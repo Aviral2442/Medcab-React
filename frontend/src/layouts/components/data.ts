@@ -1,6 +1,6 @@
 import { type MenuItemType } from '@/types/layout'
 import { type IconType } from 'react-icons'
-import { TbHeadset, TbLogout2, TbUserCircle } from 'react-icons/tb'
+import { TbLogout2, TbUserCircle } from 'react-icons/tb'
 import {
   LuCircleGauge,
   LuNotebookText,
