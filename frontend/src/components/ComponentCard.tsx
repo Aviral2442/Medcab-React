@@ -1,87 +1,76 @@
-import {useState} from 'react'
-import {Card, CardBody, CardHeader, CardTitle, Collapse} from 'react-bootstrap'
-import {TbChevronDown, TbRefresh, TbX} from 'react-icons/tb'
+import { useState } from "react";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+  Collapse,
+} from "react-bootstrap";
+import clsx from "clsx";
+import {TbArrowRight} from 'react-icons/tb'
 
-import type {ChildrenType} from '@/types'
-import clsx from 'clsx'
 
 type ComponentCardProps = {
-    title: string
-    isCollapsible?: boolean
-    isRefreshable?: boolean
-    isCloseable?: boolean
-    className?: string
-    bodyClassName?: string
-} & ChildrenType
+  title: React.ReactNode;
+  isCollapsible?: boolean;
+  isRefreshable?: boolean;
+  isCloseable?: boolean;
+  className?: string;
+  bodyClassName?: string;
+  onAddNew?: () => void;
+  children: React.ReactNode;
+  headerActions?: React.ReactNode;
+};
 
 const ComponentCard = ({
-                           title,
-                           isCloseable,
-                           isCollapsible,
-                           isRefreshable,
-                           className,
-                           bodyClassName,
-                           children
-                       }: ComponentCardProps) => {
-    const [isVisible, setIsVisible] = useState(true)
-    const [isCollapsed, setIsCollapsed] = useState(false)
-    const [isRefreshing, setIsRefreshing] = useState(false)
+  title,
+  isCollapsible,
+  className,
+  bodyClassName,
+  onAddNew,
+  children,
+  headerActions,
+}: ComponentCardProps) => {
+  const [isVisible, _setIsVisible] = useState(true);
+  const [isCollapsed, _setIsCollapsed] = useState(false);
+  const [isRefreshing, _setIsRefreshing] = useState(false);
 
-    const handleClose = () => {
-        setIsVisible(false)
-    }
+  if (!isVisible) return null;
 
-    const handleToggle = () => {
-        setIsCollapsed(!isCollapsed)
-    }
+  return (
+    <Card className={clsx(isCollapsed && "card-collapse", className)}>
+      {isRefreshing && (
+        <div className="card-overlay">
+          <div className="spinner-border text-primary" />
+        </div>
+      )}
 
-    const handleRefresh = () => {
-        setIsRefreshing(true)
-        setTimeout(() => {
-            setIsRefreshing(false)
-        }, 1500)
-    }
+      <CardHeader className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <CardTitle className="mb-0">{title}</CardTitle>
+        <div className="d-flex align-items-center gap-2 flex-wrap">
+          {headerActions}
+          {onAddNew && (
+            <button
+              type="button"
+              onClick={onAddNew}
+              className="icon-link icon-link-hover link-secondary link-underline-secondary link-underline-opacity-25 fw-semibold bg-transparent border-0 p-0"
+              style={{ textDecoration: "none" }}
+            >
+              Add New <TbArrowRight className="bi align-middle fs-lg"></TbArrowRight>
+            </button>
+          )}
+        </div>
+      </CardHeader>
 
-    if (!isVisible) return null
+      {isCollapsible ? (
+        <Collapse in={!isCollapsed}>
+          <CardBody className={bodyClassName}>{children}</CardBody>
+        </Collapse>
+      ) : (
+        <CardBody className={bodyClassName}>{children}</CardBody>
+      )}
+    </Card>
+  );
+};
 
-    return (
-        <Card className={clsx(isCollapsed && 'card-collapse', className)}>
-            {isRefreshing && (
-                <div className="card-overlay">
-                    <div className="spinner-border text-primary"/>
-                </div>
-            )}
-
-            <CardHeader className="justify-content-between align-items-center">
-                <CardTitle>{title}</CardTitle>
-                <div className="card-action">
-                    {isCollapsible && (
-                        <span className="card-action-item" onClick={handleToggle}>
-              <TbChevronDown style={{rotate: isCollapsed ? '0deg' : '180deg'}}/>
-            </span>
-                    )}
-                    {isRefreshable && (
-                        <span className="card-action-item" onClick={handleRefresh}>
-              <TbRefresh/>
-            </span>
-                    )}
-                    {isCloseable && (
-                        <span className="card-action-item" onClick={handleClose}>
-              <TbX/>
-            </span>
-                    )}
-                </div>
-            </CardHeader>
-
-            {isCollapsible ? (
-                <Collapse in={!isCollapsed}>
-                    <CardBody className={bodyClassName}>{children}</CardBody>
-                </Collapse>
-            ) : (
-                <CardBody className={bodyClassName}>{children}</CardBody>
-            )}
-        </Card>
-    )
-}
-
-export default ComponentCard
+export default ComponentCard;

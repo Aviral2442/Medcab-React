@@ -1,42 +1,42 @@
 import {Col, Container, Row} from 'react-bootstrap'
 import PageTitle from '@/components/PageTitle'
 import {LuSparkles} from 'react-icons/lu'
-import PromptsUsage from '@/views/dashboard/components/PromptsUsage'
-import ActiveUsers from '@/views/dashboard/components/ActiveUsers'
-import ResponseAccuracy from '@/views/dashboard/components/ResponseAccuracy'
-import TokenUsage from '@/views/dashboard/components/TokenUsage'
+import TotalCancelOngoingBooking from '@/views/dashboard/components/TotalCancelOngoingBookingCounts'
+import TotalActiveOtherStatusVendor from '@/views/dashboard/components/TotalActiveOtherStatusVendorCounts'
+import Latest5BookingTransactionList from '@/views/dashboard/components/Latest5BookingTransactionList'
+import GetConsumerCounts from '@/views/dashboard/components/GetConsumerCounts'
 import RequestStatistics from '@/views/dashboard/components/RequestStatistics'
-import RecentSessions from '@/views/dashboard/components/RecentSessions'
-import ModelUsageSummary from '@/views/dashboard/components/ModelUsageSummary'
-import APIPerformanceMetrics from '@/views/dashboard/components/APIPerformanceMetrics'
+import LatestNewOngoingBookingLists from '@/views/dashboard/components/LatestNewOngoingBookingLists'
+import TotalBookingCount from '@/views/dashboard/components/TotalBookingCount'
+import Latest5VendorTransactionList from '@/views/dashboard/components/Latest5VendorTransactionList'
 
 const Page = () => {
     return (
-        <Container fluid>
-            <PageTitle
+        <Container fluid className='mt-3'>
+            {/* <PageTitle
                 title="The Ultimate Admin & Dashboard Theme"
                 subtitle="A premium collection of elegant, accessible components and a powerful codebase. Built for modern frameworks. Developer Friendly. Production Ready."
                 badge={{
                     title: 'Medium and Large Business',
                     icon: LuSparkles,
                 }}
-            />
+            /> */}
 
             <Row className="row-cols-xxl-4 row-cols-md-2 row-cols-1">
                 <Col>
-                    <PromptsUsage/>
+                    <TotalBookingCount/>
                 </Col>
 
                 <Col>
-                    <ActiveUsers/>
+                    <TotalActiveOtherStatusVendor/>
                 </Col>
 
                 <Col>
-                    <ResponseAccuracy/>
+                    <TotalCancelOngoingBooking/>
                 </Col>
 
                 <Col>
-                    <TokenUsage/>
+                    <GetConsumerCounts/>
                 </Col>
             </Row>
 
@@ -48,13 +48,13 @@ const Page = () => {
 
             <Row>
                 <Col xxl={6}>
-                    <RecentSessions/>
+                    <LatestNewOngoingBookingLists/>
                 </Col>
 
                 <Col xxl={6}>
-                    <ModelUsageSummary/>
+                    <Latest5BookingTransactionList/>
 
-                    <APIPerformanceMetrics/>
+                    <Latest5VendorTransactionList/>
                 </Col>
             </Row>
         </Container>
