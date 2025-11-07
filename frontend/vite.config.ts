@@ -10,6 +10,8 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 1000, // Increase from default 500 KB to 1000 KB
+    outDir: 'dist', // ensure Vercel deploys the correct folder
+    chunkSizeWarningLimit: 1000,
   },
+  base: '/', // 👈 ensures correct routing base for SPA
 })
