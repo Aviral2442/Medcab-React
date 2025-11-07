@@ -30,7 +30,6 @@ import { bookingColumns } from "@/views/tables/data-tables/booking-data/booking/
 import { DateRangePicker, InputPicker } from "rsuite";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
-import { basePath } from "@/helpers/index.ts";
 import { useNavigate } from "react-router-dom";
 import "rsuite/dist/rsuite.min.css";
 
@@ -86,6 +85,7 @@ const ExportDataWithButtons = ({
   const [dateFilter, setDateFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<[Date, Date] | null>(null);
+  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
   const navigate = useNavigate();
 
@@ -124,7 +124,7 @@ const ExportDataWithButtons = ({
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${basePath}${endpoint}`, { params: getFilterParams() });
+      const res = await axios.get(`${baseURL}${endpoint}`, { params: getFilterParams() });
       console.log("Fetched data:", res.data);
       switch (tabKey) {
         case 1:
@@ -166,11 +166,11 @@ const ExportDataWithButtons = ({
   const handleSaveRemark = async (remark: string) => {
     try {
       // Replace with your API endpoint
-      await axios.post(`${process.env.VITE_PATH}/add_remarks/${selectedBookingId}`, {
+      await axios.post(`${baseURL}/add_remarks/${selectedBookingId}`, {
         remarkType: "BOOKING",
         remarks: remark,
       });
-      console.log(`${process.env.VITE_PATH}`);
+      console.log(`${baseURL}`);
       console.log("Remark saved successfully");
       fetchData();
       onDataChanged();

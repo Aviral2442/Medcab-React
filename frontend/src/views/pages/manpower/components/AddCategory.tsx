@@ -25,6 +25,7 @@ const AddCategory: React.FC<AddCategoryProps> = ({ mode, data, onCancel, onDataC
     mp_cat_top_rated_status: "1", // 1 = Rated, 0 = Not Rated
     mp_cat_status: "0", // 0 = Active, 1 = Inactive
   });
+  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
   React.useEffect(() => {
     if (mode === "edit" && data) {
@@ -68,7 +69,7 @@ const AddCategory: React.FC<AddCategoryProps> = ({ mode, data, onCancel, onDataC
       if (mode === "edit") {
         // console.log("Updating category...", formValues);
         await axios.put(
-          `${process.env.VITE_PATH}/manpower/edit-category/${data.mp_cat_id}`,
+          `${baseURL}/manpower/edit-category/${data.mp_cat_id}`,
           formData,
           {
             headers: { "Content-Type": "multipart/form-data" },
@@ -76,7 +77,7 @@ const AddCategory: React.FC<AddCategoryProps> = ({ mode, data, onCancel, onDataC
         );
       } else {
         // console.log("Creating new category...", formValues);
-        await axios.post(`${process.env.VITE_Path}/manpower/add-category`, formData, {
+        await axios.post(`${baseURL}/manpower/add-category`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }

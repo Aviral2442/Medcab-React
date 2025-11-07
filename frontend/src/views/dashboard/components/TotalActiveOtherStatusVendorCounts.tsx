@@ -6,6 +6,8 @@ import axios from 'axios';
 
 const ActiveUsers = () => {
 
+    const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
     const [vendors, setVendors] = React.useState({
         today_new_vendors: 0,
         active_vendors: 0,
@@ -17,7 +19,7 @@ const ActiveUsers = () => {
     const fetchVendorCounst = async () => {
         try{
             setIsLoading(true)
-            const res = await axios.get(`${process.env.VITE_PATH}/dashboard/get_total_active_other_status_vendor_counts`)
+            const res = await axios.get(`${baseURL}/dashboard/get_total_active_other_status_vendor_counts`)
             // console.log("API Response of VENDORS: ",res.data?.jsonData?.vendorCounts)
             setVendors(res.data?.jsonData?.vendorCounts || {})
         } catch (error){

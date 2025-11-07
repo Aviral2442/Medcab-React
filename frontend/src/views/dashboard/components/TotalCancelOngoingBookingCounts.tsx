@@ -8,6 +8,9 @@ import { getColor } from "@/helpers/chart";
 import type { ChartJSOptionsType } from "@/types";
 
 const ResponseAccuracy = () => {
+
+    const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
   const [bookingData, setBookingData] = React.useState({
     total_bookings: 0,
     cancelled_bookings: 0,
@@ -17,9 +20,9 @@ const ResponseAccuracy = () => {
   const fetchtotalCancelOngoingBookingCounts = async () => {
     try {
       const res = await axios.get(
-        `${process.env.VITE_PATH}/dashboard/get_total_cancel_ongoing_booking_counts`
+        `${baseURL}/dashboard/get_total_cancel_ongoing_booking_counts`
       );
-      console.log(`dekho: ${process.env.VITE_PATH}`)
+      console.log(`dekho: ${baseURL}`)
       if (res.status !== 200) {
         throw new Error("Failed to fetch data");
       }

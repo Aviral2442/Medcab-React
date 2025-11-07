@@ -17,6 +17,9 @@ import { appName, author, currentYear } from "@/helpers";
 import PageMeta from "@/components/PageMeta.tsx";
 
 const Page = () => {
+
+    const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
     const [role, setRole] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +36,7 @@ const Page = () => {
     console.log("Submitting login with:", { role, email, password });
     setLoading(true);
     try {
-      const res = await axios.post(`${process.env.VITE_PATH}/auth/login`, {
+      const res = await axios.post(`${baseURL}/auth/login`, {
         role,
         email,
         password,

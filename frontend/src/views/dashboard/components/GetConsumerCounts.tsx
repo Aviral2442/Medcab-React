@@ -10,6 +10,8 @@ import React from 'react'
 
 const TokenUsage = () => {
 
+    const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
     const [consumers, setConsumers] = React.useState({
         total_consumers_today: '0',
         total_consumers_yesterday: '0'
@@ -17,7 +19,7 @@ const TokenUsage = () => {
 
     const fetchConsumerCounts = async () => {
         try{
-            const res = await axios.get(`${process.env.VITE_PATH}/dashboard/get_consumer_counts`)
+            const res = await axios.get(`${baseURL}/dashboard/get_consumer_counts`)
             // console.log("API Response of CONSUMERS: ",res.data?.jsonData?.consumerCounts)
             setConsumers(res.data?.jsonData?.consumerCounts)
         } catch (error){

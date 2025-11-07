@@ -1,11 +1,11 @@
 import axios from "axios";
-const basePath = import.meta.env.VITE_PATH;
+const baseURL = (import.meta as any).env?.VITE_IMAGE_PATH ?? "";
 
 let catRows: any[] = [];
 const getCategories = async () => {
     try{
-        const rows = await axios.get(`${process.env.VITE_PATH}/manpower/get-category`);
-        console.log("Categories fetched:", rows.data);
+        const rows = await axios.get(`${baseURL}/manpower/get-category`);
+        console.log("Categories fetched:", rows);
         catRows = rows.data.categories;
     } catch (error) {
         console.error("Error fetching categories:", error);
@@ -36,7 +36,7 @@ export const categoryColumns = [
     },
     {data: 'mp_cat_id'},
     {data: 'mp_cat_name'},
-    {data: 'mp_cat_image', render: (data: string) => `<img src="${basePath}${data}" alt="Category Image" style="width: 50px; height: auto;" />`},
+    {data: 'mp_cat_image', render: (data: string) => `<img src="${baseURL}${data}" alt="Category Image" style="width: 50px; height: auto;" />`},
     {data: 'mp_cat_top_rated_status', render: (data: number) => data == 1 ? 'Yes' : 'No'},
     {data: 'mp_cat_status', render: (data: number) => {
       // console.log(data);
@@ -59,7 +59,7 @@ export const subCategoryColumns = [
     {data: 'mp_sub_category_id'},
     {data: 'mp_cat_name'},
     {data: 'mpsc_name'},
-    {data: 'mpsc_image', render: (data: string) => `<img src="${basePath}${data}" alt="Category Image" style="width: 50px; height: auto;" />`},
+    {data: 'mpsc_image', render: (data: string) => `<img src="${baseURL}${data}" alt="Category Image" style="width: 50px; height: auto;" />`},
     {data: 'mpsc_overview'},
     {data: 'mpsc_description'},
     {data: 'mpsc_gst_percentage'},
@@ -121,7 +121,7 @@ export const bannerColumns = [
   {
     data: "banner_image",
     render: (data: string) =>
-      `<img src="${basePath}${data}" alt="Banner Image" style="width: 80px; height: auto;" />`,
+      `<img src="${baseURL}${data}" alt="Banner Image" style="width: 80px; height: auto;" />`,
   },
   { data: "banner_page" },
   {

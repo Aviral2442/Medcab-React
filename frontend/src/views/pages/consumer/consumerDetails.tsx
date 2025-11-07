@@ -9,6 +9,8 @@ import AmbulanceBookingsList from '@/components/Consumer/AmbulanceBookingList';
 
 const consumerDetails = () => {
 
+    const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
     const { id } = useParams();
     const [loading, setLoading] = React.useState(true);
     const [ConsumerData, setConsumerData] = React.useState<any>(null);
@@ -28,7 +30,7 @@ const consumerDetails = () => {
     const fetchConsumerDetails = async () => {
         try{
             setLoading(true);
-            const res = await axios.post(`${process.env.VITE_PATH}/consumer/consumer_detail/${id}`);
+            const res = await axios.post(`${baseURL}/consumer/consumer_detail/${id}`);
             console.log("Consumer Details:", res.data?.jsonData);
             setConsumerData(res.data?.jsonData);
         } catch (error) {
@@ -42,7 +44,7 @@ const consumerDetails = () => {
     const fetchTransactionList = async () => {
         try{
             setLoading(true);
-            const res = await axios.post(`${process.env.VITE_PATH}/consumer/consumer_transaction_list/${id}`);
+            const res = await axios.post(`${baseURL}/consumer/consumer_transaction_list/${id}`);
             console.log("Consumer Transaction List:", res.data?.data);
             setTransactionListData(res.data?.data);
         } catch (error) {
@@ -56,7 +58,7 @@ const consumerDetails = () => {
     const fetchManPowerOrdersList = async () => {
         try{
             setLoading(true);
-            const res = await axios.post(`${process.env.VITE_PATH}/consumer/consumer_manpower_orders_list/${id}`);
+            const res = await axios.post(`${baseURL}/consumer/consumer_manpower_orders_list/${id}`);
             console.log("Consumer ManPower Orders List:", res.data?.data);
             setManPowerOrdersListData(res.data?.data);
         } catch (error) {
@@ -69,7 +71,7 @@ const consumerDetails = () => {
     const fetchAmbulanceBookingsList = async () => {
         try{
             setLoading(true);
-            const res = await axios.post(`${process.env.VITE_PATH}/consumer/consumer_ambulance_bookings_list/${id}`);
+            const res = await axios.post(`${baseURL}/consumer/consumer_ambulance_bookings_list/${id}`);
             console.log("Consumer Ambulance Bookings List:", res.data);
             setAmbulanceBookingsListData(res.data?.jsonData);
         } catch (error) {

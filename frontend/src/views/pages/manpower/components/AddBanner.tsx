@@ -27,6 +27,7 @@ const AddBanner: React.FC<AddBannerProps> = ({
     banner_page: "",
     banner_status: "0", // 0=Active, 1=Inactive
   });
+  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   const [file, setFile] = React.useState<File | null>(null);
 
   React.useEffect(() => {
@@ -58,11 +59,11 @@ const AddBanner: React.FC<AddBannerProps> = ({
 
     try {
       if (mode === "edit" && data) {
-        await axios.put(`${process.env.VITE_PATH}/manpower/edit-banner/${data.banner_id}`, formData, {
+        await axios.put(`${baseURL}/manpower/edit-banner/${data.banner_id}`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
-        await axios.post(`${process.env.VITE_PATH}/manpower/add-banner`, formData, {
+        await axios.post(`${baseURL}/manpower/add-banner`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }

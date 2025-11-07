@@ -13,6 +13,8 @@ import axios from "axios";
 import React from "react";
 
 const PromptsUsage = () => {
+  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
   interface BookingCounts {
     today_bookings?: number;
     yesterday_bookings?: number;
@@ -29,7 +31,7 @@ const PromptsUsage = () => {
   const fetchtotalBookingCounts = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get(`${process.env.VITE_PATH}/dashboard/get_total_booking_count`);
+      const res = await axios.get(`${baseURL}/dashboard/get_total_booking_count`);
       // console.log("API Response of Prompts: ",res.data?.jsonData?.bookingTotalCount[0])
       setBookings(res.data?.jsonData?.bookingTotalCount[0] || {});
     } catch (error) {

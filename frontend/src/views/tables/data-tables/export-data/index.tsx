@@ -95,6 +95,7 @@ const ExportDataWithButtons = ({
 }: ExportDataWithButtonsProps) => {
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
   const { endpoint, columns, headers } = tableConfig[tabKey];
 
@@ -104,7 +105,7 @@ const ExportDataWithButtons = ({
     setLoading(true);
     try {
       // const res = await axios.get("/manpower/get-categories");
-      const res = await axios.get(`${process.env.VITE_PATH}${endpoint}`);
+      const res = await axios.get(`${baseURL}${endpoint}`);
       console.log("Fetched data:", res);
       switch (tabKey) {
         case 1:

@@ -41,10 +41,12 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
     mpsc_city: "",
   });
 
+  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
   // Fetch categories for dropdown
   React.useEffect(() => {
     axios
-      .get(`${process.env.VITE_PATH}/manpower/get-category`)
+      .get(`${baseURL}/manpower/get-category`)
       .then((res) => setCategories(res.data.categories || []))
       .catch((err) => console.error("Error fetching categories:", err));
   }, []);
@@ -119,14 +121,14 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
     try {
       if (mode === "edit") {
         await axios.put(
-          `${process.env.VITE_PATH}/manpower/edit-subcategory/${data.mp_sub_category_id}`,
+          `${baseURL}/manpower/edit-subcategory/${data.mp_sub_category_id}`,
           formData,
           {
             headers: { "Content-Type": "multipart/form-data" },
           }
         );
       } else {
-        await axios.post(`${process.env.VITE_PATH}/manpower/add-subcategory`, formData, {
+        await axios.post(`${baseURL}/manpower/add-subcategory`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }

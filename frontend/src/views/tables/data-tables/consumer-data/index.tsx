@@ -71,6 +71,7 @@ const ExportDataWithButtons = ({
   const [dateFilter, setDateFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<[Date, Date] | null>(null);
+  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   
   const navigate = useNavigate();
 
@@ -107,7 +108,7 @@ const ExportDataWithButtons = ({
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${process.env.VITE_PATH}${endpoint}`, { params: getFilterParams() });
+      const res = await axios.get(`${baseURL}${endpoint}`, { params: getFilterParams() });
       console.log("API Response:", res.data);
       const consumer = res.data.data || [];
       console.log("Fetched consumer data:", consumer);
@@ -129,7 +130,7 @@ const ExportDataWithButtons = ({
 
   const handleSaveRemark = async (remark: string) => {
     try {
-      await axios.post(`${process.env.VITE_PATH}/add_remarks/${selectedBookingId}`, {
+      await axios.post(`${baseURL}/add_remarks/${selectedBookingId}`, {
         remarkType: "CONSUMER",
         remarks: remark,
       });

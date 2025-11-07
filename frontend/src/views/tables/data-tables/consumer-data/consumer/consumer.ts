@@ -1,4 +1,5 @@
 import axios from "axios";
+const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
 type ConsumerInfoType = {
     consumer_id: number
@@ -20,7 +21,7 @@ let consumerRows: ConsumerInfoType[] = [];
 
 export const getConsumerList = async () => {
     try {
-        const response = await axios.get(`${process.env.VITE_PATH}/consumer/get_consumers_list`);
+        const response = await axios.get(`${baseURL}/consumer/get_consumers_list`);
         consumerRows = response.data.consumers || [];
         return consumerRows;
     } catch (error) {

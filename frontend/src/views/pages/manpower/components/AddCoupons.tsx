@@ -33,6 +33,7 @@ const AddCoupon: React.FC<AddCouponProps> = ({
     mpc_coupon_visible: "1",
     mpc_coupon_status: "0", 
   });
+  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
   React.useEffect(() => {
     if (mode === "edit" && data) {
@@ -62,9 +63,9 @@ const AddCoupon: React.FC<AddCouponProps> = ({
 
     try {
       if (mode === "edit") {
-        await axios.put(`${process.env.VITE_PATH}/manpower/edit-coupon/${data.mpc_coupon_id}`, formValues);
+        await axios.put(`${baseURL}/manpower/edit-coupon/${data.mpc_coupon_id}`, formValues);
       } else {
-        await axios.post(`${process.env.VITE_PATH}/manpower/add-coupon`, formValues);
+        await axios.post(`${baseURL}/manpower/add-coupon`, formValues);
       }
       onDataChanged();
       onCancel();

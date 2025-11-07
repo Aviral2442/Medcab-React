@@ -1,6 +1,4 @@
 import {Col, Container, Row} from 'react-bootstrap'
-import PageTitle from '@/components/PageTitle'
-import {LuSparkles} from 'react-icons/lu'
 import TotalCancelOngoingBooking from '@/views/dashboard/components/TotalCancelOngoingBookingCounts'
 import TotalActiveOtherStatusVendor from '@/views/dashboard/components/TotalActiveOtherStatusVendorCounts'
 import Latest5BookingTransactionList from '@/views/dashboard/components/Latest5BookingTransactionList'

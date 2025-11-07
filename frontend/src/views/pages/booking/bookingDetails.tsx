@@ -9,6 +9,9 @@ import RejectList from '@/components/Booking/RejectList';
 import AcceptList from '@/components/Booking/AcceptList';
 
 const BookingDetails = () => {
+
+  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
   const { id } = useParams();
   const [bookingData, setBookingData] = React.useState<any>(null);
   const [transactionData, setTransactionData] = React.useState<any>(null);
@@ -29,7 +32,7 @@ const BookingDetails = () => {
   const fetchBookingDetails = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${process.env.VITE_PATH}/booking/booking_detail/${id}`);
+      const response = await axios.post(`${baseURL}/booking/booking_detail/${id}`);
       setBookingData(response.data.jsonData.booking[0]);
       console.log(response.data.jsonData.booking[0]);
     } catch (error) {
@@ -42,7 +45,7 @@ const BookingDetails = () => {
     try {
       setLoading(true);
       // console.log("Fetching transaction list for booking ID:", id);
-      const response = await axios.post(`${process.env.VITE_PATH}/booking/booking_transaction_list/${id}`);
+      const response = await axios.post(`${baseURL}/booking/booking_transaction_list/${id}`);
       setTransactionData(response.data?.jsonData?.transactions[0]);
       console.log("Transaction details",response.data);
     } catch (error) {
@@ -55,7 +58,7 @@ const BookingDetails = () => {
   const fetchVendorList = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${process.env.VITE_PATH}/booking/booking_pickup_city_vendor_list/${id}`);
+      const response = await axios.post(`${baseURL}/booking/booking_pickup_city_vendor_list/${id}`);
       setVendorData(response.data?.jsonData?.vendors[0]);
       console.log("vendor list: ",response.data.jsonData.vendors[0]);
     }
@@ -70,7 +73,7 @@ const BookingDetails = () => {
   const fetchRejectList = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${process.env.VITE_PATH}/booking/booking_reject_list/${id}`);
+      const response = await axios.post(`${baseURL}/booking/booking_reject_list/${id}`);
       setRejectData(response.data.jsonData.rejects[0]);
       console.log("reject list: ",response.data.jsonData.rejects[0]);
     }
@@ -85,7 +88,7 @@ const BookingDetails = () => {
   const fetchAcceptList = async () => {
     try {
       setLoading(true);
-      const response = await axios.post(`${process.env.VITE_PATH}/booking/booking_accept_list/${id}`);
+      const response = await axios.post(`${baseURL}/booking/booking_accept_list/${id}`);
       setAcceptData(response.data.jsonData.accept[0]);
       console.log("accept list: ",response.data.jsonData.accept[0]);
     }
@@ -123,7 +126,7 @@ const BookingDetails = () => {
   const handleFieldUpdate = async (field: string, value: string) => {
     try {
       // Update API call
-      await axios.put(`${process.env.VITE_PATH}/booking/booking_data_update/${id}`, {
+      await axios.put(`${baseURL}/booking/booking_data_update/${id}`, {
         [field]: value
       });
       

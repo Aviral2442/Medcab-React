@@ -14,6 +14,8 @@ import React from 'react'
 const RecentSessions = () => {
     const navigate = useNavigate()
 
+    const basePath = (import.meta as any).env?.VITE_PATH ?? "";
+
     interface Booking {
         manpower_order_id: number;
         mpo_vendor_id: string;
@@ -27,7 +29,7 @@ const RecentSessions = () => {
 
     const fetchnewbookings = async () => {
         try{
-            const res = await axios.get(`${process.env.VITE_PATH}/dashboard/latest_new_ongoing_booking_lists`)
+            const res = await axios.get(`${basePath}/dashboard/latest_new_ongoing_booking_lists`)
             console.log("API Response of Recent Sessions: ", res.data?.jsonData?.bookingList)
             setNewBooking(res.data?.jsonData?.bookingList || [])
         } catch (error){

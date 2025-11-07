@@ -17,6 +17,8 @@ const AddFAQ: React.FC<AddFAQProps> = ({mode, data, onCancel, onDataChanged}) =>
         mpf_status: "0", // 0 = Active, 1 = Inactive
     });
 
+    const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
     React.useEffect(() => {
         if (mode === "edit" && data) {
             setFormValues({
@@ -35,9 +37,9 @@ const AddFAQ: React.FC<AddFAQProps> = ({mode, data, onCancel, onDataChanged}) =>
         e.preventDefault();
         try {
             if (mode === "edit" && data) {
-                await axios.put(`${process.env.VITE_PATH}/manpower/update-faq/${data.mpf_id}`, formValues);
+                await axios.put(`${baseURL}/manpower/update-faq/${data.mpf_id}`, formValues);
             } else {
-                await axios.post(`${process.env.VITE_PATH}/manpower/add-faq`, formValues);
+                await axios.post(`${baseURL}/manpower/add-faq`, formValues);
             }
             onDataChanged();
             onCancel();

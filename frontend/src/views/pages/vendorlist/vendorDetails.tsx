@@ -9,6 +9,7 @@ const vendorDetails = () => {
   const [loading, setLoading] = React.useState(true);
   const [VendorData, setVendorData] = React.useState<any>(null);
   const [activeTab, setActiveTab] = React.useState(1);
+  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
   const tabs = [
     { eventKey: 1, title: "Vendor Details" },
@@ -21,7 +22,7 @@ const vendorDetails = () => {
   const fetchVendorDetails = async () => {
     try {
       setLoading(true);
-      const res = await axios.post(`${process.env.VITE_PATH}/vendor/vendor_detail/${id}`);
+      const res = await axios.post(`${baseURL}/vendor/vendor_detail/${id}`);
       console.log("Vendor Details:", res.data);
       setVendorData(res.data?.jsonData);
     } catch (error) {
@@ -38,7 +39,7 @@ const vendorDetails = () => {
   const handleFieldUpdate = async (field: string, value: string) => {
     try {
       // Update API call
-      await axios.put(`${process.env.VITE_PATH}/vendor/vendor_data_update/${id}`, {
+      await axios.put(`${baseURL}/vendor/vendor_data_update/${id}`, {
         [field]: value,
       });
 

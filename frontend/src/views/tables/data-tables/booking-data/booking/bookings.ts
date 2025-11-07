@@ -1,10 +1,11 @@
 import axios from "axios";
+const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 // const basePath = import.meta.env.VITE_PATH;
 
 let bookRows: any[] = [];
 const getBookings = async () => {
   try {
-    const rows = await axios.get("/booking/get_bookings");
+    const rows = await axios.get(`${baseURL}/booking/get_bookings`);
     // console.log(rows);
     bookRows = rows.data.bookings;
   } catch (error) {

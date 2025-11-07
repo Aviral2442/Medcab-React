@@ -5,6 +5,8 @@ import React from 'react'
 
 const APIPerformanceMetrics = () => {
 
+    const basePath = (import.meta as any).env?.VITE_PATH ?? "";
+
     interface VendorTransaction {
         vendor_transection_id: string;
         vendor_transection_by: string;
@@ -17,7 +19,7 @@ const APIPerformanceMetrics = () => {
 
     const fetchVendorTransactions = async () => {
         try{
-            const res = await axios.get(`${process.env.VITE_PATH}/dashboard/get_latest_5_vendor_transaction_list`)
+            const res = await axios.get(`${basePath}/dashboard/get_latest_5_vendor_transaction_list`)
             // console.log("API Response of Vendor Transactions: ", res.data)
             setData(res.data?.jsonData?.vendorTransList || [])
         } catch (error){

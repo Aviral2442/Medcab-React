@@ -1,4 +1,5 @@
 import axios from "axios";
+const baseURL = (import.meta as any).env?.VITE_PATH ?? "";  
 
 type VendorInfoType = {
     vendor_id: number
@@ -21,7 +22,7 @@ let vendorRows: VendorInfoType[] = [];
 
 export const getVendorList = async () => {
     try {
-        const response = await axios.get(`${process.env.VITE_PATH}/vendor/vendors_list`);
+        const response = await axios.get(`${baseURL}/vendor/vendors_list`);
         vendorRows = response.data.vendors || [];
         return vendorRows;
     } catch (error) {
