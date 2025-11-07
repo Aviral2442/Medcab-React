@@ -1,0 +1,11 @@
+import BaseVectorMap from '@/components/BaseVectorMap'
+import {getRussiaMapOptions} from '@/views/maps/vector/data'
+
+import 'jsvectormap'
+import 'jsvectormap/dist/maps/russia'
+
+const RussiaVectorMap = () => {
+    return <BaseVectorMap id="russia-map" options={getRussiaMapOptions()} style={{height: 360}}/>
+}
+
+export default RussiaVectorMap
