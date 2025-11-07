@@ -45,11 +45,11 @@ export const userDropdownItems: UserDropdownItemType[] = [
   //   icon: TbSettings2,
   //   url: '#',
   // },
-  {
-    label: 'Support Center',
-    icon: TbHeadset,
-    url: '#',
-  },
+  // {
+  //   label: 'Support Center',
+  //   icon: TbHeadset,
+  //   url: '#',
+  // },
   // {
   //   isDivider: true,
   // },

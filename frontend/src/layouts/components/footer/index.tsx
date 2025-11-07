@@ -6,14 +6,14 @@ const Footer = () => {
     <footer className="footer">
       <Container fluid>
         <Row>
-          <Col md={6} className="text-center text-md-start">
+          <Col md={12} className="text-center">
             © {currentYear} {appName} By <span className="fw-semibold">{author}</span>
           </Col>
-          <Col md={6}>
+          {/* <Col md={6}>
             <div className="text-md-end d-none d-md-block">
               59.5GB of <span className="fw-bold">200GB</span> Free.
             </div>
-          </Col>
+          </Col> */}
         </Row>
       </Container>
     </footer>

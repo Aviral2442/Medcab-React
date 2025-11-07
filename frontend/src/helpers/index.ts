@@ -4,13 +4,12 @@ export const currency: CurrencyType = '$'
 
 export const currentYear = new Date().getFullYear()
 
-export const appName = 'Simple'
-export const appTitle = 'Simple - Responsive Bootstrap 5 Admin Dashboard'
+export const appName = 'Medcab'
+export const appTitle = 'Medcab - Admin Dashboard'
 export const appDescription: string =
-  'Perfect for building CRM, CMS, project management tools, and custom web apps with clean UI, responsive design, and powerful features.'
-
-export const author: string = 'Coderthemes'
-export const authorWebsite: string = 'https://coderthemes.com/'
+  'Medcab is a premium admin dashboard template built with React and TypeScript.'
+export const author: string = 'Medcab'
+export const authorWebsite: string = 'IME.com'
 export const authorContact: string = ''
 
 export const basePath = (import.meta as any).env?.VITE_PATH ?? "";
