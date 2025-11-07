@@ -1,0 +1,213 @@
+import { db } from '../config/db';
+import { ApiError } from '../utils/api-error';
+import path from "path";  // Fixed import: 'part' to 'path'
+import fs from "fs";
+import { RowDataPacket, FieldPacket } from "mysql2";
+
+// Total Booking Count Service 
+export const getTotalBookingCount = async () => {
+    try {
+        const query = `
+            SELECT 
+            COUNT(manpower_order_id) AS bookingTotalCount,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(mpo_order_date)) = CURDATE() THEN 1 END) AS today_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(mpo_order_date)) = CURDATE() - INTERVAL 1 DAY THEN 1 END) AS yesterday_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(mpo_order_date)) = CURDATE() - INTERVAL 2 DAY THEN 1 END) AS day_2_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(mpo_order_date)) = CURDATE() - INTERVAL 3 DAY THEN 1 END) AS day_3_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(mpo_order_date)) = CURDATE() - INTERVAL 4 DAY THEN 1 END) AS day_4_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(mpo_order_date)) = CURDATE() - INTERVAL 5 DAY THEN 1 END) AS day_5_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(mpo_order_date)) = CURDATE() - INTERVAL 6 DAY THEN 1 END) AS day_6_bookings
+            FROM manpower_order
+        `;
+
+        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query);
+
+        if (rows.length === 0 || !rows) {
+            throw new ApiError(404, 'Data Not Found');
+        }
+
+        return {
+            bookingTotalCount: rows,
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Failed To Load Total Booking Count");
+    }
+};
+
+// Get Total, Cancelled and Ongoing Booking Counts Service
+export const getTotalCancelOngoingBookingCounts = async () => {
+    try {
+        let query = `
+            SELECT
+            COUNT(manpower_order_id) AS total_bookings,
+            COUNT(CASE WHEN mpo_status = 3 THEN 1 END) AS cancelled_bookings,
+            COUNT(CASE WHEN mpo_status = 2 THEN 1 END) AS ongoing_bookings
+            FROM manpower_order
+        `;
+
+        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query);
+
+        if (rows.length === 0 || !rows) {
+            throw new ApiError(404, 'Data Not Found');
+        }
+
+        return {
+            bookingCounts: rows,
+        };
+    } catch (error) {
+        throw new ApiError(500, "Failed To Load Booking Counts");
+    }
+};
+
+// Get Total, Active and Other Status Vendor Counts Service
+export const getTotalActiveOtherStatusVendorCounts = async () => {
+    try {
+        let query = `
+            SELECT 
+            COUNT(vendor_id) AS total_vendors,
+            COUNT(CASE WHEN vendor_status = '0' THEN 1 END) AS active_vendors,
+            COUNT(CASE WHEN vendor_status != '0' THEN 1 END) AS other_status_vendors,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(vendor_created_at)) = CURDATE() THEN 1 END) AS today_new_vendors
+            FROM vendor
+        `;
+
+        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query);
+
+        if (rows.length === 0 || !rows) {
+            throw new ApiError(404, 'Data Not Found');
+        }
+
+        return {
+            vendorCounts: rows[0],
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Failed To Load Vendor Counts");
+    }
+};
+
+// Get Latest 5 Vendor Transaction List Service
+export const getLatest5VendorTransList = async () => {
+    try {
+        let query = `
+            SELECT *
+            FROM vendor_transection
+            ORDER BY vendor_transection_id DESC
+            LIMIT 5
+        `;
+
+        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query);
+
+        if (rows.length === 0 || !rows) {
+            throw new ApiError(404, 'Data Not Found');
+        }
+
+        return {
+            vendorTransList: rows,
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Failed To Load Latest 5 Vendor Transaction List");
+    }
+};
+
+// Get Latest 5 Booking Transaction List Service
+export const getLatest5BookingTransList = async () => {
+    try {
+        let query = `
+            SELECT consumer.consumer_name, consumer_transection.*
+            FROM consumer_transection
+            LEFT JOIN consumer ON consumer_transection.consumer_transection_done_by = consumer.consumer_id
+            ORDER BY consumer_transection_id DESC
+            LIMIT 5
+        `;
+
+        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query);
+
+        if (rows.length === 0 || !rows) {
+            throw new ApiError(404, 'Data Not Found');
+        }
+
+        return {
+            bookingTransList: rows,
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Failed To Load Latest 5 Booking Transaction List");
+    }
+};
+
+// Get Latest New Ongoing Booking Lists Service
+export const getLatestNewOngoingBookingList = async () => {
+    try {
+        let query = ` 
+            SELECT * 
+            FROM manpower_order
+            WHERE mpo_status IN (1, 2)
+        `;
+
+        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query);
+
+        if (rows.length === 0 || !rows) {
+            throw new ApiError(404, 'Data Not Found');
+        }
+
+        return {
+            bookingList: rows,
+        };
+    } catch (error) {
+        throw new ApiError(500, "Failed To Load Latest New Ongoing Booking Lists");
+    }
+};
+
+// GET CONSUMERS COUNT SERVICE
+export const getConsumersCounts = async () => {
+    try {
+        const totalConsumersTodayYesterday = `
+            SELECT
+            SUM(CASE WHEN DATE(FROM_UNIXTIME(consumer_registred_date)) = CURDATE() THEN 1 ELSE 0 END) AS total_consumers_today,
+            SUM(CASE WHEN DATE(FROM_UNIXTIME(consumer_registred_date)) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) THEN 1 ELSE 0 END) AS total_consumers_yesterday
+            FROM consumer
+        `;
+
+        const [totalConsumerBothCount]: [RowDataPacket[], FieldPacket[]] = await db.query(totalConsumersTodayYesterday);
+
+        if (totalConsumerBothCount.length === 0 || !totalConsumerBothCount) {
+            throw new ApiError(404, 'Data Not Found');
+        }
+
+        const allConsumerCounts = totalConsumerBothCount[0];
+
+        return {
+            consumerCounts: allConsumerCounts,
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Failed To Load Consumers Counts");
+    }
+};
+
+export const getNewAndOngoingBookingList = async () => {
+    try {
+        let query = ` 
+            SELECT * 
+            FROM manpower_order
+            WHERE mpo_status IN (1, 2)
+            ORDER BY manpower_order_id DESC
+        `;
+
+        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query);
+
+        if (rows.length === 0) {
+            throw new ApiError(404, 'No Data Found');
+        }
+
+        return {
+            newAndOngoingBookings: rows,
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Failed To Load New and Ongoing Bookings");
+    }
+};
