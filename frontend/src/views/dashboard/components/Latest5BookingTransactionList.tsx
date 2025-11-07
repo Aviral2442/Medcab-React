@@ -12,6 +12,10 @@ import { useEffect, useState } from "react";
 
 const ModelUsageSummary = () => {
 
+
+  const basePath = (import.meta as any).env?.VITE_PATH ?? "";
+
+
   interface BookingTransaction {
     consumer_transection_id: string;
     consumer_name: string;
@@ -25,7 +29,7 @@ const ModelUsageSummary = () => {
   const bookingTransactionList = async () => {
     try {
       const response = await axios.get(
-    `${process.env.VITE_PATH}/dashboard/get_latest_5_booking_transaction_list`
+    `${basePath}/dashboard/get_latest_5_booking_transaction_list`
       );
       const rows = response.data?.jsonData?.bookingTransList || [];
       setData(rows);

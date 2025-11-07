@@ -1,4 +1,5 @@
 import mysql from "mysql2";
+require("dotenv").config();
 
 export const db = mysql
   .createPool({

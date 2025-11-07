@@ -13,4 +13,4 @@ export const author: string = 'Coderthemes'
 export const authorWebsite: string = 'https://coderthemes.com/'
 export const authorContact: string = ''
 
-export const basePath: string = ''
+export const basePath = (import.meta as any).env?.VITE_PATH ?? "";

@@ -19,6 +19,7 @@ const ResponseAccuracy = () => {
       const res = await axios.get(
         `${process.env.VITE_PATH}/dashboard/get_total_cancel_ongoing_booking_counts`
       );
+      console.log(`dekho: ${process.env.VITE_PATH}`)
       if (res.status !== 200) {
         throw new Error("Failed to fetch data");
       }
