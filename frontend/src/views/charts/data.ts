@@ -645,7 +645,6 @@ export const getMultiAxisLineChart: () => ChartJSOptionsType = () => ({
 
 export const getPointStyleLineChart: () => ChartJSOptionsType = () => ({
     data: {
-        labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6'],
         datasets: [
             {
                 label: 'Dataset 1',
@@ -702,7 +701,6 @@ export const getLineSegmentsChart: () => ChartJSOptionsType = () => ({
 
 export const getSteppedLineChart: () => ChartJSOptionsType = () => ({
     data: {
-        labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6'],
         datasets: [
             {
                 label: 'Dataset 1',

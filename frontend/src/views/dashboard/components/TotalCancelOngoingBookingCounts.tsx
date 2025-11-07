@@ -78,12 +78,7 @@ const ResponseAccuracy = () => {
         maintainAspectRatio: false,
         plugins: {
           legend: { 
-            display: true, 
-            position: 'bottom',
-            labels: {
-              padding: 4,
-              usePointStyle: true,
-            }
+            display: false, // Changed from true to false
           },
           tooltip: {
             enabled: true,
@@ -118,7 +113,7 @@ const ResponseAccuracy = () => {
           </div>
         </div>
 
-        <div className="d-flex align-items-center justify-content-center" style={{ height: '200px' }}>
+        <div className="d-flex align-items-center justify-content-center" style={{ height: '150px' }}>
           {bookingData.total_bookings > 0 ? (
             <CustomChartJS
               type="pie"

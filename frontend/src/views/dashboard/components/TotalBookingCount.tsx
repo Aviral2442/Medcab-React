@@ -62,15 +62,6 @@ const PromptsUsage = () => {
     () => ({
       type: "bar" as const,
       data: {
-        labels: [
-          "Day 6",
-          "Day 5",
-          "Day 4",
-          "Day 3",
-          "Day 2",
-          "Yesterday",
-          "Today",
-        ],
         datasets: [
           {
             data: [
@@ -177,16 +168,16 @@ const PromptsUsage = () => {
   return (
     <Card className="card">
       <CardBody>
-        <div className="d-flex justify-content-between align-items-start mb-3">
+        <div className="d-flex justify-content-between align-items-start">
           <div>
-            <h5 className="text-uppercase">Booking Counts</h5>
+            <h5 className="text-uppercase mb-3">Booking Counts</h5>
           </div>
           <div>
             <LuMessageSquare className="text-muted fs-24 svg-sw-10" />
           </div>
         </div>
 
-        <div className="mb-3" style={{ height: "150px" }}>
+        <div className="mb-3" style={{ height: "110px" }}>
           <CustomChartJS
             key={JSON.stringify(bookings)}
             type="bar"
@@ -229,7 +220,7 @@ const PromptsUsage = () => {
       </CardBody>
       <CardFooter className="text-muted text-center">
         Bookings {upDownStatusToday} by <strong>{totalPercentage}%</strong>{" "}
-        {diff >= 0 ? "from" : "compared to"} yesterday
+        {/* {diff >= 0 ? "from" : "compared to"} yesterday */}
       </CardFooter>
     </Card>
   );
