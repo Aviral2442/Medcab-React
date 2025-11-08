@@ -13,10 +13,3 @@ router.post('/insert_booking_remarks/:id', insertBookingRemarks);
 router.put('/booking_data_update/:bookingId', bookingDataUpdateController);
 
 export default router;
-
-// transaction list
-// booking list
-// bookingPickUpCityVendorList
-//reject list
-//accept list
-//remark

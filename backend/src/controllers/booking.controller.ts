@@ -1,45 +1,22 @@
 import { Request, Response, NextFunction } from "express";
-import { getAllBookings, getBookingDetailById, getBookingTransactionListById, getBookingPickUpCityVendorListById, getBookingRejectListById, getBookingAcceptListById, insertBookingRemarksById, updateBookingDataById } from "../services/booking.service";
 import { ApiError } from "../utils/api-error";
+import { getAllBookings, getBookingDetailById, getBookingTransactionListById, getBookingPickUpCityVendorListById, getBookingRejectListById, getBookingAcceptListById, insertBookingRemarksById, updateBookingDataById } from "../services/booking.service";
 
 // GET ALL BOOKINGS LISTS CONTROLLER
 export const getBookings = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { date, fromDate, toDate, status, page, limit } = req.query;
-
         const filters = {
-            date: date as string,
-            fromDate: fromDate as string,
-            toDate: toDate as string,
-            status: status as string,
-            page: page ? parseInt(page as string, 10) : undefined,
-            limit: limit ? parseInt(limit as string, 10) : undefined,
+            date: req.query.date as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            status: req.query.status as string,
+            page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 10,
         };
 
-        const bookings = await getAllBookings(filters);
+        const result = await getAllBookings(filters);
 
-        // ✅ Fixed: Check bookings.data.length instead of bookings.length
-        if (!bookings.data || bookings.data.length === 0) {
-            return res.status(404).json({
-                status: 404,
-                message: "No bookings found",
-                total: 0,
-                page: filters.page || 1,  // ✅ Fixed: Use filters.page (or default) instead of bookings.page
-                limit: filters.limit || 12,  // ✅ Fixed: Use filters.limit (or default) instead of bookings.limit
-                totalPages: 0,
-                bookings: [],
-            });
-        }
-
-        res.status(200).json({
-            status: 200,
-            message: "Bookings fetched successfully",
-            total: bookings.total,
-            page: bookings.page,
-            limit: bookings.limit,
-            totalPages: bookings.totalPages,
-            bookings: bookings.data,  // ✅ Already correct, but ensured for clarity
-        });
+        res.status(200).json(result);
     } catch (error) {
         next(error);
     }
