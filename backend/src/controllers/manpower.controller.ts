@@ -438,17 +438,21 @@ export const addFaq = async (req: Request, res: Response, next: NextFunction) =>
     const { manpower_faq_header, manpower_faq_description, manpower_faq_status } = req.body;
     let faqs: any[] = [];
 
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+
     if (Array.isArray(req.body)) {
       faqs = req.body.map((f: any) => ({
         manpower_faq_header: f.manpower_faq_header,
         manpower_faq_description: f.manpower_faq_description,
         manpower_faq_status: f.manpower_faq_status || "1",
+        manpower_faq_createdAt: currentTimestamp,
       }));
     } else if (Array.isArray(manpower_faq_header) && Array.isArray(manpower_faq_description)) {
       faqs = manpower_faq_header.map((q: string, i: number) => ({
         manpower_faq_header: q,
         manpower_faq_description: manpower_faq_description[i],
         manpower_faq_status: manpower_faq_status?.[i] || "1",
+        manpower_faq_createdAt: currentTimestamp,
       }));
     } else {
       if (!manpower_faq_header || !manpower_faq_description)
@@ -466,8 +470,11 @@ export const addFaq = async (req: Request, res: Response, next: NextFunction) =>
     const insertedFaqs = await addFaqService(faqs);
 
     res.status(201).json({
+      status: 200,
       message: `${insertedFaqs.length} FAQ${insertedFaqs.length > 1 ? "s" : ""} added successfully!`,
-      faqs: insertedFaqs,
+      jsonData: {
+        faqs: insertedFaqs,
+      },
     });
   } catch (error) {
     next(error);
