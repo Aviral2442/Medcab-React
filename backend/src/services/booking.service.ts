@@ -34,7 +34,7 @@ export const getAllBookings = async (filters?: {
         const query = `
       SELECT 
         manpower_order.manpower_order_id,
-        vendor_address.vendor_address_full,
+        user_address.ua_address,
         manpower_order.mpo_order_date,
         manpower_order.mpo_created_at,
         manpower_order.mpo_final_price,
@@ -47,7 +47,7 @@ export const getAllBookings = async (filters?: {
       FROM manpower_order
       LEFT JOIN consumer ON manpower_order.mpo_user_id = consumer.consumer_id
       LEFT JOIN vendor ON manpower_order.mpo_vendor_id = vendor.vendor_id
-      LEFT JOIN vendor_address ON vendor.vendor_address_details_id = vendor_address.vendor_address_id
+      LEFT JOIN user_address ON manpower_order.mpo_address_id = user_address.ua_id
       ${finalWhereSQL}
       ORDER BY manpower_order.mpo_order_date DESC
       LIMIT ? OFFSET ?
