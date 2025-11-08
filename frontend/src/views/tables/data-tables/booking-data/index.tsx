@@ -30,9 +30,9 @@ import { bookingColumns } from "@/views/tables/data-tables/booking-data/booking/
 import { DateRangePicker, InputPicker } from "rsuite";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import "rsuite/dist/rsuite.min.css";
-
+import TablePagination from "@/components/table/TablePagination";
 
 const tableConfig: Record<
   number,
@@ -85,6 +85,19 @@ const ExportDataWithButtons = ({
   const [dateFilter, setDateFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<[Date, Date] | null>(null);
+  
+  // URL search params
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Pagination states - initialize from URL
+  const [currentPage, setCurrentPage] = useState(() => {
+    const page = searchParams.get('page');
+    return page ? parseInt(page) - 1 : 0; // Convert to 0-based index
+  });
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
   const navigate = useNavigate();
@@ -110,8 +123,20 @@ const ExportDataWithButtons = ({
     { label: "Completed", value: "4" },
   ];
 
+  // Update URL when page changes
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', (newPage + 1).toString()); // Convert to 1-based for URL
+    setSearchParams(newParams);
+  };
+
   const getFilterParams = () => {
-    const params: any = { ...filterParams };
+    const params: any = {
+      ...filterParams,
+      page: currentPage + 1, // API expects 1-based page
+      limit: pageSize,
+    };
     if (dateFilter) params.date = dateFilter;
     if (statusFilter) params.status = statusFilter;
     if (dateRange) {
@@ -129,13 +154,19 @@ const ExportDataWithButtons = ({
       switch (tabKey) {
         case 1:
           setRows(res.data.bookings || []);
+          setTotal(res.data?.total || 0);
+          setTotalPages(res.data?.totalPages || 0);
           break;
         default:
           setRows(res.data.remark || []);
+          setTotal(res.data?.total || 0);
+          setTotalPages(res.data?.totalPages || 0);
       }
     } catch (err) {
       console.error("Fetch error:", err);
       setRows([]);
+      setTotal(0);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
@@ -143,7 +174,15 @@ const ExportDataWithButtons = ({
 
   useEffect(() => {
     fetchData();
-  }, [tabKey, refreshFlag]);
+  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange, JSON.stringify(filterParams)]);
+
+  // Sync URL params when filters change
+  useEffect(() => {
+    // Reset to page 1 when filters change
+    if (dateFilter || statusFilter || dateRange) {
+      handlePageChange(0);
+    }
+  }, [dateFilter, statusFilter, dateRange]);
 
   const handleView = (rowData: any) => {
     const id =
@@ -165,12 +204,10 @@ const ExportDataWithButtons = ({
   
   const handleSaveRemark = async (remark: string) => {
     try {
-      // Replace with your API endpoint
       await axios.post(`${baseURL}/add_remarks/${selectedBookingId}`, {
         remarkType: "BOOKING",
         remarks: remark,
       });
-      console.log(`${baseURL}`);
       console.log("Remark saved successfully");
       fetchData();
       onDataChanged();
@@ -184,8 +221,9 @@ const ExportDataWithButtons = ({
       title: "S.No.",
       data: null,
       orderable: false,
+      searchable: false,
       render: (_data: any, _type: any, _row: any, meta: any) => {
-        return meta.row + 1;
+        return currentPage * pageSize + meta.row + 1;
       },
     },
     ...columns,
@@ -193,7 +231,9 @@ const ExportDataWithButtons = ({
       title: "Actions",
       data: null,
       orderable: false,
-      createdCell: (td: HTMLElement, rowData: any) => {
+      searchable: false,
+      render: () => "",
+      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
@@ -218,7 +258,7 @@ const ExportDataWithButtons = ({
     },
   ];
 
-    const filterActions = (
+  const filterActions = (
     <div className="d-flex align-items-center gap-2 flex-wrap">
       <DateRangePicker
         format="MM/dd/yyyy"
@@ -260,48 +300,54 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center p-4">Loading...</div>
         ) : (
-          <DataTable
-            data={rows}
-            columns={columnsWithActions}
-            options={{
-              responsive: true,
-              layout: {
-                topStart: "buttons",
-              },
-              buttons: [
-                { extend: "copy", className: "btn btn-sm btn-secondary" },
-                { extend: "csv", className: "btn btn-sm btn-secondary active" },
-                { extend: "excel", className: "btn btn-sm btn-secondary" },
-                { extend: "pdf", className: "btn btn-sm btn-secondary active" },
-              ],
-              language: {
-                paginate: {
-                  first: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronsLeft className="fs-lg" />
-                  ),
-                  previous: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronLeft className="fs-lg" />
-                  ),
-                  next: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronRight className="fs-lg" />
-                  ),
-                  last: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronsRight className="fs-lg" />
-                  ),
+          <>
+            <DataTable
+              key={`booking-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
+              data={rows}
+              columns={columnsWithActions}
+              options={{
+                responsive: true,
+                destroy: true,
+                paging: false, // Disable DataTables pagination
+                searching: false,
+                info: false,
+                layout: {
+                  topStart: "buttons",
                 },
-              },
-            }}
-            className="table table-striped dt-responsive align-middle mb-0"
-          >
-            <thead className="thead-sm text-uppercase fs-xxs">
-              <tr>
-                {headers.map((col, idx) => (
-                  <th key={idx}>{col}</th>
-                ))}
-                <th>Actions</th>
-              </tr>
-            </thead>
-          </DataTable>
+                buttons: [
+                  { extend: "copy", className: "btn btn-sm btn-secondary" },
+                  { extend: "csv", className: "btn btn-sm btn-secondary active" },
+                  { extend: "excel", className: "btn btn-sm btn-secondary" },
+                  { extend: "pdf", className: "btn btn-sm btn-secondary active" },
+                ],
+              }}
+              className="table table-striped dt-responsive align-middle mb-0"
+            >
+              <thead className="thead-sm text-uppercase fs-xxs">
+                <tr>
+                  {headers.map((col, idx) => (
+                    <th key={idx}>{col}</th>
+                  ))}
+                  <th>Actions</th>
+                </tr>
+              </thead>
+            </DataTable>
+
+            <TablePagination
+              totalItems={total}
+              start={currentPage * pageSize + 1}
+              end={Math.min((currentPage + 1) * pageSize, total)}
+              itemsName="bookings"
+              showInfo={true}
+              previousPage={() => handlePageChange(Math.max(0, currentPage - 1))}
+              canPreviousPage={currentPage > 0}
+              pageCount={totalPages}
+              pageIndex={currentPage}
+              setPageIndex={handlePageChange}
+              nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+              canNextPage={currentPage < totalPages - 1}
+            />
+          </>
         )}
       </ComponentCard>
 

@@ -36,6 +36,8 @@ import {
 
 import { createRoot } from "react-dom/client";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
+import TablePagination from "@/components/table/TablePagination";
 
 const tableConfig: Record<number, {
   endpoint: string;
@@ -49,8 +51,8 @@ const tableConfig: Record<number, {
   },
   2: { // Sub Category
     endpoint: "/manpower/get-subcategory",
-    columns: subCategoryColumns, // define similar to categoryColumns
-    headers: ["S.No.", 'Sub Category ID', 'Category Name', 'Name', 'Image', 'Overview', 'Description', 'GST%', 'Emergency', 'Popular', 'Status'],
+    columns: subCategoryColumns,
+    headers: ["S.No.", 'ID', 'Cat_1', 'Name', 'Image', 'Overview', 'Description', 'GST%', 'Emergency', 'Popular', 'Status'],
   },
   3: {
     endpoint: "/manpower/get-faqs",
@@ -65,12 +67,12 @@ const tableConfig: Record<number, {
   5: {
     endpoint: "/manpower/get-coupon",
     columns: couponColumns,
-    headers: ["S.No.", 'ID', 'Code', 'Description', 'Min Cart', 'Discount %', 'Discount Amt', 'Max Discount', 'Visible', 'Status'],
+    headers: ["S.No.", 'ID', 'Code', 'Description', 'Min_Cart', 'Discount', 'Dis_Amt', 'Max_Dis', 'Visible', 'Status'],
   },
   6: {
     endpoint: "/manpower/get-price-mapper",
     columns: priceMapperColumns,
-    headers: ["S.No.", 'ID', 'Sub Cat Name', 'Visit Rate', 'Day Rate', 'Monthly Rate', 'Gender', 'City', 'Status'],
+    headers: ["S.No.", 'ID', 'Sub_Cat', 'Visit_Rate', 'Day_Rate', 'Monthly_Rate', 'Gender', 'City', 'Status'],
   },
 };
 
@@ -95,40 +97,71 @@ const ExportDataWithButtons = ({
 }: ExportDataWithButtonsProps) => {
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // URL search params
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Pagination states - initialize from URL
+  const [currentPage, setCurrentPage] = useState(() => {
+    const page = searchParams.get('page');
+    return page ? parseInt(page) - 1 : 0; // Convert to 0-based index
+  });
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
   const { endpoint, columns, headers } = tableConfig[tabKey];
 
-
+  // Update URL when page changes
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', (newPage + 1).toString()); // Convert to 1-based for URL
+    setSearchParams(newParams);
+  };
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // const res = await axios.get("/manpower/get-categories");
-      const res = await axios.get(`${baseURL}${endpoint}`);
+      const res = await axios.get(`${baseURL}${endpoint}`, {
+        params: {
+          page: currentPage + 1,
+          limit: pageSize,
+        },
+      });
       console.log("Fetched data:", res);
+      
+      let dataArray = [];
       switch (tabKey) {
         case 1:
-          setRows(res.data.categories || []);
+          dataArray = res.data.categories || [];
           break;
         case 2:
-          setRows(res.data.subCategories || []);
+          dataArray = res.data.subCategories || [];
           break;
         case 4:
-          setRows(res.data.banners || []);
+          dataArray = res.data.banners || [];
           break;
         case 5:
-          setRows(res.data.coupons || []);
+          dataArray = res.data.coupons || [];
           break;
         case 6:
-          setRows(res.data.priceMapper || []);
+          dataArray = res.data.priceMapper || [];
           break;
         default:
-          setRows(res.data.categories || []);
+          dataArray = res.data.categories || [];
       }
+      
+      setRows(dataArray);
+      setTotal(res.data.total || dataArray.length);
+      setTotalPages(res.data.totalPages || Math.ceil(dataArray.length / pageSize));
     } catch (err) {
       console.error("Fetch error:", err);
       setRows([]);
+      setTotal(0);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
@@ -136,56 +169,26 @@ const ExportDataWithButtons = ({
 
   useEffect(() => {
     fetchData();
-  }, [tabKey, refreshFlag]);
-
-  const handleDelete = async (rowData: any) => {
-    // console.log("Delete clicked", rowData);
-    let mp_id;
-    let mp_name;
-    switch(tabKey) { 
-      case 1:
-        mp_id = rowData.mp_cat_id;
-        mp_name = rowData.mp_cat_name;
-        break;
-      case 2:
-        mp_id = rowData.mp_sub_category_id;
-        mp_name = rowData.mpsc_name;
-        break;
-      case 4:
-        mp_id = rowData.banner_id;
-        mp_name = rowData.banner_id;
-        break;
-      case 5:
-        mp_id = rowData.mpc_coupon_id;
-        mp_name = rowData.mpc_coupon_code;
-        break;
-      case 6:
-        mp_id = rowData.mppm_id;
-        mp_name = rowData.mppm_id;
-        break;
-      // Add cases for other tabKeys as needed
-      default:
-        mp_id = rowData.mp_cat_id; // Default case
-    }
-    if (!confirm(`Are you sure you want to delete "${mp_name}"?`))
-      return;
-    try {
-      await axios.delete(`${endpoint.replace("get-", "delete-")}/${mp_id}`);
-      onDataChanged();
-      // fetchData();
-    } catch (err) {
-      console.error("Delete error:", err);
-      alert("Failed to delete item");
-    }
-  };
+  }, [tabKey, refreshFlag, currentPage, pageSize]);
 
   const columnsWithActions = [
-    ...columns,
+    {
+      title: "S.No.",
+      data: null,
+      orderable: false,
+      searchable: false,
+      render: (_data: any, _type: any, _row: any, meta: any) => {
+        return currentPage * pageSize + meta.row + 1;
+      },
+    },
+    ...columns.slice(1), // Skip the first S.No. column from original columns
     {
       title: "Actions",
       data: null,
       orderable: false,
-      createdCell: (td: HTMLElement, rowData: any) => {
+      searchable: false,
+      render: () => "",
+      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
@@ -197,17 +200,8 @@ const ExportDataWithButtons = ({
               <TbDotsVertical />
             </DropdownToggle>
             <DropdownMenu>
-              <DropdownItem onClick={() => console.log("View", rowData)}>
-                <TbEye className="me-1" /> View
-              </DropdownItem>
               <DropdownItem onClick={() => onEditRow(rowData)}>
                 <TbEdit className="me-1" /> Edit
-              </DropdownItem>
-              <DropdownItem
-                className="text-danger"
-                onClick={() => handleDelete(rowData)}
-              >
-                <TbTrash className="me-1" /> Delete
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
@@ -238,49 +232,54 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center p-4">Loading...</div>
         ) : (
-          <DataTable
-            // data={categoryTableData.body}
-            data={rows}
-            columns={columnsWithActions}
-            options={{
-              responsive: true,
-              layout: {
-                topStart: "buttons",
-              },
-              buttons: [
-                { extend: "copy", className: "btn btn-sm btn-secondary" },
-                { extend: "csv", className: "btn btn-sm btn-secondary active" },
-                { extend: "excel", className: "btn btn-sm btn-secondary" },
-                { extend: "pdf", className: "btn btn-sm btn-secondary active" },
-              ],
-              language: {
-                paginate: {
-                  first: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronsLeft className="fs-lg" />
-                  ),
-                  previous: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronLeft className="fs-lg" />
-                  ),
-                  next: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronRight className="fs-lg" />
-                  ),
-                  last: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronsRight className="fs-lg" />
-                  ),
+          <>
+            <DataTable
+              key={`export-table-${tabKey}-${currentPage}`}
+              data={rows}
+              columns={columnsWithActions}
+              options={{
+                responsive: true,
+                destroy: true,
+                paging: false, // Disable DataTables pagination
+                searching: false,
+                info: false,
+                layout: {
+                  topStart: "buttons",
                 },
-              },
-            }}
-            className="table table-striped dt-responsive align-middle mb-0"
-          >
-            <thead className="thead-sm text-uppercase fs-xxs">
-              <tr>
-                {headers.map((col, idx) => (
-                  <th key={idx}>{col}</th>
-                ))}
-                <th>Actions</th>
-              </tr>
-            </thead>
-          </DataTable>
+                buttons: [
+                  { extend: "copy", className: "btn btn-sm btn-secondary" },
+                  { extend: "csv", className: "btn btn-sm btn-secondary active" },
+                  { extend: "excel", className: "btn btn-sm btn-secondary" },
+                  { extend: "pdf", className: "btn btn-sm btn-secondary active" },
+                ],
+              }}
+              className="table table-striped dt-responsive align-middle mb-0"
+            >
+              <thead className="thead-sm text-uppercase fs-xxs">
+                <tr>
+                  {headers.map((col, idx) => (
+                    <th key={idx}>{col}</th>
+                  ))}
+                  <th>Actions</th>
+                </tr>
+              </thead>
+            </DataTable>
+
+            <TablePagination
+              totalItems={total}
+              start={currentPage * pageSize + 1}
+              end={Math.min((currentPage + 1) * pageSize, total)}
+              itemsName="items"
+              showInfo={true}
+              previousPage={() => handlePageChange(Math.max(0, currentPage - 1))}
+              canPreviousPage={currentPage > 0}
+              pageCount={totalPages}
+              pageIndex={currentPage}
+              setPageIndex={handlePageChange}
+              nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+              canNextPage={currentPage < totalPages - 1}
+            />
+          </>
         )}
       </ComponentCard>
     </>
