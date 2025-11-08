@@ -26,18 +26,27 @@ export const getConsumerList = async (filters?: {
 
         // 🧩 Handle STATUS filtering separately
         let finalWhereSQL = whereSQL;
+
         if (filters?.status) {
+            // Define mapping based on entity
             const statusConditionMap: Record<string, string> = {
-                newUser: "consumer_status = 0",
-                active: "consumer_status = 1",
-                inactive: "consumer_status = 2",
+                newUser: "consumer.consumer_status = 0",
+                active: "consumer.consumer_status = 1",
+                inactive: "consumer.consumer_status = 2",
             };
 
             const condition = statusConditionMap[filters.status];
+
             if (condition) {
-                finalWhereSQL += finalWhereSQL ? ` AND ${condition}` : `WHERE ${condition}`;
+                // If there’s already WHERE (from date filters), just add AND
+                if (/where\s+/i.test(finalWhereSQL)) {
+                    finalWhereSQL += ` AND ${condition}`;
+                } else {
+                    finalWhereSQL = `WHERE ${condition}`;
+                }
             }
         }
+
 
         // ⚡ Data query
         const query = `
