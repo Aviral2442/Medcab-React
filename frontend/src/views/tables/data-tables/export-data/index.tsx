@@ -12,16 +12,10 @@ import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import ReactDOMServer from "react-dom/server";
+// import ReactDOMServer from "react-dom/server";
 import {
-  TbChevronLeft,
-  TbChevronRight,
-  TbChevronsLeft,
-  TbChevronsRight,
   TbDotsVertical,
   TbEdit,
-  TbEye,
-  TbTrash,
 } from "react-icons/tb";
 
 import jszip from "jszip";
@@ -93,7 +87,7 @@ const ExportDataWithButtons = ({
   onAddNew,
   onEditRow,
   refreshFlag,
-  onDataChanged,
+  // onDataChanged,
 }: ExportDataWithButtonsProps) => {
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -106,8 +100,8 @@ const ExportDataWithButtons = ({
     const page = searchParams.get('page');
     return page ? parseInt(page) - 1 : 0; // Convert to 0-based index
   });
-  const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal] = useState(0);
+  const [pageSize, _setPageSize] = useState(10);
+  const [_total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
@@ -240,7 +234,7 @@ const ExportDataWithButtons = ({
               options={{
                 responsive: true,
                 destroy: true,
-                paging: false, // Disable DataTables pagination
+                paging: false,
                 searching: false,
                 info: false,
                 layout: {
@@ -266,10 +260,10 @@ const ExportDataWithButtons = ({
             </DataTable>
 
             <TablePagination
-              totalItems={total}
-              start={currentPage * pageSize + 1}
-              end={Math.min((currentPage + 1) * pageSize, total)}
-              itemsName="items"
+              // totalItems={total}
+              start={currentPage + 1}
+              // end={totalPages}
+              // itemsName="items"
               showInfo={true}
               previousPage={() => handlePageChange(Math.max(0, currentPage - 1))}
               canPreviousPage={currentPage > 0}

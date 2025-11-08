@@ -12,12 +12,7 @@ import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import ReactDOMServer from "react-dom/server";
 import {
-  TbChevronLeft,
-  TbChevronRight,
-  TbChevronsLeft,
-  TbChevronsRight,
   TbDotsVertical,
   TbEye,
   TbReceipt,
@@ -80,20 +75,33 @@ const ExportDataWithButtons = ({
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(
     null
   );
-  const [dateFilter, setDateFilter] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState<[Date, Date] | null>(null);
   
   // URL search params
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize filters from URL
+  const [dateFilter, setDateFilter] = useState<string | null>(() => 
+    searchParams.get('date') || null
+  );
+  const [statusFilter, setStatusFilter] = useState<string | null>(() => 
+    searchParams.get('status') || null
+  );
+  const [dateRange, setDateRange] = useState<[Date, Date] | null>(() => {
+    const fromDate = searchParams.get('fromDate');
+    const toDate = searchParams.get('toDate');
+    if (fromDate && toDate) {
+      return [new Date(fromDate), new Date(toDate)];
+    }
+    return null;
+  });
   
   // Pagination states - initialize from URL
   const [currentPage, setCurrentPage] = useState(() => {
     const page = searchParams.get('page');
     return page ? parseInt(page) - 1 : 0; // Convert to 0-based index
   });
-  const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal] = useState(0);
+  const [pageSize, _setPageSize] = useState(10);
+  const [_total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
@@ -109,7 +117,7 @@ const ExportDataWithButtons = ({
     "thisMonth",
     "custom",
   ].map((item) => ({
-    label: item,
+    label: item.charAt(0).toUpperCase() + item.slice(1).replace(/([A-Z])/g, " $1"),
     value: item,
   }));
 
@@ -124,12 +132,96 @@ const ExportDataWithButtons = ({
     { label: "OFF Duty", value: "offDuty" },
   ];
 
-  // Update URL when page changes
+  // Update URL with all current filter and pagination values
+  const updateURL = (updates: {
+    page?: number;
+    date?: string | null;
+    status?: string | null;
+    fromDate?: string | null;
+    toDate?: string | null;
+  }) => {
+    const newParams = new URLSearchParams();
+    
+    // Add page (1-based for URL)
+    const pageValue = updates.page !== undefined ? updates.page : currentPage;
+    if (pageValue > 0) {
+      newParams.set('page', (pageValue + 1).toString());
+    }
+    
+    // Add date filter
+    const dateValue = updates.date !== undefined ? updates.date : dateFilter;
+    if (dateValue) {
+      newParams.set('date', dateValue);
+    }
+    
+    // Add status filter
+    const statusValue = updates.status !== undefined ? updates.status : statusFilter;
+    if (statusValue) {
+      newParams.set('status', statusValue);
+    }
+    
+    // Add date range
+    const fromDateValue = updates.fromDate !== undefined ? updates.fromDate : 
+      (dateRange ? dateRange[0].toISOString().split('T')[0] : null);
+    const toDateValue = updates.toDate !== undefined ? updates.toDate : 
+      (dateRange ? dateRange[1].toISOString().split('T')[0] : null);
+    
+    if (fromDateValue && toDateValue) {
+      newParams.set('fromDate', fromDateValue);
+      newParams.set('toDate', toDateValue);
+    }
+    
+    setSearchParams(newParams);
+  };
+
+  // Handle page change
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    const newParams = new URLSearchParams(searchParams);
-    newParams.set('page', (newPage + 1).toString()); // Convert to 1-based for URL
-    setSearchParams(newParams);
+    updateURL({ page: newPage });
+  };
+
+  // Handle date filter change
+  const handleDateFilterChange = (value: string | null) => {
+    setDateFilter(value);
+    setCurrentPage(0);
+    
+    // Clear date range if not custom
+    if (value !== 'custom') {
+      setDateRange(null);
+      updateURL({ page: 0, date: value, fromDate: null, toDate: null });
+    } else {
+      updateURL({ page: 0, date: value });
+    }
+  };
+
+  // Handle status filter change
+  const handleStatusFilterChange = (value: string | null) => {
+    setStatusFilter(value);
+    setCurrentPage(0);
+    updateURL({ page: 0, status: value });
+  };
+
+  // Handle date range change
+  const handleDateRangeChange = (value: [Date, Date] | null) => {
+    setDateRange(value);
+    setCurrentPage(0);
+    
+    if (value) {
+      const fromDate = value[0].toISOString().split('T')[0];
+      const toDate = value[1].toISOString().split('T')[0];
+      updateURL({ 
+        page: 0, 
+        date: 'custom', 
+        fromDate, 
+        toDate 
+      });
+      setDateFilter('custom');
+    } else {
+      updateURL({ page: 0, fromDate: null, toDate: null });
+      if (dateFilter === 'custom') {
+        setDateFilter(null);
+      }
+    }
   };
 
   const getFilterParams = () => {
@@ -138,12 +230,23 @@ const ExportDataWithButtons = ({
       page: currentPage + 1, // API expects 1-based page
       limit: pageSize,
     };
-    if (dateFilter) params.date = dateFilter;
-    if (statusFilter) params.status = statusFilter;
+    
+    // Add date filter (only if not custom)
+    if (dateFilter && dateFilter !== 'custom') {
+      params.date = dateFilter;
+    }
+    
+    // Add status filter
+    if (statusFilter) {
+      params.status = statusFilter;
+    }
+    
+    // Add date range
     if (dateRange) {
       params.fromDate = dateRange[0].toISOString().split("T")[0];
       params.toDate = dateRange[1].toISOString().split("T")[0];
     }
+    
     return params;
   };
 
@@ -152,14 +255,23 @@ const ExportDataWithButtons = ({
     try {
       const res = await axios.get(`${baseURL}${endpoint}`, { params: getFilterParams() });
       console.log("API Response:", res.data);
-      const vendors = res.data?.jsonData?.vendors || [];
+      
+      const vendors = res.data?.vendors || [];
       setData(vendors);
-      setTotal(res.data?.jsonData?.total || res.data?.total || vendors.length);
-      setTotalPages(
-        res.data?.jsonData?.totalPages || 
-        res.data?.totalPages ||   
-        Math.ceil(vendors.length / pageSize)
-      );
+      
+      // Get pagination info from response
+      if (res.data.pagination) {
+        setTotal(res.data.pagination.total);
+        setTotalPages(res.data.pagination.totalPages);
+      } else {
+        // Fallback if pagination object not present
+        setTotal(res.data?.jsonData?.total || res.data?.total || vendors.length);
+        setTotalPages(
+          res.data?.jsonData?.totalPages || 
+          res.data?.totalPages || 
+          Math.ceil(vendors.length / pageSize)
+        );
+      }
     } catch (error) {
       console.error("Error fetching vendor data:", error);
       setData([]);
@@ -172,7 +284,7 @@ const ExportDataWithButtons = ({
 
   const handleRemark = (rowData: any) => {
     const id = rowData?.vendor_id ?? rowData?.id;
-    console.log("Selected Booking ID for Remark:", id);
+    console.log("Selected Vendor ID for Remark:", id);
     setSelectedBookingId(id);
     setIsRemarkOpen(true);
   };
@@ -193,15 +305,7 @@ const ExportDataWithButtons = ({
 
   useEffect(() => {
     fetchData();
-  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange, JSON.stringify(filterParams)]);
-
-  // Sync URL params when filters change
-  useEffect(() => {
-    // Reset to page 1 when filters change
-    if (dateFilter || statusFilter || dateRange) {
-      handlePageChange(0);
-    }
-  }, [dateFilter, statusFilter, dateRange]);
+  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange]);
 
   const columnsWithActions = [
     {
@@ -210,7 +314,7 @@ const ExportDataWithButtons = ({
       orderable: false,
       searchable: false,
       render: (_data: any, _type: any, _row: any, meta: any) => {
-        return meta.row + 1;
+        return currentPage * pageSize + meta.row + 1;
       },
     },
     ...columns,
@@ -255,7 +359,7 @@ const ExportDataWithButtons = ({
         format="MM/dd/yyyy"
         style={{ width: 220 }}
         value={dateRange}
-        onChange={setDateRange}
+        onChange={handleDateRangeChange}
         placeholder="Select date range"
         cleanable
         size="sm"
@@ -263,7 +367,7 @@ const ExportDataWithButtons = ({
       <InputPicker
         data={DateFilterOptions}
         value={dateFilter}
-        onChange={setDateFilter}
+        onChange={handleDateFilterChange}
         placeholder="Date filter"
         style={{ width: 150 }}
         cleanable
@@ -272,7 +376,7 @@ const ExportDataWithButtons = ({
       <InputPicker
         data={StatusFilterOption}
         value={statusFilter}
-        onChange={setStatusFilter}
+        onChange={handleStatusFilterChange}
         placeholder="Status"
         style={{ width: 150 }}
         cleanable
@@ -299,7 +403,7 @@ const ExportDataWithButtons = ({
               options={{
                 responsive: true,
                 destroy: true,
-                paging: false, // Disable DataTables pagination
+                paging: false,
                 searching: false,
                 info: false,
                 layout: { 
@@ -341,10 +445,10 @@ const ExportDataWithButtons = ({
             </DataTable>
 
             <TablePagination
-              totalItems={total}
+              // totalItems={total}
               start={currentPage + 1}
-              end={Math.min((currentPage + 1) * pageSize, total)}
-              itemsName="vendors"
+              // end={totalPages}
+              // itemsName="vendors"
               showInfo={true}
               previousPage={() => handlePageChange(Math.max(0, currentPage - 1))}
               canPreviousPage={currentPage > 0}

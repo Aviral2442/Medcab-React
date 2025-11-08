@@ -61,10 +61,10 @@ const Page = () => {
 
     const pageIndex = table.getState().pagination.pageIndex
     const pageSize = table.getState().pagination.pageSize
-    const totalItems = table.getFilteredRowModel().rows.length
+    // const totalItems = table.getFilteredRowModel().rows.length
 
     const start = pageIndex * pageSize + 1
-    const end = Math.min(start + pageSize - 1, totalItems)
+    // const end = Math.min(start + pageSize - 1, totalItems)
 
     return (
         <>
@@ -108,9 +108,9 @@ const Page = () => {
                             {table.getRowModel().rows.length > 0 && (
                                 <CardFooter className="border-0">
                                     <TablePagination
-                                        totalItems={totalItems}
+                                        // totalItems={totalItems}
                                         start={start}
-                                        end={end}
+                                        // end={end}
                                         previousPage={table.previousPage}
                                         canPreviousPage={table.getCanPreviousPage()}
                                         pageCount={table.getPageCount()}

@@ -3,10 +3,10 @@ import {Col, Row} from 'react-bootstrap'
 import {TbChevronLeft, TbChevronRight} from 'react-icons/tb'
 
 export type TablePaginationProps = {
-    totalItems: number
+    // totalItems: number
     start: number
-    end: number
-    itemsName?: string
+    // end: number
+    // itemsName?: string
     showInfo?: boolean
     // Pagination control props
     previousPage: () => void
@@ -19,10 +19,10 @@ export type TablePaginationProps = {
 }
 
 const TablePagination = ({
-                             totalItems,
+                            //  totalItems,
                              start,
-                             end,
-                             itemsName = 'items',
+                            //  end,
+                            //  itemsName = 'items',
                              showInfo,
                              previousPage,
                              canPreviousPage,
@@ -32,6 +32,12 @@ const TablePagination = ({
                              nextPage,
                              canNextPage,
                          }: TablePaginationProps) => {
+                            console.log("pageCount:", pageCount);
+                            console.log("currentPageIndex:", pageIndex);
+
+    if (pageCount === 0) {
+        return null
+    }
     return (
         <Row
             className={clsx('align-items-center text-center text-sm-start', showInfo ? 'justify-content-between' : 'justify-content-end')}>
