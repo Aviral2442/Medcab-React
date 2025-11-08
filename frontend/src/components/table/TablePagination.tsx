@@ -32,8 +32,8 @@ const TablePagination = ({
                              nextPage,
                              canNextPage,
                          }: TablePaginationProps) => {
-                            console.log("pageCount:", pageCount);
-                            console.log("currentPageIndex:", pageIndex);
+                            // console.log("pageCount:", pageCount);
+                            // console.log("currentPageIndex:", pageIndex);
 
     if (pageCount === 0) {
         return null

@@ -69,9 +69,9 @@ const ExportDataWithButtons = ({
   // URL search params
   const [searchParams, setSearchParams] = useSearchParams();
   
-  // Initialize filters from URL
+  // Initialize filters from URL - default to 'today' if no date filter
   const [dateFilter, setDateFilter] = useState<string | null>(() => 
-    searchParams.get('date') || null
+    searchParams.get('date') || 'today'
   );
   const [statusFilter, setStatusFilter] = useState<string | null>(() => 
     searchParams.get('status') || null
@@ -175,6 +175,7 @@ const ExportDataWithButtons = ({
       setDateRange(null);
       updateURL({ page: 0, date: value, fromDate: null, toDate: null });
     } else {
+      // When custom is selected, just update the date filter
       updateURL({ page: 0, date: value });
     }
   };
@@ -200,8 +201,16 @@ const ExportDataWithButtons = ({
         fromDate, 
         toDate 
       });
+      // Automatically set date filter to custom when date range is selected
+      if (dateFilter !== 'custom') {
+        setDateFilter('custom');
+      }
     } else {
       updateURL({ page: 0, fromDate: null, toDate: null });
+      // Reset to today if date range is cleared
+      if (dateFilter === 'custom') {
+        setDateFilter('today');
+      }
     }
   };
 
@@ -237,7 +246,7 @@ const ExportDataWithButtons = ({
       const res = await axios.get(`${baseURL}${endpoint}`, { params: getFilterParams() });
       console.log("API Response:", res.data);
       
-      const consumer = res.data.data || [];
+      const consumer = res.data?.jsonData?.consumerList || [];
       setData(consumer);
       
       // Get pagination info from response
@@ -279,6 +288,13 @@ const ExportDataWithButtons = ({
       console.error("Error saving remark:", error);
     }
   };
+
+  // Set default filter on mount if no filter in URL
+  useEffect(() => {
+    if (!searchParams.get('date') && dateFilter === 'today') {
+      updateURL({ date: 'today' });
+    }
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -340,6 +356,7 @@ const ExportDataWithButtons = ({
         placeholder="Select date range"
         cleanable
         size="sm"
+        disabled={dateFilter !== 'custom'}
       />
       <InputPicker
         data={DateFilterOptions}

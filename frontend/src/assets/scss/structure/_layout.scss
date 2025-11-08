@@ -19,7 +19,7 @@
     padding: 0 calc($grid-gutter-width * 0.5);
 
     @include media-breakpoint-up(xxl) {
-        padding: 0px;
+        padding: 0 10px;
     }
 }
 

@@ -13,7 +13,6 @@ import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 import AddRemark from "@/components/AddRemark";
 
-// import ReactDOMServer from "react-dom/server";
 import {
   TbDotsVertical,
   TbEye,
@@ -78,12 +77,25 @@ const ExportDataWithButtons = ({
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(
     null
   );
-  const [dateFilter, setDateFilter] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState<[Date, Date] | null>(null);
   
-  // URL search params
+  // URL search params - MOVE THIS BEFORE using it
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize filters from URL - default to 'today' if no date filter
+  const [dateFilter, setDateFilter] = useState<string | null>(() => 
+    searchParams.get('date') || 'today'
+  );
+  const [statusFilter, setStatusFilter] = useState<string | null>(() => 
+    searchParams.get('status') || null
+  );
+  const [dateRange, setDateRange] = useState<[Date, Date] | null>(() => {
+    const fromDate = searchParams.get('fromDate');
+    const toDate = searchParams.get('toDate');
+    if (fromDate && toDate) {
+      return [new Date(fromDate), new Date(toDate)];
+    }
+    return null;
+  });
   
   // Pagination states - initialize from URL
   const [currentPage, setCurrentPage] = useState(() => {
@@ -123,7 +135,104 @@ const ExportDataWithButtons = ({
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     const newParams = new URLSearchParams(searchParams);
-    newParams.set('page', (newPage + 1).toString()); // Convert to 1-based for URL
+    newParams.set('page', (newPage + 1).toString());
+    
+    // Preserve existing filters
+    if (dateFilter) newParams.set('date', dateFilter);
+    if (statusFilter) newParams.set('status', statusFilter);
+    if (dateRange) {
+      newParams.set('fromDate', dateRange[0].toISOString().split('T')[0]);
+      newParams.set('toDate', dateRange[1].toISOString().split('T')[0]);
+    }
+    
+    setSearchParams(newParams);
+  };
+
+  // Handle date filter change
+  const handleDateFilterChange = (value: string | null) => {
+    setDateFilter(value);
+    setCurrentPage(0);
+    
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', '1');
+    
+    if (value !== 'custom') {
+      // Clear date range if not custom
+      setDateRange(null);
+      if (value) {
+        newParams.set('date', value);
+      } else {
+        newParams.delete('date');
+      }
+      newParams.delete('fromDate');
+      newParams.delete('toDate');
+    } else {
+      newParams.set('date', 'custom');
+    }
+    
+    // Preserve status filter
+    if (statusFilter) newParams.set('status', statusFilter);
+    
+    setSearchParams(newParams);
+  };
+
+  // Handle status filter change
+  const handleStatusFilterChange = (value: string | null) => {
+    setStatusFilter(value);
+    setCurrentPage(0);
+    
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', '1');
+    
+    if (value) {
+      newParams.set('status', value);
+    } else {
+      newParams.delete('status');
+    }
+    
+    // Preserve date filter
+    if (dateFilter) newParams.set('date', dateFilter);
+    if (dateRange) {
+      newParams.set('fromDate', dateRange[0].toISOString().split('T')[0]);
+      newParams.set('toDate', dateRange[1].toISOString().split('T')[0]);
+    }
+    
+    setSearchParams(newParams);
+  };
+
+  // Handle date range change
+  const handleDateRangeChange = (value: [Date, Date] | null) => {
+    setDateRange(value);
+    setCurrentPage(0);
+    
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', '1');
+    
+    if (value) {
+      const fromDate = value[0].toISOString().split('T')[0];
+      const toDate = value[1].toISOString().split('T')[0];
+      newParams.set('date', 'custom');
+      newParams.set('fromDate', fromDate);
+      newParams.set('toDate', toDate);
+      
+      // Automatically set date filter to custom
+      if (dateFilter !== 'custom') {
+        setDateFilter('custom');
+      }
+    } else {
+      newParams.delete('fromDate');
+      newParams.delete('toDate');
+      
+      // Reset to today if date range is cleared
+      if (dateFilter === 'custom') {
+        setDateFilter('today');
+        newParams.set('date', 'today');
+      }
+    }
+    
+    // Preserve status filter
+    if (statusFilter) newParams.set('status', statusFilter);
+    
     setSearchParams(newParams);
   };
 
@@ -133,12 +242,23 @@ const ExportDataWithButtons = ({
       page: currentPage + 1, // API expects 1-based page
       limit: pageSize,
     };
-    if (dateFilter) params.date = dateFilter;
-    if (statusFilter) params.status = statusFilter;
+    
+    // Add date filter (only if not custom)
+    if (dateFilter && dateFilter !== 'custom') {
+      params.date = dateFilter;
+    }
+    
+    // Add status filter
+    if (statusFilter) {
+      params.status = statusFilter;
+    }
+    
+    // Add date range
     if (dateRange) {
       params.fromDate = dateRange[0].toISOString().split("T")[0];
       params.toDate = dateRange[1].toISOString().split("T")[0];
     }
+    
     return params;
   };
 
@@ -149,9 +269,9 @@ const ExportDataWithButtons = ({
       console.log("Fetched data:", res.data);
       switch (tabKey) {
         case 1:
-          setRows(res.data.bookings || []);
-          setTotal(res.data?.total || 0);
-          setTotalPages(res.data?.totalPages || 0);
+          setRows(res.data?.jsonData?.bookingsLists || []);
+          setTotal(res.data?.pagination?.total || 0);
+          setTotalPages(res.data?.pagination?.totalPages || 0);
           break;
         default:
           setRows(res.data.remark || []);
@@ -168,17 +288,18 @@ const ExportDataWithButtons = ({
     }
   };
 
+  // Set default filter on mount if no filter in URL
+  useEffect(() => {
+    if (!searchParams.get('date') && dateFilter === 'today') {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('date', 'today');
+      setSearchParams(newParams);
+    }
+  }, []);
+
   useEffect(() => {
     fetchData();
-  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange, JSON.stringify(filterParams)]);
-
-  // Sync URL params when filters change
-  useEffect(() => {
-    // Reset to page 1 when filters change
-    if (dateFilter || statusFilter || dateRange) {
-      handlePageChange(0);
-    }
-  }, [dateFilter, statusFilter, dateRange]);
+  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange]);
 
   const handleView = (rowData: any) => {
     const id =
@@ -260,15 +381,16 @@ const ExportDataWithButtons = ({
         format="MM/dd/yyyy"
         style={{ width: 220 }}
         value={dateRange}
-        onChange={setDateRange}
+        onChange={handleDateRangeChange}
         placeholder="Select date range"
         cleanable
         size="sm"
+        disabled={dateFilter !== 'custom'}
       />
       <InputPicker
         data={DateFilterOptions}
         value={dateFilter}
-        onChange={setDateFilter}
+        onChange={handleDateFilterChange}
         placeholder="Date filter"
         style={{ width: 150 }}
         cleanable
@@ -277,7 +399,7 @@ const ExportDataWithButtons = ({
       <InputPicker
         data={StatusFilterOption}
         value={statusFilter}
-        onChange={setStatusFilter}
+        onChange={handleStatusFilterChange}
         placeholder="Status"
         style={{ width: 150 }}
         cleanable
