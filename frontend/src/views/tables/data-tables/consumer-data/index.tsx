@@ -42,7 +42,7 @@ const tableConfig: Record<
   1: {
     endpoint: "/consumer/get_consumers_list",
     columns: consumerColumns,
-    headers: ["S.No.","ID", "Name", "Mobile", "Email", "Wallet", "Ref Code", "Ref By", "Register", "Status"],
+    headers: ["S.No.","ID", "Name", "Mobile", "Email", "Wallet", "Ref_Code", "Ref_By", "Register", "Status"],
   },
 };
 

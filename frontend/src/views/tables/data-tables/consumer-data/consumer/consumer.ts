@@ -35,9 +35,14 @@ export const consumerColumns = [
     { data: 'consumer_name' },
     { data: 'consumer_mobile_no' },
     { data: 'consumer_email_id' },
-    { data: 'consumer_wallet_amount' },
-    { data: 'consumer_city_id' },
-    { data: 'consumer_city_id' },
+    { data: 'consumer_wallet_amount' ,
+        render: (data: number) => {
+            return `₹${data}`;
+        }
+
+    },
+    { data: 'consumer_my_referal_code' },
+    { data: 'referer_name' },
     {
         data: 'consumer_registred_date',
         render: (data: string) => {
