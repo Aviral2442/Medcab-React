@@ -1,90 +1,83 @@
 import { db } from "../config/db";
 import { ApiError } from "../utils/api-error";
-import path from "path";
-import fs from "fs";
-import { RowDataPacket, FieldPacket } from "mysql2";  // Added import for proper typing
+import { buildFilters } from "../utils/filters";
+import { RowDataPacket, FieldPacket } from "mysql2";
 
 // GET ALL BOOKINGS LISTS 
 export const getAllBookings = async (filters?: {
-
     date?: string;
     fromDate?: string;
     toDate?: string;
     status?: string;
     page?: number;
     limit?: number;
-
 }) => {
     try {
-        let query = `
-            SELECT 
-                manpower_order.manpower_order_id,
-                manpower_order.mpo_address_id,
-                manpower_order.mpo_order_date,
-                manpower_order.mpo_created_at,
-                manpower_order.mpo_final_price,
-                manpower_order.mpo_payment_mode,
-                manpower_order.mpo_status,
-                consumer.consumer_name,
-                consumer.consumer_mobile_no,
-                vendor.vendor_name,
-                vendor.vendor_mobile
-            FROM manpower_order
-            LEFT JOIN consumer ON manpower_order.mpo_user_id = consumer.consumer_id
-            LEFT JOIN vendor ON manpower_order.mpo_vendor_id = vendor.vendor_id
-            WHERE 1=1
-        `;
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
 
-        const params: any[] = [];
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "manpower_order.mpo_order_date",
+        });
 
-        // Apply filters
-        if (filters?.date) {
-            query += " AND DATE(manpower_order.mpo_order_date) = ?";
-            params.push(filters.date);
-        }
-
-        if (filters?.fromDate && filters?.toDate) {
-            query += " AND DATE(manpower_order.mpo_order_date) BETWEEN ? AND ?";
-            params.push(filters.fromDate, filters.toDate);
-        }
+        let finalWhereSQL = whereSQL;
 
         if (filters?.status) {
-            query += " AND manpower_order.mpo_status = ?";
+            finalWhereSQL += finalWhereSQL
+                ? ` AND manpower_order.mpo_status = ?`
+                : `WHERE manpower_order.mpo_status = ?`;
             params.push(filters.status);
         }
 
-        // Pagination setup
-        const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 12;
-        const offset = (page - 1) * limit;
+        const query = `
+      SELECT 
+        manpower_order.manpower_order_id,
+        manpower_order.mpo_address_id,
+        manpower_order.mpo_order_date,
+        manpower_order.mpo_created_at,
+        manpower_order.mpo_final_price,
+        manpower_order.mpo_payment_mode,
+        manpower_order.mpo_status,
+        consumer.consumer_name,
+        consumer.consumer_mobile_no,
+        vendor.vendor_name,
+        vendor.vendor_mobile
+      FROM manpower_order
+      LEFT JOIN consumer ON manpower_order.mpo_user_id = consumer.consumer_id
+      LEFT JOIN vendor ON manpower_order.mpo_vendor_id = vendor.vendor_id
+      ${finalWhereSQL}
+      ORDER BY manpower_order.mpo_order_date DESC
+      LIMIT ? OFFSET ?
+    `;
 
-        // Count total records for pagination info
-        const countQuery = `
-            SELECT COUNT(*) AS total
-            FROM manpower_order
-            WHERE 1=1
-            ${filters?.date ? " AND DATE(mpo_order_date) = ?" : ""}
-            ${filters?.fromDate && filters?.toDate ? " AND DATE(mpo_order_date) BETWEEN ? AND ?" : ""}
-            ${filters?.status ? " AND mpo_status = ?" : ""}
-        `;
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
 
-        const [countRows]: [RowDataPacket[], FieldPacket[]] = await db.query(countQuery, params);  // Added typing
-        const total = countRows[0]?.total || 0;  // Removed 'as any' cast
+        // --- Count Query ---
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) AS total FROM manpower_order ${finalWhereSQL}`,
+            params
+        );
 
-        // Final query with pagination
-        query += " ORDER BY manpower_order.mpo_order_date DESC LIMIT ? OFFSET ?";
-        params.push(limit, offset);
-
-        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query, params);  // Added typing
+        const total = countRows[0]?.total || 0;
 
         return {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-            data: rows || [],
+            status: 200,
+            message: "Bookings fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                bookingsLists: rows || []
+            },
         };
     } catch (error) {
+        console.error("❌ Error fetching bookings:", error);
         throw new ApiError(500, "Failed to fetch bookings");
     }
 };

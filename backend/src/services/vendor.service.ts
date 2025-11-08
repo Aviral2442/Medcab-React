@@ -4,7 +4,7 @@ import { buildFilters } from "../utils/filters";
 import path from 'path';
 import fs from 'fs';
 
-// 🧠 VENDOR LIST SERVICE
+// VENDOR LIST SERVICE
 export const getVendorList = async (filters?: {
   date?: string;
   fromDate?: string;
@@ -14,18 +14,15 @@ export const getVendorList = async (filters?: {
   limit?: number;
 }) => {
   try {
-    // 🧮 Pagination
     const page = filters?.page && filters.page > 0 ? filters.page : 1;
     const limit = filters?.limit && filters.limit > 0 ? filters.limit : 12;
     const offset = (page - 1) * limit;
 
-    // 🧠 Build date filters
     const { whereSQL, params } = buildFilters({
       ...filters,
       dateColumn: "vendor.vendor_created_at",
     });
 
-    // ✅ Manually handle status filter
     let finalWhereSQL = whereSQL;
     const finalParams = [...params];
 
@@ -43,7 +40,6 @@ export const getVendorList = async (filters?: {
       }
     }
 
-    // --- Main Query ---
     const query = `
       SELECT 
         vendor.vendor_id,
@@ -73,7 +69,6 @@ export const getVendorList = async (filters?: {
     const queryParams = [...finalParams, limit, offset];
     const [rows]: any = await db.query(query, queryParams);
 
-    // --- Count Query ---
     const [countRows]: any = await db.query(
       `SELECT COUNT(*) AS total FROM vendor ${finalWhereSQL}`,
       finalParams
@@ -81,7 +76,6 @@ export const getVendorList = async (filters?: {
 
     const total = countRows?.[0]?.total || 0;
 
-    // --- Final Response ---
     return {
       status: 200,
       message: "Vendor list fetched successfully",
@@ -91,7 +85,7 @@ export const getVendorList = async (filters?: {
         total,
         totalPages: Math.ceil(total / limit),
       },
-      vendors: rows || [],
+      jsonData: rows || [],
     };
   } catch (error) {
     console.error("❌ Error fetching vendor list:", error);
