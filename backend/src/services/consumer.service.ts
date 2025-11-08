@@ -21,7 +21,7 @@ export const getConsumerList = async (filters?: {
         // 🧠 Build WHERE + params for DATE only
         const { whereSQL, params } = buildFilters({
             ...filters,
-            dateColumn: "consumer_registred_date",
+            dateColumn: "consumer.consumer_registred_date",
         });
 
         // 🧩 Handle STATUS filtering separately
@@ -42,15 +42,17 @@ export const getConsumerList = async (filters?: {
         // ⚡ Data query
         const query = `
       SELECT 
-        consumer_id,
-        consumer_name,
-        consumer_mobile_no,
-        consumer_email_id,
-        consumer_wallet_amount,
-        consumer_city_id,
-        consumer_status,
-        consumer_registred_date
+        consumer.consumer_id,
+        consumer.consumer_name,
+        consumer.consumer_mobile_no,
+        consumer.consumer_email_id,
+        consumer.consumer_wallet_amount,
+        consumer.consumer_my_referal_code,
+        referrer.consumer_name AS referer_name,
+        consumer.consumer_status,
+        consumer.consumer_registred_date
       FROM consumer
+      LEFT JOIN consumer as referrer ON consumer.consumer_refered_by = referrer.consumer_refered_by
       ${finalWhereSQL}
       ORDER BY consumer_id DESC
       LIMIT ? OFFSET ?
