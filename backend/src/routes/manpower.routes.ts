@@ -1,11 +1,10 @@
 import { Router } from "express";
-import { getCategories, addCategory, editCategory, deleteCategory, getSubCategories, addSubCategory, editSubCategory, deleteSubCategory, getCoupons, addCoupon, editCoupon, deleteCoupon, getBanners, addBanner, editBanner, deleteBanner, getPriceMapper, editPriceMapper, deletePriceMapper } from "../controllers/manpower.controller";
+import { getCategories, addCategory, editCategory, deleteCategory, getSubCategories, addSubCategory, editSubCategory, deleteSubCategory, getCoupons, addCoupon, editCoupon, deleteCoupon, getBanners, addBanner, editBanner, deleteBanner, getPriceMapper, editPriceMapper, deletePriceMapper, getAllFaqs, addFaq, updateFaq, deleteFaq } from "../controllers/manpower.controller";
 import multer from "multer";
 
 const router = Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
-
 
 router.get("/get-category", getCategories);
 router.post("/add-category", upload.single("mp_cat_image"), addCategory);
@@ -31,5 +30,9 @@ router.get("/get-price-mapper", getPriceMapper);
 router.put("/edit-price-mapper/:id", editPriceMapper);
 router.delete("/delete-price-mapper/:id", deletePriceMapper);
 
+router.get("/get_faq", getAllFaqs);
+router.post("/add_faq", addFaq);
+router.put("/edit_faq/:id", updateFaq);
+router.delete("/delete_faq/:id", deleteFaq);
 
 export default router;

@@ -84,7 +84,7 @@ export const editCategoryService = async (data: EditCategoryInput) => {
     );
 
     if (!rows || rows.length === 0) {
-      throw new ApiError(404,"Category not found");
+      throw new ApiError(404, "Category not found");
     }
 
     let imagePath = rows[0].mp_cat_image;
@@ -128,7 +128,7 @@ export const editCategoryService = async (data: EditCategoryInput) => {
 
     return { ...data, mp_cat_image: imagePath };
   } catch (error) {
-    throw new ApiError(500,"Failed to update category");
+    throw new ApiError(500, "Failed to update category");
   }
 };
 
@@ -141,7 +141,7 @@ export const deleteCategoryService = async (id: number) => {
     );
 
     if (!rows || rows.length === 0) {
-      throw new ApiError(404,"Category not found");
+      throw new ApiError(404, "Category not found");
     }
 
     const category = rows[0];
@@ -161,7 +161,7 @@ export const deleteCategoryService = async (id: number) => {
 
     return category;
   } catch (error) {
-    throw new ApiError(500,"Failed to delete category");
+    throw new ApiError(500, "Failed to delete category");
   }
 };
 
@@ -275,7 +275,7 @@ export const addSubCategoryService = async (data: AddSubCategoryInput) => {
       mpsc_image: imagePath,
     };
   } catch (error) {
-    throw new ApiError(500,"Failed to add subcategory");
+    throw new ApiError(500, "Failed to add subcategory");
   }
 };
 
@@ -308,7 +308,7 @@ export const editSubCategoryService = async (
     );
 
     if (!existingRows || existingRows.length === 0) {
-      throw new ApiError(404,"Subcategory not found");
+      throw new ApiError(404, "Subcategory not found");
     }
 
     let imagePath = existingRows[0].mpsc_image;
@@ -376,7 +376,7 @@ export const editSubCategoryService = async (
     );
 
     if (result.affectedRows === 0) {
-      throw new ApiError(500,"Failed to update subcategory");
+      throw new ApiError(500, "Failed to update subcategory");
     }
 
     return {
@@ -385,7 +385,7 @@ export const editSubCategoryService = async (
       mpsc_image: imagePath,
     };
   } catch (error) {
-    throw new ApiError(500,"Failed to update subcategory");
+    throw new ApiError(500, "Failed to update subcategory");
   }
 };
 
@@ -398,7 +398,7 @@ export const deleteSubCategoryService = async (id: number) => {
     );
 
     if (!rows || rows.length === 0) {
-      throw new ApiError(404,"Subcategory not found",);
+      throw new ApiError(404, "Subcategory not found",);
     }
 
     const subCategory = rows[0];
@@ -426,7 +426,7 @@ export const deleteSubCategoryService = async (id: number) => {
 
     return subCategory;
   } catch (error) {
-    throw new ApiError(404,"Failed to delete subcategory");
+    throw new ApiError(404, "Failed to delete subcategory");
   }
 };
 
@@ -446,7 +446,7 @@ export const getCouponsService = async () => {
 
     return rows;
   } catch (error) {
-    throw new ApiError(500,"Failed to fetch coupons");
+    throw new ApiError(500, "Failed to fetch coupons");
   }
 };
 
@@ -484,7 +484,7 @@ export const addCouponService = async (data: CouponInput) => {
 
     return { id: result.insertId, ...data };
   } catch (error) {
-    throw new ApiError(500,"Failed to add coupon");
+    throw new ApiError(500, "Failed to add coupon");
   }
 };
 
@@ -521,7 +521,7 @@ export const editCouponService = async (id: number, data: Partial<CouponInput>) 
 
     return { id, ...data };
   } catch (error) {
-    throw new ApiError(500,"Failed to update coupon");
+    throw new ApiError(500, "Failed to update coupon");
   }
 };
 
@@ -539,7 +539,7 @@ export const deleteCouponService = async (id: number) => {
 
     return true;
   } catch (error) {
-    throw new ApiError(500,"Failed to delete coupon");
+    throw new ApiError(500, "Failed to delete coupon");
   }
 };
 
@@ -651,7 +651,7 @@ export const editBannerService = async (data: EditBannerInput) => {
 
     return { ...data, banner_image: imagePath };
   } catch (error) {
-    throw new ApiError(500,"Failed to update banner");
+    throw new ApiError(500, "Failed to update banner");
   }
 };
 
@@ -664,7 +664,7 @@ export const deleteBannerService = async (banner_id: number) => {
     );
 
     if (!rows || rows.length === 0) {
-      throw new ApiError(404,"Banner not found");
+      throw new ApiError(404, "Banner not found");
     }
 
     const banner = rows[0];
@@ -682,7 +682,7 @@ export const deleteBannerService = async (banner_id: number) => {
 
     return true;
   } catch (error) {
-    throw new ApiError(500,"Failed to delete banner");
+    throw new ApiError(500, "Failed to delete banner");
   }
 };
 
@@ -700,7 +700,7 @@ export const getPriceMapperService = async () => {
 
     return rows || [];
   } catch (error) {
-    throw new ApiError(500,"Failed to fetch price mapper");
+    throw new ApiError(500, "Failed to fetch price mapper");
   }
 };
 
@@ -724,7 +724,7 @@ export const editPriceMapperService = async (data: EditPriceMapperInput) => {
     );
 
     if (!rows || rows.length === 0) {
-      throw new ApiError(404,"Price Mapper not found");
+      throw new ApiError(404, "Price Mapper not found");
     }
 
     await db.query(
@@ -746,7 +746,7 @@ export const editPriceMapperService = async (data: EditPriceMapperInput) => {
 
     return data;
   } catch (error) {
-    throw new ApiError(500,"Failed to update Price Mapper");
+    throw new ApiError(500, "Failed to update Price Mapper");
   }
 };
 
@@ -759,7 +759,7 @@ export const deletePriceMapperService = async (mppm_id: number) => {
     );
 
     if (!rows || rows.length === 0) {
-      throw new ApiError(404,"Price Mapper not found");
+      throw new ApiError(404, "Price Mapper not found");
     }
 
     await db.query(
@@ -770,5 +770,83 @@ export const deletePriceMapperService = async (mppm_id: number) => {
     return true;
   } catch (error) {
     throw new ApiError(500, "Failed to delete Price Mapper");
+  }
+};
+
+// ✅ Add one or multiple FAQs
+export const addFaqService = async (
+  faqs: { manpower_faq_header: string; manpower_faq_description: string; manpower_faq_status?: string }[]
+) => {
+  try {
+    const insertedFaqs: any[] = [];
+
+    for (const faq of faqs) {
+      const [result]: any = await db.query(
+        `INSERT INTO manpower_faq 
+        (manpower_faq_header, manpower_faq_description, manpower_faq_status, manpower_faq_createdAt) 
+        VALUES (?, ?, ?, NOW())`,
+        [faq.manpower_faq_header, faq.manpower_faq_description, faq.manpower_faq_status || "1"]
+      );
+
+      insertedFaqs.push({
+        manpower_faq_id: result.insertId,
+        manpower_faq_header: faq.manpower_faq_header,
+        manpower_faq_description: faq.manpower_faq_description,
+        manpower_faq_status: faq.manpower_faq_status || "1",
+      });
+    }
+
+    return insertedFaqs;
+  } catch (error) {
+    throw new ApiError(500, "Failed to add FAQs");
+  }
+};
+
+// ✅ Get all FAQs
+export const getAllFaqsService = async () => {
+  try {
+    const [rows]: any = await db.query(
+      `SELECT manpower_faq_id, manpower_faq_header, manpower_faq_description, manpower_faq_status, manpower_faq_createdAt 
+       FROM manpower_faq 
+       ORDER BY manpower_faq_id DESC`
+    );
+    return rows;
+  } catch (error) {
+    throw new ApiError(500, "Failed to fetch FAQs");
+  }
+};
+
+// ✅ Update FAQ
+export const updateFaqService = async (
+  id: number,
+  data: { manpower_faq_header?: string; manpower_faq_description?: string; manpower_faq_status?: string }
+) => {
+  try {
+    const [result]: any = await db.query(
+      `UPDATE manpower_faq 
+       SET manpower_faq_header = COALESCE(?, manpower_faq_header),
+           manpower_faq_description = COALESCE(?, manpower_faq_description),
+           manpower_faq_status = COALESCE(?, manpower_faq_status)
+       WHERE manpower_faq_id = ?`,
+      [data.manpower_faq_header, data.manpower_faq_description, data.manpower_faq_status, id]
+    );
+
+    if (result.affectedRows === 0) throw new ApiError(404, "FAQ not found");
+
+    return { message: "FAQ updated successfully" };
+  } catch (error) {
+    throw new ApiError(500, "Failed to update FAQ");
+  }
+};
+
+// ✅ Delete FAQ
+export const deleteFaqService = async (id: number) => {
+  try {
+    const [result]: any = await db.query(`DELETE FROM manpower_faq WHERE manpower_faq_id = ?`, [id]);
+    if (result.affectedRows === 0) throw new ApiError(404, "FAQ not found");
+
+    return { message: "FAQ deleted successfully" };
+  } catch (error) {
+    throw new ApiError(500, "Failed to delete FAQ");
   }
 };

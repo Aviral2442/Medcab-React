@@ -18,6 +18,10 @@ import { deleteBannerService } from "../services/manpower.service";
 import { getPriceMapperService } from "../services/manpower.service";
 import { editPriceMapperService } from "../services/manpower.service";
 import { deletePriceMapperService } from "../services/manpower.service";
+import { getAllFaqsService } from "../services/manpower.service";
+import { addFaqService } from "../services/manpower.service";
+import { updateFaqService } from "../services/manpower.service";
+import { deleteFaqService } from "../services/manpower.service";
 
 
 
@@ -422,6 +426,88 @@ export const deletePriceMapper = async (req: Request, res: Response, next: NextF
     await deletePriceMapperService(Number(mppm_id));
 
     res.status(200).json({ message: "Price Mapper deleted successfully!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// ✅ Add FAQ(s)
+export const addFaq = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { manpower_faq_header, manpower_faq_description, manpower_faq_status } = req.body;
+    let faqs: any[] = [];
+
+    if (Array.isArray(req.body)) {
+      faqs = req.body.map((f: any) => ({
+        manpower_faq_header: f.manpower_faq_header,
+        manpower_faq_description: f.manpower_faq_description,
+        manpower_faq_status: f.manpower_faq_status || "1",
+      }));
+    } else if (Array.isArray(manpower_faq_header) && Array.isArray(manpower_faq_description)) {
+      faqs = manpower_faq_header.map((q: string, i: number) => ({
+        manpower_faq_header: q,
+        manpower_faq_description: manpower_faq_description[i],
+        manpower_faq_status: manpower_faq_status?.[i] || "1",
+      }));
+    } else {
+      if (!manpower_faq_header || !manpower_faq_description)
+        return res.status(400).json({ message: "Header and Description are required" });
+
+      faqs = [
+        {
+          manpower_faq_header,
+          manpower_faq_description,
+          manpower_faq_status: manpower_faq_status || "1",
+        },
+      ];
+    }
+
+    const insertedFaqs = await addFaqService(faqs);
+
+    res.status(201).json({
+      message: `${insertedFaqs.length} FAQ${insertedFaqs.length > 1 ? "s" : ""} added successfully!`,
+      faqs: insertedFaqs,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ✅ Get all FAQs
+export const getAllFaqs = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const faqs = await getAllFaqsService();
+    res.status(200).json({ total: faqs.length, faqs });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ✅ Update FAQ
+export const updateFaq = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Number(req.params.id);
+    const { manpower_faq_header, manpower_faq_description, manpower_faq_status } = req.body;
+
+    const result = await updateFaqService(id, {
+      manpower_faq_header,
+      manpower_faq_description,
+      manpower_faq_status,
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ✅ Delete FAQ
+export const deleteFaq = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Number(req.params.id);
+    const result = await deleteFaqService(id);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
