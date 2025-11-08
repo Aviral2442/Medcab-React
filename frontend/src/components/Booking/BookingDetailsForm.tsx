@@ -19,7 +19,7 @@ const Section: React.FC<SectionProps> = ({
   children,
   titleColor = "primary",
 }) => (
-  <div className="mb-0 pb-0">
+  <div className="pb-0 pt-0 mb-0 mt-0">
     <h5 className={`text-${titleColor} mb-2 `}>{title}</h5>
     {children}
   </div>

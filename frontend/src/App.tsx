@@ -1,8 +1,10 @@
-import {useRoutes} from 'react-router'
-import {routes} from '@/routes'
+import { useRoutes } from "react-router";
+import { routes } from "@/routes";
+import { useZoom } from "@/components/zoom";
 
 const App = () => {
-    return useRoutes(routes)
-}
+  useZoom(90); // Call hook directly
+  return useRoutes(routes);
+};
 
-export default App
+export default App;

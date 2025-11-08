@@ -6,7 +6,6 @@ let bookRows: any[] = [];
 const getBookings = async () => {
   try {
     const rows = await axios.get(`${baseURL}/booking/get_bookings`);
-    // console.log(rows);
     bookRows = rows.data.bookings;
   } catch (error) {
     console.error("Error fetching categories:", error);
