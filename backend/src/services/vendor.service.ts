@@ -1,9 +1,10 @@
 import { db } from '../config/db';
 import { ApiError } from '../utils/api-error';
+import { buildFilters } from "../utils/filters";
 import path from 'path';
 import fs from 'fs';
 
-// VENDOR LIST SERVICE
+// 🧠 VENDOR LIST SERVICE
 export const getVendorList = async (filters?: {
   date?: string;
   fromDate?: string;
@@ -13,7 +14,37 @@ export const getVendorList = async (filters?: {
   limit?: number;
 }) => {
   try {
-    let query = `
+    // 🧮 Pagination
+    const page = filters?.page && filters.page > 0 ? filters.page : 1;
+    const limit = filters?.limit && filters.limit > 0 ? filters.limit : 12;
+    const offset = (page - 1) * limit;
+
+    // 🧠 Build date filters
+    const { whereSQL, params } = buildFilters({
+      ...filters,
+      dateColumn: "vendor.vendor_created_at",
+    });
+
+    // ✅ Manually handle status filter
+    let finalWhereSQL = whereSQL;
+    const finalParams = [...params];
+
+    if (filters?.status) {
+      const statusConditionMap: Record<string, number> = {
+        new: 0,
+        active: 1,
+        inactive: 2,
+      };
+
+      const statusValue = statusConditionMap[filters.status];
+      if (statusValue !== undefined) {
+        finalWhereSQL += finalWhereSQL ? ` AND vendor.vendor_status = ?` : `WHERE vendor.vendor_status = ?`;
+        finalParams.push(statusValue);
+      }
+    }
+
+    // --- Main Query ---
+    const query = `
       SELECT 
         vendor.vendor_id,
         vendor.vendor_name,
@@ -26,66 +57,48 @@ export const getVendorList = async (filters?: {
         city.city_name,
         manpower_category.mp_cat_name
       FROM vendor
-      LEFT JOIN vendor_address ON vendor.vendor_address_details_id = vendor_address.vendor_address_id
-      LEFT JOIN city ON vendor_address.vendor_address_city_id = city.city_id
-      LEFT JOIN vendor_manpower_mapper ON vendor.vendor_category_details_id = vendor_manpower_mapper.vmm_id
-      LEFT JOIN manpower_category ON vendor_manpower_mapper.vmm_category_id = manpower_category.mp_cat_id
-      WHERE 1=1
+      LEFT JOIN vendor_address 
+        ON vendor.vendor_address_details_id = vendor_address.vendor_address_id
+      LEFT JOIN city 
+        ON vendor_address.vendor_address_city_id = city.city_id
+      LEFT JOIN vendor_manpower_mapper 
+        ON vendor.vendor_category_details_id = vendor_manpower_mapper.vmm_id
+      LEFT JOIN manpower_category 
+        ON vendor_manpower_mapper.vmm_category_id = manpower_category.mp_cat_id
+      ${finalWhereSQL}
+      ORDER BY vendor.vendor_created_at DESC
+      LIMIT ? OFFSET ?
     `;
 
-    const params: any[] = [];
+    const queryParams = [...finalParams, limit, offset];
+    const [rows]: any = await db.query(query, queryParams);
 
-    if (filters?.date) {
-      query += " AND DATE(vendor.vendor_created_at) = ?";
-      params.push(filters.date);
-    }
+    // --- Count Query ---
+    const [countRows]: any = await db.query(
+      `SELECT COUNT(*) AS total FROM vendor ${finalWhereSQL}`,
+      finalParams
+    );
 
-    if (filters?.fromDate && filters?.toDate) {
-      query += " AND DATE(vendor.vendor_created_at) BETWEEN ? AND ?";
-      params.push(filters.fromDate, filters.toDate);
-    }
-
-    if (filters?.status) {
-      query += " AND vendor.vendor_status = ?";
-      params.push(filters.status);
-    }
-
-    const page = filters?.page && filters.page > 0 ? filters.page : 1;
-    const limit = filters?.limit && filters.limit > 0 ? filters.limit : 12;
-    const offset = (page - 1) * limit;
-
-    // --- Count total ---
-    const countQuery = `
-      SELECT COUNT(*) as total
-      FROM vendor
-      WHERE 1=1
-      ${filters?.date ? " AND DATE(vendor.vendor_created_at) = ?" : ""}
-      ${filters?.fromDate && filters?.toDate ? " AND DATE(vendor.vendor_created_at) BETWEEN ? AND ?" : ""}
-      ${filters?.status ? " AND vendor.vendor_status = ?" : ""}
-    `;
-
-    const [countRows]: any = await db.query(countQuery, params);
     const total = countRows?.[0]?.total || 0;
 
-    // --- Pagination ---
-    query += " ORDER BY vendor.vendor_created_at DESC LIMIT ? OFFSET ?";
-    params.push(limit, offset);
-
-    const [rows] = await db.query(query, params);
-
-    // ✅ Return success even if no vendors
+    // --- Final Response ---
     return {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      status: 200,
+      message: "Vendor list fetched successfully",
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
       vendors: rows || [],
     };
   } catch (error) {
-    console.error("Error fetching vendor list:", error);
+    console.error("❌ Error fetching vendor list:", error);
     throw new ApiError(500, "Failed to fetch vendor list");
   }
 };
+
 
 // Vendor Details Service
 export const vendorDetailService = async (vendorId: number) => {

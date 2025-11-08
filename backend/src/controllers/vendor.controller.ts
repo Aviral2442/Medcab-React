@@ -2,47 +2,22 @@ import { Request, Response, NextFunction } from 'express';
 import { getVendorList, vendorDetailService } from '../services/vendor.service';
 
 // GET VENDOR LIST CONTROLLER
-export const vendorList = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { date, fromDate, toDate, status, page, limit } = req.query;
+export const vendorListController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const filters = {
+            date: req.query.date as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            status: req.query.status as string,
+            page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 10,
+        };
 
-    const filters = {
-      date: date as string,
-      fromDate: fromDate as string,
-      toDate: toDate as string,
-      status: status as string,
-      page: page ? parseInt(page as string, 10) : undefined,
-      limit: limit ? parseInt(limit as string, 10) : undefined,
-    };
-
-    const vendorsList = await getVendorList(filters);
-
-    // ✅ Safely check if vendors exist and are an array
-    const vendorsArray = Array.isArray(vendorsList?.vendors) ? vendorsList.vendors : [];
-
-    if (vendorsArray.length === 0) {
-      return res.status(200).json({
-        status: 200,
-        message: "No vendors found",
-        total: 0,
-        page: vendorsList?.page ?? 1,
-        limit: vendorsList?.limit ?? 10,
-        totalPages: 0,
-        jsonData: { vendors: [] },
-      });
+        const result = await getVendorList(filters);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
     }
-
-    res.status(200).json({
-      status: 200,
-      message: "Vendor list fetched successfully",
-      jsonData: {
-        ...vendorsList,
-        vendors: vendorsArray, // ensure it's an array
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
 };
 
 // VENDOR DETAIL CONTROLLER
