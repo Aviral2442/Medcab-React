@@ -76,7 +76,7 @@ export const getConsumerList = async (filters?: {
                 total,
                 totalPages: Math.ceil(total / limit),
             },
-            data: rows,
+            jsonData: rows,
         };
     } catch (error) {
         console.error("❌ Error in getConsumerList:", error);
