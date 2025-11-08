@@ -3,43 +3,61 @@ const baseURL = (import.meta as any).env?.VITE_IMAGE_PATH ?? "";
 
 let catRows: any[] = [];
 const getCategories = async () => {
-    try{
-        const rows = await axios.get(`${baseURL}/manpower/get-category`);
-        console.log("Categories fetched:", rows);
-        catRows = rows.data.categories;
-    } catch (error) {
-        console.error("Error fetching categories:", error);
-    }
-    
+  try {
+    const rows = await axios.get(`${baseURL}/manpower/get-category`);
+    console.log("Categories fetched:", rows);
+    catRows = rows.data.categories;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+  }
 }
 await getCategories();
 
 type TableType<T> = {
-    header: string[]
-    body: T[]
+  header: string[]
+  body: T[]
 }
 
 type categoryInfoType = {
-    mp_cat_id : number
-    mp_cat_name: string
-    mp_cat_image: string
-    mp_cat_top_rated_status: string
-    mp_cat_status: string
+  mp_cat_id: number
+  mp_cat_name: string
+  mp_cat_image: string
+  mp_cat_top_rated_status: string
+  mp_cat_status: string
 }
 
+// CATEGORY COLUMNS
 export const categoryColumns = [
-    {
-      data: "S.No.", 
-      render: (_data: any, _type: any, _row: any, meta: any) => {
-        return meta.row + 1;
-      }
-    },
-    {data: 'mp_cat_id'},
-    {data: 'mp_cat_name'},
-    {data: 'mp_cat_image', render: (data: string) => `<img src="${baseURL}${data}" alt="Category Image" style="width: 50px; height: auto;" />`},
-    {data: 'mp_cat_top_rated_status', render: (data: number) => data == 1 ? 'Yes' : 'No'},
-    {data: 'mp_cat_status', render: (data: number) => {
-      // console.log(data);
+  {
+    data: null,
+    orderable: false,
+    searchable: false,
+    render: (_data: any, _type: any, _row: any, meta: any) => {
+      return meta.row + 1;
+    }
+  },
+  { 
+    data: 'mp_cat_id',
+    defaultContent: '-'
+  },
+  {   
+    data: 'mp_cat_name',
+    defaultContent: '-'
+  },
+  { 
+    data: 'mp_cat_image',
+    defaultContent: '',
+    render: (data: string) => data ? `<img src="${baseURL}${data}" alt="Category Image" style="width: 50px; height: auto;" />` : '-'
+  },
+  { 
+    data: 'mp_cat_top_rated_status',
+    defaultContent: '0',
+    render: (data: number) => data == 1 ? 'Yes' : 'No'
+  },
+  {
+    data: 'mp_cat_status',
+    defaultContent: '1',
+    render: (data: number) => {
       if (data == 0) {
         return `<span class="badge badge-label badge-soft-success">Active</span>`;
       } else if (data == 1) {
@@ -47,26 +65,63 @@ export const categoryColumns = [
       } else {
         return `<span class="badge badge-label badge-soft-secondary">Deleted</span>`;
       }
-    }},
-]
+    }
+  },
+];
+
+// SUB-CATEGORY COLUMNS
 export const subCategoryColumns = [
   {
-      data: "S.No.", 
-      render: (_data: any, _type: any, _row: any, meta: any) => {
-        return meta.row + 1;
-      }
-    },
-    {data: 'mp_sub_category_id'},
-    {data: 'mp_cat_name'},
-    {data: 'mpsc_name'},
-    {data: 'mpsc_image', render: (data: string) => `<img src="${baseURL}${data}" alt="Category Image" style="width: 50px; height: auto;" />`},
-    {data: 'mpsc_overview'},
-    {data: 'mpsc_description'},
-    {data: 'mpsc_gst_percentage'},
-    {data: 'mpsc_emergency_status', render: (data: number) => data == 0 ? 'Yes' : 'No'},
-    {data: 'mpsc_popular_status', render: (data: number) => data == 0 ? 'Yes' : 'No'},
-    {data: 'mpsc_status', render: (data: number) => {
-      // console.log(data);
+    data: null,
+    orderable: false,
+    searchable: false,
+    render: (_data: any, _type: any, _row: any, meta: any) => {
+      return meta.row + 1;
+    }
+  },
+  { 
+    data: 'mp_sub_category_id',
+    defaultContent: '-'
+  },
+  { 
+    data: 'mp_cat_name',
+    defaultContent: '-'
+  },
+  { 
+    data: 'mpsc_name',
+    defaultContent: '-'
+  },
+  { 
+    data: 'mpsc_image',
+    defaultContent: '',
+    render: (data: string) => data ? `<img src="${baseURL}${data}" alt="SubCategory Image" style="width: 50px; height: auto;" />` : '-'
+  },
+  { 
+    data: 'mpsc_overview',
+    defaultContent: '-'
+  },
+  { 
+    data: 'mpsc_description',
+    defaultContent: '-'
+  },
+  { 
+    data: 'mpsc_gst_percentage',
+    defaultContent: '0'
+  },
+  { 
+    data: 'mpsc_emergency_status',
+    defaultContent: '1',
+    render: (data: number) => data == 0 ? 'Yes' : 'No'
+  },
+  { 
+    data: 'mpsc_popular_status',
+    defaultContent: '1',
+    render: (data: number) => data == 0 ? 'Yes' : 'No'
+  },
+  {
+    data: 'mpsc_status',
+    defaultContent: '1',
+    render: (data: number) => {
       if (data == 0) {
         return `<span class="badge badge-label badge-soft-success">Active</span>`;
       } else if (data == 1) {
@@ -74,58 +129,134 @@ export const subCategoryColumns = [
       } else {
         return `<span class="badge badge-label badge-soft-secondary">Deleted</span>`;
       }
-    }},
-]
+    }
+  },
+];
 
+// COUPON COLUMNS
 export const couponColumns = [
   {
-      data: "S.No.", 
-      render: (_data: any, _type: any, _row: any, meta: any) => {
-        return meta.row + 1;
-      }
-    },
-  { data: "mpc_coupon_id" },
-  { data: "mpc_coupon_code" },
-  { data: "mpc_coupon_description" },
-  { data: "mpc_coupon_min_cart_value" },
-  { data: "mpc_coupon_discount_percent", render: (data: number) => `${data}%` },
-  { data: "mpc_coupon_discount_amount", render: (data: number) => `₹${data}` },
-  { data: "mpc_coupon_max_discount_value", render: (data: number) => `₹${data}` },
+    data: null,
+    orderable: false,
+    searchable: false,
+    render: (_data: any, _type: any, _row: any, meta: any) => {
+      return meta.row + 1;
+    }
+  },
+  { 
+    data: "mpc_coupon_id",
+    defaultContent: '-'
+  },
+  { 
+    data: "mpc_coupon_code",
+    defaultContent: '-'
+  },
+  { 
+    data: "mpc_coupon_description",
+    defaultContent: '-'
+  },
+  { 
+    data: "mpc_coupon_min_cart_value",
+    defaultContent: '0'
+  },
+  { 
+    data: "mpc_coupon_discount_percentage",
+    defaultContent: '0'
+  },
+  { 
+    data: "mpc_coupon_max_discount_amount",
+    defaultContent: '0'
+  },
+  { 
+    data: "mpc_coupon_max_discount_amount",
+    defaultContent: '0'
+  },
   {
     data: "mpc_coupon_visible",
-    render: (data: string) =>
-      data == "1"
-        ? `<span class="badge badge-label badge-soft-success">Yes</span>`
-        : `<span class="badge badge-label badge-soft-warning">No</span>`,
+    defaultContent: '1',
+    render: (data: string) => {
+      if (data == "0") {
+        return `<span class="badge badge-label badge-soft-success">Yes</span>`;
+      } else {
+        return `<span class="badge badge-label badge-soft-danger">No</span>`;
+      }
+    },
   },
   {
     data: "mpc_coupon_status",
+    defaultContent: '1',
     render: (data: string) => {
       if (data == "0") {
         return `<span class="badge badge-label badge-soft-success">Active</span>`;
       } else {
         return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
       }
+    },
+  },
+];
+
+
+export const faqColumns = [
+  {
+    data: null,
+    orderable: false,
+    searchable: false,
+    render: (_data: any, _type: any, _row: any, meta: any) => {
+      return meta.row + 1;
     }
+  },
+  {
+    data: "manpower_faq_id",
+    defaultContent: '-'
+  },
+  {
+    data: "manpower_faq_header",
+    defaultContent: '-'
+  },
+  {
+    data: "manpower_faq_description",
+    defaultContent: '-'
+  },
+  {
+    data: "manpower_faq_status",
+    defaultContent: '1',
+    render: (data: string) => {
+      if (data == "0") {
+        return `<span class="badge badge-label badge-soft-success">Active</span>`;
+      } else {
+        return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
+      }
+    },
   }
 ];
 
+// BANNER COLUMNS
 export const bannerColumns = [
   {
-      data: "S.No.", 
-      render: (_data: any, _type: any, _row: any, meta: any) => {
-        return meta.row + 1;
-      }
-    },
-  { data: "banner_id" },
+    data: null,
+    orderable: false,
+    searchable: false,
+    render: (_data: any, _type: any, _row: any, meta: any) => {
+      return meta.row + 1;
+    }
+  },
+  { 
+    data: "banner_id",
+    defaultContent: '-'
+  },
   {
     data: "banner_image",
+    defaultContent: '',
     render: (data: string) =>
-      `<img src="${baseURL}${data}" alt="Banner Image" style="width: 80px; height: auto;" />`,
+      data ? `<img src="${baseURL}${data}" alt="Banner Image" style="width: 80px; height: auto;" />` : '-',
   },
-  { data: "banner_page" },
+  { 
+    data: "banner_page",
+    defaultContent: '-'
+  },
   {
     data: "banner_status",
+    defaultContent: '1',
     render: (data: string) => {
       if (data == "0") {
         return `<span class="badge badge-label badge-soft-success">Active</span>`;
@@ -135,22 +266,48 @@ export const bannerColumns = [
     },
   },
 ];
+
+// PRICE MAPPER COLUMNS
 export const priceMapperColumns = [
   {
-      data: "S.No.", 
-      render: (_data: any, _type: any, _row: any, meta: any) => {
-        return meta.row + 1;
-      }
-    },
-  { data: "mppm_id" },
-  { data: "mpsc_name" },
-  { data: "mppm_visit_rate" },
-  { data: "mppm_days_rate" },
-  { data: "mppm_month_rate" },
-  { data: "mppm_gender" },
-  { data: "mppm_city_id" },
+    data: null,
+    orderable: false,
+    searchable: false,
+    render: (_data: any, _type: any, _row: any, meta: any) => {
+      return meta.row + 1;
+    }
+  },
+  { 
+    data: "mppm_id",
+    defaultContent: '-'
+  },
+  { 
+    data: "mpsc_name",
+    defaultContent: '-'
+  },
+  { 
+    data: "mppm_visit_rate",
+    defaultContent: '0'
+  },
+  { 
+    data: "mppm_days_rate",
+    defaultContent: '0'
+  },
+  { 
+    data: "mppm_month_rate",
+    defaultContent: '0'
+  },
+  { 
+    data: "mppm_gender",
+    defaultContent: '-'
+  },
+  { 
+    data: "mppm_city_id",
+    defaultContent: '-'
+  },
   {
     data: "mppm_status",
+    defaultContent: '1',
     render: (data: string) => {
       if (data == "0") {
         return `<span class="badge badge-label badge-soft-success">Active</span>`;
@@ -163,9 +320,7 @@ export const priceMapperColumns = [
   },
 ];
 
-
-
 export const categoryTableData: TableType<categoryInfoType> = {
-    header: ["S.No." ,'ID', 'Name', 'Image', 'Top Rated', 'Status'],
-    body: catRows,
+  header: ["S.No.", 'ID', 'Name', 'Image', 'Top Rated', 'Status'],
+  body: catRows,
 }

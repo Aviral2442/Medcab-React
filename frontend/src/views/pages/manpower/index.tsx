@@ -67,7 +67,6 @@ const Page = () => {
               data={editData}
               onCancel={() => setShowForm(false)}
               onDataChanged={triggerRefresh}
-
             />
           );
         case 4:
@@ -104,7 +103,6 @@ const Page = () => {
               data={editData}
               onCancel={() => setShowForm(false)}
               onDataChanged={triggerRefresh}
-
             />
           );
       }

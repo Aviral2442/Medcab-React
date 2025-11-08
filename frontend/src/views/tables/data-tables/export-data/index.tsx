@@ -26,6 +26,7 @@ import {
   couponColumns,
   bannerColumns,
   priceMapperColumns,
+  faqColumns,
 } from "@/views/tables/data-tables/export-data/manpower/category.ts";
 
 import { createRoot } from "react-dom/client";
@@ -46,11 +47,11 @@ const tableConfig: Record<number, {
   2: { // Sub Category
     endpoint: "/manpower/get-subcategory",
     columns: subCategoryColumns,
-    headers: ["S.No.", 'ID', 'Cat_1', 'Name', 'Image', 'Overview', 'Description', 'GST%', 'Emergency', 'Popular', 'Status'],
+    headers: ["S.No.", 'ID', 'ctg', 'sub_ctg', 'Image', 'Overview', 'Description', 'GST%', 'Emergency', 'Popular', 'Status'],
   },
   3: {
-    endpoint: "/manpower/get-faqs",
-    columns: categoryColumns,
+    endpoint: "/manpower/get_faq",
+    columns: faqColumns,
     headers: ["S.No.", 'ID', 'Question', 'Answer', 'Status'],
   },
   4: {
@@ -126,6 +127,7 @@ const ExportDataWithButtons = ({
         },
       });
       console.log("Fetched data:", res);
+      // console.log("Tab Key:", tabKey); // Debug log
       
       let dataArray = [];
       switch (tabKey) {
@@ -134,6 +136,11 @@ const ExportDataWithButtons = ({
           break;
         case 2:
           dataArray = res.data.subCategories || [];
+          // console.log("SubCategories data:", dataArray); // Debug log to see actual field names
+          break;
+        case 3:
+          dataArray = res.data?.jsonData?.faqs || [];
+          console.log("FAQs data:", dataArray); // Debug log to see actual field names
           break;
         case 4:
           dataArray = res.data.banners || [];

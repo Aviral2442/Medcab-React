@@ -35,7 +35,7 @@ export const bookingColumns = [
   { data: 'manpower_order_id' },
   { data: 'consumer_name' },
   { data: 'consumer_mobile_no' },
-  { data: 'mpo_address_id' },
+  { data: 'ua_address' },
   { data: 'mpo_final_price' },
   { data: 'mpo_payment_mode' },
   { data: 'mpo_order_date',
@@ -65,6 +65,6 @@ export const bookingColumns = [
 
 
 export const categoryTableData: TableType<BookingInfoType> = {
-  header: ["S.No.","order id", "name", "mobile_no", "address_id", "Price", "payment_mode","order_date", "status"],
+  header: ["S.No.","order id", "name", "mobile_no", "address", "Price", "payment_mode","order_date", "status"],
   body: bookRows,
 }

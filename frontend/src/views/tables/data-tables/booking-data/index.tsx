@@ -45,7 +45,7 @@ const tableConfig: Record<
       "order id",
       "name",
       "mobile_no",
-      "address_id",
+      "address",
       "Price",
       "payment_mode",
       "order_date",
