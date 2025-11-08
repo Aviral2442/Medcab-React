@@ -1,9 +1,10 @@
 import { db } from '../config/db';
 import { ApiError } from '../utils/api-error';
+import { buildFilters } from '../utils/filters';
 import path from 'path';
 import fs from 'fs';
 
-// 🧩 GET CONSUMER LIST WITH FILTERS AND PAGINATION SERVICE
+// ✅ GET CONSUMER LIST WITH FILTERS + PAGINATION (Fully Fixed)
 export const getConsumerList = async (filters?: {
     date?: string;
     status?: string;
@@ -13,119 +14,59 @@ export const getConsumerList = async (filters?: {
     limit?: number;
 }) => {
     try {
-        // ✅ Pagination defaults
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
         const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
-        // ✅ Extract filters + default date = "today"
-        let { date, status, fromDate, toDate } = filters || {};
-        if (!date) date = "today";
+        // 🧠 Build WHERE + params for DATE only
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "consumer_registred_date",
+        });
 
-        // 🧮 Query builder variables
-        let whereClauses: string[] = [];
-        let params: any[] = [];
+        // 🧩 Handle STATUS filtering separately
+        let finalWhereSQL = whereSQL;
+        if (filters?.status) {
+            const statusConditionMap: Record<string, string> = {
+                newUser: "consumer_status = 0",
+                active: "consumer_status = 1",
+                inactive: "consumer_status = 2",
+            };
 
-        // 🗓️ Date filters (based on consumer_registred_date)
-        const now = new Date();
-        let startTimestamp: number | null = null;
-        let endTimestamp: number | null = null;
-
-        switch (date) {
-            case "today": {
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-                startTimestamp = Math.floor(todayStart.getTime() / 1000);
-                endTimestamp = Math.floor(Date.now() / 1000);
-                break;
-            }
-
-            case "yesterday": {
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                startTimestamp = Math.floor(new Date(yesterday.setHours(0, 0, 0, 0)).getTime() / 1000);
-                endTimestamp = Math.floor(new Date(yesterday.setHours(23, 59, 59, 999)).getTime() / 1000);
-                break;
-            }
-
-            case "this week": {
-                const day = now.getDay();
-                const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
-                const monday = new Date(now.setDate(diffToMonday));
-                startTimestamp = Math.floor(new Date(monday.setHours(0, 0, 0, 0)).getTime() / 1000);
-                endTimestamp = Math.floor(Date.now() / 1000);
-                break;
-            }
-
-            case "this month": {
-                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-                startTimestamp = Math.floor(firstDay.getTime() / 1000);
-                endTimestamp = Math.floor(Date.now() / 1000);
-                break;
-            }
-
-            case "custom": {
-                if (fromDate && toDate) {
-                    startTimestamp = Math.floor(new Date(fromDate).getTime() / 1000);
-                    endTimestamp = Math.floor(new Date(toDate).getTime() / 1000);
-                }
-                break;
+            const condition = statusConditionMap[filters.status];
+            if (condition) {
+                finalWhereSQL += finalWhereSQL ? ` AND ${condition}` : `WHERE ${condition}`;
             }
         }
 
-        // ✅ Apply date filter
-        if (startTimestamp && endTimestamp) {
-            whereClauses.push("consumer_registred_date BETWEEN ? AND ?");
-            params.push(startTimestamp, endTimestamp);
-        }
-
-        // 🔘 Status filter
-        if (status) {
-            if (status === "newUser") {
-                whereClauses.push("consumer_status = 0");
-            } else if (status === "active") {
-                whereClauses.push("consumer_status = 1");
-            } else if (status === "inactive") {
-                whereClauses.push("consumer_status = 2");
-            }
-        }
-
-        // 🏗️ Build final WHERE clause
-        const whereSQL = whereClauses.length ? `WHERE ${whereClauses.join(" AND ")}` : "";
-
-        // ⚡ Main Query
+        // ⚡ Data query
         const query = `
-            SELECT 
-                consumer_id,
-                consumer_name,
-                consumer_mobile_no,
-                consumer_email_id,
-                consumer_wallet_amount,
-                consumer_city_id,
-                consumer_status,
-                consumer_registred_date
-            FROM consumer
-            ${whereSQL}
-            ORDER BY consumer_id DESC
-            LIMIT ? OFFSET ?
-        `;
+      SELECT 
+        consumer_id,
+        consumer_name,
+        consumer_mobile_no,
+        consumer_email_id,
+        consumer_wallet_amount,
+        consumer_city_id,
+        consumer_status,
+        consumer_registred_date
+      FROM consumer
+      ${finalWhereSQL}
+      ORDER BY consumer_id DESC
+      LIMIT ? OFFSET ?
+    `;
 
-        params.push(limit, offset);
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
 
-        // 🧠 Execute data query
-        const [rows]: any = await db.query(query, params);
-
-        // 🔢 Get total count (for pagination)
-        // console.log(rows);
-        const countParams = whereClauses.length ? params.slice(0, -2) : [];
+        // 🔢 Count query
         const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM consumer ${whereSQL}`,
-            countParams
+            `SELECT COUNT(*) as total FROM consumer ${finalWhereSQL}`,
+            params
         );
 
         const total = countRows[0]?.total || 0;
 
-        // ✅ Final response
         return {
             status: 200,
             message: "Consumer list fetched successfully",
@@ -137,7 +78,6 @@ export const getConsumerList = async (filters?: {
             },
             data: rows,
         };
-
     } catch (error) {
         console.error("❌ Error in getConsumerList:", error);
         throw new ApiError(500, "Failed to fetch consumer list");
