@@ -790,7 +790,7 @@ export const addFaqService = async (
       );
 
       insertedFaqs.push({
-        manpower_faq_id: result.insertId,
+        // manpower_faq_id: result.insertId,
         manpower_faq_header: faq.manpower_faq_header,
         manpower_faq_description: faq.manpower_faq_description,
         manpower_faq_status: faq.manpower_faq_status || "1",
