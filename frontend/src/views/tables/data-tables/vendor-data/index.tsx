@@ -28,10 +28,11 @@ import pdfmake from "pdfmake";
 import { vendorColumns } from "@/views/tables/data-tables/vendor-data/vendor/vendor.ts";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AddRemark from "@/components/AddRemark";
 import { DateRangePicker, InputPicker } from "rsuite";
 import "rsuite/dist/rsuite.min.css";
+import TablePagination from "@/components/table/TablePagination";
 
 // Register DataTable plugins
 DataTable.use(DT);
@@ -82,6 +83,19 @@ const ExportDataWithButtons = ({
   const [dateFilter, setDateFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<[Date, Date] | null>(null);
+  
+  // URL search params
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Pagination states - initialize from URL
+  const [currentPage, setCurrentPage] = useState(() => {
+    const page = searchParams.get('page');
+    return page ? parseInt(page) - 1 : 0; // Convert to 0-based index
+  });
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
   const navigate = useNavigate();
@@ -110,8 +124,20 @@ const ExportDataWithButtons = ({
     { label: "OFF Duty", value: "offDuty" },
   ];
 
+  // Update URL when page changes
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', (newPage + 1).toString()); // Convert to 1-based for URL
+    setSearchParams(newParams);
+  };
+
   const getFilterParams = () => {
-    const params: any = { ...filterParams };
+    const params: any = {
+      ...filterParams,
+      page: currentPage + 1, // API expects 1-based page
+      limit: pageSize,
+    };
     if (dateFilter) params.date = dateFilter;
     if (statusFilter) params.status = statusFilter;
     if (dateRange) {
@@ -127,11 +153,18 @@ const ExportDataWithButtons = ({
       const res = await axios.get(`${baseURL}${endpoint}`, { params: getFilterParams() });
       console.log("API Response:", res.data);
       const vendors = res.data?.jsonData?.vendors || [];
-      // console.log("Fetched vendor data:", vendors);
       setData(vendors);
+      setTotal(res.data?.jsonData?.total || res.data?.total || vendors.length);
+      setTotalPages(
+        res.data?.jsonData?.totalPages || 
+        res.data?.totalPages ||   
+        Math.ceil(vendors.length / pageSize)
+      );
     } catch (error) {
       console.error("Error fetching vendor data:", error);
       setData([]);
+      setTotal(0);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
@@ -160,7 +193,15 @@ const ExportDataWithButtons = ({
 
   useEffect(() => {
     fetchData();
-  }, [tabKey, refreshFlag, dateFilter, statusFilter, dateRange, JSON.stringify(filterParams)]);
+  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange, JSON.stringify(filterParams)]);
+
+  // Sync URL params when filters change
+  useEffect(() => {
+    // Reset to page 1 when filters change
+    if (dateFilter || statusFilter || dateRange) {
+      handlePageChange(0);
+    }
+  }, [dateFilter, statusFilter, dateRange]);
 
   const columnsWithActions = [
     {
@@ -250,67 +291,70 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
-          <DataTable
-            key={`vendor-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}`}
-            data={data}
-            columns={columnsWithActions}
-            options={{
-              responsive: true,
-              destroy: true,
-              layout: { 
-                topStart: "buttons",
-                topEnd: "search"
-              },
-              buttons: [
-                {
-                  extend: "copyHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "Copy",
+          <>
+            <DataTable
+              key={`vendor-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
+              data={data}
+              columns={columnsWithActions}
+              options={{
+                responsive: true,
+                destroy: true,
+                paging: false, // Disable DataTables pagination
+                searching: false,
+                info: false,
+                layout: { 
+                  topStart: "buttons",
                 },
-                {
-                  extend: "excelHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "Excel",
-                },
-                {
-                  extend: "csvHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "CSV",
-                },
-                {
-                  extend: "pdfHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "PDF",
-                },
-              ],
-              language: {
-                paginate: {
-                  first: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronsLeft className="fs-lg" />
-                  ),
-                  previous: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronLeft className="fs-lg" />
-                  ),
-                  next: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronRight className="fs-lg" />
-                  ),
-                  last: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronsRight className="fs-lg" />
-                  ),
-                },
-              },
-            }}
-            className="table table-striped dt-responsive align-middle mb-0"
-          >
-            <thead className="thead-sm text-uppercase fs-xxs">
-              <tr>
-                {headers.map((col, idx) => (
-                  <th key={idx}>{col}</th>
-                ))}
-                <th>Actions</th>
-              </tr>
-            </thead>
-          </DataTable>
+                buttons: [
+                  {
+                    extend: "copyHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "Copy",
+                  },
+                  {
+                    extend: "excelHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "Excel",
+                  },
+                  {
+                    extend: "csvHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "CSV",
+                  },
+                  {
+                    extend: "pdfHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "PDF",
+                  },
+                ],
+              }}
+              className="table table-striped dt-responsive align-middle mb-0"
+            >
+              <thead className="thead-sm text-uppercase fs-xxs">
+                <tr>
+                  {headers.map((col, idx) => (
+                    <th key={idx}>{col}</th>
+                  ))}
+                  <th>Actions</th>
+                </tr>
+              </thead>
+            </DataTable>
+
+            <TablePagination
+              totalItems={total}
+              start={currentPage + 1}
+              end={Math.min((currentPage + 1) * pageSize, total)}
+              itemsName="vendors"
+              showInfo={true}
+              previousPage={() => handlePageChange(Math.max(0, currentPage - 1))}
+              canPreviousPage={currentPage > 0}
+              pageCount={totalPages}
+              pageIndex={currentPage}
+              setPageIndex={handlePageChange}
+              nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+              canNextPage={currentPage < totalPages - 1}
+            />
+          </>
         )}
       </ComponentCard>
       <AddRemark

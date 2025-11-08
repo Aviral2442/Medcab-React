@@ -28,10 +28,11 @@ import pdfmake from "pdfmake";
 import { consumerColumns } from "@/views/tables/data-tables/consumer-data/consumer/consumer.ts";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AddRemark from "@/components/AddRemark";
 import { DateRangePicker, InputPicker } from "rsuite";
 import "rsuite/dist/rsuite.min.css";
+import TablePagination from "@/components/table/TablePagination";
 
 // Register DataTable plugins
 DataTable.use(DT);
@@ -68,9 +69,35 @@ const ExportDataWithButtons = ({
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(
     null
   );
-  const [dateFilter, setDateFilter] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState<[Date, Date] | null>(null);
+  
+  // URL search params
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize filters from URL
+  const [dateFilter, setDateFilter] = useState<string | null>(() => 
+    searchParams.get('date') || null
+  );
+  const [statusFilter, setStatusFilter] = useState<string | null>(() => 
+    searchParams.get('status') || null
+  );
+  const [dateRange, setDateRange] = useState<[Date, Date] | null>(() => {
+    const fromDate = searchParams.get('fromDate');
+    const toDate = searchParams.get('toDate');
+    if (fromDate && toDate) {
+      return [new Date(fromDate), new Date(toDate)];
+    }
+    return null;
+  });
+  
+  // Pagination states - initialize from URL
+  const [currentPage, setCurrentPage] = useState(() => {
+    const page = searchParams.get('page');
+    return page ? parseInt(page) - 1 : 0; // Convert to 0-based index
+  });
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   
   const navigate = useNavigate();
@@ -84,7 +111,7 @@ const ExportDataWithButtons = ({
     "thisMonth",
     "custom",
   ].map((item) => ({
-    label: item,
+    label: item.charAt(0).toUpperCase() + item.slice(1).replace(/([A-Z])/g, " $1"),
     value: item,
   }));
 
@@ -94,14 +121,117 @@ const ExportDataWithButtons = ({
     { label: "Inactive", value: "inactive" },
   ];
 
+  // Update URL with all current filter and pagination values
+  const updateURL = (updates: {
+    page?: number;
+    date?: string | null;
+    status?: string | null;
+    fromDate?: string | null;
+    toDate?: string | null;
+  }) => {
+    const newParams = new URLSearchParams();
+    
+    // Add page (1-based for URL)
+    const pageValue = updates.page !== undefined ? updates.page : currentPage;
+    if (pageValue > 0) {
+      newParams.set('page', (pageValue + 1).toString());
+    }
+    
+    // Add date filter
+    const dateValue = updates.date !== undefined ? updates.date : dateFilter;
+    if (dateValue) {
+      newParams.set('date', dateValue);
+    }
+    
+    // Add status filter
+    const statusValue = updates.status !== undefined ? updates.status : statusFilter;
+    if (statusValue) {
+      newParams.set('status', statusValue);
+    }
+    
+    // Add date range
+    const fromDateValue = updates.fromDate !== undefined ? updates.fromDate : 
+      (dateRange ? dateRange[0].toISOString().split('T')[0] : null);
+    const toDateValue = updates.toDate !== undefined ? updates.toDate : 
+      (dateRange ? dateRange[1].toISOString().split('T')[0] : null);
+    
+    if (fromDateValue && toDateValue) {
+      newParams.set('fromDate', fromDateValue);
+      newParams.set('toDate', toDateValue);
+    }
+    
+    setSearchParams(newParams);
+  };
+
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    updateURL({ page: newPage });
+  };
+
+  // Handle date filter change
+  const handleDateFilterChange = (value: string | null) => {
+    setDateFilter(value);
+    setCurrentPage(0);
+    
+    // Clear date range if not custom
+    if (value !== 'custom') {
+      setDateRange(null);
+      updateURL({ page: 0, date: value, fromDate: null, toDate: null });
+    } else {
+      updateURL({ page: 0, date: value });
+    }
+  };
+
+  // Handle status filter change
+  const handleStatusFilterChange = (value: string | null) => {
+    setStatusFilter(value);
+    setCurrentPage(0);
+    updateURL({ page: 0, status: value });
+  };
+
+  // Handle date range change
+  const handleDateRangeChange = (value: [Date, Date] | null) => {
+    setDateRange(value);
+    setCurrentPage(0);
+    
+    if (value) {
+      const fromDate = value[0].toISOString().split('T')[0];
+      const toDate = value[1].toISOString().split('T')[0];
+      updateURL({ 
+        page: 0, 
+        date: 'custom', 
+        fromDate, 
+        toDate 
+      });
+    } else {
+      updateURL({ page: 0, fromDate: null, toDate: null });
+    }
+  };
+
   const getFilterParams = () => {
-    const params: any = { ...filterParams };
-    if (dateFilter) params.date = dateFilter;
-    if (statusFilter) params.status = statusFilter;
+    const params: any = {
+      ...filterParams,
+      page: currentPage + 1, // API expects 1-based page
+      limit: pageSize,
+    };
+    
+    // Add date filter (only if not custom)
+    if (dateFilter && dateFilter !== 'custom') {
+      params.date = dateFilter;
+    }
+    
+    // Add status filter
+    if (statusFilter) {
+      params.status = statusFilter;
+    }
+    
+    // Add date range
     if (dateRange) {
       params.fromDate = dateRange[0].toISOString().split("T")[0];
       params.toDate = dateRange[1].toISOString().split("T")[0];
     }
+    
     return params;
   };
 
@@ -110,12 +240,24 @@ const ExportDataWithButtons = ({
     try {
       const res = await axios.get(`${baseURL}${endpoint}`, { params: getFilterParams() });
       console.log("API Response:", res.data);
+      
       const consumer = res.data.data || [];
-      console.log("Fetched consumer data:", consumer);
       setData(consumer);
+      
+      // Get pagination info from response
+      if (res.data.pagination) {
+        setTotal(res.data.pagination.total);
+        setTotalPages(res.data.pagination.totalPages);
+      } else {
+        // Fallback if pagination object not present
+        setTotal(res.data?.total || consumer.length);
+        setTotalPages(res.data?.totalPages || Math.ceil(consumer.length / pageSize));
+      }
     } catch (error) {
       console.error("Error fetching consumer data:", error);
       setData([]);
+      setTotal(0);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
@@ -123,7 +265,7 @@ const ExportDataWithButtons = ({
 
   const handleRemark = (rowData: any) => {
     const id = rowData?.consumer_id ?? rowData?.id;
-    console.log("Selected Booking ID for Remark:", id);
+    console.log("Selected Consumer ID for Remark:", id);
     setSelectedBookingId(id);
     setIsRemarkOpen(true);
   };
@@ -144,15 +286,16 @@ const ExportDataWithButtons = ({
 
   useEffect(() => {
     fetchData();
-  }, [tabKey, refreshFlag, dateFilter, statusFilter, dateRange, JSON.stringify(filterParams)]);
+  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange]);
 
   const columnsWithActions = [
-        {
+    {
       title: "S.No.",
       data: null,
       orderable: false,
+      searchable: false,
       render: (_data: any, _type: any, _row: any, meta: any) => {
-        return meta.row + 1;
+        return currentPage * pageSize + meta.row + 1;
       },
     },
     ...columns,
@@ -160,7 +303,9 @@ const ExportDataWithButtons = ({
       title: "Actions",
       data: null,
       orderable: false,
-      createdCell: (td: HTMLElement, rowData: any) => {
+      searchable: false,
+      render: () => "",
+      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
@@ -195,7 +340,7 @@ const ExportDataWithButtons = ({
         format="MM/dd/yyyy"
         style={{ width: 220 }}
         value={dateRange}
-        onChange={setDateRange}
+        onChange={handleDateRangeChange}
         placeholder="Select date range"
         cleanable
         size="sm"
@@ -203,7 +348,7 @@ const ExportDataWithButtons = ({
       <InputPicker
         data={DateFilterOptions}
         value={dateFilter}
-        onChange={setDateFilter}
+        onChange={handleDateFilterChange}
         placeholder="Date filter"
         style={{ width: 150 }}
         cleanable
@@ -212,7 +357,7 @@ const ExportDataWithButtons = ({
       <InputPicker
         data={StatusFilterOption}
         value={statusFilter}
-        onChange={setStatusFilter}
+        onChange={handleStatusFilterChange}
         placeholder="Status"
         style={{ width: 150 }}
         cleanable
@@ -231,67 +376,70 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
-          <DataTable
-            key={`consumer-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}`}
-            data={data}
-            columns={columnsWithActions}
-            options={{
-              responsive: true,
-              destroy: true,
-              layout: { 
-                topStart: "buttons",
-                topEnd: "search"
-              },
-              buttons: [
-                {
-                  extend: "copyHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "Copy",
+          <>
+            <DataTable
+              key={`consumer-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
+              data={data}
+              columns={columnsWithActions}
+              options={{
+                responsive: true,
+                destroy: true,
+                paging: false,
+                searching: false,
+                info: false,
+                layout: { 
+                  topStart: "buttons",
                 },
-                {
-                  extend: "excelHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "Excel",
-                },
-                {
-                  extend: "csvHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "CSV",
-                },
-                {
-                  extend: "pdfHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "PDF",
-                },
-              ],
-              language: {
-                paginate: {
-                  first: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronsLeft className="fs-lg" />
-                  ),
-                  previous: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronLeft className="fs-lg" />
-                  ),
-                  next: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronRight className="fs-lg" />
-                  ),
-                  last: ReactDOMServer.renderToStaticMarkup(
-                    <TbChevronsRight className="fs-lg" />
-                  ),
-                },
-              },
-            }}
-            className="table table-striped dt-responsive align-middle mb-0"
-          >
-            <thead className="thead-sm text-uppercase fs-xxs">
-              <tr>
-                {headers.map((col, idx) => (
-                  <th key={idx}>{col}</th>
-                ))}
-                <th>Actions</th>
-              </tr>
-            </thead>
-          </DataTable>
+                buttons: [
+                  {
+                    extend: "copyHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "Copy",
+                  },
+                  {
+                    extend: "excelHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "Excel",
+                  },
+                  {
+                    extend: "csvHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "CSV",
+                  },
+                  {
+                    extend: "pdfHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "PDF",
+                  },
+                ],
+              }}
+              className="table table-striped dt-responsive align-middle mb-0"
+            >
+              <thead className="thead-sm text-uppercase fs-xxs">
+                <tr>
+                  {headers.map((col, idx) => (
+                    <th key={idx}>{col}</th>
+                  ))}
+                  <th>Actions</th>
+                </tr>
+              </thead>
+            </DataTable>
+
+            <TablePagination
+              totalItems={total}
+              start={currentPage * pageSize + 1}
+              end={Math.min((currentPage + 1) * pageSize, total)}
+              itemsName="consumers"
+              showInfo={true}
+              previousPage={() => handlePageChange(Math.max(0, currentPage - 1))}
+              canPreviousPage={currentPage > 0}
+              pageCount={totalPages}
+              pageIndex={currentPage}
+              setPageIndex={handlePageChange}
+              nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+              canNextPage={currentPage < totalPages - 1}
+            />
+          </>
         )}
       </ComponentCard>
       <AddRemark
