@@ -3,6 +3,7 @@ import { ApiError } from "../utils/api-error";
 import path from "path";
 import fs from "fs";
 import { RowDataPacket, FieldPacket } from "mysql2";
+import { buildFilters } from "../utils/filters";
 
 // Get All Categories
 export const getCategoriesService = async () => {
@@ -802,16 +803,79 @@ export const addFaqService = async (
   }
 };
 
-// ✅ Get all FAQs
-export const getAllFaqsService = async () => {
+export const getAllFaqsService = async (filters?: {
+  date?: string;
+  fromDate?: string;
+  toDate?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}) => {
   try {
-    const [rows]: any = await db.query(
-      `SELECT manpower_faq_id, manpower_faq_header, manpower_faq_description, manpower_faq_status, manpower_faq_createdAt 
-       FROM manpower_faq 
-       ORDER BY manpower_faq_id DESC`
+    // ✅ Pagination defaults
+    const page = filters?.page && filters.page > 0 ? filters.page : 1;
+    const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+    const offset = (page - 1) * limit;
+
+    // ✅ Generate WHERE clause from filters util
+    const { whereSQL, params } = buildFilters({
+      ...filters,
+      dateColumn: "manpower_faq_createdAt",
+    });
+
+    // ✅ Status filter (0=new, 1=active, 2=inactive)
+    let finalWhereSQL = whereSQL;
+    if (filters?.status) {
+      const statusConditionMap: Record<string, string> = {
+        "0": "manpower_faq_status = '0'",
+        "1": "manpower_faq_status = '1'",
+        "2": "manpower_faq_status = '2'",
+      };
+      const condition = statusConditionMap[filters.status];
+      if (condition) {
+        finalWhereSQL += finalWhereSQL ? ` AND ${condition}` : `WHERE ${condition}`;
+      }
+    }
+
+    // ✅ Main query
+    const query = `
+      SELECT 
+        manpower_faq_id,
+        manpower_faq_header,
+        manpower_faq_description,
+        manpower_faq_status,
+        manpower_faq_createdAt
+      FROM manpower_faq
+      ${finalWhereSQL}
+      ORDER BY manpower_faq_createdAt DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    const queryParams = [...params, limit, offset];
+    const [rows]: any = await db.query(query, queryParams);
+
+    // ✅ Count query
+    const [countRows]: any = await db.query(
+      `SELECT COUNT(*) AS total FROM manpower_faq ${finalWhereSQL}`,
+      params
     );
-    return rows;
+
+    const total = countRows[0]?.total || 0;
+
+    // ✅ Return structured response
+    return {
+      status: 200,
+      message: "FAQs fetched successfully",
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+      faqs: rows || [],
+    };
   } catch (error) {
+    console.error("❌ Error fetching FAQs:", error);
     throw new ApiError(500, "Failed to fetch FAQs");
   }
 };

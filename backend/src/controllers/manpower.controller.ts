@@ -97,8 +97,8 @@ export const deleteCategory = async (req: Request, res: Response, next: NextFunc
     if (!id) {
       return res.status(400).json({ message: "Category ID is required" });
     }
-    console.log("ID",id);
-    console.log("NumberID",Number(id));
+    console.log("ID", id);
+    console.log("NumberID", Number(id));
     const deletedCategory = await deleteCategoryService(Number(id));
 
     res.status(200).json({
@@ -381,7 +381,7 @@ export const getPriceMapper = async (req: Request, res: Response, next: NextFunc
 export const editPriceMapper = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const mppm_id = req.params.id;
-    const { 
+    const {
       mppm_sub_cat_id,
       mppm_visit_rate,
       mppm_days_rate,
@@ -477,8 +477,27 @@ export const addFaq = async (req: Request, res: Response, next: NextFunction) =>
 // ✅ Get all FAQs
 export const getAllFaqs = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const faqs = await getAllFaqsService();
-    res.status(200).json({ total: faqs.length, faqs });
+    const { date, fromDate, toDate, status, page, limit } = req.query;
+
+    const filters = {
+      date: date as string,
+      fromDate: fromDate as string,
+      toDate: toDate as string,
+      status: status as string,
+      page: page ? parseInt(page as string, 10) : 1,
+      limit: limit ? parseInt(limit as string, 10) : 10,
+    };
+
+    const result = await getAllFaqsService(filters);
+
+    res.status(200).json({
+      status: 200,
+      message: "FAQs fetched successfully",
+      pagination: result.pagination,
+      jsonData: {
+        faqs: result.faqs,
+      },
+    });
   } catch (error) {
     next(error);
   }
