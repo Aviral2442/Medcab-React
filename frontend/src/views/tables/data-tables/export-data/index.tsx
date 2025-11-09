@@ -33,6 +33,12 @@ import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import TablePagination from "@/components/table/TablePagination";
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+
+
+
+
 
 const tableConfig: Record<number, {
   endpoint: string;
@@ -139,7 +145,7 @@ const ExportDataWithButtons = ({
           // console.log("SubCategories data:", dataArray); // Debug log to see actual field names
           break;
         case 3:
-          dataArray = res.data?.jsonData?.faqs || [];
+          dataArray = res.data?.jsonData || [];
           console.log("FAQs data:", dataArray); // Debug log to see actual field names
           break;
         case 4:
