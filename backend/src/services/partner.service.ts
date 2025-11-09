@@ -2,6 +2,7 @@ import { db } from '../config/db';
 import { ApiError } from '../utils/api-error';
 import { buildFilters } from '../utils/filters';
 
+// Get Partners List
 export const getPartnerServices = async (filters?: {
     date?: string;
     status?: string;
@@ -94,6 +95,7 @@ export const getPartnerServices = async (filters?: {
 
 };
 
+// Get Manpower Partners List
 export const getManpowerPartnerServices = async (filters?: {
     date?: string;
     status?: string;
@@ -184,6 +186,89 @@ export const getManpowerPartnerServices = async (filters?: {
     } catch (error) {
         console.error(error);
         throw new ApiError(500, 'Failed to retrieve partner services');
+    }
+
+};
+
+// Get Partner Transactions List
+export const getPartnerTransactionServices = async (filters?: {
+    date?: string;
+    // status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+
+    try {
+
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'partner_transection.created_at' });
+
+        let finalWhereSQL = whereSQL;
+
+        // if (filters?.status) {
+        //     const statusConsitionMap: Record<string, string> = {
+        //         new: "partner_man_power_status = 0",
+        //         active: "partner_man_power_status = 1",
+        //         inActive: "partner_man_power_status = 2",
+        //     };
+
+        //     const condition = statusConsitionMap[filters.status];
+
+        //     if (condition) {
+        //         if (/where\s+/i.test(finalWhereSQL)) {
+        //             finalWhereSQL += ` AND ${condition}`;
+        //         } else {
+        //             finalWhereSQL = `WHERE ${condition}`;
+        //         }
+        //     }
+        // }
+
+        const query = `
+
+            SELECT *, partner.partner_f_name , partner.partner_mobile , partner.partner_id 
+            FROM partner_transection
+            LEFT JOIN partner ON partner_transection.partner_transection_by = partner.partner_id
+            ${finalWhereSQL}
+            ORDER BY partner_transection_id DESC
+            LIMIT ? OFFSET ?;
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `
+            SELECT COUNT(*) as total
+            FROM partner_transection
+            ${finalWhereSQL}
+            `, params
+        );
+
+        const totalData = countRows[0]?.total || 0;
+        const totalPages = Math.ceil(totalData / limit);
+
+        return {
+            status: 200,
+            message: 'Partner Transaction List Fetch Successful',
+            paginations: {
+                page,
+                limit,
+                total: totalData,
+                totalPages
+            },
+            jsonData: {
+                partnerTransactions: rows
+            }
+        };
+
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'Failed to retrieve partner transaction services');
     }
 
 };
