@@ -8,6 +8,9 @@ import bookingRoutes from "./routes/booking.routes";
 import transactionRoutes from "./routes/transaction.routes";
 import vendor from "./routes/vendor.routes";
 import consumer from "./routes/consumer.routes";
+import partnerRoutes from "./routes/partner.routes";
+import vehicleRoutes from "./routes/vehicle.routes";
+import driverRoutes from "./routes/driver.routes";
 import { errorMiddleware } from "./middleware/error.middleware";
 
 const app = express();
@@ -35,6 +38,9 @@ app.use("/api/transaction", transactionRoutes);
 app.use("/api/vendor", vendor);
 app.use("/api/dashboard", dashboard);
 app.use("/api/consumer", consumer);
+app.use("/api/partner", partnerRoutes);
+app.use("/api/vehicle", vehicleRoutes);
+app.use("/api/driver", driverRoutes);
 app.use(errorMiddleware);
 
 export default app;
