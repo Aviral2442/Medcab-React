@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { getPartnerServices, getManpowerPartnerServices, getPartnerTransactionServices } from '..//services/partner.service';
+import { getPartnerServices, getManpowerPartnerServices, getPartnerTransactionServices, getPartnerDetailServices } from '..//services/partner.service';
 
 // Get Partners List
 export const getPartnersController = async (req: Request, res: Response, next: NextFunction) => {
@@ -56,6 +56,17 @@ export const getPartnerTransactionsController = async (req: Request, res: Respon
         }
 
         const result = await getPartnerTransactionServices(filters);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Get Partner Details
+export const getPartnerDetailsController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const partnerId = parseInt(req.params.partnerId);
+        const result = await getPartnerDetailServices(partnerId);
         res.status(200).json(result);
     } catch (error) {
         next(error);

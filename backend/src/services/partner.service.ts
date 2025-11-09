@@ -272,3 +272,31 @@ export const getPartnerTransactionServices = async (filters?: {
     }
 
 };
+
+// Get Partner Detail Services
+export const getPartnerDetailServices = async (partnerId: number) => {
+
+    try {
+
+        const partnerBasicDetail = `SELECT * FROM partner WHERE partner_id = ?`;
+
+        const partnerAccountDetail = `SELECT * FROM partner_acc_dtl WHERE partner_acc_dtl_p_id = ?`;
+
+        const [basicData]: any = await db.query(partnerBasicDetail, [partnerId]);
+        const [accountData]: any = await db.query(partnerAccountDetail, [partnerId]);
+
+        return {
+            status: 200,
+            message: 'Partner Details Fetch Successful',
+            jsonData: {
+                partnerBasicDetail: basicData,
+                partnerAccountDetail: accountData
+            }
+        };
+
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'Failed to retrieve partner detail services');
+    }
+
+};
