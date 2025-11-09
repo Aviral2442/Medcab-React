@@ -22,7 +22,7 @@ const ResponseAccuracy = () => {
       const res = await axios.get(
         `${baseURL}/dashboard/get_total_cancel_ongoing_booking_counts`
       );
-      console.log(`dekho: ${baseURL}`)
+      // console.log(`dekho: ${baseURL}`)
       if (res.status !== 200) {
         throw new Error("Failed to fetch data");
       }
@@ -52,6 +52,7 @@ const ResponseAccuracy = () => {
       bookingData.total_bookings - 
       bookingData.cancelled_bookings - 
       bookingData.ongoing_bookings;
+      console.log("Completed Bookings:", completedBookings);
 
     return {
       data: {
@@ -69,7 +70,7 @@ const ResponseAccuracy = () => {
               getColor('chart-dark'),
             ],
             borderColor: '#ffffff',
-            borderWidth: 2,
+            borderWidth: 0,
           },
         ],
       },
@@ -78,7 +79,7 @@ const ResponseAccuracy = () => {
         maintainAspectRatio: false,
         plugins: {
           legend: { 
-            display: false, // Changed from true to false
+            display: false,
           },
           tooltip: {
             enabled: true,
@@ -91,6 +92,14 @@ const ResponseAccuracy = () => {
                 return `${label}: ${value} (${percentage}%)`;
               },
             },
+          },
+        },
+        scales: {
+          x: {
+            display: false,
+          },
+          y: {
+            display: false,
           },
         },
       },

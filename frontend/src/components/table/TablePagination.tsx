@@ -35,7 +35,7 @@ const TablePagination = ({
                             // console.log("pageCount:", pageCount);
                             // console.log("currentPageIndex:", pageIndex);
 
-    if (pageCount === 0) {
+    if (pageCount === 0 || isNaN(pageCount)) {
         return null
     }
     return (
