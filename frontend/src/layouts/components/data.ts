@@ -90,6 +90,8 @@ export const menuItems: MenuItemType[] = [
       { key: 'booking-list', label: 'Booking', url: '/booking-list' },
       { key: 'vendor-list', label: 'Vendor', url: '/vendor-list' },
       { key: 'consumer-list', label: 'Consumer', url: '/consumer-list' },
+      { key: 'driver-list', label: 'Driver', url: '/driver-list' },
+      { key: 'partner-list', label: 'Partner', url: '/Partner-list' },
       // { key: 'pricing', label: 'Pricing', url: '/pages/pricing' },
       // { key: 'empty-page', label: 'Empty Page', url: '/pages/empty' },
       // { key: 'timeline', label: 'Timeline', url: '/pages/timeline' },

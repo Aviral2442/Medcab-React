@@ -11,41 +11,45 @@ import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-import AddRemark from "@/components/AddRemark";
 
 import { TbDotsVertical, TbEye, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
-import { bookingColumns } from "@/views/tables/data-tables/booking-data/booking/bookings.ts";
+import { driverColumns } from "@/views/tables/data-tables/driver-data/components/driver.ts";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import AddRemark from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
 
+// Register DataTable plugins
+DataTable.use(DT);
+DT.Buttons.jszip(jszip);
+DT.Buttons.pdfMake(pdfmake);
+
 const tableConfig: Record<
   number,
-  {
-    endpoint: string;
-    columns: any[];
-    headers: string[];
-  }
+  { endpoint: string; columns: any[]; headers: string[] }
 > = {
   1: {
-    endpoint: "/booking/get_bookings",
-    columns: bookingColumns,
+    endpoint: "/driver/get_drivers",
+    columns: driverColumns,
     headers: [
       "S.No.",
-      "order id",
-      "name",
-      "mobile_no",
-      "address",
-      "Price",
-      "payment_mode",
-      "order_date",
-      "status",
+      "ID",
+      "Name",
+      "Last Name",
+      "Mobile",
+      "Wallet",
+      "City ID",
+      "Created By",
+      "Profile",
+      "Duty Status",
+      "Status",
+      "Created At",
     ],
   },
 };
@@ -54,12 +58,8 @@ type ExportDataWithButtonsProps = {
   tabKey: number;
   refreshFlag: number;
   filterParams?: Record<string, any>;
-  onDataChanged: () => void;
+  onDataChanged?: () => void;
 };
-
-DataTable.use(DT);
-DT.Buttons.jszip(jszip);
-DT.Buttons.pdfMake(pdfmake);
 
 const ExportDataWithButtons = ({
   tabKey,
@@ -67,10 +67,10 @@ const ExportDataWithButtons = ({
   filterParams = {},
   onDataChanged,
 }: ExportDataWithButtonsProps) => {
-  const [rows, setRows] = useState<any[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isRemarkOpen, setIsRemarkOpen] = useState(false);
-  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
+  const [selectedDriverId, setSelectedDriverId] = useState<number | null>(null);
 
   const [pageSize] = useState(10);
   const [_total, setTotal] = useState(0);
@@ -97,10 +97,11 @@ const ExportDataWithButtons = ({
   const { endpoint, columns, headers } = tableConfig[tabKey];
 
   const StatusFilterOptions = [
-    { label: "New", value: "1" },
-    { label: "Ongoing", value: "2" },
-    { label: "Canceled", value: "3" },
-    { label: "Completed", value: "4" },
+    { label: "New", value: "new" },
+    { label: "Active", value: "active" },
+    { label: "Inactive", value: "inActive" },
+    { label: "Delete", value: "delete" },
+    { label: "Verification", value: "verification" },
   ];
 
   const fetchData = async () => {
@@ -108,22 +109,23 @@ const ExportDataWithButtons = ({
     try {
       const params = getFilterParams(pageSize, filterParams);
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
-      console.log("Fetched data:", res.data);
-      
-      switch (tabKey) {
-        case 1:
-          setRows(res.data?.jsonData?.bookingsLists || []);
-          setTotal(res.data?.pagination?.total || 0);
-          setTotalPages(res.data?.pagination?.totalPages || 0);
-          break;
-        default:
-          setRows(res.data.remark || []);
-          setTotal(res.data?.total || 0);
-          setTotalPages(res.data?.totalPages || 0);
+      console.log("API Response:", res.data);
+
+      const drivers = res.data?.jsonData?.drivers || [];
+      setData(drivers);
+
+      if (res.data.paginations) {
+        setTotal(res.data.paginations.total);
+        setTotalPages(res.data.paginations.totalPages);
+      } else {
+        setTotal(res.data?.total || drivers.length);
+        setTotalPages(
+          res.data?.totalPages || Math.ceil(drivers.length / pageSize)
+        );
       }
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setRows([]);
+    } catch (error) {
+      console.error("Error fetching driver data:", error);
+      setData([]);
       setTotal(0);
       setTotalPages(0);
     } finally {
@@ -131,33 +133,22 @@ const ExportDataWithButtons = ({
     }
   };
 
-  const handleView = (rowData: any) => {
-    const id =
-      rowData?.manpower_order_id ?? rowData?.mpo_order_id ?? rowData?.id;
-    if (id !== undefined && id !== null) {
-      navigate(`/booking-details/${id}`);
-    } else {
-      console.warn("No id found for row", rowData);
-    }
-  };
-
   const handleRemark = (rowData: any) => {
-    const id =
-      rowData?.manpower_order_id ?? rowData?.mpo_order_id ?? rowData?.id;
-    console.log("Selected Booking ID for Remark:", id);
-    setSelectedBookingId(id);
+    const id = rowData?.driver_id ?? rowData?.id;
+    console.log("Selected Driver ID for Remark:", id);
+    setSelectedDriverId(id);
     setIsRemarkOpen(true);
   };
 
   const handleSaveRemark = async (remark: string) => {
     try {
-      await axios.post(`${baseURL}/add_remarks/${selectedBookingId}`, {
-        remarkType: "BOOKING",
+      await axios.post(`${baseURL}/add_remarks/${selectedDriverId}`, {
+        remarkType: "DRIVER",
         remarks: remark,
       });
       console.log("Remark saved successfully");
       fetchData();
-      onDataChanged();
+      onDataChanged?.();
     } catch (error) {
       console.error("Error saving remark:", error);
     }
@@ -165,7 +156,15 @@ const ExportDataWithButtons = ({
 
   useEffect(() => {
     fetchData();
-  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange]);
+  }, [
+    tabKey,
+    refreshFlag,
+    currentPage,
+    pageSize,
+    dateFilter,
+    statusFilter,
+    dateRange,
+  ]);
 
   const columnsWithActions = [
     {
@@ -196,7 +195,11 @@ const ExportDataWithButtons = ({
               <TbDotsVertical />
             </DropdownToggle>
             <DropdownMenu>
-              <DropdownItem onClick={() => handleView(rowData)}>
+              <DropdownItem
+                onClick={() => {
+                  navigate(`/driver-details/${rowData.driver_id}`);
+                }}
+              >
                 <TbEye className="me-1" /> View
               </DropdownItem>
               <DropdownItem onClick={() => handleRemark(rowData)}>
@@ -212,8 +215,8 @@ const ExportDataWithButtons = ({
   return (
     <>
       <ComponentCard
-        title={tabKey === 1 ? "Manage Booking" : ""}
-        className="mb-4 overflow-x-auto"
+        title={tabKey === 1 ? "Manage Drivers" : ""}
+        className="mb-2 overflow-x-auto"
         headerActions={
           <TableFilters
             dateFilter={dateFilter}
@@ -223,16 +226,17 @@ const ExportDataWithButtons = ({
             onStatusFilterChange={handleStatusFilterChange}
             onDateRangeChange={handleDateRangeChange}
             statusOptions={StatusFilterOptions}
+            className="w-100"
           />
         }
       >
         {loading ? (
-          <div className="text-center p-4">Loading...</div>
+          <div className="text-center py-4">Loading...</div>
         ) : (
           <>
             <DataTable
-              key={`booking-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
-              data={rows}
+              key={`driver-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
+              data={data}
               columns={columnsWithActions}
               options={{
                 responsive: true,
@@ -244,36 +248,56 @@ const ExportDataWithButtons = ({
                   topStart: "buttons",
                 },
                 buttons: [
-                  { extend: "copy", className: "btn btn-sm btn-secondary" },
-                  { extend: "csv", className: "btn btn-sm btn-secondary active" },
-                  { extend: "excel", className: "btn btn-sm btn-secondary" },
-                  { extend: "pdf", className: "btn btn-sm btn-secondary active" },
+                  {
+                    extend: "copyHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "Copy",
+                  },
+                  {
+                    extend: "excelHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "Excel",
+                  },
+                  {
+                    extend: "csvHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "CSV",
+                  },
+                  {
+                    extend: "pdfHtml5",
+                    className: "btn btn-sm btn-primary",
+                    text: "PDF",
+                  },
                 ],
               }}
               className="table table-striped dt-responsive align-middle mb-0"
             >
               <thead className="thead-sm text-uppercase fs-xxs">
                 <tr>
-                  {headers.map((col, idx) => (
-                    <th key={idx}>{col}</th>
+                  {headers.map((header, idx) => (
+                    <th key={idx}>{header}</th>
                   ))}
                   <th>Actions</th>
                 </tr>
               </thead>
             </DataTable>
 
-                        <TablePagination
+            <TablePagination
               // totalItems={total}
               start={currentPage + 1}
               // end={totalPages}
               // itemsName="items"
               showInfo={true}
-              previousPage={() => handlePageChange(Math.max(0, currentPage - 1))}
+              previousPage={() =>
+                handlePageChange(Math.max(0, currentPage - 1))
+              }
               canPreviousPage={currentPage > 0}
               pageCount={totalPages}
               pageIndex={currentPage}
               setPageIndex={handlePageChange}
-              nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+              nextPage={() =>
+                handlePageChange(Math.min(totalPages - 1, currentPage + 1))
+              }
               canNextPage={currentPage < totalPages - 1}
             />
           </>
@@ -289,4 +313,5 @@ const ExportDataWithButtons = ({
   );
 };
 
+// Export the component directly, not wrapped in another component
 export default ExportDataWithButtons;

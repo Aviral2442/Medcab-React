@@ -1,0 +1,85 @@
+import axios from "axios";
+const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
+type PartnerInfoType = {
+    partner_id: number;
+    partner_f_name: string;
+    partner_l_name: string;
+    partner_mobile: string;
+    partner_wallet: Number;
+    partner_profile_img: string;
+    partner_registration_step: string;
+    partner_city_id: number;
+    partner_created_by: string;
+    partner_status: number;
+}
+
+type TableType<T> = {
+    header: string[];
+    body: T[];
+}
+
+let partnerRows: PartnerInfoType[] = [];
+
+export const getPartnerList = async () => {
+    try {
+        const response = await axios.get(`${baseURL}/partner/get_partners_list`);
+        partnerRows = response.data.jsonData?.partners || [];
+        return partnerRows;
+    } catch (error) {
+        console.error("Error fetching partners:", error);
+        throw error;
+    }
+}
+
+export const partnerColumns = [
+    { data: 'partner_id' },
+    { data: 'partner_f_name' },
+    { data: 'partner_l_name' },
+    { data: 'partner_mobile' },
+    { data: 'partner_profile_img' },
+    { 
+        data: 'partner_wallet_amount',
+        render: (data: number) => {
+            return `₹${data || 0}`;
+        }
+    },
+    { data: 'partner_city_id' },
+    { data: 'partner_registration_step' },
+    {
+        data: 'created_at',
+        render: (data: string) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+        }
+    },
+    {
+        data: 'partner_status',
+        render: (data: number) => {
+            const statusMap: Record<number, { label: string; class: string }> = {
+                0: { label: 'New', class: 'info' },
+                1: { label: 'Active', class: 'success' },
+                2: { label: 'Inactive', class: 'warning' },
+            };
+
+            const status = statusMap[data] || { label: 'Unknown', class: 'secondary' };
+            return `<span class="badge badge-label badge-soft-${status.class}">${status.label}</span>`;
+        }
+    },
+];
+
+// Export table data structure
+export const partnerTableData: TableType<PartnerInfoType> = {
+    header: [
+        "S.No.",
+        "ID",
+        "Name",
+        "Mobile",
+        "Email",
+        "Wallet",
+        "City",
+        "Created At",
+        "Status"
+    ],
+    body: partnerRows,
+};

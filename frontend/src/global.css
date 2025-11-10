@@ -1,0 +1,20 @@
+.react-datepicker-wrapper {
+  width: 100%;
+  min-width: 220px;
+  max-width: 280px;
+}
+
+@media (max-width: 576px) {
+  .react-datepicker-wrapper {
+    max-width: 100%;
+    min-width: 100%;
+  }
+  
+  .react-datepicker-popper {
+    width: calc(100vw - 32px) !important;
+  }
+  
+  .react-datepicker {
+    width: 100%;
+  }
+}

@@ -33,12 +33,8 @@ import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import TablePagination from "@/components/table/TablePagination";
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-
-
-
-
+import _pdfMake from "pdfmake/build/pdfmake";
+import _pdfFonts from "pdfmake/build/vfs_fonts";
 
 const tableConfig: Record<number, {
   endpoint: string;
