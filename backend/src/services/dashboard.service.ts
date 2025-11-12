@@ -213,3 +213,58 @@ export const getNewAndOngoingBookingList = async () => {
         throw new ApiError(500, "Failed To Load New and Ongoing Bookings");
     }
 };
+
+export const getConsumerTodayYesterdayCountService = async () => {
+    try {
+        const query = `
+      SELECT 
+        FLOOR(HOUR(FROM_UNIXTIME(consumer_registred_date)) / 3) * 3 AS hour_group,
+        COUNT(*) AS count,
+        CASE 
+          WHEN DATE(FROM_UNIXTIME(consumer_registred_date)) = CURDATE() THEN 'today'
+          WHEN DATE(FROM_UNIXTIME(consumer_registred_date)) = CURDATE() - INTERVAL 1 DAY THEN 'yesterday'
+        END AS day_type
+      FROM consumer
+      WHERE DATE(FROM_UNIXTIME(consumer_registred_date)) IN (CURDATE(), CURDATE() - INTERVAL 1 DAY)
+      GROUP BY day_type, hour_group
+      ORDER BY hour_group;
+    `;
+
+        const [rows]: any = await db.query(query);
+
+        // 8 groups (0–3h, 3–6h, 6–9h, 9–12h, 12–15h, 15–18h, 18–21h, 21–24h)
+        const todayData = Array(8).fill(0);
+        const yesterdayData = Array(8).fill(0);
+
+        rows.forEach((row: any) => {
+            const index = row.hour_group / 3; // convert group to array index
+            if (row.day_type === "today") {
+                todayData[index] = row.count;
+            } else if (row.day_type === "yesterday") {
+                yesterdayData[index] = row.count;
+            }
+        });
+
+        return {
+            status: 200,
+            message: "Consumer Today and Yesterday Counts Fetch Successful",
+            jsonData: {
+                today: todayData,
+                yesterday: yesterdayData,
+                labels: [
+                    "0–3h",
+                    "3–6h",
+                    "6–9h",
+                    "9–12h",
+                    "12–15h",
+                    "15–18h",
+                    "18–21h",
+                    "21–24h"
+                ]
+            }
+        };
+    } catch (error) {
+        console.error("Error fetching consumer graph data:", error);
+        throw new ApiError(500, "Failed To Load Consumer Today and Yesterday Counts");
+    }
+};
