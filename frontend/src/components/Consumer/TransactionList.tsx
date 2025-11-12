@@ -78,17 +78,17 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
       render: (data: any) => data || "N/A"
     },
     { 
-      title: "Mobile No", 
+      title: "Mobile", 
       data: "consumer_mobile_no",
       render: (data: any) => data || "N/A"
     },
     { 
-      title: "Order_ID", 
+      title: "Order ID", 
       data: "consumer_transection_order_id",
       render: (data: any) => data || "N/A"
     },
     { 
-      title: "Pay_ID", 
+      title: "Pay ID", 
       data: "consumer_transection_payment_id",
       render: (data: any) => data || "N/A"
     },
@@ -108,19 +108,14 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
       render: (data: any) => `₹${data || 0}`,
     },
     { 
-      title: "Pre_Amt", 
+      title: "Pre Amt", 
       data: "consumer_transection_previous_amount",
       render: (data: any) => `₹${data || 0}`,
     },
     { 
-      title: "New_Amt", 
+      title: "New Amt", 
       data: "consumer_transection_new_amount",
       render: (data: any) => `₹${data || 0}`,
-    },
-    { 
-      title: "Status", 
-      data: "consumer_transection_status",
-      render: (data: any) => getStatusBadge(data)
     },
     { 
       title: "Note", 
@@ -128,9 +123,14 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
       render: (data: any) => data || "N/A"
     },
     { 
-      title: "Trans_On", 
+      title: "Trans", 
       data: "consumer_transection_time",
       render: (data: any) => formatValue(data, "datetime-local")
+    },
+    { 
+      title: "Status", 
+      data: "consumer_transection_status",
+      render: (data: any) => getStatusBadge(data)
     },
   ];
 
@@ -139,17 +139,27 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
   return (
     <ComponentCard title="Transaction List" className="mb-4">
       <div className="table-responsive">
-        <DataTable
-          ref={tableRef}
-          data={tableData}
+               <DataTable
+          data={tableData || tableData[0]}
           columns={columns}
           options={{
-            responsive: true,
-            destroy: true, // Allow reinitialization
-            pageLength: 10,
-            lengthMenu: [10, 25, 50, 100],
+            responsive: false,
+            paging: false,
+            searching: true,
+            ordering: true,
+            info: false,
+            layout: {
+              topStart: "buttons",
+            },
+            buttons: [
+              { extend: "copy", className: "btn btn-sm btn-secondary" },
+              { extend: "csv", className: "btn btn-sm btn-secondary" },
+              { extend: "excel", className: "btn btn-sm btn-secondary" },
+              { extend: "pdf", className: "btn btn-sm btn-secondary" },
+            ],
           }}
-          className="table table-striped dt-responsive align-middle mb-0"
+          className="table table-striped align-middle mb-0 nowrap w-100"
+          
         >
           <thead className="thead-sm text-uppercase fs-xxs">
             <tr>

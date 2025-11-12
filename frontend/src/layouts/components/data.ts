@@ -2,8 +2,19 @@ import { type MenuItemType } from '@/types/layout'
 import { type IconType } from 'react-icons'
 import { TbLogout2, TbUserCircle } from 'react-icons/tb'
 import {
+  LuAmbulance,
+  LuAmpersands,
+  LuAxis3D,
+  LuBed,
   LuCircleGauge,
+  LuClipboardType,
+  LuFileType,
+  LuMoonStar,
   LuNotebookText,
+  LuSettings,
+  LuSquareMenu,
+  LuTableOfContents,
+  LuVideo,
 } from 'react-icons/lu'
 
 type UserDropdownItemType = {
@@ -81,8 +92,8 @@ export const menuItems: MenuItemType[] = [
   // { key: 'custom-pages', label: 'Custom Pages', isTitle: true },
 
   {
-    key: 'pages',
-    label: 'Manage Manpower',
+    key: 'pages-manpower',
+    label: 'Manpower',
     icon: LuNotebookText,
     children: [
       { key: 'manpower', label: 'Manpower', url: '/manpower' },
@@ -97,6 +108,64 @@ export const menuItems: MenuItemType[] = [
       // { key: 'timeline', label: 'Timeline', url: '/pages/timeline' },
       // { key: 'terms-conditions', label: 'Terms & Conditions', url: '/pages/terms-conditions' },
       // { key: 'invoice', label: 'Invoice', url: '/pages/invoice' },
+    ],
+  },
+  {
+    key: 'pages-ambulance',
+    label: 'Ambulance',
+    icon: LuAmbulance,
+    children: [
+      // { key: 'manpower', label: 'Manpower', url: '/manpower' },
+    ],
+  },
+  {
+    key: 'pages-pathology',
+    label: 'Pathology',
+    icon: LuAxis3D,
+    children: [
+      // { key: 'manpower', label: 'Manpower', url: '/manpower' },
+    ],
+  },
+  {
+    key: 'pages-video-consultation',
+    label: 'Video Consultation',
+    icon: LuVideo,
+    children: [
+      // { key: 'manpower', label: 'Manpower', url: '/manpower' },
+    ],
+  },
+  {
+    key: 'pages-Bed-Availability',
+    label: 'Bed Availability',
+    icon: LuBed,
+    children: [
+      // { key: 'manpower', label: 'Manpower', url: '/manpower' },
+    ],
+  },
+  {
+    key: 'pages-Emergency',
+    label: 'Emergency',
+    icon: LuFileType,
+    children: [
+      // { key: 'manpower', label: 'Manpower', url: '/manpower' },
+    ],
+  },
+  {
+    key: 'pages-content-Writing',
+    label: 'Content Writing',
+    icon: LuTableOfContents,
+    children: [
+      { key: 'city', label: 'City', url: '/city', },
+      { key: 'blogs', label: 'Blogs', url: '/blogs' },
+    ],
+  },
+  {
+    key: 'page-admin-settings',
+    label: 'Admin Settings',
+    icon: LuSettings,
+    children: [
+      { key: 'admin', label: 'Admin', url: '/admin' },
+      { key: 'permission', label: 'Permission', url: '/permission' },
     ],
   },
   // {

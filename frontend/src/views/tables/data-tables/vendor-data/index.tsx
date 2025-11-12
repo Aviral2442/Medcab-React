@@ -221,7 +221,7 @@ const ExportDataWithButtons = ({
     <>
       <ComponentCard
         title={tabKey === 1 ? "Manage Vendor" : ""}
-        className="mb-2 overflow-x-auto"
+        className="mb-2"
         headerActions={
           <TableFilters
             dateFilter={dateFilter}
@@ -238,7 +238,7 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
-          <>
+          <div className="overflow-x-auto">
             <DataTable
               key={`vendor-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
               data={data}
@@ -247,7 +247,7 @@ const ExportDataWithButtons = ({
                 responsive: true,
                 destroy: true,
                 paging: false,
-                searching: false,
+                searching: true,
                 info: false,
                 layout: {
                   topStart: "buttons",
@@ -305,7 +305,7 @@ const ExportDataWithButtons = ({
               }
               canNextPage={currentPage < totalPages - 1}
             />
-          </>
+          </div>
         )}
       </ComponentCard>
       

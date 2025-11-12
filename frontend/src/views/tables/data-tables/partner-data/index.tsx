@@ -45,7 +45,7 @@ const tableConfig: Record<
       "Email",
       "Wallet",
       "City",
-      "Created At",
+      "Date",
       "Status",
     ],
   },
@@ -220,7 +220,7 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
-          <>
+          <div className="overflow-x-auto">
             <DataTable
               key={`partner-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
               data={data}
@@ -229,7 +229,7 @@ const ExportDataWithButtons = ({
                 responsive: true,
                 destroy: true,
                 paging: false,
-                searching: false,
+                searching: true,
                 info: false,
                 layout: {
                   topStart: "buttons",
@@ -283,7 +283,7 @@ const ExportDataWithButtons = ({
               nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
               canNextPage={currentPage < totalPages - 1}
             />
-          </>
+          </div>
         )}
       </ComponentCard>
 

@@ -388,18 +388,14 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
       <Card className="mb-4 bg-light">
         <Card.Body className="py-3 d-flex flex-wrap align-items-center gap-3 justify-content-center">
           <div>
-            <span className="h4 fw-semibold">Booking ID:</span>{" "}
-            <strong className="fs-4 text-muted">
+            <span className="h4 fw-semibold fs-3">Booking ID:</span>{" "}
+            <strong className="fs-3 text-muted">
               {data?.manpower_order_id || "N/A"}
             </strong>
           </div>
-          <div className="fs-5">{getStatusBadge(data?.mpo_status)}</div>
-          <div className="fs-5">
-            {getPaymentTypeBadge(data?.mpo_payment_type)}
-          </div>
           <div>
-            <span className="h4 fw-semibold">Order Date:</span>{" "}
-            <strong className="fs-4 text-muted">
+            <span className="h4 fs-3 fw-semibold">Order Date:</span>{" "}
+            <strong className="fs-3 text-muted">
               {formatDate(data?.mpo_order_date)}
             </strong>
           </div>

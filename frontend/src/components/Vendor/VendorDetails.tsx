@@ -370,15 +370,14 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
       <Card className="mb-4 bg-light">
         <Card.Body className="py-3 d-flex flex-wrap align-items-center gap-3 justify-content-center">
           <div>
-            <span className="h4 fw-semibold">Vendor:</span>{" "}
-            <strong className="fs-4 text-muted">
+            <span className="h4 fw-semibold fs-3">Vendor:</span>{" "}
+            <strong className="fs-3 text-muted">
               {data?.vendor_name ?? "N/A"}
             </strong>
           </div>
-          <div className="fs-4">{getStatusBadge(data?.vendor_status)}</div>
           <div>
-            <span className="h4 fw-semibold">Created:</span>{" "}
-            <strong className="fs-4 text-muted">
+            <span className="h4 fs-3 fw-semibold">Created:</span>{" "}
+            <strong className="fs-3 text-muted">
               {formatDate(data?.vendor_created_at)}
             </strong>
           </div>

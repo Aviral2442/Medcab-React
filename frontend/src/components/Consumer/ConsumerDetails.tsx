@@ -103,12 +103,11 @@ const ConsumerDetails: React.FC<ConsumerDetailsProps> = ({ data }) => {
       <Card className="mb-4 bg-light">
         <Card.Body className="py-3 d-flex flex-wrap align-items-center gap-3 justify-content-center">
           <div className="d-flex align-items-center gap-3">
-              <div className="text-muted small">ID: {data?.consumer_id ?? "N/A"}</div>
-              <div className="h5 mb-0">{data?.consumer_name ?? "N/A"}</div>
+              <div className="text-muted fs-3">ID: {data?.consumer_id ?? "N/A"}</div>
+              <div className="h5 mb-0 fs-3">{data?.consumer_name ?? "N/A"}</div>
             </div>
 
-            <div className="mb-1">{getStatusBadge(data?.consumer_status)}</div>
-            <div className="text-muted ">Registered: {formatDateShort(data?.consumer_registred_date)}</div>
+            <div className="text-muted fs-3">Registered: {formatDateShort(data?.consumer_registred_date)}</div>
         </Card.Body>
       </Card>
 

@@ -38,13 +38,13 @@ const tableConfig: Record<
     columns: bookingColumns,
     headers: [
       "S.No.",
-      "order id",
+      "id",
       "name",
-      "mobile_no",
+      "mobile",
       "address",
       "Price",
-      "payment_mode",
-      "order_date",
+      "payment",
+      "date",
       "status",
     ],
   },
@@ -229,7 +229,7 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center p-4">Loading...</div>
         ) : (
-          <>
+          <div className="overflow-x-auto">
             <DataTable
               key={`booking-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
               data={rows}
@@ -238,7 +238,7 @@ const ExportDataWithButtons = ({
                 responsive: true,
                 destroy: true,
                 paging: false,
-                searching: false,
+                searching: true,
                 info: false,
                 layout: {
                   topStart: "buttons",
@@ -276,7 +276,7 @@ const ExportDataWithButtons = ({
               nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
               canNextPage={currentPage < totalPages - 1}
             />
-          </>
+          </div>
         )}
       </ComponentCard>
 

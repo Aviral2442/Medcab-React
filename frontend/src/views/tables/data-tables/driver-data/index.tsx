@@ -41,7 +41,6 @@ const tableConfig: Record<
       "S.No.",
       "ID",
       "Name",
-      "Last Name",
       "Mobile",
       "Wallet",
       "City ID",
@@ -49,7 +48,7 @@ const tableConfig: Record<
       "Profile",
       "Duty Status",
       "Status",
-      "Created At",
+      "Date",
     ],
   },
 };
@@ -233,7 +232,7 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
-          <>
+          <div className="overflow-x-auto">
             <DataTable
               key={`driver-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
               data={data}
@@ -242,7 +241,7 @@ const ExportDataWithButtons = ({
                 responsive: true,
                 destroy: true,
                 paging: false,
-                searching: false,
+                searching: true,
                 info: false,
                 layout: {
                   topStart: "buttons",
@@ -300,7 +299,7 @@ const ExportDataWithButtons = ({
               }
               canNextPage={currentPage < totalPages - 1}
             />
-          </>
+          </div>
         )}
       </ComponentCard>
 

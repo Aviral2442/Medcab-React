@@ -49,7 +49,7 @@ const tableConfig: Record<number, {
   2: { // Sub Category
     endpoint: "/manpower/get-subcategory",
     columns: subCategoryColumns,
-    headers: ["S.No.", 'ID', 'ctg', 'sub_ctg', 'Image', 'Overview', 'Description', 'GST%', 'Emergency', 'Popular', 'Status'],
+    headers: ["S.No.", 'ID', 'ctg', 'sub ctg', 'Image', 'Overview', 'Description', 'GST%', 'Emergency', 'Popular', 'Status'],
   },
   3: {
     endpoint: "/manpower/get_faq",
@@ -64,12 +64,12 @@ const tableConfig: Record<number, {
   5: {
     endpoint: "/manpower/get-coupon",
     columns: couponColumns,
-    headers: ["S.No.", 'ID', 'Code', 'Description', 'Min_Cart', 'Discount', 'Dis_Amt', 'Max_Dis', 'Visible', 'Status'],
+    headers: ["S.No.", 'ID', 'Code', 'Description', 'Cart', 'Discount', 'Dis', 'Max', 'Visible', 'Status'],
   },
   6: {
     endpoint: "/manpower/get-price-mapper",
     columns: priceMapperColumns,
-    headers: ["S.No.", 'ID', 'Sub_Cat', 'Visit_Rate', 'Day_Rate', 'Monthly_Rate', 'Gender', 'City', 'Status'],
+    headers: ["S.No.", 'ID', 'Sub Cat', 'Visit', 'Day', 'Monthly', 'Gender', 'City', 'Status'],
   },
 };
 
@@ -122,44 +122,54 @@ const ExportDataWithButtons = ({
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${baseURL}${endpoint}`, {
-        params: {
-          page: currentPage + 1,
-          limit: pageSize,
-        },
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: pageSize.toString(),
       });
-      console.log("Fetched data:", res);
-      // console.log("Tab Key:", tabKey); // Debug log
+
+      const res = await axios.get(`${baseURL}${endpoint}`, { params });
+      console.log("API Response:", res.data);
+
+      let dataArray: any[] = [];
       
-      let dataArray = [];
       switch (tabKey) {
         case 1:
           dataArray = res.data.categories || [];
+          setTotal(res.data.total || 0);
+          setTotalPages(res.data.totalPages || 0);
           break;
         case 2:
           dataArray = res.data.subCategories || [];
-          // console.log("SubCategories data:", dataArray); // Debug log to see actual field names
+          setTotal(res.data.total || 0);
+          setTotalPages(res.data.totalPages || 0);
           break;
         case 3:
-          dataArray = res.data?.jsonData || [];
-          console.log("FAQs data:", dataArray); // Debug log to see actual field names
+          dataArray = res.data.jsonData?.faqs || [];
+          setTotal(res.data.pagination?.total || 0);
+          setTotalPages(res.data.pagination?.totalPages || 0);
           break;
         case 4:
           dataArray = res.data.banners || [];
+          setTotal(res.data.total || 0);
+          setTotalPages(res.data.totalPages || 0);
           break;
         case 5:
           dataArray = res.data.coupons || [];
+          setTotal(res.data.total || 0);
+          setTotalPages(res.data.totalPages || 0);
           break;
         case 6:
           dataArray = res.data.priceMapper || [];
+          setTotal(res.data.total || 0);
+          setTotalPages(res.data.totalPages || 0);
           break;
         default:
           dataArray = res.data.categories || [];
+          setTotal(res.data.total || 0);
+          setTotalPages(res.data.totalPages || 0);
       }
       
       setRows(dataArray);
-      setTotal(res.data.total || dataArray.length);
-      setTotalPages(res.data.totalPages || Math.ceil(dataArray.length / pageSize));
     } catch (err) {
       console.error("Fetch error:", err);
       setRows([]);
@@ -235,7 +245,7 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center p-4">Loading...</div>
         ) : (
-          <>
+          <div className="overflow-x-auto">
             <DataTable
               key={`export-table-${tabKey}-${currentPage}`}
               data={rows}
@@ -244,7 +254,7 @@ const ExportDataWithButtons = ({
                 responsive: true,
                 destroy: true,
                 paging: false,
-                searching: false,
+                searching: true,
                 info: false,
                 layout: {
                   topStart: "buttons",
@@ -282,7 +292,7 @@ const ExportDataWithButtons = ({
               nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
               canNextPage={currentPage < totalPages - 1}
             />
-          </>
+          </div>
         )}
       </ComponentCard>
     </>
