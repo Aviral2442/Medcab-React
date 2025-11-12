@@ -142,8 +142,9 @@ export const getLatest5BookingTransList = async () => {
 export const getLatestNewOngoingBookingList = async () => {
     try {
         let query = ` 
-            SELECT * 
+            SELECT manpower_order.* , consumer.consumer_name, consumer.consumer_email_id, consumer.consumer_mobile_no
             FROM manpower_order
+            LEFT JOIN consumer ON manpower_order.mpo_user_id = consumer.consumer_id
             WHERE mpo_status IN (1, 2)
         `;
 
