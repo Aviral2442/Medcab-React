@@ -214,19 +214,19 @@ export const getNewAndOngoingBookingList = async () => {
     }
 };
 
-// Get Consumer Today and Yesterday Count Service
-export const getConsumerTodayYesterdayCountService = async () => {
+// Get Vendor Today and Yesterday Count Service
+export const getVendorTodayYesterdayCountService = async () => {
     try {
         const query = `
       SELECT 
-        FLOOR(HOUR(FROM_UNIXTIME(consumer_registred_date)) / 3) * 3 AS hour_group,
+        FLOOR(HOUR(FROM_UNIXTIME(vendor_created_at)) / 3) * 3 AS hour_group,
         COUNT(*) AS count,
         CASE 
-          WHEN DATE(FROM_UNIXTIME(consumer_registred_date)) = CURDATE() THEN 'today'
-          WHEN DATE(FROM_UNIXTIME(consumer_registred_date)) = CURDATE() - INTERVAL 1 DAY THEN 'yesterday'
+          WHEN DATE(FROM_UNIXTIME(vendor_created_at)) = CURDATE() THEN 'today'
+          WHEN DATE(FROM_UNIXTIME(vendor_created_at)) = CURDATE() - INTERVAL 1 DAY THEN 'yesterday'
         END AS day_type
-      FROM consumer
-      WHERE DATE(FROM_UNIXTIME(consumer_registred_date)) IN (CURDATE(), CURDATE() - INTERVAL 1 DAY)
+      FROM vendor
+      WHERE DATE(FROM_UNIXTIME(vendor_created_at)) IN (CURDATE(), CURDATE() - INTERVAL 1 DAY)
       GROUP BY day_type, hour_group
       ORDER BY hour_group;
     `;
@@ -248,7 +248,7 @@ export const getConsumerTodayYesterdayCountService = async () => {
 
         return {
             status: 200,
-            message: "Consumer Today and Yesterday Counts Fetch Successful",
+            message: "Vendor Today and Yesterday Counts Fetch Successful",
             jsonData: {
                 today: todayData,
                 yesterday: yesterdayData,
@@ -265,7 +265,7 @@ export const getConsumerTodayYesterdayCountService = async () => {
             }
         };
     } catch (error) {
-        console.error("Error fetching consumer graph data:", error);
-        throw new ApiError(500, "Failed To Load Consumer Today and Yesterday Counts");
+        console.error("Error fetching vendor graph data:", error);
+        throw new ApiError(500, "Failed To Load Vendor Today and Yesterday Counts");
     }
 };

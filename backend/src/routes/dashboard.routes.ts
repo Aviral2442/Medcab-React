@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { consumerCount, latestBookingListOfNewOngoing, latestBookingTransactionList, latestVendorTransList, newOngoingBookingList, totalActiveOtherStatusVendorCounts, totalBookingCount, totalCancelOngoingBookingCounts, getConsumerTodayYesterdayCountController } from '../controllers/dashboard.controller';
+import { consumerCount, latestBookingListOfNewOngoing, latestBookingTransactionList, latestVendorTransList, newOngoingBookingList, totalActiveOtherStatusVendorCounts, totalBookingCount, totalCancelOngoingBookingCounts, getVendorTodayYesterdayCountController } from '../controllers/dashboard.controller';
 const router = Router();
 
 router.get('/get_total_booking_count', totalBookingCount);
@@ -10,6 +10,6 @@ router.get('/get_latest_5_booking_transaction_list', latestBookingTransactionLis
 router.get('/latest_new_ongoing_booking_lists', latestBookingListOfNewOngoing);
 router.get('/get_consumer_counts', consumerCount);
 router.get('/get_new_ongoing_booking_list', newOngoingBookingList);
-router.get('/get_consumer_today_yesterday_counts', getConsumerTodayYesterdayCountController);
+router.get('/get_vendor_today_yesterday_counts', getVendorTodayYesterdayCountController);
 
 export default router;
