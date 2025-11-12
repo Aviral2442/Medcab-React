@@ -10,7 +10,6 @@ import user7 from '@/assets/images/users/user-7.jpg'
 import user8 from '@/assets/images/users/user-8.jpg'
 import user9 from '@/assets/images/users/user-9.jpg'
 import user10 from '@/assets/images/users/user-10.jpg'
-import {currency} from '@/helpers'
 import type {APIPerformanceMetricsType, ModelUsageType, SessionType} from '@/views/dashboard/types'
 
 export const promptsUsageChart: () => ChartJSOptionsType = () => ({
