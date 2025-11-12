@@ -214,10 +214,11 @@ export const getNewAndOngoingBookingList = async () => {
     }
 };
 
-// Get Vendor Today and Yesterday Count Service
+
 export const getVendorTodayYesterdayCountService = async () => {
-    try {
-        const query = `
+  try {
+    // ✅ 1. Vendor count grouped by 3-hour intervals (Today vs Yesterday)
+    const vendorCountQuery = `
       SELECT 
         FLOOR(HOUR(FROM_UNIXTIME(vendor_created_at)) / 3) * 3 AS hour_group,
         COUNT(*) AS count,
@@ -231,41 +232,75 @@ export const getVendorTodayYesterdayCountService = async () => {
       ORDER BY hour_group;
     `;
 
-        const [rows]: any = await db.query(query);
+    // ✅ 2. Last 30 days total wallet transactions
+    const last30DaysWalletQuery = `
+      SELECT
+          SUM(vendor_wallet) AS total_amount_last_30_days
+      FROM vendor
+      WHERE DATE(FROM_UNIXTIME(vendor_created_at)) >= CURDATE() - INTERVAL 30 DAY;
+    `;
 
-        // 8 groups (0–3h, 3–6h, 6–9h, 9–12h, 12–15h, 15–18h, 18–21h, 21–24h)
-        const todayData = Array(8).fill(0);
-        const yesterdayData = Array(8).fill(0);
+    // ✅ 3. Overall wallet amount (all time)
+    const overallWalletQuery = `
+      SELECT
+          SUM(vendor_wallet) AS overall_wallet_amount
+      FROM vendor;
+    `;
 
-        rows.forEach((row: any) => {
-            const index = row.hour_group / 3; // convert group to array index
-            if (row.day_type === "today") {
-                todayData[index] = row.count;
-            } else if (row.day_type === "yesterday") {
-                yesterdayData[index] = row.count;
-            }
-        });
+    // ✅ 4. Last transaction date/time (most recent)
+    const lastTransactionQuery = `
+      SELECT
+          vendor_transection_time_unix
+      FROM vendor_transection
+      ORDER BY vendor_transection_time_unix DESC
+      LIMIT 1;
+    `;
 
-        return {
-            status: 200,
-            message: "Vendor Today and Yesterday Counts Fetch Successful",
-            jsonData: {
-                today: todayData,
-                yesterday: yesterdayData,
-                labels: [
-                    "0–3h",
-                    "3–6h",
-                    "6–9h",
-                    "9–12h",
-                    "12–15h",
-                    "15–18h",
-                    "18–21h",
-                    "21–24h"
-                ]
-            }
-        };
-    } catch (error) {
-        console.error("Error fetching vendor graph data:", error);
-        throw new ApiError(500, "Failed To Load Vendor Today and Yesterday Counts");
-    }
+    // ✅ Execute all queries
+    const [vendorRows]: any = await db.query(vendorCountQuery);
+    const [last30DaysRows]: any = await db.query(last30DaysWalletQuery);
+    const [overallWalletRows]: any = await db.query(overallWalletQuery);
+    const [lastTransRows]: any = await db.query(lastTransactionQuery);
+
+    // ✅ Initialize arrays for 3-hour groups
+    const todayData = Array(8).fill(0);
+    const yesterdayData = Array(8).fill(0);
+
+    vendorRows.forEach((row: any) => {
+      const index = row.hour_group / 3; // convert group to array index (0–7)
+      if (row.day_type === "today") {
+        todayData[index] = row.count;
+      } else if (row.day_type === "yesterday") {
+        yesterdayData[index] = row.count;
+      }
+    });
+
+    // ✅ Prepare response data
+    const responseData = {
+      today: todayData,
+      yesterday: yesterdayData,
+      labels: [
+        "0–3h",
+        "3–6h",
+        "6–9h",
+        "9–12h",
+        "12–15h",
+        "15–18h",
+        "18–21h",
+        "21–24h"
+      ],
+      total_amount_last_30_days: last30DaysRows[0]?.total_amount_last_30_days || 0,
+      overall_wallet_amount: overallWalletRows[0]?.overall_wallet_amount || 0,
+      last_transaction_unix_time: lastTransRows[0]?.vendor_transection_time_unix || null
+    };
+
+    return {
+      status: 200,
+      message: "Vendor Today and Yesterday Counts Fetch Successful",
+      jsonData: responseData
+    };
+  } catch (error) {
+    console.error("Error fetching vendor graph data:", error);
+    throw new ApiError(500, "Failed To Load Vendor Today and Yesterday Counts");
+  }
 };
