@@ -1,7 +1,5 @@
 import { db } from '../config/db';
 import { ApiError } from '../utils/api-error';
-import path from "path";  // Fixed import: 'part' to 'path'
-import fs from "fs";
 import { RowDataPacket, FieldPacket } from "mysql2";
 
 // Total Booking Count Service 
@@ -190,6 +188,7 @@ export const getConsumersCounts = async () => {
     }
 };
 
+// New and Ongoing Booking List Service
 export const getNewAndOngoingBookingList = async () => {
     try {
         let query = ` 
@@ -215,6 +214,7 @@ export const getNewAndOngoingBookingList = async () => {
     }
 };
 
+// Get Consumer Today and Yesterday Count Service
 export const getConsumerTodayYesterdayCountService = async () => {
     try {
         const query = `
