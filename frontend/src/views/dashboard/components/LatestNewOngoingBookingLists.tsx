@@ -30,7 +30,7 @@ const RecentSessions = () => {
     const fetchnewbookings = async () => {
         try{
             const res = await axios.get(`${basePath}/dashboard/latest_new_ongoing_booking_lists`)
-            console.log("New and Ongoing Bookings: ", res.data?.jsonData?.bookingList)
+            // console.log("New and Ongoing Bookings: ", res.data?.jsonData?.bookingList)
             setNewBooking(res.data?.jsonData?.bookingList || [])
         } catch (error){
             console.error("Error fetching Recent Sessions: ", error)

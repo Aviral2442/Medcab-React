@@ -4,8 +4,28 @@ import CustomChartJS from '@/components/CustomChartJS.tsx'
 import {activeUsersChart} from '@/views/dashboard/data'
 import {Filler, LineController, LineElement, PointElement} from 'chart.js'
 import CountUp from "react-countup";
+import axios from 'axios'
+import React from 'react'
 
 const RequestStatistics = () => {
+
+    const basePath = (import.meta as any).env?.VITE_PATH ?? "";
+    const [statsData, setStatsData] = React.useState<any>(null);
+
+    const fetchStatsData = async () => {
+        try{
+            const res = await axios.get(`${basePath}/dashboard/get_consumer_today_yesterday_counts`)
+            console.log(res.data)
+            setStatsData(res.data)
+        } catch (error) {
+            console.error('Fetching Stats Data Error: ', error)
+        }
+    }
+
+    React.useEffect(() => {
+        fetchStatsData();
+    }, [])
+
     return (
         <Card>
             <CardBody>

@@ -20,7 +20,7 @@ const APIPerformanceMetrics = () => {
     const fetchVendorTransactions = async () => {
         try{
             const res = await axios.get(`${basePath}/dashboard/get_latest_5_vendor_transaction_list`)
-            console.log("API Response of Vendor Transactions: ", res.data)
+            // console.log("API Response of Vendor Transactions: ", res.data)
             setData(res.data?.jsonData?.vendorTransList || [])
         } catch (error){
             console.error("Error fetching Vendor Transactions: ", error)
