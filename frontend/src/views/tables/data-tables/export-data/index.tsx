@@ -49,7 +49,7 @@ const tableConfig: Record<number, {
   2: { // Sub Category
     endpoint: "/manpower/get-subcategory",
     columns: subCategoryColumns,
-    headers: ["S.No.", 'ID', 'ctg', 'sub ctg', 'Image', 'Overview', 'Description', 'GST%', 'Emergency', 'Popular', 'Status'],
+    headers: ["S.No.", 'ID', 'cat', 'sub cat', 'Image', 'Overview', 'Description', 'GST%', 'Emergency', 'Popular', 'Status'],
   },
   3: {
     endpoint: "/manpower/get_faq",
@@ -253,9 +253,9 @@ const ExportDataWithButtons = ({
               options={{
                 responsive: true,
                 destroy: true,
-                paging: false,
+                paging: true,
                 searching: true,
-                info: false,
+                info: true,
                 layout: {
                   topStart: "buttons",
                 },
@@ -266,7 +266,7 @@ const ExportDataWithButtons = ({
                   { extend: "pdf", className: "btn btn-sm btn-secondary active" },
                 ],
               }}
-              className="table table-striped dt-responsive align-middle mb-0"
+              className="table table-striped dt-responsive align-middle mb-0 "
             >
               <thead className="thead-sm text-uppercase fs-xxs">
                 <tr>

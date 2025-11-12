@@ -63,12 +63,12 @@ const DataTable = <TData, >({
                 ))}
                 </thead>
             )}
-            <tbody>
+            <tbody className='d-flex flex-nowrap'>
             {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                     <tr key={row.id}>
                         {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                            <td key={cell.id} className=''>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
                         ))}
                     </tr>
                 ))
