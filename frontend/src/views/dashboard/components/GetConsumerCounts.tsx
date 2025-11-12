@@ -58,7 +58,7 @@ const TokenUsage = () => {
 
 
     return (
-        <Card className="card-h-100">
+        <Card className="card" style={{ maxHeight: '230px' }}>
             <CardBody>
                 <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>

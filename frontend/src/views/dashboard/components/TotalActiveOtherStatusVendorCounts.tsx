@@ -46,26 +46,26 @@ const ActiveUsers = () => {
     }
 
     return (
-        <Card className="card-h-100">
+        <Card className="card" style={{ maxHeight: '230px' }}>
             <CardBody>
                 <div className="d-flex justify-content-between align-items-start">
                     <div>
-                        <h5 className="text-uppercase mb-3">Vendor's</h5>
+                        <h5 className="text-uppercase mb-2">Vendor's</h5>
                         <h3 className="mb-0 fw-normal">
                         <span>
                           <CountUp end={Number(total_vendors) || 0} duration={2} enableScrollSpy scrollSpyOnce/>
                         </span>
                         </h3>
-                        <p className="text-muted mb-3">Total Vendors in Collection</p>
+                        <p className="text-muted mb-2">Total Vendors in Collection</p>
                     </div>
                     <div>
                         <LuUsers className="text-muted fs-24 svg-sw-10"/>
                     </div>
                 </div>
 
-                <ProgressBar now={active_vendors} className="progress-lg mb-3"/>
+                <ProgressBar now={active_vendors} className="progress-lg mb-2"/>
 
-                <div className="d-flex justify-content-between mb-3">
+                <div className="d-flex justify-content-between">
                     <div>
                         <span className="text-muted">Active Vendors</span>
                         <h5 className="mb-0">{active_vendors}</h5>

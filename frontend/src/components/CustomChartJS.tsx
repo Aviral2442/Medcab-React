@@ -109,7 +109,7 @@ const CustomChartJS = ({type, height = '100%', width = '100%', getOptions, plugi
         }
 
         const {data, options} = getOptions()
-        console.log("Chart Data:", data);
+        // console.log("Chart Data:", data);
 
         const mergedOptions = merge({}, getDefaultChartOptions(), options)
 

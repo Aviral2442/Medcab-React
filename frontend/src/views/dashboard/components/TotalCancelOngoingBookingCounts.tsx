@@ -22,13 +22,10 @@ const ResponseAccuracy = () => {
       const res = await axios.get(
         `${baseURL}/dashboard/get_total_cancel_ongoing_booking_counts`
       );
-      // console.log(`dekho: ${baseURL}`)
       if (res.status !== 200) {
         throw new Error("Failed to fetch data");
       }
-    //   console.log("API Response:", res.data);
       
-      // Assuming the API returns data in jsonData.bookingCounts[0]
       if (res.data.jsonData?.bookingCounts?.[0]) {
         const data = res.data.jsonData.bookingCounts[0];
         setBookingData({
@@ -36,7 +33,6 @@ const ResponseAccuracy = () => {
           cancelled_bookings: data.cancelled_bookings || 0,
           ongoing_bookings: data.ongoing_bookings || 0,
         });
-        // console.log("Booking Data Set:", data);
       }
     } catch (error) {
       console.error("Error fetching booking counts:", error);
@@ -67,7 +63,7 @@ const ResponseAccuracy = () => {
             backgroundColor: [
               getColor('chart-primary'),
               getColor('chart-secondary'),
-              getColor('chart-dark'),
+              '#D0D3D5', // Changed from getColor('chart-dark') to custom grey color
             ],
             borderColor: '#ffffff',
             borderWidth: 0,
@@ -106,12 +102,8 @@ const ResponseAccuracy = () => {
     };
   }, [bookingData]);
 
-  // const accuracyPercentage = bookingData.total_bookings > 0
-  //   ? (((bookingData.total_bookings - bookingData.cancelled_bookings) / bookingData.total_bookings) * 100).toFixed(1)
-  //   : '0';
-
   return (
-    <Card className="card-h-100">
+    <Card className="card-h-100" style={{ maxHeight: '230px' }}>
       <CardBody>
         <div className="d-flex justify-content-between align-items-start mb-3">
           <div>
@@ -122,7 +114,7 @@ const ResponseAccuracy = () => {
           </div>
         </div>
 
-        <div className="d-flex align-items-center justify-content-center" style={{ height: '150px' }}>
+        <div className="d-flex align-items-center justify-content-center" style={{ height: '100px' }}>
           {bookingData.total_bookings > 0 ? (
             <CustomChartJS
               type="pie"
@@ -139,9 +131,6 @@ const ResponseAccuracy = () => {
         <div>
           <strong>Total Bookings: {bookingData.total_bookings}</strong>
         </div>
-        {/* <div className="mt-1">
-          Success Rate: <strong>{accuracyPercentage}%</strong>
-        </div> */}
       </CardFooter>
     </Card>
   );

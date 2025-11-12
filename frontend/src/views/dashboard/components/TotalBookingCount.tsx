@@ -166,7 +166,7 @@ const PromptsUsage = () => {
   }
 
   return (
-    <Card className="card">
+    <Card className="card" style={{ maxHeight: '230px' }}>
       <CardBody>
         <div className="d-flex justify-content-between align-items-start">
           <div>
@@ -177,7 +177,7 @@ const PromptsUsage = () => {
           </div>
         </div>
 
-        <div className="mb-3" style={{ height: "110px" }}>
+        <div className="mb-3" style={{ height: "57px" }}>
           <CustomChartJS
             key={JSON.stringify(bookings)}
             type="bar"

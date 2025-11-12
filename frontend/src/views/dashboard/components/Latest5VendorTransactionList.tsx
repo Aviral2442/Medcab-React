@@ -9,10 +9,10 @@ const APIPerformanceMetrics = () => {
 
     interface VendorTransaction {
         vendor_transection_id: string;
-        vendor_transection_by: string;
+        vendor_name: string;
         vendor_transection_amount: string;
         vendor_transection_note: string;
-        vendor_created_at: string;
+        vendor_transection_time_unix: string;
     }
 
     const [data, setData] = React.useState<VendorTransaction[]>([]);
@@ -20,7 +20,7 @@ const APIPerformanceMetrics = () => {
     const fetchVendorTransactions = async () => {
         try{
             const res = await axios.get(`${basePath}/dashboard/get_latest_5_vendor_transaction_list`)
-            // console.log("API Response of Vendor Transactions: ", res.data)
+            console.log("API Response of Vendor Transactions: ", res.data)
             setData(res.data?.jsonData?.vendorTransList || [])
         } catch (error){
             console.error("Error fetching Vendor Transactions: ", error)
@@ -52,11 +52,11 @@ const APIPerformanceMetrics = () => {
                     {data.map((row, idx) => (
                         <tr key={idx}>
                             <td>{row.vendor_transection_id}</td>
-                            <td>{row.vendor_transection_by} (vendor)</td>
-                            <td>{row.vendor_transection_amount}</td>
+                            <td>{row.vendor_name}</td>
+                            <td>₹{row.vendor_transection_amount}</td>
                             <td>{row.vendor_transection_note}</td>
                                                             <td>{(() => {
-                                    const ts = Number(row.vendor_created_at);
+                                    const ts = Number(row.vendor_transection_time_unix);
                                     if (!ts || Number.isNaN(ts)) return '-';
                                     const date = new Date(ts < 1e12 ? ts * 1000 : ts); // handle seconds vs milliseconds
                                     date.toLocaleString = () => {

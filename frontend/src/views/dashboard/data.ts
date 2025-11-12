@@ -239,7 +239,7 @@ export const sessions: SessionType[] = [
 ]
 
 export const modelUsageTable: TableType<ModelUsageType> = {
-    headers: ['Model', 'Requests', 'Total Tokens', 'Average Tokens', 'Last Used'],
+    headers: ['ID', 'Name', 'Amount', 'Note', 'Date'],
     body: [
         {
             model: 'GPT-4',
@@ -280,7 +280,7 @@ export const modelUsageTable: TableType<ModelUsageType> = {
 }
 
 export const apiPerformanceMetricsTable: TableType<APIPerformanceMetricsType> = {
-    headers: ['Endpoint', 'Latency', 'Requests', 'Error Rate', `Cost (${currency})`],
+    headers: ['ID', 'Name', 'Amount', 'Note', `Date`],
     body: [
         {
             endpoint: '/v1/chat/completions',
