@@ -8,7 +8,7 @@ import {
   getTotalActiveOtherStatusVendorCounts,
   getTotalBookingCount,
   getTotalCancelOngoingBookingCounts,
-  getConsumerTodayYesterdayCountService
+  getVendorTodayYesterdayCountService
 } from '../services/dashboard.service';
 
 // Helper to check if data is empty
@@ -153,10 +153,10 @@ export const newOngoingBookingList = async (req: Request, res: Response, next: N
 };
 
 // Consumer Today and Yesterday Counts
-export const getConsumerTodayYesterdayCountController = async (req: Request, res: Response, next: NextFunction) => {
+export const getVendorTodayYesterdayCountController = async (req: Request, res: Response, next: NextFunction) => {
   try {
 
-    const result = await getConsumerTodayYesterdayCountService();
+    const result = await getVendorTodayYesterdayCountService();
     res.status(200).json(result);
 
   } catch (error) {
