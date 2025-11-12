@@ -91,8 +91,9 @@ export const getTotalActiveOtherStatusVendorCounts = async () => {
 export const getLatest5VendorTransList = async () => {
     try {
         let query = `
-            SELECT *
+            SELECT vendor.vendor_name, vendor_transection.vendor_transection_id , vendor_transection.vendor_transection_amount, vendor_transection.vendor_transection_time_unix, vendor_transection.vendor_transection_note
             FROM vendor_transection
+            LEFT JOIN vendor ON vendor_transection.vendor_transection_by = vendor.vendor_id
             ORDER BY vendor_transection_id DESC
             LIMIT 5
         `;
