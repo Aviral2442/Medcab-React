@@ -3,8 +3,7 @@ import { ApiError } from "../../utils/api-error";
 import { buildFilters } from "../../utils/filters";
 import { currentUnixTime } from "../../utils/current_unixtime";
 import { generateSlug } from "../../utils/generate_sku";
-import path from "path";
-import fs from "fs";
+import { uploadFileCustom } from "../../utils/file_uploads";
 
 interface blogData {
     blogs_image?: Express.Multer.File;
@@ -111,17 +110,8 @@ export const addBlogService = async (data: blogData) => {
     let imagePath = null;
 
     if (data.blogs_image) {
-        const uploadDir = path.join(__dirname, "../../public/assets/blogs");
-
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-
-        const fileName = `${Date.now()}-${data.blogs_image.originalname}`;
-        const filePath = path.join(uploadDir, fileName);
-
-        fs.writeFileSync(filePath, data.blogs_image.buffer);
-        imagePath = `assets/blogs/${fileName}`;
+        const uploadedPath = uploadFileCustom(data.blogs_image, "/blogs");
+        imagePath = uploadedPath;
     }
 
     try {
@@ -153,6 +143,67 @@ export const addBlogService = async (data: blogData) => {
 
     } catch (error) {
         throw new ApiError(500, "Add Blog Error On Inserting");
+    }
+
+};
+
+// SERVICE TO EDIT EXISTING BLOG
+export const editBlogService = async (blogId: number, data: blogData) => {
+
+    try {
+
+        // const updateData: any = {
+        //     blogs_title: data.blogs_title,
+        //     blogs_sku: generateSlug(data.blogs_sku),
+        //     blogs_short_desc: data.blogs_short_desc,
+        //     blogs_long_desc: data.blogs_long_desc,
+        //     blogs_category: data.blogs_category,
+        //     blogs_meta_title: data.blogs_meta_title,
+        //     blogs_meta_desc: data.blogs_meta_desc,
+        //     blogs_meta_keywords: data.blogs_meta_keywords,
+        //     blogs_force_keywords: data.blogs_force_keywords,
+        //     blogs_schema: data.blogs_schema,
+        // };
+
+        const updateData: any = {};
+
+        if (data.blogs_title) updateData.blogs_title = data.blogs_title;
+        if (data.blogs_sku) updateData.blogs_sku = generateSlug(data.blogs_sku);
+        if (data.blogs_short_desc) updateData.blogs_short_desc = data.blogs_short_desc;
+        if (data.blogs_long_desc) updateData.blogs_long_desc = data.blogs_long_desc;
+        if (data.blogs_category) updateData.blogs_category = data.blogs_category;
+        if (data.blogs_meta_title) updateData.blogs_meta_title = data.blogs_meta_title;
+        if (data.blogs_meta_desc) updateData.blogs_meta_desc = data.blogs_meta_desc;
+        if (data.blogs_meta_keywords) updateData.blogs_meta_keywords = data.blogs_meta_keywords;
+        if (data.blogs_force_keywords) updateData.blogs_force_keywords = data.blogs_force_keywords;
+        if (data.blogs_schema) updateData.blogs_schema = data.blogs_schema;
+
+        if (data.blogs_image) {
+            const uploadedPath = uploadFileCustom(data.blogs_image, "/blogs");
+            updateData.blogs_image = uploadedPath;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return {
+                status: 400,
+                message: "No valid fields provided to update",
+            };
+        }
+
+        const [result]: any = await db.query(
+            `UPDATE blogs SET ? WHERE blogs_id = ?`,
+            [updateData, blogId]
+        );
+
+        return {
+            status: 200,
+            message: "Blog updated successfully",
+        };
+
+    } catch (error) {
+        console.log(error);
+
+        throw new ApiError(500, "Edit Blog Error On Updating");
     }
 
 };
