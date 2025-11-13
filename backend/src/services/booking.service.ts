@@ -91,6 +91,7 @@ export const getBookingDetailById = async (bookingId: number) => {
             SELECT * 
             FROM manpower_order 
             LEFT JOIN manpower_order_details ON manpower_order.manpower_order_id = manpower_order_details.mpod_order_id
+            LEFT JOIN consumer ON manpower_order.mpo_user_id = consumer.consumer_id
             WHERE manpower_order_id = ? 
             ORDER BY mpo_created_at DESC
         `;

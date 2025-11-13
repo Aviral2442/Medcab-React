@@ -14,6 +14,5 @@ export const uploadFileCustom = (file: Express.Multer.File, folder: string): str
 
   fs.writeFileSync(filePath, file.buffer);
 
-  // Return relative path for DB
   return `assets${folder}/${fileName}`;
 };
