@@ -147,6 +147,31 @@ export const addBlogService = async (data: blogData) => {
 
 };
 
+// SERVICE TO GET SINGLE BLOG
+export const getBlogService = async (blogId: number) => {
+    try {
+        const [rows]: any = await db.query(
+            `SELECT * FROM blogs WHERE blogs_id = ?`,
+            [blogId]
+        );
+
+        if (!rows || rows.length === 0) {
+            throw new ApiError(404, "Blog not found");
+        }
+
+        return {
+            status: 200,
+            message: "Blog fetched successfully",
+            jsonData: {
+                blog: rows[0]
+            },
+        };
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Get Blog Error On Fetching");
+    }
+};
+
 // SERVICE TO EDIT EXISTING BLOG
 export const editBlogService = async (blogId: number, data: blogData) => {
 
@@ -318,27 +343,3 @@ export const getCityContentService = async (filters?: {
 
 };
 
-// SERVICE TO GET SINGLE BLOG
-export const getBlogService = async (blogId: number) => {
-    try {
-        const [rows]: any = await db.query(
-            `SELECT * FROM blogs WHERE blogs_id = ?`,
-            [blogId]
-        );
-
-        if (!rows || rows.length === 0) {
-            throw new ApiError(404, "Blog not found");
-        }
-
-        return {
-            status: 200,
-            message: "Blog fetched successfully",
-            jsonData: {
-                blog: rows[0]
-            },
-        };
-    } catch (error) {
-        console.log(error);
-        throw new ApiError(500, "Get Blog Error On Fetching");
-    }
-};

@@ -53,6 +53,18 @@ export const addBlogController = async (req: Request, res: Response, next: NextF
 
 };
 
+// CONTROLLER TO GET SINGLE BLOG
+export const getBlogController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const blogId = parseInt(req.params.id);
+        const result = await getBlogService(blogId);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO EDIT BLOG
 export const editBlogController = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
@@ -122,13 +134,3 @@ export const getCityContentController = async (req: Request, res: Response, next
 
 };
 
-// CONTROLLER TO GET SINGLE BLOG
-export const getBlogController = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const blogId = parseInt(req.params.id);
-        const result = await getBlogService(blogId);
-        res.status(200).json(result);
-    } catch (error) {
-        next(error);
-    }
-};

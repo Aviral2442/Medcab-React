@@ -13,6 +13,7 @@ import vehicleRoutes from "./routes/vehicle.routes";
 import driverRoutes from "./routes/driver.routes";
 import contentWriter from "./routes/contentWriter.routes";
 import { errorMiddleware } from "./middleware/error.middleware";
+import path from "path";
 
 const app = express();
 
@@ -30,6 +31,9 @@ app.use(express.json());
 app.get('/', (req: Request, res: Response) => {
     res.send('Welcome to the Medcab Backend API');
 });
+
+// ✅ Serve static files (make /public available)
+app.use("/assets", express.static(path.join(__dirname, "../public/assets")));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/", userRoutes);
