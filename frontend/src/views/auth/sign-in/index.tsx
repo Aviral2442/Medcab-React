@@ -46,7 +46,7 @@ const Page = () => {
 
       localStorage.setItem("token", res.data.token);
 
-      window.location.href = "/dashboard";
+      window.location.href = "/manpower-dashboard";
     } catch (err: any) {
       console.error("Login Failed:", err);
       setError(err.response?.data?.message || "Login failed!");

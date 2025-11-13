@@ -104,7 +104,7 @@ const errorRoutes: RouteObject[] = [
 ];
 
 const dashboardRoutes: RouteObject[] = [
-  { path: "/dashboard", element: <Dashboard /> },
+  { path: "/manpower-dashboard", element: <Dashboard /> },
 ];
 
 const appsRoutes: RouteObject[] = [
@@ -119,10 +119,10 @@ const pagesRoutes: RouteObject[] = [
   { path: "/pages/pricing", element: <Pricing /> },
   { path: "/pages/terms-conditions", element: <TermsConditions /> },
   { path: "/pages/timeline", element: <Timeline /> },
-  { path: "/manpower", element: <Manpower /> },
-  { path: "/booking-list", element: <Booking/> },
+  { path: "/manpower-category", element: <Manpower /> },
+  { path: "/manpower-bookings", element: <Booking/> },
   { path: "/booking-details/:id", element: <BookingDetails/> },
-  { path: "/vendor-list", element: <VendorList/>},
+  { path: "/manpower-vendors", element: <VendorList/>},
   { path: "/consumer-list", element: <ConsumerList/>},
   { path: "/vendor-details/:id", element: <VendorDetails/>},
   { path: "/consumer-details/:id", element: <ConsumerDetails/> },
