@@ -274,9 +274,7 @@ interface city_content_Data {
     city_meta_keyword: string;
     city_force_keyword: string;
     city_faq_heading: string;
-    city_status: number;
     city_emergency_desc: string;
-    city_timestamp: number;
 }
 
 // SERVICE TO GET CITY CONTENT LIST WITH FILTERS AND PAGINATION
@@ -343,3 +341,53 @@ export const getCityContentService = async (filters?: {
 
 };
 
+// SERVICE TO ADD NEW CITY CONTENT
+export const addCityContentService = async (data: city_content_Data) => {
+
+    try {
+
+        let imagePath = null;
+
+        if (data.city_thumbnail) {
+            const uploadedPath = uploadFileCustom(data.city_thumbnail, "/city_content");
+            imagePath = uploadedPath;
+        }
+
+        const insertData = {
+            city_name: data.city_name,
+            city_title_sku: generateSlug(data.city_title_sku),
+            city_title: data.city_title,
+            city_heading: data.city_heading,
+            city_body_desc: data.city_body_desc,
+            city_why_choose_us: data.city_why_choose_us,
+            why_choose_meta_desc: data.why_choose_meta_desc,
+            city_block1_heading: data.city_block1_heading,
+            city_block1_body: data.city_block1_body,
+            city_block2_heading: data.city_block2_heading,
+            city_block2_body: data.city_block2_body,
+            city_thumbnail: imagePath,
+            city_thumbnail_alt: data.city_thumbnail_alt,
+            city_meta_title: data.city_meta_title,
+            city_meta_desc: data.city_meta_desc,
+            city_meta_keyword: data.city_meta_keyword,
+            city_force_keyword: data.city_force_keyword,
+            city_faq_heading: data.city_faq_heading,
+            city_status: 0,
+            city_timestamp: currentUnixTime(),
+        }
+
+        const [result]: any = await db.query(
+            `INSERT INTO city_content SET ?`,
+            [insertData]
+        );
+
+        return {
+            status: 201,
+            message: "City content added successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Add City Content Error On Inserting");
+    }
+
+};

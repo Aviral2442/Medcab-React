@@ -1,5 +1,5 @@
 import Router from "express";
-import { getBlogListController, getBlogController, addBlogController, editBlogController, updateBlogStatusController, getCityContentController } from "../controllers/contentWriter/contentWriter.controller"
+import { getBlogListController, getBlogController, addBlogController, editBlogController, updateBlogStatusController, getCityContentController, addCityContentController } from "../controllers/contentWriter/contentWriter.controller"
 import multer from "multer";
 
 const router = Router();
@@ -12,5 +12,6 @@ router.put("/edit_blog/:id", upload.single("blogs_image"), editBlogController);
 router.patch("/update_blog_status/:id", updateBlogStatusController);
 
 router.get("/get_city_content", getCityContentController);
+router.post("/add_city_content", upload.single("city_thumbnail"), addCityContentController);
 
 export default router;

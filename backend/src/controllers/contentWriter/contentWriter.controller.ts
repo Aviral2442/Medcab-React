@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService } from "../../services/contentWriter/contentWriter.service";
+import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService } from "../../services/contentWriter/contentWriter.service";
 import { Next } from "mysql2/typings/mysql/lib/parsers/typeCast";
 
 // CONTROLLER TO GET BLOG LIST WITH FILTERS AND PAGINATION
@@ -134,3 +134,37 @@ export const getCityContentController = async (req: Request, res: Response, next
 
 };
 
+// CONTROLLER TO ADD NEW CITY CONTENT
+export const addCityContentController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const cityContentData = {
+            city_name: req.body.city_name,
+            city_title_sku: req.body.city_title_sku,
+            city_title: req.body.city_title,
+            city_heading: req.body.city_heading,
+            city_body_desc: req.body.city_body_desc,
+            city_why_choose_us: req.body.city_why_choose_us,
+            why_choose_meta_desc: req.body.why_choose_meta_desc,
+            city_block1_heading: req.body.city_block1_heading,
+            city_block1_body: req.body.city_block1_body,
+            city_block2_heading: req.body.city_block2_heading,
+            city_block2_body: req.body.city_block2_body,
+            city_thumbnail: req.file,
+            city_thumbnail_alt: req.body.city_thumbnail_alt,
+            city_meta_title: req.body.city_meta_title,
+            city_meta_desc: req.body.city_meta_desc,
+            city_meta_keyword: req.body.city_meta_keyword,
+            city_force_keyword: req.body.city_force_keyword,
+            city_faq_heading: req.body.city_faq_heading,
+            city_emergency_desc: req.body.city_emergency_desc,
+            city_schema: req.body.city_schema
+        }
+
+        const result = await addCityContentService(cityContentData);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
