@@ -16,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
+import _pdfMake from "pdfmake/build/pdfmake";
+import _pdfFonts from "pdfmake/build/vfs_fonts";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -62,6 +64,7 @@ const ExportDataWithButtons = ({
   const [totalPages, setTotalPages] = useState(0);
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+  const basePath = "http://localhost:4000";
 
   const {
     dateFilter,
@@ -153,7 +156,7 @@ const ExportDataWithButtons = ({
       orderable: false,
       render: (data: string) => {
         if (!data) return '<span class="text-muted">No Image</span>';
-        return `<img src="${baseURL}/${data}" alt="Blog" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />`;
+        return `<img src="${basePath}/${data}" alt="Blog" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />`;
       },
     },
     {
