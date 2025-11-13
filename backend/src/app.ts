@@ -11,6 +11,7 @@ import consumer from "./routes/consumer.routes";
 import partnerRoutes from "./routes/partner.routes";
 import vehicleRoutes from "./routes/vehicle.routes";
 import driverRoutes from "./routes/driver.routes";
+import contentWriter from "./routes/contentWriter.routes";
 import { errorMiddleware } from "./middleware/error.middleware";
 
 const app = express();
@@ -41,6 +42,7 @@ app.use("/api/consumer", consumer);
 app.use("/api/partner", partnerRoutes);
 app.use("/api/vehicle", vehicleRoutes);
 app.use("/api/driver", driverRoutes);
+app.use("/api/content_writer", contentWriter);
 app.use(errorMiddleware);
 
 export default app;
