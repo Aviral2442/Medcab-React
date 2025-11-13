@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
+import '@/global.css';
 import {
   Dropdown,
   DropdownMenu,
@@ -24,6 +25,8 @@ import AddRemark from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
+import _pdfMake from "pdfmake/build/pdfmake";
+import _pdfFonts from "pdfmake/build/vfs_fonts";
 
 // Register DataTable plugins
 DataTable.use(DT);
@@ -44,8 +47,8 @@ const tableConfig: Record<
       "Mobile",
       "Email",
       "Wallet",
-      "Ref Code",
-      "Ref By",
+      "Ref_Code",
+      "Ref_By",
       "Register",
       "Status",
     ],
@@ -185,26 +188,18 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-          <Dropdown align="end" className="text-muted">
-            <DropdownToggle
-              variant="link"
-              className="drop-arrow-none fs-xxl link-reset p-0"
+          <div className="d-flex flex-row gap-1">
+            <button className="eye-icon p-0 ps-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+              onClick={() => {
+                navigate(`/consumer-details/${rowData.consumer_id}`);
+              }}
             >
-              <TbDotsVertical />
-            </DropdownToggle>
-            <DropdownMenu>
-              <DropdownItem
-                onClick={() => {
-                  navigate(`/consumer-details/${rowData.consumer_id}`);
-                }}
-              >
-                <TbEye className="me-1" /> View
-              </DropdownItem>
-              <DropdownItem onClick={() => handleRemark(rowData)}>
-                <TbReceipt className="me-1" /> Remark
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+              <TbEye className="me-1" />
+            </button>
+              <button className="remark-icon p-0 ps-1 text-white rounded-1 " onClick={() => handleRemark(rowData)}>
+              <TbReceipt className="me-1" />
+            </button>
+          </div>
         );
       },
     },
@@ -224,10 +219,9 @@ const ExportDataWithButtons = ({
             onStatusFilterChange={handleStatusFilterChange}
             onDateRangeChange={handleDateRangeChange}
             statusOptions={StatusFilterOptions}
-            className="w-100"
           />
         }
-      >
+        >
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
@@ -245,6 +239,7 @@ const ExportDataWithButtons = ({
                 layout: {
                   topStart: "buttons",
                 },
+                // dom: 'Bfrtip', // Add this line to display buttons
                 buttons: [
                   {
                     extend: "copyHtml5",

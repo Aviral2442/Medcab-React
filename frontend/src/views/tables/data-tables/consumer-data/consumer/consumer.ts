@@ -54,8 +54,8 @@ export const consumerColumns = [
         data: 'consumer_status',
         render: (data: number) => {
             const statusMap: Record<number, { label: string; class: string }> = {
-                0: { label: 'New User', class: 'success' },
-                1: { label: 'Active', class: 'warning' },
+                0: { label: 'New User', class: 'warning' },
+                1: { label: 'Active', class: 'success' },
                 2: { label: 'inactive', class: 'info' },
             };
 

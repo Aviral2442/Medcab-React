@@ -28,6 +28,8 @@ const VendorDetails = lazy(() => import('@/views/pages/vendorlist/vendorDetails'
 const ConsumerDetails = lazy(() => import('@/views/pages/consumer/consumerDetails'))
 const PartnerList = lazy(() => import('@/views/pages/partner'))
 const DriverList = lazy(() => import('@/views/pages/driver'))
+const BlogList = lazy(() => import('@/views/pages/blogs'))
+const AddBlogs = lazy(() => import('@/views/pages/blogs/components/AddBlogs'))
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -127,10 +129,12 @@ const pagesRoutes: RouteObject[] = [
   { path: "/vendor-details/:id", element: <VendorDetails/>},
   { path: "/consumer-details/:id", element: <ConsumerDetails/> },
   { path: "/partner-list", element: <PartnerList/> },
-  { path: "/driver-list", element: <DriverList/> }
+  { path: "/driver-list", element: <DriverList/> },
+  { path: "/blogs", element: <BlogList/> },
+  { path: "/add-blog", element: <AddBlogs/> }
 ];
 
-const uiRoutes: RouteObject[] = [
+const uiRoutes: RouteObject[] = [ 
   { path: "/ui/core-elements", element: <CoreElements /> },
   { path: "/ui/interactive-features", element: <InteractiveFeatures /> },
   { path: "/ui/menu-links", element: <MenuLinks /> },
