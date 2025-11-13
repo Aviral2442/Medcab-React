@@ -50,22 +50,23 @@ export const getConsumerList = async (filters?: {
 
         // ⚡ Data query
         const query = `
-      SELECT 
-        consumer.consumer_id,
-        consumer.consumer_name,
-        consumer.consumer_mobile_no,
-        consumer.consumer_email_id,
-        consumer.consumer_wallet_amount,
-        consumer.consumer_my_referal_code,
-        referrer.consumer_name AS referer_name,
-        consumer.consumer_status,
-        consumer.consumer_registred_date
-      FROM consumer
-      LEFT JOIN consumer as referrer ON consumer.consumer_refered_by = referrer.consumer_refered_by
-      ${finalWhereSQL}
-      ORDER BY consumer_id DESC
-      LIMIT ? OFFSET ?
-    `;
+            SELECT 
+                consumer.consumer_id,
+                consumer.consumer_name,
+                consumer.consumer_mobile_no,
+                consumer.consumer_email_id,
+                consumer.consumer_wallet_amount,
+                consumer.consumer_my_referal_code,
+                referrer.consumer_name AS referer_name,
+                consumer.consumer_status,
+                consumer.consumer_registred_date
+            FROM consumer
+            LEFT JOIN consumer as referrer ON consumer.consumer_refered_by = referrer.consumer_refered_by
+            ${finalWhereSQL}
+            GROUP BY consumer.consumer_id
+            ORDER BY consumer.consumer_id DESC
+            LIMIT ? OFFSET ?
+            `;
 
         const queryParams = [...params, limit, offset];
         const [rows]: any = await db.query(query, queryParams);
