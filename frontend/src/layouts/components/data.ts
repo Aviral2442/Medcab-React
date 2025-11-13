@@ -97,9 +97,9 @@ export const menuItems: MenuItemType[] = [
     label: 'Dashboard',
     icon: LuCircleGauge,
     children: [
-      { key: 'amulance-dashboard', label: 'Ambulance Dashboard', url: '/ambulance-dashboard' },
-      { key: 'pathology-dashboard', label: 'Pathology Dashboard', url: '/pathology-dashboard' },
-      { key: 'manpower-dashboard', label: 'Manpower Dashboard', url: '/manpower-dashboard' },
+      { key: 'amulance-dashboard', label: 'Ambulance', url: '/ambulance-dashboard' },
+      { key: 'pathology-dashboard', label: 'Pathology', url: '/pathology-dashboard' },
+      { key: 'manpower-dashboard', label: 'Manpower', url: '/manpower-dashboard' },
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
     ],
   },

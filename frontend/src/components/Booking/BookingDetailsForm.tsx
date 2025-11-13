@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card, Row, Col, Form, Button, Badge } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX } from "react-icons/tb";
+import '@/global.css';
 
 interface BookingDetailsFormProps {
   data: any;
@@ -112,7 +113,7 @@ const Field: React.FC<FieldProps> = ({
               <Form.Select
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="flex-grow-1"
+                className="flex-grow-1 input-field"
               >
                 {options.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -126,7 +127,7 @@ const Field: React.FC<FieldProps> = ({
                 type={type !== "textarea" ? type : undefined}
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="flex-grow-1"
+                className="flex-grow-1 input-field"
                 {...(type === "textarea" ? { rows } : {})}
               />
             )}
@@ -154,14 +155,14 @@ const Field: React.FC<FieldProps> = ({
               plaintext
               value={displayValue}
               as={type === "textarea" ? "textarea" : "input"}
-              className="flex-grow-1 p-2 "
+              className="flex-grow-1 p-2 input-field"
             />
             {editable && onEdit && (
               <Button
                 variant="link"
                 size="sm"
                 onClick={() => setIsEditing(true)}
-                className="text-muted p-1"
+                className="text-muted p-1 input-field "
               >
                 <TbPencil size={18} />
               </Button>
@@ -225,6 +226,18 @@ const fieldGroups = {
       type: "datetime-local",
       editable: false,
     },
+  ],
+  consumer: [
+    { label: "Consumer ID", name: "consumer_id", type: "number", editable: false},
+    { label: "Consumer Name", name: "consumer_name",editable: false },
+    { label: "Consumer Mobile", name: "consumer_mobile_no", type: "tel", editable: false },
+    { label: "Consumer Email", name: "consumer_email_id", type: "email", editable: false },
+    { label: "Consumer City", name: "consumer_city_id", type: "number", editable: false },
+    { label: "Consumer Wallet", name: "consumer_wallet_amount", type: "number", editable: false },
+    { label: "Consumer Referral", name: "consumer_my_referal_code", type: "number", editable: false },
+    { label: "Consumer Refered By", name: "consumer_refered_by", type: "number", editable: false },
+    { label: "Consumer Registered Date", name:"consumer_registred_date", type: "date", editable: false },
+    { label: "Consumer Status", name: "consumer_status", type: "number", editable: false },
   ],
   payment: [
     { label: "Payment Mode", name: "mpo_payment_mode" },
@@ -407,6 +420,14 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
         <Card.Body>
           <Section title="Order Information">
             {renderFields(fieldGroups.orderInfo)}
+          </Section>
+        </Card.Body>
+      </Card>
+
+      <Card className="mb-4">
+        <Card.Body>
+          <Section title="Consumer Information">
+            {renderFields(fieldGroups.consumer)}
           </Section>
         </Card.Body>
       </Card>

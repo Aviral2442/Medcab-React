@@ -105,7 +105,7 @@ const ExportDataWithButtons = ({
   });
   const [pageSize, _setPageSize] = useState(10);
   const [_total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [_totalPages, setTotalPages] = useState(0);
   
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 

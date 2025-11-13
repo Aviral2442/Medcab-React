@@ -7,7 +7,7 @@ import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import { TbEye, TbEdit, TbArrowRight } from "react-icons/tb";
+import { TbEye, TbEdit, TbArrowRight, TbContainer } from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
 import { createRoot } from "react-dom/client";
@@ -18,6 +18,7 @@ import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
+import { LuActivity, LuCircle } from "react-icons/lu";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -214,12 +215,19 @@ const ExportDataWithButtons = ({
               <TbEye className="me-1" />
             </button>
             <button
-              className="edit-icon p-0 ps-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+              className="edit-icon p-0 ps-1 py-1 text-white rounded-1 d-flex align-items-center justify-content-center"
               onClick={() => {
                 navigate(`/edit-blog/${rowData.blogs_id}`);
               }}
             >
               <TbEdit className="me-1" />
+            </button>
+            <button
+                className="icon-link icon-link-hover link-secondary link-underline-secondary link-underline-opacity-25 fw-semibold bg-transparent border-0 p-0"
+              >
+                {/* // active and inactive toggle button */}
+                {/* {rowData.blogs_status == 1 ? "Deactivate" : "Activate"} */}
+                
             </button>
           </div>
         );
