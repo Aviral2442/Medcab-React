@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
-import {
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  DropdownToggle,
-} from "react-bootstrap";
+// import {
+//   Dropdown,
+//   DropdownMenu,
+//   DropdownItem,
+//   DropdownToggle,
+// } from "react-bootstrap";
 
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
+import '@/global.css';
 
 // import ReactDOMServer from "react-dom/server";
 import {
-  TbDotsVertical,
+  // TbDotsVertical,
   TbEdit,
 } from "react-icons/tb";
 
@@ -32,7 +33,7 @@ import {
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
-import TablePagination from "@/components/table/TablePagination";
+// import TablePagination from "@/components/table/TablePagination";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 
@@ -96,10 +97,10 @@ const ExportDataWithButtons = ({
   const [loading, setLoading] = useState(false);
   
   // URL search params
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
   
   // Pagination states - initialize from URL
-  const [currentPage, setCurrentPage] = useState(() => {
+  const [currentPage, _setCurrentPage] = useState(() => {
     const page = searchParams.get('page');
     return page ? parseInt(page) - 1 : 0; // Convert to 0-based index
   });
@@ -112,12 +113,12 @@ const ExportDataWithButtons = ({
   const { endpoint, columns, headers } = tableConfig[tabKey];
 
   // Update URL when page changes
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-    const newParams = new URLSearchParams(searchParams);
-    newParams.set('page', (newPage + 1).toString()); // Convert to 1-based for URL
-    setSearchParams(newParams);
-  };
+  // const handlePageChange = (newPage: number) => {
+  //   setCurrentPage(newPage);
+  //   const newParams = new URLSearchParams(searchParams);
+  //   newParams.set('page', (newPage + 1).toString()); // Convert to 1-based for URL
+  //   setSearchParams(newParams);
+  // };
 
   const fetchData = async () => {
     setLoading(true);
@@ -205,19 +206,14 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-          <Dropdown align="end" className="text-muted">
-            <DropdownToggle
-              variant="link"
-              className="drop-arrow-none fs-xxl link-reset p-0"
+          <div className="d-flex align-items-center gap-2">
+            <button
+              className="edit-icon p-0 ps-1 py-1 border-0 text-white rounded-1 d-flex align-items-center justify-content-center"
+              onClick={() => onEditRow(rowData)}
             >
-              <TbDotsVertical />
-            </DropdownToggle>
-            <DropdownMenu>
-              <DropdownItem onClick={() => onEditRow(rowData)}>
-                <TbEdit className="me-1" /> Edit
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+              <TbEdit className="me-1" />
+            </button>
+          </div>
         );
       },
     },

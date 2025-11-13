@@ -1,13 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import ComponentCard from "@/components/ComponentCard";
 import "@/global.css";
-import { InputGroup, FormControl, ButtonGroup, Button } from "react-bootstrap";
+// import { InputGroup, FormControl, ButtonGroup, Button } from "react-bootstrap";
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import { TbEye, TbEdit, TbArrowRight, TbContainer } from "react-icons/tb";
+import { TbEye, TbEdit, TbArrowRight} from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
 import { createRoot } from "react-dom/client";
@@ -18,7 +18,7 @@ import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
-import { LuActivity, LuCircle } from "react-icons/lu";
+// import { LuActivity, LuCircle } from "react-icons/lu";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -44,7 +44,7 @@ type ExportDataWithButtonsProps = {
   refreshFlag: number;
   onAddNew: () => void;
   filterParams?: Record<string, any>;
-  onDataChanged?: () => void;
+  _onDataChanged?: () => void;
 };
 
 const ExportDataWithButtons = ({
@@ -52,12 +52,12 @@ const ExportDataWithButtons = ({
   refreshFlag,
   onAddNew,
   filterParams = {},
-  onDataChanged,
+//   _onDataChanged,
 }: ExportDataWithButtonsProps) => {
   const navigate = useNavigate();
   const [tableData, setTableData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+//   const [searchTerm, setSearchTerm] = useState("");
   const tableRef = useRef<any>(null);
 
   const [pageSize] = useState(10);
@@ -209,10 +209,13 @@ const ExportDataWithButtons = ({
             <button
               className="eye-icon p-0 ps-1 text-white rounded-1 d-flex align-items-center justify-content-center"
               onClick={() => {
-                navigate(`/blog-details/${rowData.blogs_id}`);
+                // navigate(`/blog-details/${rowData.blogs_id}`);
               }}
             >
+                {/* created a toggle for inactive or active blogs */}
+
               <TbEye className="me-1" />
+              {/* <TbEyeClosed/> */}
             </button>
             <button
               className="edit-icon p-0 ps-1 py-1 text-white rounded-1 d-flex align-items-center justify-content-center"
@@ -222,13 +225,13 @@ const ExportDataWithButtons = ({
             >
               <TbEdit className="me-1" />
             </button>
-            <button
+            {/* <button
                 className="icon-link icon-link-hover link-secondary link-underline-secondary link-underline-opacity-25 fw-semibold bg-transparent border-0 p-0"
+
               >
-                {/* // active and inactive toggle button */}
-                {/* {rowData.blogs_status == 1 ? "Deactivate" : "Activate"} */}
                 
-            </button>
+                
+            </button> */}
           </div>
         );
       },

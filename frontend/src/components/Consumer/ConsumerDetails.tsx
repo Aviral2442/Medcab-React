@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Row, Col, Form, Badge } from "react-bootstrap";
+import { Card, Row, Col, Form } from "react-bootstrap";
 
 interface ConsumerDetailsProps {
   data: any;
@@ -59,11 +59,11 @@ const Field: React.FC<{ label: string; value: any; type?: string; options?: any[
   );
 };
 
-const statusMap: Record<string, [string, string]> = {
-  "2": ["info", "Inactive"],
-  "1": ["warning", "Active"],
-  "0": ["success", "New User"],
-};
+// const statusMap: Record<string, [string, string]> = {
+//   "2": ["info", "Inactive"],
+//   "1": ["warning", "Active"],
+//   "0": ["success", "New User"],
+// };
 
 const consumerFields: FieldDef[] = [
   { label: "Consumer ID", name: "consumer_id", type: "number" },
@@ -78,11 +78,11 @@ const consumerFields: FieldDef[] = [
   { label: "Wallet Amount", name: "consumer_wallet_amount", type: "number" },
 ];
 
-const getStatusBadge = (status: any) => {
-  const s = String(status ?? "unknown");
-  const [variant, text] = statusMap[s] || ["secondary", s];
-  return <Badge bg={variant}>{text}</Badge>;
-};
+// const getStatusBadge = (status: any) => {
+//   const s = String(status ?? "unknown");
+//   const [variant, text] = statusMap[s] || ["secondary", s];
+//   return <Badge bg={variant}>{text}</Badge>;
+// };
 
 const formatDateShort = (value: any) => {
   if (value === null || value === undefined || value === "") return "N/A";

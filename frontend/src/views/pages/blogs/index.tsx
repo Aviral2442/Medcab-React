@@ -5,13 +5,13 @@ import { useNavigate } from "react-router-dom";
 
 const Page: React.FC = () => {
     const navigate = useNavigate();
-    const [refreshFlag, setRefreshFlag] = React.useState(0);
+    const [refreshFlag, _setRefreshFlag] = React.useState(0);
 
     const handleAddNew = () => {
         navigate('/add-blog');
     };
 
-    const triggerRefresh = () => setRefreshFlag((prev) => prev + 1);
+    // const triggerRefresh = () => setRefreshFlag((prev) => prev + 1);
 
     return (
         <Container fluid className="p-2">
@@ -19,7 +19,7 @@ const Page: React.FC = () => {
                 tabKey={1}
                 refreshFlag={refreshFlag}
                 onAddNew={handleAddNew}
-                onDataChanged={triggerRefresh}
+                // onDataChanged={triggerRefresh}
             />
         </Container>
     );

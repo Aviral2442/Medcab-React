@@ -2,20 +2,22 @@ import { type MenuItemType } from '@/types/layout'
 import { type IconType } from 'react-icons'
 import { TbLogout2, TbUserCircle } from 'react-icons/tb'
 import {
-  LuAlignLeft,
+  // LuAlignLeft,
   LuAmbulance,
-  LuAmpersands,
+  // LuAmpersands,
   LuAxis3D,
   LuBed,
   LuCircleGauge,
-  LuClipboardType,
+  // LuClipboardType,
   LuFileType,
-  LuMoonStar,
+  // LuMoonStar,
   LuNotebookText,
   LuSettings,
-  LuSquareMenu,
+  // LuSquareMenu,
   LuTableOfContents,
   LuUser,
+  LuUserRound,
+  LuUserRoundPlus,
   LuVideo,
 } from 'react-icons/lu'
 
@@ -107,7 +109,7 @@ export const menuItems: MenuItemType[] = [
   {
     key: 'pages-manpower',
     label: 'Manpower',
-    icon: LuNotebookText,
+    icon: LuUserRoundPlus,
     children: [
       { key: 'manpower-category', label: 'Category', url: '/manpower-category' },
       { key: 'manpower-vendor', label: 'Vendor', url: '/manpower-vendors' },

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Row, Col, Form, Button, Badge } from "react-bootstrap";
+import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX } from "react-icons/tb";
 import '@/global.css';
 
@@ -323,27 +323,27 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
   const handleFieldUpdate = (field: string, value: string) =>
     onUpdate?.(field, value);
 
-  const getStatusBadge = (status: number) => {
-    const map: Record<number, [string, string]> = {
-      1: ["success", "New"],
-      2: ["warning", "Ongoing"],
-      3: ["danger", "Canceled"],
-      4: ["secondary", "Completed"],
-      5: ["info", "Processing"],
-      6: ["primary", "Assigned"],
-    };
-    const [variant, text] = map[status] || ["secondary", "Unknown"];
-    return <Badge bg={variant}>{text}</Badge>;
-  };
+  // const getStatusBadge = (status: number) => {
+  //   const map: Record<number, [string, string]> = {
+  //     1: ["success", "New"],
+  //     2: ["warning", "Ongoing"],
+  //     3: ["danger", "Canceled"],
+  //     4: ["secondary", "Completed"],
+  //     5: ["info", "Processing"],
+  //     6: ["primary", "Assigned"],
+  //   };
+  //   const [variant, text] = map[status] || ["secondary", "Unknown"];
+  //   return <Badge bg={variant}>{text}</Badge>;
+  // };
 
-  const getPaymentTypeBadge = (type: string) => {
-    const map: Record<string, [string, string]> = {
-      COD: ["success", "COD"],
-      Online: ["info", "Online"],
-    };
-    const [variant, text] = map[type] || ["secondary", type || "N/A"];
-    return <Badge bg={variant}>{text}</Badge>;
-  };
+  // const getPaymentTypeBadge = (type: string) => {
+  //   const map: Record<string, [string, string]> = {
+  //     COD: ["success", "COD"],
+  //     Online: ["info", "Online"],
+  //   };
+  //   const [variant, text] = map[type] || ["secondary", type || "N/A"];
+  //   return <Badge bg={variant}>{text}</Badge>;
+  // };
 
   const formatDate = (value: string | number) => {
     if (!value && value !== 0) return "N/A";

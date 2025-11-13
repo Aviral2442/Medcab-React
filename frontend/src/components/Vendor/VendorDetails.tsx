@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Row, Col, Form, Button, Badge } from "react-bootstrap";
+import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX } from "react-icons/tb";
 
 interface VendorDetailsProps {
@@ -303,21 +303,21 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
   const handleFieldUpdate = (field: string, value: string) =>
     onUpdate?.(field, value);
 
-  const getStatusBadge = (status: any) => {
-    const s = String(status ?? "unknown");
-    const map: Record<string, [string, string]> = {
-      "0": ["secondary", "Inactive"],
-      "1": ["success", "Active"],
-      "2": ["info", "New"],
-      "3": ["warning", "Pending Approval"],
-      "4": ["primary", "Assigned"],
-      "5": ["success", "Free"],
-      "6": ["primary", "On Duty"],
-      "7": ["secondary", "Off Duty"],
-    };
-    const [variant, text] = map[s] || ["secondary", s];
-    return <Badge bg={variant}>{text}</Badge>;
-  };
+  // const getStatusBadge = (status: any) => {
+  //   const s = String(status ?? "unknown");
+  //   const map: Record<string, [string, string]> = {
+  //     "0": ["secondary", "Inactive"],
+  //     "1": ["success", "Active"],
+  //     "2": ["info", "New"],
+  //     "3": ["warning", "Pending Approval"],
+  //     "4": ["primary", "Assigned"],
+  //     "5": ["success", "Free"],
+  //     "6": ["primary", "On Duty"],
+  //     "7": ["secondary", "Off Duty"],
+  //   };
+  //   const [variant, text] = map[s] || ["secondary", s];
+  //   return <Badge bg={variant}>{text}</Badge>;
+  // };
 
   const formatDate = (value: string | number) => {
     if (value === null || value === undefined || value === "") return "N/A";
