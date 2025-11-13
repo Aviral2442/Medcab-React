@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col, Card, Alert, Image } from "react-bootstrap";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import SnowEditor from "@/views/forms/editors/index";
 import ComponentCard from "@/components/ComponentCard";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const blogValidationSchema = Yup.object({
   blogs_title: Yup.string().required("Blog title is required"),
@@ -22,12 +22,15 @@ const blogValidationSchema = Yup.object({
 
 const AddBlogs = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const initialValues = {
+  const [initialValues, setInitialValues] = useState({
     blogs_image: null as File | null,
     blogs_title: "",
     blogs_sku: "",
@@ -39,6 +42,45 @@ const AddBlogs = () => {
     blogs_meta_keywords: "",
     blogs_force_keywords: "",
     blogs_schema: "",
+  });
+
+  useEffect(() => {
+    if (isEditMode) {
+      fetchBlogDetails();
+    }
+  }, [id]);
+
+  const fetchBlogDetails = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `${baseURL}/content_writer/get_blog/${id}`
+      );
+      const blog = response.data.jsonData.blog;
+
+      setInitialValues({
+        blogs_image: null,
+        blogs_title: blog.blogs_title || "",
+        blogs_sku: blog.blogs_sku || "",
+        blogs_short_desc: blog.blogs_short_desc || "",
+        blogs_long_desc: blog.blogs_long_desc || "",
+        blogs_category: blog.blogs_category?.toString() || "",
+        blogs_meta_title: blog.blogs_meta_title || "",
+        blogs_meta_desc: blog.blogs_meta_desc || "",
+        blogs_meta_keywords: blog.blogs_meta_keywords || "",
+        blogs_force_keywords: blog.blogs_force_keywords || "",
+        blogs_schema: blog.blogs_schema || "",
+      });
+
+      if (blog.blogs_image) {
+        setPreviewImage(`${baseURL}/${blog.blogs_image}`);
+      }
+    } catch (err: any) {
+      console.error("Error fetching blog details:", err);
+      setError(err.response?.data?.message || "Failed to fetch blog details");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleImageChange = (
@@ -78,29 +120,62 @@ const AddBlogs = () => {
       formData.append("blogs_force_keywords", values.blogs_force_keywords);
       formData.append("blogs_schema", values.blogs_schema);
 
-      const response = await axios.post(
-        `${baseURL}/content_writer/add_blog`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      let response;
+      if (isEditMode) {
+        response = await axios.put(
+          `${baseURL}/content_writer/edit_blog/${id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      } else {
+        response = await axios.post(
+          `${baseURL}/content_writer/add_blog`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      }
 
-      if (response.data.status === 201) {
+      if (response.data.status === 201 || response.data.status === 200) {
         navigate("/blogs");
       }
     } catch (err: any) {
-      console.error("Error adding blog:", err);
-      setError(err.response?.data?.message || "Failed to add blog");
+      console.error(
+        `Error ${isEditMode ? "updating" : "adding"} blog:`,
+        err
+      );
+      setError(
+        err.response?.data?.message ||
+          `Failed to ${isEditMode ? "update" : "add"} blog`
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <ComponentCard
+        title={isEditMode ? "Edit Blog" : "Add New Blog"}
+        className="m-2"
+      >
+        <div className="text-center py-4">Loading blog details...</div>
+      </ComponentCard>
+    );
+  }
+
   return (
-    <ComponentCard title="Add New Blog" className="m-2">
+    <ComponentCard
+      title={isEditMode ? "Edit Blog" : "Add New Blog"}
+      className="m-2"
+    >
       {error && (
         <Alert variant="danger" dismissible onClose={() => setError(null)}>
           {error}
@@ -111,6 +186,7 @@ const AddBlogs = () => {
         initialValues={initialValues}
         validationSchema={blogValidationSchema}
         onSubmit={handleSubmit}
+        enableReinitialize
       >
         {({
           values,
@@ -129,7 +205,8 @@ const AddBlogs = () => {
                   <Card.Body>
                     <Form.Group>
                       <Form.Label className="fw-semibold">
-                        Blog Image <span className="text-danger">*</span>
+                        Blog Image{" "}
+                        {!isEditMode && <span className="text-danger">*</span>}
                       </Form.Label>
                       <Form.Control
                         type="file"
@@ -139,11 +216,16 @@ const AddBlogs = () => {
                         }
                         onBlur={handleBlur}
                       />
+                      {isEditMode && (
+                        <Form.Text className="text-muted">
+                          Leave empty to keep current image
+                        </Form.Text>
+                      )}
                     </Form.Group>
                   </Card.Body>
                 </Card>
               </Col>
-              <Col lg={6} >
+              <Col lg={6}>
                 {previewImage && (
                   <div className="">
                     <Image
@@ -246,13 +328,14 @@ const AddBlogs = () => {
                           />
                         </Form.Group>
                       </Col>
+
                       <Col md={12}>
                         <Form.Group>
                           <SnowEditor
                             title="Short Description"
                             value={values.blogs_short_desc}
-                            onChange={(values: string) =>
-                              setFieldValue("blogs_short_desc", values)
+                            onChange={(value: string) =>
+                              setFieldValue("blogs_short_desc", value)
                             }
                           />
                           {touched.blogs_short_desc &&
@@ -397,7 +480,13 @@ const AddBlogs = () => {
                     Cancel
                   </Button>
                   <Button variant="primary" type="submit" disabled={submitting}>
-                    {submitting ? "Saving..." : "Save Blog"}
+                    {submitting
+                      ? isEditMode
+                        ? "Updating..."
+                        : "Saving..."
+                      : isEditMode
+                      ? "Update Blog"
+                      : "Save Blog"}
                   </Button>
                 </div>
               </Col>

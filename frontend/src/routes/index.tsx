@@ -131,7 +131,8 @@ const pagesRoutes: RouteObject[] = [
   { path: "/partner-list", element: <PartnerList/> },
   { path: "/driver-list", element: <DriverList/> },
   { path: "/blogs", element: <BlogList/> },
-  { path: "/add-blog", element: <AddBlogs/> }
+  { path: "/add-blog", element: <AddBlogs/> },
+  { path: "/edit-blog/:id", element: <AddBlogs/> }
 ];
 
 const uiRoutes: RouteObject[] = [ 
