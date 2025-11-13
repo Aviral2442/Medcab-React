@@ -255,26 +255,26 @@ export const updateBlogStatusService = async (blogId: number, status: number) =>
 };
 
 
-interface city_content_Data {
-    city_name: string;
-    city_title_sku: string;
-    city_title: string;
-    city_heading: string;
-    city_body_desc: string;
-    city_why_choose_us: string;
-    why_choose_meta_desc: string;
-    city_block1_heading: string;
-    city_block1_body: string;
-    city_block2_heading: string;
-    city_block2_body: string;
-    city_thumbnail: Express.Multer.File;
-    city_thumbnail_alt: string;
-    city_meta_title: string;
-    city_meta_desc: string;
-    city_meta_keyword: string;
-    city_force_keyword: string;
-    city_faq_heading: string;
-    city_emergency_desc: string;
+interface cityContentData {
+    city_name?: string;
+    city_title_sku?: string;
+    city_title?: string;
+    city_heading?: string;
+    city_body_desc?: string;
+    city_why_choose_us?: string;
+    why_choose_meta_desc?: string;
+    city_block1_heading?: string;
+    city_block1_body?: string;
+    city_block2_heading?: string;
+    city_block2_body?: string;
+    city_thumbnail?: Express.Multer.File;
+    city_thumbnail_alt?: string;
+    city_meta_title?: string;
+    city_meta_desc?: string;
+    city_meta_keyword?: string;
+    city_force_keyword?: string;
+    city_faq_heading?: string;
+    city_emergency_desc?: string;
 }
 
 // SERVICE TO GET CITY CONTENT LIST WITH FILTERS AND PAGINATION
@@ -342,20 +342,19 @@ export const getCityContentService = async (filters?: {
 };
 
 // SERVICE TO ADD NEW CITY CONTENT
-export const addCityContentService = async (data: city_content_Data) => {
+export const addCityContentService = async (data: cityContentData) => {
 
     try {
 
-        let imagePath = null;
+        let imagePath: string | null = null;
 
         if (data.city_thumbnail) {
-            const uploadedPath = uploadFileCustom(data.city_thumbnail, "/city_content");
-            imagePath = uploadedPath;
+            imagePath = uploadFileCustom(data.city_thumbnail, "/city_content");
         }
 
         const insertData = {
             city_name: data.city_name,
-            city_title_sku: generateSlug(data.city_title_sku),
+            city_title_sku: generateSlug(data.city_title_sku || ""),
             city_title: data.city_title,
             city_heading: data.city_heading,
             city_body_desc: data.city_body_desc,
@@ -372,9 +371,10 @@ export const addCityContentService = async (data: city_content_Data) => {
             city_meta_keyword: data.city_meta_keyword,
             city_force_keyword: data.city_force_keyword,
             city_faq_heading: data.city_faq_heading,
+            city_emergency_desc: data.city_emergency_desc,
             city_status: 0,
             city_timestamp: currentUnixTime(),
-        }
+        };
 
         const [result]: any = await db.query(
             `INSERT INTO city_content SET ?`,
@@ -382,7 +382,7 @@ export const addCityContentService = async (data: city_content_Data) => {
         );
 
         return {
-            status: 201,
+            status: 200,
             message: "City content added successfully",
         };
 

@@ -138,7 +138,9 @@ export const getCityContentController = async (req: Request, res: Response, next
 export const addCityContentController = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        const cityContentData = {
+        
+        const cityContent = {
+            city_thumbnail: req.file ?? undefined,
             city_name: req.body.city_name,
             city_title_sku: req.body.city_title_sku,
             city_title: req.body.city_title,
@@ -150,7 +152,6 @@ export const addCityContentController = async (req: Request, res: Response, next
             city_block1_body: req.body.city_block1_body,
             city_block2_heading: req.body.city_block2_heading,
             city_block2_body: req.body.city_block2_body,
-            city_thumbnail: req.file,
             city_thumbnail_alt: req.body.city_thumbnail_alt,
             city_meta_title: req.body.city_meta_title,
             city_meta_desc: req.body.city_meta_desc,
@@ -158,11 +159,10 @@ export const addCityContentController = async (req: Request, res: Response, next
             city_force_keyword: req.body.city_force_keyword,
             city_faq_heading: req.body.city_faq_heading,
             city_emergency_desc: req.body.city_emergency_desc,
-            city_schema: req.body.city_schema
-        }
+        };
 
-        const result = await addCityContentService(cityContentData);
-        res.status(200).json(result);
+        const result = await addCityContentService(cityContent);
+        res.status(result.status).json(result);
 
     } catch (error) {
         next(error);
