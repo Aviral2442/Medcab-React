@@ -18,3 +18,16 @@
     width: 100%;
   }
 }
+
+
+:root{
+  --eye-color: #4a5e70;
+  --remark-color: #f0ac4d;
+}
+
+.eye-icon{
+  background-color: var(--eye-color);
+}
+.remark-icon{
+  background-color: var(--remark-color);
+}

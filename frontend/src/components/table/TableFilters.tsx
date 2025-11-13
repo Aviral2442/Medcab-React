@@ -51,47 +51,53 @@ const TableFilters = ({
   }));
 
   return (
-    <div className={`d-flex align-items-center gap-2 flex-wrap ${className}`}>
+    <div className={`d-flex align-items-center gap-2 flex-nowrap ${className}`} style={{ minWidth: 0 }}>
       {showDateRange && (
-        <DatePicker
-          selectsRange={true}
-          startDate={startDate}
-          endDate={endDate}
-          onChange={onDateRangeChange}
-          dateFormat="MM/dd/yyyy"
-          placeholderText={dateRangePlaceholder}
-          className="form-control form-control-sm"
-          disabled={dateFilter !== "custom"}
-          isClearable
-          maxDate={new Date()}
-          showMonthDropdown
-          showYearDropdown
-          dropdownMode="select"
-        />
+        <div style={{ width: '200px', flexShrink: 0, marginRight: '20px' }}>
+          <DatePicker
+            selectsRange={true}
+            startDate={startDate}
+            endDate={endDate}
+            onChange={onDateRangeChange}
+            dateFormat="MM/dd/yyyy"
+            placeholderText={dateRangePlaceholder}
+            className="form-control form-control-sm"
+            disabled={dateFilter !== "custom"}
+            isClearable
+            maxDate={new Date()}
+            showMonthDropdown
+            showYearDropdown
+            dropdownMode="select"
+          />
+        </div>
       )}
       
       {showDateFilter && (
-        <InputPicker
-          data={DateFilterOptions}
-          value={dateFilter}
-          onChange={onDateFilterChange}
-          placeholder={dateFilterPlaceholder}
-          style={{ width: 150 }}
-          cleanable
-          size="sm"
-        />
+        <div style={{ width: '130px', flexShrink: 0 }}>
+          <InputPicker
+            data={DateFilterOptions}
+            value={dateFilter}
+            onChange={onDateFilterChange}
+            placeholder={dateFilterPlaceholder}
+            style={{ width: '100%' }}
+            cleanable
+            size="sm"
+          />
+        </div>
       )}
       
       {showStatusFilter && (
-        <InputPicker
-          data={statusOptions}
-          value={statusFilter}
-          onChange={onStatusFilterChange}
-          placeholder={statusFilterPlaceholder}
-          style={{ width: 150 }}
-          cleanable
-          size="sm"
-        />
+        <div style={{ width: '120px', flexShrink: 0 }}>
+          <InputPicker
+            data={statusOptions}
+            value={statusFilter}
+            onChange={onStatusFilterChange}
+            placeholder={statusFilterPlaceholder}
+            style={{ width: '100%' }}
+            cleanable
+            size="sm"
+          />
+        </div>
       )}
     </div>
   );

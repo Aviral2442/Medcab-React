@@ -4,7 +4,13 @@ import {LiaEdit} from 'react-icons/lia'
 import {useMemo, useState} from 'react'
 import CustomQuill from "@/components/CustomQuill.tsx";
 
-const SnowEditor = () => {
+interface SnowEditorProps {
+    title?: string;
+    value?: string;
+    onChange?: (value: string) => void;
+}
+
+const SnowEditor = ({ title = "Editor", value, onChange }: SnowEditorProps) => {
     const modules = useMemo(
         () => ({
             toolbar: [
@@ -22,34 +28,28 @@ const SnowEditor = () => {
         }),
         [],
     )
-    const [value, setValue] = useState<string>(
-        `<div>
-      <h3>A powerful and responsive admin dashboard template built on Bootstrap.</h3>
-      <p>
-        <br />
-      </p>
-      <ul>
-        <li>Fully responsive layout with a sleek and modern design.</li>
-        <li>Multiple pre-built pages such as login, registration, dashboard, charts, tables, and more.</li>
-        <li>Includes various components like modals, alerts, navigation menus, etc.</li>
-        <li>Easy to customize and extend to suit your project’s needs.</li>
-        <li>Built with Bootstrap 5x, ensuring compatibility with a wide range of devices.</li>
-      </ul>
-      <p>
-        <br />
-      </p>
-      <p>Simple Admin is the perfect choice for your next admin project. Get started today and create a stunning interface for your application.</p>
-    </div>`,
-    )
+    const [internalValue, setInternalValue] = useState<string>()
+
+    const handleChange = (newValue: string) => {
+        if (onChange) {
+            onChange(newValue);
+        } else {
+            setInternalValue(newValue);
+        }
+    }
 
     return (
         <>
             <CardTitle as="h5" className="mb-2">
-                Snow Editor
+                {title}
             </CardTitle>
-            <p className="text-muted">Snow is a clean, flat toolbar theme.</p>
-
-            <CustomQuill key="snow" theme="snow" modules={modules} value={value} onChange={setValue}/>
+            <CustomQuill 
+                key="snow" 
+                theme="snow" 
+                modules={modules} 
+                value={value || internalValue} 
+                onChange={handleChange}
+            />
         </>
     )
 }
@@ -90,12 +90,7 @@ const Page = () => {
     return (
         <Container fluid>
             <PageTitle
-                title="Rich Text Editor"
-                subtitle="Create and edit beautifully formatted content with Quill.js — a modern WYSIWYG editor with extensible features."
-                badge={{
-                    title: 'React Quill New Editor',
-                    icon: LiaEdit,
-                }}
+                title=""
             />
 
             <Row>
@@ -105,11 +100,11 @@ const Page = () => {
                             <SnowEditor/>
                         </CardBody>
 
-                        <div className="border-top border-dashed"></div>
+                        {/* <div className="border-top border-dashed"></div>
 
                         <CardBody>
                             <BubbleEditor/>
-                        </CardBody>
+                        </CardBody> */}
                     </Card>
                 </Col>
             </Row>
@@ -117,4 +112,4 @@ const Page = () => {
     )
 }
 
-export default Page
+export default SnowEditor;
