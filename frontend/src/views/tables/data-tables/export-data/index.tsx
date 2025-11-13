@@ -278,7 +278,7 @@ const ExportDataWithButtons = ({
               </thead>
             </DataTable>
 
-            <TablePagination
+            {/* <TablePagination
               // totalItems={total}
               start={currentPage + 1}
               // end={totalPages}
@@ -291,7 +291,7 @@ const ExportDataWithButtons = ({
               setPageIndex={handlePageChange}
               nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
               canNextPage={currentPage < totalPages - 1}
-            />
+            /> */}
           </div>
         )}
       </ComponentCard>

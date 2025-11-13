@@ -2,6 +2,7 @@ import { type MenuItemType } from '@/types/layout'
 import { type IconType } from 'react-icons'
 import { TbLogout2, TbUserCircle } from 'react-icons/tb'
 import {
+  LuAlignLeft,
   LuAmbulance,
   LuAmpersands,
   LuAxis3D,
@@ -14,6 +15,7 @@ import {
   LuSettings,
   LuSquareMenu,
   LuTableOfContents,
+  LuUser,
   LuVideo,
 } from 'react-icons/lu'
 
@@ -78,11 +80,11 @@ export const userDropdownItems: UserDropdownItemType[] = [
 ]
 
 export const menuItems: MenuItemType[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: LuCircleGauge, url: '/dashboard' },
+  { key: 'consumer-list', label: 'Consumer', icon: LuUser, url: '/consumer-list' },
   // { key: 'ton-ai', label: 'Ton AI', icon: LuSparkles, url: '/ton-ai', badge: { text: 'Hot', variant: 'primary' } },
   // { key: 'calendar', label: 'Calendar', icon: LuCalendar, url: '/calendar' },
   // { key: 'directory', label: 'Directory', icon: LuBookUser, url: '/directory' },
-
+  
   // { key: 'manpower', label: 'Manpower', icon: LuBookUser, url: '/manpower' },
   // { key: 'order-list', label: 'Order List', icon: LuNotebookText, url: '/order-list' },
   // { key: 'booking-list', label: 'Booking List', icon: LuCalendar, url: '/booking-list' },
@@ -90,19 +92,26 @@ export const menuItems: MenuItemType[] = [
   // { key: 'consumer-list', label: 'Consumer List', icon: TbUserCircle, url: '/consumer-list' },
 
   // { key: 'custom-pages', label: 'Custom Pages', isTitle: true },
+  {
+    key: 'pages-dashboard',
+    label: 'Dashboard',
+    icon: LuCircleGauge,
+    children: [
+      { key: 'amulance-dashboard', label: 'Ambulance Dashboard', url: '/ambulance-dashboard' },
+      { key: 'pathology-dashboard', label: 'Pathology Dashboard', url: '/pathology-dashboard' },
+      { key: 'manpower-dashboard', label: 'Manpower Dashboard', url: '/manpower-dashboard' },
+      // { key: 'manpower', label: 'Manpower', url: '/manpower' },
+    ],
+  },
 
   {
     key: 'pages-manpower',
     label: 'Manpower',
     icon: LuNotebookText,
     children: [
-      { key: 'manpower', label: 'Manpower', url: '/manpower' },
-      // { key: 'order-list', label: 'Order List', url: '/order-list' },
-      { key: 'booking-list', label: 'Booking', url: '/booking-list' },
-      { key: 'vendor-list', label: 'Vendor', url: '/vendor-list' },
-      { key: 'consumer-list', label: 'Consumer', url: '/consumer-list' },
-      { key: 'driver-list', label: 'Driver', url: '/driver-list' },
-      { key: 'partner-list', label: 'Partner', url: '/Partner-list' },
+      { key: 'manpower-category', label: 'Category', url: '/manpower-category' },
+      { key: 'manpower-vendor', label: 'Vendor', url: '/manpower-vendors' },
+      { key: 'manpower-booking', label: 'Booking', url: '/manpower-bookings' },
       // { key: 'pricing', label: 'Pricing', url: '/pages/pricing' },
       // { key: 'empty-page', label: 'Empty Page', url: '/pages/empty' },
       // { key: 'timeline', label: 'Timeline', url: '/pages/timeline' },
@@ -115,6 +124,8 @@ export const menuItems: MenuItemType[] = [
     label: 'Ambulance',
     icon: LuAmbulance,
     children: [
+      { key: 'driver-list', label: 'Driver', url: '/driver-list' },
+      { key: 'partner-list', label: 'Partner', url: '/Partner-list' },
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
     ],
   },
