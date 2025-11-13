@@ -61,7 +61,7 @@ export const getConsumerList = async (filters?: {
                 consumer.consumer_status,
                 consumer.consumer_registred_date
             FROM consumer
-            LEFT JOIN consumer as referrer ON consumer.consumer_refered_by = referrer.consumer_refered_by
+            LEFT JOIN consumer as referrer ON consumer.consumer_refered_by = referrer.consumer_id
             ${finalWhereSQL}
             GROUP BY consumer.consumer_id
             ORDER BY consumer.consumer_id DESC
