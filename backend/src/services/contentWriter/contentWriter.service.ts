@@ -228,3 +228,92 @@ export const updateBlogStatusService = async (blogId: number, status: number) =>
         throw new ApiError(500, "Update Blog Status Error On Updating");
     }
 };
+
+
+interface city_content_Data {
+    city_name: string;
+    city_title_sku: string;
+    city_title: string;
+    city_heading: string;
+    city_body_desc: string;
+    city_why_choose_us: string;
+    why_choose_meta_desc: string;
+    city_block1_heading: string;
+    city_block1_body: string;
+    city_block2_heading: string;
+    city_block2_body: string;
+    city_thumbnail: Express.Multer.File;
+    city_thumbnail_alt: string;
+    city_meta_title: string;
+    city_meta_desc: string;
+    city_meta_keyword: string;
+    city_force_keyword: string;
+    city_faq_heading: string;
+    city_status: number;
+    city_emergency_desc: string;
+    city_timestamp: number;
+}
+
+// SERVICE TO GET CITY CONTENT LIST WITH FILTERS AND PAGINATION
+export const getCityContentService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+
+    try {
+
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "city_content.city_timestamp",
+        });
+
+        const query = `
+            SELECT 
+                city_content.city_id,
+                city_content.city_name,
+                city_content.city_title,
+                city_content.city_status,
+                city_content.city_timestamp
+            FROM city_content
+            ${whereSQL}
+            ORDER BY city_content.city_id DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM city_content ${whereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "City content list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                city_content_list: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Get City Content Error On Fetching");
+    }
+
+};

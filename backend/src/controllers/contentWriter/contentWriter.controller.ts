@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getBlogListService, addBlogService, editBlogService, updateBlogStatusService } from "../../services/contentWriter/contentWriter.service";
+import { getBlogListService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService } from "../../services/contentWriter/contentWriter.service";
 import { Next } from "mysql2/typings/mysql/lib/parsers/typeCast";
 
 // CONTROLLER TO GET BLOG LIST WITH FILTERS AND PAGINATION
@@ -97,4 +97,27 @@ export const updateBlogStatusController = async (req: Request, res: Response, ne
     } catch (error) {
         next(error);
     }
+};
+
+// CONTROLLER TO GET CITY CONTENT WITH FILTERS AND PAGINATION
+export const getCityContentController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        }
+
+        const result = await getCityContentService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
 };
