@@ -207,3 +207,24 @@ export const editBlogService = async (blogId: number, data: blogData) => {
     }
 
 };
+
+// SERVICE TO UPDATE BLOG STATUS
+export const updateBlogStatusService = async (blogId: number, status: number) => {
+    try {
+
+        const [result]: any = await db.query(
+            `UPDATE blogs SET blogs_status = ? WHERE blogs_id = ?`,
+            [status, blogId]
+        );
+
+        return {
+            status: 200,
+            message: "Blog status updated successfully",
+        };
+
+    } catch (error) {
+        console.log(error);
+
+        throw new ApiError(500, "Update Blog Status Error On Updating");
+    }
+};

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { getBlogListService, addBlogService, editBlogService } from "../../services/contentWriter/contentWriter.service";
+import { getBlogListService, addBlogService, editBlogService, updateBlogStatusService } from "../../services/contentWriter/contentWriter.service";
+import { Next } from "mysql2/typings/mysql/lib/parsers/typeCast";
 
 // CONTROLLER TO GET BLOG LIST WITH FILTERS AND PAGINATION
 export const getBlogListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -79,4 +80,21 @@ export const editBlogController = async (req: Request, res: Response, next: Next
         next(error);
     }
 
+};
+
+// CONTROLLER TO UPDATE BLOG STATUS
+export const updateBlogStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const blogId = parseInt(req.params.id);
+
+        const status = req.body.status;
+
+        const result = await updateBlogStatusService(blogId, status);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
 };
