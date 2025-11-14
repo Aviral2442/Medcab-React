@@ -12,6 +12,7 @@ import partnerRoutes from "./routes/partner.routes";
 import vehicleRoutes from "./routes/vehicle.routes";
 import driverRoutes from "./routes/driver.routes";
 import contentWriter from "./routes/contentWriter.routes";
+import ambulanceRoutes from "./routes/ambulance.routes";
 import { errorMiddleware } from "./middleware/error.middleware";
 import path from "path";
 
@@ -47,6 +48,8 @@ app.use("/api/partner", partnerRoutes);
 app.use("/api/vehicle", vehicleRoutes);
 app.use("/api/driver", driverRoutes);
 app.use("/api/content_writer", contentWriter);
+app.use("/api/ambulance", ambulanceRoutes);
+
 app.use(errorMiddleware);
 
 export default app;
