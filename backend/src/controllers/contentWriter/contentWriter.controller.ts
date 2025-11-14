@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService, getCityContentFaqListService, addCityContentFaqService, fetchCityContentFaqService, editCityContentFaqService } from "../../services/contentWriter/contentWriter.service";
+import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService, getCityContentFaqListService, addCityContentFaqService, fetchCityContentFaqService, editCityContentFaqService, updateCityContentFaqStatusService } from "../../services/contentWriter/contentWriter.service";
 
 // CONTROLLER TO GET BLOG LIST WITH FILTERS AND PAGINATION
 export const getBlogListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -301,3 +301,16 @@ export const editCityContentFaqController = async (req: Request, res: Response, 
         next(error);
     }
 }
+
+// CONTROLLER TO UPDATE CITY CONTENT FAQ STATUS
+export const updateCityContentFaqStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const faqId = parseInt(req.params.id);
+        const status = req.body.status;
+        const result = await updateCityContentFaqStatusService(faqId, status);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};

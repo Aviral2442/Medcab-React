@@ -621,3 +621,21 @@ export const editCityContentFaqService = async (faqId: number, data: cityContent
         throw new ApiError(500, "Edit City Content FAQ Error On Updating");
     }
 };
+
+// SERVICE TO UPDATE CITY CONTENT FAQ STATUS
+export const updateCityContentFaqStatusService = async (faqId: number, status: number) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `UPDATE city_faq SET city_faq_status = ? WHERE city_faq_id = ?`,
+            [status, faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content FAQ status updated successfully",
+        };
+    } catch (error) {
+        throw new ApiError(500, "Update City Content FAQ Status Error On Updating");    
+    }
+};
