@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService, getCityContentFaqListService, addCityContentFaqService } from "../../services/contentWriter/contentWriter.service";
+import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService, getCityContentFaqListService, addCityContentFaqService, fetchCityContentFaqService, editCityContentFaqService } from "../../services/contentWriter/contentWriter.service";
 
 // CONTROLLER TO GET BLOG LIST WITH FILTERS AND PAGINATION
 export const getBlogListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -272,3 +272,32 @@ export const addCityContentFaqController = async (req: Request, res: Response, n
     }
 
 };
+
+// CONTROLLER TO FETCH CITY CONTENT FAQ BY FAQ ID
+export const fetchCityContentFaqController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const faqId = parseInt(req.params.id);
+        const result = await fetchCityContentFaqService(faqId);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO EDIT CITY CONTENT FAQ
+export const editCityContentFaqController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const faqId = parseInt(req.params.id);
+        const faqData = {
+            city_id: req.body.city_id || 0,
+            city_faq_que: req.body.city_faq_que,
+            city_faq_ans: req.body.city_faq_ans,
+        };
+        const result = await editCityContentFaqService(faqId, faqData);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+}

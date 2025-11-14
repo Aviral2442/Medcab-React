@@ -1,5 +1,5 @@
 import Router from "express";
-import { getBlogListController, getBlogController, addBlogController, editBlogController, updateBlogStatusController, getCityContentController, addCityContentController, fetchCityContentController, editCityContentController, updateCityContentStatusController, getCityContentFaqListController, addCityContentFaqController } from "../controllers/contentWriter/contentWriter.controller"
+import { getBlogListController, getBlogController, addBlogController, editBlogController, updateBlogStatusController, getCityContentController, addCityContentController, fetchCityContentController, editCityContentController, updateCityContentStatusController, getCityContentFaqListController, addCityContentFaqController, fetchCityContentFaqController, editCityContentFaqController } from "../controllers/contentWriter/contentWriter.controller"
 import multer from "multer";
 
 const router = Router();
@@ -22,4 +22,7 @@ router.patch("/update_city_content_status/:id", updateCityContentStatusControlle
 // CITY CONTENT FAQ ROUTER's
 router.get("/get_city_content_faq_list", getCityContentFaqListController);
 router.post("/add_city_content_faq", addCityContentFaqController);
+router.get("/fetch_city_content_faq/:id", fetchCityContentFaqController);
+router.put("/edit_city_content_faq/:id", editCityContentFaqController);
+
 export default router;

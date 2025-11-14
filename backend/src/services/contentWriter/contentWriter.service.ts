@@ -572,3 +572,52 @@ export const addCityContentFaqService = async (data: cityContentFaqData) => {
     }
 
 };
+
+// SERVICE TO FETCH SINGLE CITY CONTENT FAQ
+export const fetchCityContentFaqService = async (faqId: number) => {
+
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT * FROM city_faq WHERE city_faq.city_faq_id = ?`,
+            [faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content FAQ fetched successfully",
+            jsonData: {
+                city_content_faq: rows[0] || null
+            }
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Fetch City Content FAQ Error On Fetching");
+    }
+
+};
+
+// SERVICE TO EDIT EXISTING CITY CONTENT FAQ
+export const editCityContentFaqService = async (faqId: number, data: cityContentFaqData) => {
+    try {
+
+        const updateData: any = {};
+
+        if (data.city_id) updateData.city_id = data.city_id;
+        if (data.city_faq_que) updateData.city_faq_que = data.city_faq_que;
+        if (data.city_faq_ans) updateData.city_faq_ans = data.city_faq_ans;
+
+        const [result]: any = await db.query(
+            `UPDATE city_faq SET ? WHERE city_faq_id = ?`,
+            [updateData, faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content FAQ updated successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Edit City Content FAQ Error On Updating");
+    }
+};
