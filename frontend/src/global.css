@@ -25,6 +25,7 @@
   --remark-color: #f0ac4d;
   --edit-icon-color: #5456cc;
   --inputField-bg: #f7fafc;
+  --detailPage-header-bg: #ebf4ff;
 }
 
 .eye-icon{
@@ -38,4 +39,7 @@
 }
 .input-field{
   background-color: var(--inputFeild-bg);
+}
+.detailPage-header{
+  background-color: var(--detailPage-header-bg);
 }

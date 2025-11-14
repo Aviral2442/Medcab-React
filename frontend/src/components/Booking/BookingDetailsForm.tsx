@@ -228,16 +228,18 @@ const fieldGroups = {
     },
   ],
   consumer: [
-    { label: "Consumer ID", name: "consumer_id", type: "number", editable: false},
+    // { label: "Consumer ID", name: "consumer_id", type: "number", editable: false},
     { label: "Consumer Name", name: "consumer_name",editable: false },
     { label: "Consumer Mobile", name: "consumer_mobile_no", type: "tel", editable: false },
-    { label: "Consumer Email", name: "consumer_email_id", type: "email", editable: false },
-    { label: "Consumer City", name: "consumer_city_id", type: "number", editable: false },
+    // { label: "Consumer Email", name: "consumer_email_id", type: "email", editable: false },
+    // { label: "Consumer City", name: "consumer_city_id", type: "number", editable: false },
     { label: "Consumer Wallet", name: "consumer_wallet_amount", type: "number", editable: false },
-    { label: "Consumer Referral", name: "consumer_my_referal_code", type: "number", editable: false },
-    { label: "Consumer Refered By", name: "consumer_refered_by", type: "number", editable: false },
+    // { label: "Consumer Referral", name: "consumer_my_referal_code", type: "number", editable: false },
+    // { label: "Consumer Refered By", name: "consumer_refered_by", type: "number", editable: false },
     { label: "Consumer Registered Date", name:"consumer_registred_date", type: "date", editable: false },
     { label: "Consumer Status", name: "consumer_status", type: "number", editable: false },
+    { label: "OTP", name: "mpo_otp" },
+    { label: "Verify OTP", name: "mpod_verify_otp" },
   ],
   payment: [
     { label: "Payment Mode", name: "mpo_payment_mode" },
@@ -275,8 +277,6 @@ const fieldGroups = {
     { label: "Vendor Picture", name: "mpo_vender_picture" },
   ],
   otp: [
-    { label: "OTP", name: "mpo_otp" },
-    { label: "Verify OTP", name: "mpod_verify_otp" },
   ],
   orderDetails: [
     { label: "Product ID", name: "mpod_product_id", type: "number" },
@@ -398,17 +398,17 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
   return (
     <div>
       {/* Booking Header */}
-      <Card className="mb-4 bg-light">
+      <Card className="mb-4 detailPage-header">
         <Card.Body className="py-3 d-flex flex-wrap align-items-center gap-3 justify-content-center">
           <div>
-            <span className="h4 fw-semibold fs-3">Booking ID:</span>{" "}
-            <strong className="fs-3 text-muted">
+            <span className="h4 fw-semibold fs-4">Booking ID:</span>{" "}
+            <strong className="fs-4 text-muted">
               {data?.manpower_order_id || "N/A"}
             </strong>
           </div>
           <div>
-            <span className="h4 fs-3 fw-semibold">Order Date:</span>{" "}
-            <strong className="fs-3 text-muted">
+            <span className="h4 fs-4 fw-semibold">Order Date:</span>{" "}
+            <strong className="fs-4 text-muted">
               {formatDate(data?.mpo_order_date)}
             </strong>
           </div>
@@ -418,19 +418,20 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
       {/* All Sections */}
       <Card className="mb-4">
         <Card.Body>
-          <Section title="Order Information">
-            {renderFields(fieldGroups.orderInfo)}
+          <Section title="Consumer Information">
+            {renderFields(fieldGroups.consumer)}
           </Section>
         </Card.Body>
       </Card>
 
       <Card className="mb-4">
         <Card.Body>
-          <Section title="Consumer Information">
-            {renderFields(fieldGroups.consumer)}
+          <Section title="Order Information">
+            {renderFields(fieldGroups.orderInfo)}
           </Section>
         </Card.Body>
       </Card>
+
 
       <Card className="mb-4">
         <Card.Body>

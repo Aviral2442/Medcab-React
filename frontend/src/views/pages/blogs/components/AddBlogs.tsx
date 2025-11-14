@@ -327,7 +327,7 @@ const AddBlogs = () => {
                             )}
                         </Form.Group>
                       </Col>
-              <Col lg={8}>
+              <Col lg={10}>
                 <Card className="border">
                   <Card.Body>
                     <Form.Group>
@@ -352,7 +352,7 @@ const AddBlogs = () => {
                   </Card.Body>
                 </Card>
               </Col>
-              <Col lg={4}>
+              <Col lg={2}>
                 {previewImage && (
                   <div className="">
                     <Image
