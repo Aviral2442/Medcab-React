@@ -200,43 +200,6 @@ const AddBlogs = () => {
           <Form onSubmit={handleSubmit}>
             <Row className="g-3">
               {/* Blog Image */}
-              <Col lg={6}>
-                <Card className="border">
-                  <Card.Body>
-                    <Form.Group>
-                      <Form.Label className="fw-semibold">
-                        Blog Image{" "}
-                        {!isEditMode && <span className="text-danger">*</span>}
-                      </Form.Label>
-                      <Form.Control
-                        type="file"
-                        accept="image/*"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          handleImageChange(e, setFieldValue)
-                        }
-                        onBlur={handleBlur}
-                      />
-                      {isEditMode && (
-                        <Form.Text className="text-muted">
-                          Leave empty to keep current image
-                        </Form.Text>
-                      )}
-                    </Form.Group>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col lg={6}>
-                {previewImage && (
-                  <div className="">
-                    <Image
-                      src={previewImage}
-                      alt="Preview"
-                      thumbnail
-                      style={{ maxWidth: "200px", maxHeight: "200px" }}
-                    />
-                  </div>
-                )}
-              </Col>
 
               {/* Basic Information */}
               <Col lg={12}>
@@ -364,6 +327,43 @@ const AddBlogs = () => {
                             )}
                         </Form.Group>
                       </Col>
+              <Col lg={8}>
+                <Card className="border">
+                  <Card.Body>
+                    <Form.Group>
+                      <Form.Label className="fw-semibold">
+                        Blog Image{" "}
+                        {!isEditMode && <span className="text-danger">*</span>}
+                      </Form.Label>
+                      <Form.Control
+                        type="file"
+                        accept="image/*"
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          handleImageChange(e, setFieldValue)
+                        }
+                        onBlur={handleBlur}
+                      />
+                      {isEditMode && (
+                        <Form.Text className="text-muted">
+                          Leave empty to keep current image
+                        </Form.Text>
+                      )}
+                    </Form.Group>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col lg={4}>
+                {previewImage && (
+                  <div className="">
+                    <Image
+                      src={previewImage}
+                      alt="Preview"
+                      thumbnail
+                      style={{ maxWidth: "200px", maxHeight: "200px" }}
+                    />
+                  </div>
+                )}
+              </Col>
                     </Row>
                   </Card.Body>
                 </Card>
