@@ -542,3 +542,32 @@ export const getCityContentFaqListService = async (filters?: {
         throw new ApiError(500, "Get City Content FAQ List Error On Fetching");
     }
 };
+
+// SERVICE TO ADD NEW CITY CONTENT FAQ
+export const addCityContentFaqService = async (data: cityContentFaqData) => {
+
+    try {
+
+        const insertData = {
+            city_id: data.city_id,
+            city_faq_que: data.city_faq_que,
+            city_faq_ans: data.city_faq_ans,
+            city_faq_status: 0,
+            city_faq_timestamp: currentUnixTime(),
+        }
+
+        const [result]: any = await db.query(
+            `INSERT INTO city_faq SET ?`,
+            [insertData]
+        );
+
+        return {
+            status: 200,
+            message: "City Content FAQ added successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Add City Content FAQ Error On Inserting");
+    }
+
+};
