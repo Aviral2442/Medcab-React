@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getAmbulanceCategoryListService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, editAmbulanceCategoryService, getAmbulanceCategoryListService, getAmbulanceCategoryService, updateAmbulanceCategoryStatusService } from "../services/ambulance.service";
 
 // Get Ambulance Category List Controller
 export const getAmbulanceCategoryListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -18,3 +18,80 @@ export const getAmbulanceCategoryListController = async (req: Request, res: Resp
         next(error);
     }
 }
+
+// CONTROLLER TO ADD NEW AMBULANCE CATEGORY
+export const addAmbulanceCategoryController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const data = {
+            ambulance_category_type: req.body.ambulance_category_type,
+            ambulance_category_service_type: req.body.ambulance_category_service_type,
+            ambulance_category_state_id: req.body.ambulance_category_state_id,
+            ambulance_category_name: req.body.ambulance_category_name,
+            ambulance_category_icon: req.file,
+            ambulance_catagory_desc: req.body.ambulance_catagory_desc,
+            ambulance_category_sku: req.body.ambulance_category_sku,
+        };
+
+        const result = await addAmbulanceCategoryService(data);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO GET SINGLE AMBULANCE CATEGORY
+export const getAmbulanceCategoryController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const categoryId = parseInt(req.params.id);
+        const result = await getAmbulanceCategoryService(categoryId);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO EDIT AMBULANCE CATEGORY
+export const editAmbulanceCategoryController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const categoryId = parseInt(req.params.id);
+
+        const data = {
+            ambulance_category_type: req.body.ambulance_category_type,
+            ambulance_category_service_type: req.body.ambulance_category_service_type,
+            ambulance_category_state_id: req.body.ambulance_category_state_id,
+            ambulance_category_name: req.body.ambulance_category_name,
+            ambulance_category_icon: req.file,
+            ambulance_catagory_desc: req.body.ambulance_catagory_desc,
+            ambulance_category_sku: req.body.ambulance_category_sku,
+        };
+
+        const result = await editAmbulanceCategoryService(categoryId, data);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO UPDATE AMBULANCE CATEGORY STATUS
+export const updateAmbulanceCategoryStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const categoryId = parseInt(req.params.id);
+        const status = req.body.status;
+
+        const result = await updateAmbulanceCategoryStatusService(categoryId, status);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
