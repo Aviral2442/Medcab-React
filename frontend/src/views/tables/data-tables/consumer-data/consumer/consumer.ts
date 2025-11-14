@@ -5,7 +5,7 @@ type ConsumerInfoType = {
     consumer_id: number
     consumer_name: string
     consumer_mobile_no: string
-    consumer_email_id: string
+    // consumer_email_id: string
     consumer_wallet_amount: number
     consumer_city_id: string
     consumer_registred_date: number
@@ -34,7 +34,7 @@ export const consumerColumns = [
     { data: 'consumer_id' },
     { data: 'consumer_name' },
     { data: 'consumer_mobile_no' },
-    { data: 'consumer_email_id' },
+    // { data: 'consumer_email_id' },
     { data: 'consumer_wallet_amount' ,
         render: (data: number) => {
             return `₹${data}`;

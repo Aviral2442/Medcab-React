@@ -9,37 +9,122 @@
     max-width: 100%;
     min-width: 100%;
   }
-  
+
   .react-datepicker-popper {
     width: calc(100vw - 32px) !important;
   }
-  
+
   .react-datepicker {
     width: 100%;
   }
 }
 
 
-:root{
+:root {
   --eye-color: #4a5e70;
   --remark-color: #f0ac4d;
-  --edit-icon-color: #5456cc;
+  --edit-icon-color: #5bc0de;
   --inputField-bg: #f7fafc;
   --detailPage-header-bg: #ebf4ff;
+  --status-active: #21c45d;
+  --status-inactive: #ff3e1d;
+}
+.status-active {
+  background-color: var(--status-active);
+}
+.status-inactive {
+  background-color: var(--status-inactive);
 }
 
-.eye-icon{
+.eye-icon {
   background-color: var(--eye-color);
 }
-.remark-icon{
+
+.remark-icon {
   background-color: var(--remark-color);
 }
-.edit-icon{
+
+.edit-icon {
   background-color: var(--edit-icon-color);
 }
-.input-field{
+
+.input-field {
   background-color: var(--inputFeild-bg);
 }
-.detailPage-header{
+
+.detailPage-header {
   background-color: var(--detailPage-header-bg);
+}
+
+#DataTables_Table_1 thead tr th .dt-column-header .dt-column-title {
+  padding-right: 1px !important;
+  text-transform: capitalize !important;
+  color: #73879C !important;
+}
+
+#DataTables_Table_1 thead tr th .dt-column-header {
+  padding-right: 1px !important;
+  text-transform: capitalize !important;
+
+}
+
+#DataTables_Table_1 thead tr th .dt-column-title {
+  padding-right: 1px !important;
+  text-transform: capitalize !important;
+
+}
+
+#DataTables_Table_1 thead tr th div {
+  padding-right: 1px !important;
+  text-transform: capitalize !important;
+  
+}
+
+#DataTables_Table_1 thead tr th div.dt-column-header .dt-column-title {
+  padding-right: 1px !important;
+  text-transform: capitalize !important;
+
+}
+
+#DataTables_Table_1 thead tr th div.dt-column-header {
+  padding-right: 1px !important;
+  text-transform: capitalize !important;
+
+}
+#DataTables_Table_1 tbody tr td div button{
+  /* padding: 0.2rem !important; */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.table tbody tr td{
+  padding: 0.4rem 0.3rem !important;
+  font-size: 0.74rem !important;
+  color: #73879C !important;
+}
+
+.table tbody tr td div button{
+  font-size: 0.7rem !important;
+  font-weight: 800 !important;
+  /* background: #4a5e70 !important; */
+  color: #ffff !important;
+  border-radius: 0.24rem !important;
+  /* padding: 0.2rem !important;  */
+}
+
+.table tbody tr td div button svg{
+  margin-right: 0rem !important;
+}
+
+.table tbody tr dt-type-numeric sorting_1{
+  padding: 0.4rem 0.3rem !important;
+}
+
+.table tbody tr dt-type-numeric{
+  padding: 0.4rem 0.3rem !important;
+}
+
+.table tbody tr sorting_1{
+  padding: 0.4rem 0.3rem !important;
 }

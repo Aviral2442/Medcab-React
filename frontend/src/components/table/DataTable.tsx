@@ -2,6 +2,7 @@ import {flexRender, type Table as TableType} from '@tanstack/react-table'
 import clsx from 'clsx'
 import {Table} from 'react-bootstrap'
 import {TbArrowDown, TbArrowUp} from 'react-icons/tb'
+import '@/global.css';
 
 type DataTableProps<TData> = {
     /**

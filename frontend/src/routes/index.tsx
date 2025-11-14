@@ -31,6 +31,8 @@ const DriverList = lazy(() => import('@/views/pages/driver'))
 const BlogList = lazy(() => import('@/views/pages/blogs'))
 const AddBlogs = lazy(() => import('@/views/pages/blogs/components/AddBlogs'))
 const CityList = lazy(() => import('@/views/pages/city'))
+const AddCity = lazy(() => import('@/views/pages/city/components/AddCity'))
+const EditCity = lazy(() => import('@/views/pages/city/components/AddCity'))
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -135,6 +137,8 @@ const pagesRoutes: RouteObject[] = [
   { path: "/add-blog", element: <AddBlogs/> },
   { path: "/edit-blog/:id", element: <AddBlogs/> },
   { path: "/city", element: <CityList/> },
+  { path: "/add-city", element: <AddCity/> },
+  { path: "/edit-city/:id", element: <EditCity/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 

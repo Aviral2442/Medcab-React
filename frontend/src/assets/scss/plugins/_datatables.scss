@@ -45,6 +45,8 @@ select.dt-input {
     display: flex;
     justify-content: space-between;
     align-items: center;
+            border: 1px solid black !important;
+
 }
 
 .dt-paging {
@@ -154,10 +156,13 @@ table.dataTable {
         > tr > .selected {
             background-color: rgba(var(--#{$prefix}warning-rgb), 0.1);
             color: inherit;
+                    border: 1px solid black !important;
+
 
             td {
                 background-color: rgba(var(--#{$prefix}warning-rgb), 0.1);
                 color: inherit;
+                
             }
         }
     }
@@ -204,11 +209,11 @@ div.dt-scroll-body tfoot tr {
 }
 
 .dt-column-header {
-    padding-right: 30px;
+    padding-right: 0px !important;
 }
 
 .dt-column-title {
-    padding-right: 30px;
+    padding-right: 0px !important;
 }
 
 .dt-child-rows-btn {

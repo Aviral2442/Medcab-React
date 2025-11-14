@@ -7,7 +7,7 @@ import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import { TbEye, TbEdit, TbArrowRight, TbBan} from "react-icons/tb";
+import { TbEdit, TbArrowRight} from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
 import { createRoot } from "react-dom/client";
@@ -19,7 +19,7 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 // import { LuActivity, LuCircle } from "react-icons/lu";
-import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
+import { FaRegTimesCircle, FaRegCheckCircle } from "react-icons/fa";
 
 
 DataTable.use(DT);
@@ -178,7 +178,7 @@ const ExportDataWithButtons = ({
       orderable: false,
       render: (data: string) => {
         if (!data) return '<span class="text-muted">No Image</span>';
-        return `<img src="${basePath}/${data}" alt="Blog" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />`;
+        return `<img src="${basePath}/${data}" alt="Blog" style="width: 20px; height: 20px; object-fit: cover; border-radius: 4px;" />`;
       },
     },
     {
@@ -228,21 +228,22 @@ const ExportDataWithButtons = ({
         root.render(
           <div className="d-flex flex-row gap-1">
             <button
-                className="p-0 ps-1 py-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+                className="p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
                 onClick={() => {
                     toggleStatus(rowData.blogs_id, rowData.blogs_status);
                 }}
                 title={rowData.blogs_status === 1 ? "Click to deactivate" : "Click to activate"}
-                style={{ backgroundColor: rowData.blogs_status === 0 ? "red" : "green" }}
-            >
-                {rowData.blogs_status === 0 ? (
-                    <CiCircleRemove className="me-1" />
+                style={{ backgroundColor: rowData.blogs_status === 1 ? "#d9534f" : "#3a833a" }}
+            >           
+
+                {rowData.blogs_status === 1 ? (
+                    <FaRegTimesCircle className="me-1" />
                 ) : (
-                    <CiCircleCheck className="me-1" />
+                    <FaRegCheckCircle className="me-1" />
                 )}
             </button>
             <button
-                className="edit-icon p-0 ps-1 py-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+                className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
                 onClick={() => {
                     navigate(`/edit-blog/${rowData.blogs_id}`);
                 }}
@@ -318,10 +319,10 @@ const ExportDataWithButtons = ({
               statusOptions={statusFilterOptions}
             />
             <button 
-              className="icon-link icon-link-hover link-secondary link-underline-secondary link-underline-opacity-25 fw-semibold bg-transparent border-0 p-0"
+              className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
               onClick={onAddNew}
             >
-              Add New <TbArrowRight className="bi align-middle fs-lg"></TbArrowRight>
+              Add New <TbArrowRight className="fs-5" />
             </button>
           </div>
         }

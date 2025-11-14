@@ -45,7 +45,7 @@ const tableConfig: Record<
       "ID",
       "Name",
       "Mobile",
-      "Email",
+      // "Email",
       "Wallet",
       "Ref_Code",
       "Ref_By",
@@ -189,14 +189,14 @@ const ExportDataWithButtons = ({
         const root = createRoot(td);
         root.render(
           <div className="d-flex flex-row gap-1">
-            <button className="eye-icon p-0 ps-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+            <button className="eye-icon p-1"
               onClick={() => {
                 navigate(`/consumer-details/${rowData.consumer_id}`);
               }}
             >
               <TbEye className="me-1" />
             </button>
-              <button className="remark-icon p-0 ps-1 text-white rounded-1 " onClick={() => handleRemark(rowData)}>
+              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
               <TbReceipt className="me-1" />
             </button>
           </div>
