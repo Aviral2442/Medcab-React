@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService } from "../../services/contentWriter/contentWriter.service";
-import { Next } from "mysql2/typings/mysql/lib/parsers/typeCast";
+import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService } from "../../services/contentWriter/contentWriter.service";
 
 // CONTROLLER TO GET BLOG LIST WITH FILTERS AND PAGINATION
 export const getBlogListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -138,7 +137,7 @@ export const getCityContentController = async (req: Request, res: Response, next
 export const addCityContentController = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-        
+
         const cityContent = {
             city_thumbnail: req.file ?? undefined,
             city_name: req.body.city_name,
@@ -163,6 +162,19 @@ export const addCityContentController = async (req: Request, res: Response, next
 
         const result = await addCityContentService(cityContent);
         res.status(result.status).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO FETCH CITY CONTENT BY CITY ID
+export const fetchCityContentController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const cityId = parseInt(req.params.id);
+        const result = await fetchCityContentService(cityId);
+        res.status(200).json(result);
 
     } catch (error) {
         next(error);

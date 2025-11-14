@@ -391,3 +391,25 @@ export const addCityContentService = async (data: cityContentData) => {
     }
 
 };
+
+// SERVICE TO FETCH SINGLE CITY CONTENT
+export const fetchCityContentService = async (cityId: number) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT * FROM city_content WHERE city_content.city_id = ?`,
+            [cityId]
+        )
+
+        return {
+            status: 200,
+            message: "City content fetched successfully",
+            jsonData: {
+                city_content: rows[0] || null
+            }
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Fetch City Content Error On Fetching");
+    }
+};
