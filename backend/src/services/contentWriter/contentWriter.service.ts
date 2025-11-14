@@ -475,3 +475,70 @@ export const updateCityContentStatusService = async (cityId: number, status: num
         throw new ApiError(500, "Update City Content Status Error On Updating");
     }
 };
+
+
+interface cityContentFaqData {
+    city_id?: number;
+    city_faq_que?: string;
+    city_faq_ans?: string;
+}
+
+// CITY CONTENT FAQ LIST SERVICE
+export const getCityContentFaqListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+    try {
+
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "city_faq.city_faq_timestamp",
+        });
+
+        const query = `
+        
+        SELECT city_faq.*, city_content.city_name
+        FROM city_faq
+        LEFT JOIN city_content ON city_faq.city_id = city_content.city_id
+        ${whereSQL}
+        ORDER BY city_faq.city_faq_id DESC
+        LIMIT ? OFFSET ?
+
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM city_faq ${whereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "City Content FAQ list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                city_content_faq_list: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Get City Content FAQ List Error On Fetching");
+    }
+};

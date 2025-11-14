@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService } from "../../services/contentWriter/contentWriter.service";
+import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService, getCityContentFaqListService } from "../../services/contentWriter/contentWriter.service";
 
 // CONTROLLER TO GET BLOG LIST WITH FILTERS AND PAGINATION
 export const getBlogListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -228,4 +228,27 @@ export const updateCityContentStatusController = async (req: Request, res: Respo
     } catch (error) {
         next(error);
     }
+};
+
+// CONTROLLER TO GET CITY CONTENT FAQ LIST WITH FILTERS AND PAGINATION
+export const getCityContentFaqListController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        }
+
+        const result = await getCityContentFaqListService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
 };
