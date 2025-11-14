@@ -413,3 +413,65 @@ export const fetchCityContentService = async (cityId: number) => {
         throw new ApiError(500, "Fetch City Content Error On Fetching");
     }
 };
+
+// SERVICE TO EDIT EXISTING CITY CONTENT
+export const editCityContentService = async (cityId: number, data: cityContentData) => {
+    try {
+
+        const updateData: any = {};
+
+        if (data.city_name) updateData.city_name = data.city_name;
+        if (data.city_title_sku) updateData.city_title_sku = generateSlug(data.city_title_sku);
+        if (data.city_title) updateData.city_title = data.city_title;
+        if (data.city_heading) updateData.city_heading = data.city_heading;
+        if (data.city_body_desc) updateData.city_body_desc = data.city_body_desc;
+        if (data.city_why_choose_us) updateData.city_why_choose_us = data.city_why_choose_us;
+        if (data.why_choose_meta_desc) updateData.why_choose_meta_desc = data.why_choose_meta_desc;
+        if (data.city_block1_heading) updateData.city_block1_heading = data.city_block1_heading;
+        if (data.city_block1_body) updateData.city_block1_body = data.city_block1_body;
+        if (data.city_block2_heading) updateData.city_block2_heading = data.city_block2_heading;
+        if (data.city_block2_body) updateData.city_block2_body = data.city_block2_body;
+        if (data.city_thumbnail) {
+            const uploadedPath = uploadFileCustom(data.city_thumbnail, "/city_content");
+            updateData.city_thumbnail = uploadedPath;
+        }
+        if (data.city_thumbnail_alt) updateData.city_thumbnail_alt = data.city_thumbnail_alt;
+        if (data.city_meta_title) updateData.city_meta_title = data.city_meta_title;
+        if (data.city_meta_desc) updateData.city_meta_desc = data.city_meta_desc;
+        if (data.city_meta_keyword) updateData.city_meta_keyword = data.city_meta_keyword;
+        if (data.city_force_keyword) updateData.city_force_keyword = data.city_force_keyword;
+        if (data.city_faq_heading) updateData.city_faq_heading = data.city_faq_heading;
+        if (data.city_emergency_desc) updateData.city_emergency_desc = data.city_emergency_desc;
+
+        const [result]: any = await db.query(
+            `UPDATE city_content SET ? WHERE city_id = ?`,
+            [updateData, cityId]
+        );
+
+        return {
+            status: 200,
+            message: "City content updated successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Edit City Content Error On Updating");
+    }
+};
+
+// SERVICE TO UPDATE CITY CONTENT STATUS
+export const updateCityContentStatusService = async (cityId: number, status: number) => {
+    try {
+
+        const [result]: any = await db.query(`
+            UPDATE city_content SET city_status = ? WHERE city_id = ?
+        `, [status, cityId]);
+
+        return {
+            status: 200,
+            message: "City content status updated successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Update City Content Status Error On Updating");
+    }
+};

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService } from "../../services/contentWriter/contentWriter.service";
+import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService } from "../../services/contentWriter/contentWriter.service";
 
 // CONTROLLER TO GET BLOG LIST WITH FILTERS AND PAGINATION
 export const getBlogListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -174,6 +174,55 @@ export const fetchCityContentController = async (req: Request, res: Response, ne
 
         const cityId = parseInt(req.params.id);
         const result = await fetchCityContentService(cityId);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO EDIT CITY CONTENT
+export const editCityContentController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const cityId = parseInt(req.params.id);
+
+        const cityContent = {
+            city_thumbnail: req.file ?? undefined,
+            city_name: req.body.city_name,
+            city_title_sku: req.body.city_title_sku,
+            city_title: req.body.city_title,
+            city_heading: req.body.city_heading,
+            city_body_desc: req.body.city_body_desc,
+            city_why_choose_us: req.body.city_why_choose_us,
+            why_choose_meta_desc: req.body.why_choose_meta_desc,
+            city_block1_heading: req.body.city_block1_heading,
+            city_block1_body: req.body.city_block1_body,
+            city_block2_heading: req.body.city_block2_heading,
+            city_block2_body: req.body.city_block2_body,
+            city_thumbnail_alt: req.body.city_thumbnail_alt,
+            city_meta_title: req.body.city_meta_title,
+            city_meta_desc: req.body.city_meta_desc,
+            city_meta_keyword: req.body.city_meta_keyword,
+            city_force_keyword: req.body.city_force_keyword,
+            city_faq_heading: req.body.city_faq_heading,
+            city_emergency_desc: req.body.city_emergency_desc,
+        };
+
+        const result = await editCityContentService(cityId, cityContent);
+        res.status(result.status).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO UPDATE CITY CONTENT STATUS
+export const updateCityContentStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const cityId = parseInt(req.params.id);
+        const status = req.body.status;
+
+        const result = await updateCityContentStatusService(cityId, status);
         res.status(200).json(result);
 
     } catch (error) {
