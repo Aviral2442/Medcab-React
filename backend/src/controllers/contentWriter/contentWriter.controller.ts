@@ -253,14 +253,15 @@ export const getCityContentFaqListController = async (req: Request, res: Respons
 
 };
 
+// CONTROLLER TO ADD NEW CITY CONTENT FAQ
 export const addCityContentFaqController = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
 
         const faqData = {
-            city_id: req.body.city_id,
-            faq_question: req.body.faq_question,
-            faq_answer: req.body.faq_answer,
+            city_id: req.body.city_id || 0,
+            city_faq_que: req.body.city_faq_que,
+            city_faq_ans: req.body.city_faq_ans,
         };
 
         const result = await addCityContentFaqService(faqData);

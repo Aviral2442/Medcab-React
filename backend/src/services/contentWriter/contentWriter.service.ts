@@ -564,6 +564,7 @@ export const addCityContentFaqService = async (data: cityContentFaqData) => {
         return {
             status: 200,
             message: "City Content FAQ added successfully",
+            insert_id: result.insertId,
         };
 
     } catch (error) {
