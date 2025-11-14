@@ -230,3 +230,429 @@ export const updateAmbulanceCategoryStatusService = async (categoryId: number, s
         throw new ApiError(500, "Update Ambulance Category Status Error On Updating");
     }
 };
+
+
+interface ambulanceFaqData {
+    ambulance_id: number;
+    ambulance_faq_que: string;
+    ambulance_faq_ans: string;
+}
+
+// SERVICE TO GET AMBULANCE FAQ LIST WITH FILTERS AND PAGINATION
+export const getAmbulanceFaqListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+
+    try {
+
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "ambulance_faq.ambulance_faq_timestamp",
+        });
+
+        let finalWhereSQL = whereSQL;
+
+        if (filters?.status) {
+            const statusMap: Record<string, string> = {
+                active: "ambulance_faq.ambulance_faq_status = 0",
+                inactive: "ambulance_faq.ambulance_faq_status = 1",
+            };
+
+            const condition = statusMap[filters.status];
+
+            if (condition) {
+                if (/where\s+/i.test(finalWhereSQL)) {
+                    finalWhereSQL += ` AND ${condition}`;
+                } else {
+                    finalWhereSQL = `WHERE ${condition}`;
+                }
+            }
+        }
+
+        const query = `
+            SELECT 
+                ambulance_faq_id,
+                ambulance_id,
+                ambulance_faq_que,
+                ambulance_faq_ans,
+                ambulance_faq_status,
+                ambulance_faq_timestamp
+            FROM ambulance_faq
+            ${finalWhereSQL}
+            ORDER BY ambulance_faq_id DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM ambulance_faq ${finalWhereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "Ambulance FAQ list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                ambulance_faq_list: rows
+            },
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Get Ambulance FAQ List Error On Fetching");
+    }
+
+};
+
+// SERVICE TO ADD NEW AMBULANCE FAQ
+export const addAmbulanceFaqService = async (data: ambulanceFaqData) => {
+
+    try {
+
+        const insertData = {
+            ambulance_id: data.ambulance_id,
+            ambulance_faq_que: data.ambulance_faq_que,
+            ambulance_faq_ans: data.ambulance_faq_ans,
+            ambulance_faq_timestamp: currentUnixTime(),
+            ambulance_faq_status: 0
+        };
+
+        await db.query(`INSERT INTO ambulance_faq SET ?`, [insertData]);
+
+        return {
+            status: 201,
+            message: "Ambulance FAQ added successfully",
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Add Ambulance FAQ Error On Inserting");
+    }
+
+};
+
+// SERVICE TO GET SINGLE AMBULANCE FAQ
+export const getAmbulanceFaqService = async (faqId: number) => {
+
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT * FROM ambulance_faq WHERE ambulance_faq_id = ?`,
+            [faqId]
+        );
+
+        if (!rows || rows.length === 0) {
+            throw new ApiError(404, "Ambulance FAQ not found");
+        }
+
+        return {
+            status: 200,
+            message: "Ambulance FAQ fetched successfully",
+            jsonData: {
+                ambulance_faq: rows[0]
+            },
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Get Ambulance FAQ Error On Fetching");
+    }
+
+};
+
+// SERVICE TO EDIT AMBULANCE FAQ
+export const editAmbulanceFaqService = async (faqId: number, data: ambulanceFaqData) => {
+
+    try {
+
+        const updateData: any = {};
+
+        if (data.ambulance_id) updateData.ambulance_id = data.ambulance_id;
+        if (data.ambulance_faq_que) updateData.ambulance_faq_que = data.ambulance_faq_que;
+        if (data.ambulance_faq_ans) updateData.ambulance_faq_ans = data.ambulance_faq_ans;
+
+        if (Object.keys(updateData).length === 0) {
+            return {
+                status: 400,
+                message: "No valid fields provided to update",
+            };
+        }
+
+        await db.query(
+            `UPDATE ambulance_faq SET ? WHERE ambulance_faq_id = ?`,
+            [updateData, faqId]
+        );
+
+        return {
+            status: 200,
+            message: "Ambulance FAQ updated successfully",
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Edit Ambulance FAQ Error On Updating");
+    }
+
+};
+
+// SERVICE TO UPDATE AMBULANCE FAQ STATUS
+export const updateAmbulanceFaqStatusService = async (faqId: number, status: number) => {
+
+    try {
+
+        await db.query(
+            `UPDATE ambulance_faq SET ambulance_faq_status = ? WHERE ambulance_faq_id = ?`,
+            [status, faqId]
+        );
+
+        return {
+            status: 200,
+            message: "Ambulance FAQ status updated successfully",
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Update Ambulance FAQ Status Error On Updating");
+    }
+
+};
+
+interface ambulanceFacilitiesData {
+    ambulance_facilities_image?: Express.Multer.File;
+    ambulance_facilities_category_type: string;
+    ambulance_facilities_name: string;
+    ambulance_facilities_state: string;
+    ambulance_facilities_created_time?: number;
+    ambulance_facilities_updated_time?: number;
+}
+
+// SERVICE TO GET AMBULANCE FACILITIES LIST WITH FILTERS AND PAGINATION
+export const getAmbulanceFacilitiesListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+
+    try {
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "ambulance_facilities.ambulance_facilities_created_time",
+        });
+
+        let finalWhereSQL = whereSQL;
+
+        if (filters?.status) {
+            const statusConditionMap: Record<string, string> = {
+                active: "ambulance_facilities.ambulance_facilities_state = 0",
+                inactive: "ambulance_facilities.ambulance_facilities_state = 1",
+            };
+
+            const condition = statusConditionMap[filters.status];
+
+            if (condition) {
+                if (/where\s+/i.test(finalWhereSQL)) {
+                    finalWhereSQL += ` AND ${condition}`;
+                } else {
+                    finalWhereSQL = `WHERE ${condition}`;
+                }
+            }
+        }
+
+        const query = `
+            SELECT 
+                ambulance_facilities.ambulance_facilities_id,
+                ambulance_facilities.ambulance_facilities_image,
+                ambulance_facilities.ambulance_facilities_name,
+                ambulance_facilities.ambulance_facilities_category_type,
+                ambulance_facilities.ambulance_facilities_state,
+                ambulance_facilities.ambulance_facilities_created_time
+            FROM ambulance_facilities
+            ${finalWhereSQL}
+            ORDER BY ambulance_facilities.ambulance_facilities_id DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM ambulance_facilities ${finalWhereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "Ambulance facilities list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                ambulance_facilities_list: rows
+            },
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Get Ambulance Facilities List Error On Fetching");
+    }
+
+};
+
+// SERVICE TO ADD NEW AMBULANCE FACILITY
+export const addAmbulanceFacilitiesService = async (data: ambulanceFacilitiesData) => {
+
+    let imagePath = null;
+
+    if (data.ambulance_facilities_image) {
+        const uploadedPath = uploadFileCustom(data.ambulance_facilities_image, "/ambulance_facilities");
+        imagePath = uploadedPath;
+    }
+
+    try {
+        const insertData = {
+            ambulance_facilities_image: imagePath,
+            ambulance_facilities_category_type: data.ambulance_facilities_category_type,
+            ambulance_facilities_name: data.ambulance_facilities_name,
+            ambulance_facilities_state: data.ambulance_facilities_state,
+            ambulance_facilities_created_time: currentUnixTime(),
+            ambulance_facilities_updated_time: currentUnixTime(),
+        }
+
+        const [result]: any = await db.query(
+            `INSERT INTO ambulance_facilities SET ?`,
+            [insertData]
+        );
+
+        return {
+            status: 201,
+            message: "Ambulance facility added successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Add Ambulance Facilities Error On Inserting");
+    }
+
+};
+
+// SERVICE TO GET SINGLE AMBULANCE FACILITY
+export const getAmbulanceFacilitiesService = async (facilityId: number) => {
+    try {
+        const [rows]: any = await db.query(
+            `SELECT * FROM ambulance_facilities WHERE ambulance_facilities_id = ?`,
+            [facilityId]
+        );
+
+        if (!rows || rows.length === 0) {
+            throw new ApiError(404, "Ambulance facility not found");
+        }
+
+        return {
+            status: 200,
+            message: "Ambulance facility fetched successfully",
+            jsonData: {
+                ambulance_facility: rows[0]
+            },
+        };
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Get Ambulance Facilities Error On Fetching");
+    }
+};
+
+// SERVICE TO EDIT AMBULANCE FACILITIES
+export const editAmbulanceFacilitiesService = async (facilityId: number, data: ambulanceFacilitiesData) => {
+
+    try {
+
+        const updateData: any = {};
+
+        if (data.ambulance_facilities_category_type)
+            updateData.ambulance_facilities_category_type = data.ambulance_facilities_category_type;
+
+        if (data.ambulance_facilities_name)
+            updateData.ambulance_facilities_name = data.ambulance_facilities_name;
+
+        if (data.ambulance_facilities_state)
+            updateData.ambulance_facilities_state = data.ambulance_facilities_state;
+
+        updateData.ambulance_facilities_updated_time = currentUnixTime();
+
+        if (data.ambulance_facilities_image) {
+            const uploadedPath = uploadFileCustom(data.ambulance_facilities_image, "/ambulance_facilities");
+            updateData.ambulance_facilities_image = uploadedPath;
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return {
+                status: 400,
+                message: "No valid fields provided to update",
+            };
+        }
+
+        const [result]: any = await db.query(
+            `UPDATE ambulance_facilities SET ? WHERE ambulance_facilities_id = ?`,
+            [updateData, facilityId]
+        );
+
+        return {
+            status: 200,
+            message: "Ambulance facility updated successfully",
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Edit Ambulance Facilities Error On Updating");
+    }
+
+};
+
+// SERVICE TO UPDATE AMBULANCE FACILITIES STATUS
+export const updateAmbulanceFacilitiesStatusService = async (facilityId: number, status: number) => {
+    try {
+
+        const [result]: any = await db.query(
+            `UPDATE ambulance_facilities SET ambulance_facilities_state = ? WHERE ambulance_facilities_id = ?`,
+            [status, facilityId]
+        );
+
+        return {
+            status: 200,
+            message: "Ambulance facility status updated successfully",
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Update Ambulance Facilities Status Error On Updating");
+    }
+};

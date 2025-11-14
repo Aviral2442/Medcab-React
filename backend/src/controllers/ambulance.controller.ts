@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, editAmbulanceCategoryService, getAmbulanceCategoryListService, getAmbulanceCategoryService, updateAmbulanceCategoryStatusService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesService, addAmbulanceFaqService, editAmbulanceCategoryService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
 
 // Get Ambulance Category List Controller
 export const getAmbulanceCategoryListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -89,6 +89,195 @@ export const updateAmbulanceCategoryStatusController = async (req: Request, res:
         const status = req.body.status;
 
         const result = await updateAmbulanceCategoryStatusService(categoryId, status);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO GET AMBULANCE FAQ LIST
+export const getAmbulanceFaqListController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        };
+
+        const result = await getAmbulanceFaqListService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO ADD NEW AMBULANCE FAQ
+export const addAmbulanceFaqController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const data = {
+            ambulance_id: req.body.ambulance_id,
+            ambulance_faq_que: req.body.ambulance_faq_que,
+            ambulance_faq_ans: req.body.ambulance_faq_ans,
+        };
+
+        const result = await addAmbulanceFaqService(data);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO GET SINGLE AMBULANCE FAQ
+export const getAmbulanceFaqController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const faqId = parseInt(req.params.id);
+        const result = await getAmbulanceFaqService(faqId);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO EDIT AMBULANCE FAQ
+export const editAmbulanceFaqController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const faqId = parseInt(req.params.id);
+
+        const data = {
+            ambulance_id: req.body.ambulance_id,
+            ambulance_faq_que: req.body.ambulance_faq_que,
+            ambulance_faq_ans: req.body.ambulance_faq_ans,
+        };
+
+        const result = await editAmbulanceFaqService(faqId, data);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO UPDATE STATUS
+export const updateAmbulanceFaqStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const faqId = parseInt(req.params.id);
+        const status = req.body.status;
+
+        const result = await updateAmbulanceFaqStatusService(faqId, status);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO GET LIST
+export const getAmbulanceFacilitiesListController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        }
+
+        const result = await getAmbulanceFacilitiesListService(filters);
+        res.status(200).json(result);
+        
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO ADD
+export const addAmbulanceFacilitiesController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const facilitiesData = {
+            ambulance_facilities_image: req.file,
+            ambulance_facilities_category_type: req.body.ambulance_facilities_category_type,
+            ambulance_facilities_name: req.body.ambulance_facilities_name,
+            ambulance_facilities_state: req.body.ambulance_facilities_state,
+        }
+
+        const result = await addAmbulanceFacilitiesService(facilitiesData);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO GET SINGLE
+export const getAmbulanceFacilitiesController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const facilityId = parseInt(req.params.id);
+        const result = await getAmbulanceFacilitiesService(facilityId);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO EDIT
+export const editAmbulanceFacilitiesController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const facilityId = parseInt(req.params.id);
+
+        const facilitiesData = {
+            ambulance_facilities_image: req.file,
+            ambulance_facilities_category_type: req.body.ambulance_facilities_category_type,
+            ambulance_facilities_name: req.body.ambulance_facilities_name,
+            ambulance_facilities_state: req.body.ambulance_facilities_state,
+        };
+
+        const result = await editAmbulanceFacilitiesService(facilityId, facilitiesData);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO UPDATE STATUS
+export const updateAmbulanceFacilitiesStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const facilityId = parseInt(req.params.id);
+        const status = req.body.status;
+
+        const result = await updateAmbulanceFacilitiesStatusService(facilityId, status);
         res.status(200).json(result);
 
     } catch (error) {
