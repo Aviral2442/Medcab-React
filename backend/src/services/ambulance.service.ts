@@ -656,3 +656,229 @@ export const updateAmbulanceFacilitiesStatusService = async (facilityId: number,
         throw new ApiError(500, "Update Ambulance Facilities Status Error On Updating");
     }
 };
+
+
+interface ambulanceFacilitiesRateData {
+    ambulance_facilities_rate_f_id?: number;
+    ambulance_facilities_rate_amount?: string;
+    ambulance_facilities_rate_increase_per_km?: string;
+    ambulance_facilities_rate_from?: string;
+    ambulance_facilities_rate_to?: string;
+    ambulance_facilities_rate_status?: string;
+}
+
+// SERVICE TO GET AMBULANCE FACILITIES RATE LIST WITH FILTERS AND PAGINATION
+export const getAmbulanceFacilitiesRateListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+
+    try {
+
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "ambulance_facilities_rate.ambulance_facilities_rate_id",
+        });
+
+        let finalWhereSQL = whereSQL;
+
+        if (filters?.status) {
+
+            const statusConditionMap: Record<string, string> = {
+                active: "ambulance_facilities_rate.ambulance_facilities_rate_status = 0",
+                inactive: "ambulance_facilities_rate.ambulance_facilities_rate_status = 1",
+            };
+
+            const condition = statusConditionMap[filters.status];
+
+            if (condition) {
+                if (/where\s+/i.test(finalWhereSQL)) {
+                    finalWhereSQL += ` AND ${condition}`;
+                } else {
+                    finalWhereSQL = `WHERE ${condition}`;
+                }
+            }
+        }
+
+        const query = `
+            SELECT 
+                ambulance_facilities_rate.ambulance_facilities_rate_id,
+                ambulance_facilities_rate.ambulance_facilities_rate_f_id,
+                ambulance_facilities_rate.ambulance_facilities_rate_amount,
+                ambulance_facilities_rate.ambulance_facilities_rate_increase_per_km,
+                ambulance_facilities_rate.ambulance_facilities_rate_from,
+                ambulance_facilities_rate.ambulance_facilities_rate_to,
+                ambulance_facilities_rate.ambulance_facilities_rate_status
+            FROM ambulance_facilities_rate
+            ${finalWhereSQL}
+            ORDER BY ambulance_facilities_rate.ambulance_facilities_rate_id DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM ambulance_facilities_rate ${finalWhereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "Ambulance facilities rate list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                ambulance_facilities_rate_list: rows
+            },
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Get Ambulance Facilities Rate List Error On Fetching");
+    }
+
+};
+
+// SERVICE TO ADD NEW AMBULANCE FACILITIES RATE
+export const addAmbulanceFacilitiesRateService = async (data: ambulanceFacilitiesRateData) => {
+
+    try {
+
+        const insertData = {
+            ambulance_facilities_rate_f_id: data.ambulance_facilities_rate_f_id,
+            ambulance_facilities_rate_amount: data.ambulance_facilities_rate_amount,
+            ambulance_facilities_rate_increase_per_km: data.ambulance_facilities_rate_increase_per_km,
+            ambulance_facilities_rate_from: data.ambulance_facilities_rate_from,
+            ambulance_facilities_rate_to: data.ambulance_facilities_rate_to,
+            ambulance_facilities_rate_status: data.ambulance_facilities_rate_status,
+        };
+
+        const [result]: any = await db.query(
+            `INSERT INTO ambulance_facilities_rate SET ?`,
+            [insertData]
+        );
+
+        return {
+            status: 201,
+            message: "Ambulance facilities rate added successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Add Ambulance Facilities Rate Error On Inserting");
+    }
+
+};
+
+// SERVICE TO GET SINGLE AMBULANCE FACILITIES RATE
+export const getAmbulanceFacilitiesRateService = async (rateId: number) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT * FROM ambulance_facilities_rate WHERE ambulance_facilities_rate_id = ?`,
+            [rateId]
+        );
+
+        if (!rows || rows.length === 0) {
+            throw new ApiError(404, "Ambulance facilities rate not found");
+        }
+
+        return {
+            status: 200,
+            message: "Ambulance facilities rate fetched successfully",
+            jsonData: {
+                ambulance_facilities_rate: rows[0]
+            },
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Get Ambulance Facilities Rate Error On Fetching");
+    }
+};
+
+// SERVICE TO EDIT AMBULANCE FACILITIES RATE
+export const editAmbulanceFacilitiesRateService = async (rateId: number, data: ambulanceFacilitiesRateData) => {
+
+    try {
+
+        const updateData: any = {};
+
+        if (data.ambulance_facilities_rate_f_id)
+            updateData.ambulance_facilities_rate_f_id = data.ambulance_facilities_rate_f_id;
+
+        if (data.ambulance_facilities_rate_amount)
+            updateData.ambulance_facilities_rate_amount = data.ambulance_facilities_rate_amount;
+
+        if (data.ambulance_facilities_rate_increase_per_km)
+            updateData.ambulance_facilities_rate_increase_per_km = data.ambulance_facilities_rate_increase_per_km;
+
+        if (data.ambulance_facilities_rate_from)
+            updateData.ambulance_facilities_rate_from = data.ambulance_facilities_rate_from;
+
+        if (data.ambulance_facilities_rate_to)
+            updateData.ambulance_facilities_rate_to = data.ambulance_facilities_rate_to;
+
+        if (data.ambulance_facilities_rate_status)
+            updateData.ambulance_facilities_rate_status = data.ambulance_facilities_rate_status;
+
+        if (Object.keys(updateData).length === 0) {
+            return {
+                status: 400,
+                message: "No valid fields provided to update",
+            };
+        }
+
+        const [result]: any = await db.query(
+            `UPDATE ambulance_facilities_rate SET ? WHERE ambulance_facilities_rate_id = ?`,
+            [updateData, rateId]
+        );
+
+        return {
+            status: 200,
+            message: "Ambulance facilities rate updated successfully",
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Edit Ambulance Facilities Rate Error On Updating");
+    }
+
+};
+
+// SERVICE TO UPDATE AMBULANCE FACILITIES RATE STATUS
+export const updateAmbulanceFacilitiesRateStatusService = async (rateId: number, status: number) => {
+
+    try {
+
+        const [result]: any = await db.query(
+            `UPDATE ambulance_facilities_rate SET ambulance_facilities_rate_status = ? WHERE ambulance_facilities_rate_id = ?`,
+            [status, rateId]
+        );
+
+        return {
+            status: 200,
+            message: "Ambulance facilities rate status updated successfully",
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Update Ambulance Facilities Rate Status Error On Updating");
+    }
+
+};
+

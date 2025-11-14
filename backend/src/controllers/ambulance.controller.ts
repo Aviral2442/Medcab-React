@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesService, addAmbulanceFaqService, editAmbulanceCategoryService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
 
 // Get Ambulance Category List Controller
 export const getAmbulanceCategoryListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -207,7 +207,7 @@ export const getAmbulanceFacilitiesListController = async (req: Request, res: Re
 
         const result = await getAmbulanceFacilitiesListService(filters);
         res.status(200).json(result);
-        
+
     } catch (error) {
         next(error);
     }
@@ -283,4 +283,107 @@ export const updateAmbulanceFacilitiesStatusController = async (req: Request, re
     } catch (error) {
         next(error);
     }
+};
+
+// CONTROLLER TO GET AMBULANCE FACILITIES RATE LIST
+export const getAmbulanceFacilitiesRateListController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        };
+
+        const result = await getAmbulanceFacilitiesRateListService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO ADD AMBULANCE FACILITIES RATE
+export const addAmbulanceFacilitiesRateController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const rateData = {
+            ambulance_facilities_rate_f_id: req.body.ambulance_facilities_rate_f_id,
+            ambulance_facilities_rate_amount: req.body.ambulance_facilities_rate_amount,
+            ambulance_facilities_rate_increase_per_km: req.body.ambulance_facilities_rate_increase_per_km,
+            ambulance_facilities_rate_from: req.body.ambulance_facilities_rate_from,
+            ambulance_facilities_rate_to: req.body.ambulance_facilities_rate_to,
+            ambulance_facilities_rate_status: req.body.ambulance_facilities_rate_status,
+        };
+
+        const result = await addAmbulanceFacilitiesRateService(rateData);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO GET SINGLE AMBULANCE FACILITIES RATE
+export const getAmbulanceFacilitiesRateController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const rateId = parseInt(req.params.id);
+        const result = await getAmbulanceFacilitiesRateService(rateId);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO EDIT AMBULANCE FACILITIES RATE
+export const editAmbulanceFacilitiesRateController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const rateId = parseInt(req.params.id);
+
+        const rateData = {
+            ambulance_facilities_rate_f_id: req.body.ambulance_facilities_rate_f_id,
+            ambulance_facilities_rate_amount: req.body.ambulance_facilities_rate_amount,
+            ambulance_facilities_rate_increase_per_km: req.body.ambulance_facilities_rate_increase_per_km,
+            ambulance_facilities_rate_from: req.body.ambulance_facilities_rate_from,
+            ambulance_facilities_rate_to: req.body.ambulance_facilities_rate_to,
+            ambulance_facilities_rate_status: req.body.ambulance_facilities_rate_status,
+        };
+
+        const result = await editAmbulanceFacilitiesRateService(rateId, rateData);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER AMBULANCE FACILITIES RATE STATUS TO UPDATE STATUS
+export const updateAmbulanceFacilitiesRateStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const rateId = parseInt(req.params.id);
+        const status = req.body.status;
+
+        const result = await updateAmbulanceFacilitiesRateStatusService(rateId, status);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
 };
