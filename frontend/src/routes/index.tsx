@@ -30,6 +30,7 @@ const PartnerList = lazy(() => import('@/views/pages/partner'))
 const DriverList = lazy(() => import('@/views/pages/driver'))
 const BlogList = lazy(() => import('@/views/pages/blogs'))
 const AddBlogs = lazy(() => import('@/views/pages/blogs/components/AddBlogs'))
+const CityList = lazy(() => import('@/views/pages/city'))
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -133,6 +134,7 @@ const pagesRoutes: RouteObject[] = [
   { path: "/blogs", element: <BlogList/> },
   { path: "/add-blog", element: <AddBlogs/> },
   { path: "/edit-blog/:id", element: <AddBlogs/> },
+  { path: "/city", element: <CityList/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 

@@ -7,7 +7,7 @@ import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import { TbEye, TbEdit, TbArrowRight} from "react-icons/tb";
+import { TbEye, TbEdit, TbArrowRight, TbBan} from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
 import { createRoot } from "react-dom/client";
@@ -19,6 +19,8 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 // import { LuActivity, LuCircle } from "react-icons/lu";
+import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
+
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -66,6 +68,25 @@ const ExportDataWithButtons = ({
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   const basePath = "http://localhost:4000";
+
+  const toggleStatus = async (blogId: number, currentStatus: number) => {
+    try {
+      const newStatus = currentStatus === 1 ? 0 : 1;
+      await axios.patch(`${baseURL}/content_writer/update_blog_status/${blogId}`, {
+        status: newStatus,
+      });
+      
+      setTableData(prevData => 
+        prevData.map(blog => 
+          blog.blogs_id === blogId 
+            ? { ...blog, blogs_status: newStatus }
+            : blog
+        )
+      );
+    } catch (error) {
+      console.error("Error updating blog status:", error);
+    }
+  };
 
   const {
     dateFilter,
@@ -187,13 +208,13 @@ const ExportDataWithButtons = ({
     {
       title: "Status",
       data: "blogs_status",
-    render: (data: number) => {
-      if (data == 1) {
-        return `<span class="badge badge-label badge-soft-success">Active</span>`;
-      } else if (data == 0) {
-        return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
+      render: (data: number) => {
+        if (data == 1) {
+          return `<span class="badge badge-label badge-soft-success">Active</span>`;
+        } else if (data == 0) {
+          return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
+        }
       }
-    }
     },
     {
       title: "Actions",
@@ -207,31 +228,27 @@ const ExportDataWithButtons = ({
         root.render(
           <div className="d-flex flex-row gap-1">
             <button
-              className="eye-icon p-0 ps-1 text-white rounded-1 d-flex align-items-center justify-content-center"
-              onClick={() => {
-                // navigate(`/blog-details/${rowData.blogs_id}`);
-              }}
+                className="p-0 ps-1 py-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+                onClick={() => {
+                    toggleStatus(rowData.blogs_id, rowData.blogs_status);
+                }}
+                title={rowData.blogs_status === 1 ? "Click to deactivate" : "Click to activate"}
+                style={{ backgroundColor: rowData.blogs_status === 0 ? "red" : "green" }}
             >
-                {/* created a toggle for inactive or active blogs */}
-
-              <TbEye className="me-1" />
-              {/* <TbEyeClosed/> */}
+                {rowData.blogs_status === 0 ? (
+                    <CiCircleRemove className="me-1" />
+                ) : (
+                    <CiCircleCheck className="me-1" />
+                )}
             </button>
             <button
-              className="edit-icon p-0 ps-1 py-1 text-white rounded-1 d-flex align-items-center justify-content-center"
-              onClick={() => {
-                navigate(`/edit-blog/${rowData.blogs_id}`);
-              }}
+                className="edit-icon p-0 ps-1 py-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+                onClick={() => {
+                    navigate(`/edit-blog/${rowData.blogs_id}`);
+                }}
             >
-              <TbEdit className="me-1" />
+                <TbEdit className="me-1" />
             </button>
-            {/* <button
-                className="icon-link icon-link-hover link-secondary link-underline-secondary link-underline-opacity-25 fw-semibold bg-transparent border-0 p-0"
-
-              >
-                
-                
-            </button> */}
           </div>
         );
       },
