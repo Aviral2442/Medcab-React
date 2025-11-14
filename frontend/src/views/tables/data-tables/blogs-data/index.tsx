@@ -1,12 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import ComponentCard from "@/components/ComponentCard";
 import "@/global.css";
-// import { InputGroup, FormControl, ButtonGroup, Button } from "react-bootstrap";
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-
 import { TbEdit, TbArrowRight} from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
@@ -18,7 +16,6 @@ import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
-// import { LuActivity, LuCircle } from "react-icons/lu";
 import { FaRegTimesCircle, FaRegCheckCircle } from "react-icons/fa";
 
 
