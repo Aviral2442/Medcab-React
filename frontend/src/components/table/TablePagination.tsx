@@ -3,12 +3,8 @@ import { Col, Row } from "react-bootstrap";
 import { TbChevronLeft, TbChevronRight } from "react-icons/tb";
 
 export type TablePaginationProps = {
-  // totalItems: number
   start: number;
-  // end: number
-  // itemsName?: string
   showInfo?: boolean;
-  // Pagination control props
   previousPage: () => void;
   canPreviousPage: boolean;
   pageCount: number;
@@ -19,10 +15,7 @@ export type TablePaginationProps = {
 };
 
 const TablePagination = ({
-  //  totalItems,
   start,
-  //  end,
-  //  itemsName = 'items',
   showInfo,
   previousPage,
   canPreviousPage,
@@ -32,12 +25,46 @@ const TablePagination = ({
   nextPage,
   canNextPage,
 }: TablePaginationProps) => {
-  // console.log("pageCount:", pageCount);
-  // console.log("currentPageIndex:", pageIndex);
+  if (pageCount === 0 || isNaN(pageCount)) return null;
 
-  if (pageCount === 0 || isNaN(pageCount)) {
-    return null;
-  }
+  // Build dynamic pagination items
+  const generatePageNumbers = () => {
+    const pages: (number | "...")[] = [];
+
+    // Always show first page
+    pages.push(0);
+
+    // If only a few pages, show all
+    if (pageCount <= 5) {
+      return Array.from({ length: pageCount }, (_, i) => i);
+    }
+
+    // Add left ellipsis if needed
+    if (pageIndex > 2) {
+      pages.push("...");
+    }
+
+    // Middle page numbers (current ±1)
+    const startPage = Math.max(1, pageIndex - 1);
+    const endPage = Math.min(pageCount - 2, pageIndex + 1);
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    // Add right ellipsis if needed
+    if (pageIndex < pageCount - 3) {
+      pages.push("...");
+    }
+
+    // Always show last page
+    pages.push(pageCount - 1);
+
+    return pages;
+  };
+
+  const paginationItems = generatePageNumbers();
+
   return (
     <Row
       className={clsx(
@@ -53,44 +80,52 @@ const TablePagination = ({
           </div>
         </Col>
       )}
-      <Col sm="auto" className="mt-3 mt-sm-0">
-        <div>
-          <ul className="pagination pagination-boxed mb-0 justify-content-center">
-            <li className="page-item">
-              <button
-                className="page-link"
-                onClick={() => previousPage()}
-                disabled={!canPreviousPage}
-              >
-                <TbChevronLeft />
-              </button>
-            </li>
 
-            {Array.from({ length: pageCount }).map((_, index) => (
+      <Col sm="auto" className="mt-3 mt-sm-0">
+        <ul className="pagination pagination-boxed mb-0 justify-content-center">
+          {/* Prev Button */}
+          <li className="page-item">
+            <button
+              className="page-link"
+              onClick={previousPage}
+              disabled={!canPreviousPage}
+            >
+              <TbChevronLeft />
+            </button>
+          </li>
+
+          {/* Dynamic Pages */}
+          {paginationItems.map((item, idx) =>
+            item === "..." ? (
+              <li key={idx} className="page-item disabled">
+                <button className="page-link">…</button>
+              </li>
+            ) : (
               <li
-                key={index}
-                className={`page-item ${pageIndex === index ? "active" : ""}`}
+                key={idx}
+                className={`page-item ${pageIndex === item ? "active" : ""}`}
               >
                 <button
                   className="page-link"
-                  onClick={() => setPageIndex(index)}
+                  onClick={() => setPageIndex(item as number)}
                 >
-                  {index + 1}
+                  {(item as number) + 1}
                 </button>
               </li>
-            ))}
+            )
+          )}
 
-            <li className="page-item">
-              <button
-                className="page-link"
-                onClick={() => nextPage()}
-                disabled={!canNextPage}
-              >
-                <TbChevronRight />
-              </button>
-            </li>
-          </ul>
-        </div>
+          {/* Next Button */}
+          <li className="page-item">
+            <button
+              className="page-link"
+              onClick={nextPage}
+              disabled={!canNextPage}
+            >
+              <TbChevronRight />
+            </button>
+          </li>
+        </ul>
       </Col>
     </Row>
   );

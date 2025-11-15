@@ -212,7 +212,7 @@ const ExportDataWithButtons = ({
       },
     },
     {
-      title: "City ID",
+      title: "ID",
       data: "city_id",
     },
     {
@@ -337,12 +337,17 @@ const ExportDataWithButtons = ({
       },
     },
     {
-      title: "FAQ ID",
+      title: "ID",
       data: "city_faq_id",
       defaultContent: "N/A", // Add this to handle missing data
       render: (data: any) => {
         return data || "N/A";
       },
+    },
+    {
+      title: "City Name",
+      data: "city_name",
+      defaultContent: "N/A", // Add this
     },
     {
       title: "Question",

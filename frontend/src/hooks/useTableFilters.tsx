@@ -163,28 +163,32 @@ export const useTableFilters = ({
   };
 
   // Get filter params for API call
-  const getFilterParams = (pageSize: number, additionalParams: Record<string, any> = {}) => {
-    const params: any = {
-      ...additionalParams,
-      page: currentPage + 1,
-      limit: pageSize,
-    };
-
-    if (dateFilter && dateFilter !== "custom") {
-      params.date = dateFilter;
-    }
-
-    if (statusFilter) {
-      params.status = statusFilter;
-    }
-
-    if (startDate && endDate) {
-      params.fromDate = startDate.toISOString().split("T")[0];
-      params.toDate = endDate.toISOString().split("T")[0];
-    }
-
-    return params;
+const getFilterParams = (pageSize: number, additionalParams = {}) => {
+  const params: any = {
+    ...additionalParams,
+    page: currentPage + 1,
+    limit: pageSize,
   };
+
+  // Normal quick filters
+  if (dateFilter && dateFilter !== "custom") {
+    params.date = dateFilter;
+  }
+
+  // Custom date range filter
+  if (startDate && endDate) {
+    params.date = "custom"; // 🔥 MUST SEND THIS
+    params.fromDate = startDate.toISOString().split("T")[0];
+    params.toDate = endDate.toISOString().split("T")[0];
+  }
+
+  if (statusFilter) {
+    params.status = statusFilter;
+  }
+
+  return params;
+};
+
 
   // Set default filter on mount if no filter in URL
   useEffect(() => {

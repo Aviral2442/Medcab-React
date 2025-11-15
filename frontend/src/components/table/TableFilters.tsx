@@ -2,13 +2,6 @@ import { InputPicker, DateRangePicker } from "rsuite";
 import type { DateRange } from "rsuite/esm/DateRangePicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "rsuite/dist/rsuite.min.css";
-import subDays from 'date-fns/subDays';
-import startOfWeek from 'date-fns/startOfWeek';
-import endOfWeek from 'date-fns/endOfWeek';
-import addDays from 'date-fns/addDays';
-import startOfMonth from 'date-fns/startOfMonth';
-import endOfMonth from 'date-fns/endOfMonth';
-import addMonths from 'date-fns/addMonths';
 
 interface TableFiltersProps {
   dateFilter: string | null;
@@ -45,53 +38,53 @@ const TableFilters = ({
 }: TableFiltersProps) => {
   const [startDate, endDate] = dateRange;
 
-  const predefinedRanges = [
-    {
-      label: 'Today',
-      value: [new Date(), new Date()] as DateRange,
-      placement: 'left' as const
-    },
-    {
-      label: 'Yesterday',
-      value: [addDays(new Date(), -1), addDays(new Date(), -1)] as DateRange,
-      placement: 'left' as const
-    },
-    {
-      label: 'This week',
-      value: [startOfWeek(new Date(), { weekStartsOn: 0 }), endOfWeek(new Date(), { weekStartsOn: 0 })] as DateRange,
-      placement: 'left' as const
-    },
-    {
-      label: 'Last 7 days',
-      value: [subDays(new Date(), 6), new Date()] as DateRange,
-      placement: 'left' as const
-    },
-    {
-      label: 'Last 30 days',
-      value: [subDays(new Date(), 29), new Date()] as DateRange,
-      placement: 'left' as const
-    },
-    {
-      label: 'This month',
-      value: [startOfMonth(new Date()), new Date()] as DateRange,
-      placement: 'left' as const
-    },
-    {
-      label: 'Last month',
-      value: [startOfMonth(addMonths(new Date(), -1)), endOfMonth(addMonths(new Date(), -1))] as DateRange,
-      placement: 'left' as const
-    },
-    {
-      label: 'This year',
-      value: [new Date(new Date().getFullYear(), 0, 1), new Date()] as DateRange,
-      placement: 'left' as const
-    },
-    {
-      label: 'Last year',
-      value: [new Date(new Date().getFullYear() - 1, 0, 1), new Date(new Date().getFullYear() - 1, 11, 31)] as DateRange,
-      placement: 'left' as const
-    },
-  ];
+  // const predefinedRanges = [
+  //   {
+  //     label: 'Today',
+  //     value: [new Date(), new Date()] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'Yesterday',
+  //     value: [addDays(new Date(), -1), addDays(new Date(), -1)] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'This week',
+  //     value: [startOfWeek(new Date(), { weekStartsOn: 0 }), endOfWeek(new Date(), { weekStartsOn: 0 })] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'Last 7 days',
+  //     value: [subDays(new Date(), 6), new Date()] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'Last 30 days',
+  //     value: [subDays(new Date(), 29), new Date()] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'This month',
+  //     value: [startOfMonth(new Date()), new Date()] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'Last month',
+  //     value: [startOfMonth(addMonths(new Date(), -1)), endOfMonth(addMonths(new Date(), -1))] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'This year',
+  //     value: [new Date(new Date().getFullYear(), 0, 1), new Date()] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'Last year',
+  //     value: [new Date(new Date().getFullYear() - 1, 0, 1), new Date(new Date().getFullYear() - 1, 11, 31)] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  // ];
 
   const handleDateRangeChange = (value: DateRange | null) => {
     if (value && value[0] && value[1]) {
@@ -117,10 +110,10 @@ const TableFilters = ({
       className={`d-flex align-items-center gap-2 flex-wrap ${className}`}
       style={{ minWidth: 0 }}
     >
-      {showDateRange && (
+      {/* {showDateRange && (
         <div style={{ width: "280px", flexShrink: 0 }}>
           <DateRangePicker
-            ranges={predefinedRanges}
+            // ranges={predefinedRanges}
             showOneCalendar
             placeholder={dateRangePlaceholder}
             style={{ width: "100%" }}
@@ -131,7 +124,20 @@ const TableFilters = ({
             disabled={!isCustomSelected}
           />
         </div>
+      )} */}
+
+      {showDateRange && (
+        <DateRangePicker 
+          placeholder={dateRangePlaceholder}
+          style={{ width: 280 }}
+          value={startDate && endDate ? [startDate, endDate] : null}
+          onChange={handleDateRangeChange}
+          cleanable
+          size="sm"
+          disabled={!isCustomSelected}
+        />
       )}
+
       {showDateFilter && (
         <div style={{ width: "150px", flexShrink: 0 }}>
           <InputPicker

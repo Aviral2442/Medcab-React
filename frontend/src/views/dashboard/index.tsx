@@ -10,7 +10,7 @@ import Latest5VendorTransactionList from '@/views/dashboard/components/Latest5Ve
 
 const Page = () => {
     return (
-        <Container fluid className='mt-3'>
+        <Container fluid className='mt-3 background-page'>
             {/* <PageTitle
                 title="The Ultimate Admin & Dashboard Theme"
                 subtitle="A premium collection of elegant, accessible components and a powerful codebase. Built for modern frameworks. Developer Friendly. Production Ready."

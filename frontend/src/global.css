@@ -28,10 +28,20 @@
   --detailPage-header-bg: #ebf4ff;
   --status-active: #21c45d;
   --status-inactive: #ff3e1d;
+  --cancel-button-bg: #929294;
 }
+.cancel-button {
+  background-color: var(--cancel-button-bg);
+}
+
 .status-active {
   background-color: var(--status-active);
 }
+
+.background-page {
+  background-color: var(--backgroundPage);
+}
+
 .status-inactive {
   background-color: var(--status-inactive);
 }
@@ -128,3 +138,23 @@
 .table tbody tr sorting_1{
   padding: 0.4rem 0.3rem !important;
 }
+
+.compact-form .form-control,
+.compact-form .form-select,
+.compact-form textarea {
+  margin-top: 0.1rem; /* bring inputs slightly closer to labels */
+}
+
+.compact-form .card-title,
+.compact-form .fs-6,
+.compact-form .ql-editor + .ql-container,
+.compact-form .ql-toolbar {
+  margin-bottom: 0.1rem;
+}
+
+/* When editor title is present, tighten its spacing as well */
+.custom-quill, /* if your CustomQuill wrapper has this class */
+.ql-container {
+  margin-top: 0;
+}
+

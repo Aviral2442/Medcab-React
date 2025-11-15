@@ -82,18 +82,6 @@ export const userDropdownItems: UserDropdownItemType[] = [
 ]
 
 export const menuItems: MenuItemType[] = [
-  { key: 'consumer-list', label: 'Consumer', icon: LuUser, url: '/consumer-list' },
-  // { key: 'ton-ai', label: 'Ton AI', icon: LuSparkles, url: '/ton-ai', badge: { text: 'Hot', variant: 'primary' } },
-  // { key: 'calendar', label: 'Calendar', icon: LuCalendar, url: '/calendar' },
-  // { key: 'directory', label: 'Directory', icon: LuBookUser, url: '/directory' },
-  
-  // { key: 'manpower', label: 'Manpower', icon: LuBookUser, url: '/manpower' },
-  // { key: 'order-list', label: 'Order List', icon: LuNotebookText, url: '/order-list' },
-  // { key: 'booking-list', label: 'Booking List', icon: LuCalendar, url: '/booking-list' },
-  // { key: 'vendor-list', label: 'Vendor List', icon: LuLayers2, url: '/vendor-list' },
-  // { key: 'consumer-list', label: 'Consumer List', icon: TbUserCircle, url: '/consumer-list' },
-
-  // { key: 'custom-pages', label: 'Custom Pages', isTitle: true },
   {
     key: 'pages-dashboard',
     label: 'Dashboard',
@@ -105,6 +93,14 @@ export const menuItems: MenuItemType[] = [
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
     ],
   },
+  
+  { key: 'consumer-list', label: 'Consumer', icon: LuUser, url: '/consumer-list' },
+  // { key: 'ton-ai', label: 'Ton AI', icon: LuSparkles, url: '/ton-ai', badge: { text: 'Hot', variant: 'primary' } },
+  // { key: 'calendar', label: 'Calendar', icon: LuCalendar, url: '/calendar' },
+  // { key: 'directory', label: 'Directory', icon: LuBookUser, url: '/directory' },
+  
+  // { key: 'manpower', label: 'Manpower', icon: LuBookUser, url: '/manpower' },
+
 
   {
     key: 'pages-manpower',
@@ -164,8 +160,8 @@ export const menuItems: MenuItemType[] = [
     ],
   },
   {
-    key: 'pages-content-Writing',
-    label: 'Content Writing',
+    key: 'pages-content-SEO',
+    label: 'Content SEO',
     icon: LuTableOfContents,
     children: [
       { key: 'city', label: 'City', url: '/city', },

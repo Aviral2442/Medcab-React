@@ -10,7 +10,7 @@ interface SnowEditorProps {
     onChange?: (value: string) => void;
 }
 
-const SnowEditor = ({ title = "Editor", value, onChange }: SnowEditorProps) => {
+const SnowEditor = ({ value, onChange }: SnowEditorProps) => {
     const modules = useMemo(
         () => ({
             toolbar: [
@@ -41,8 +41,7 @@ const SnowEditor = ({ title = "Editor", value, onChange }: SnowEditorProps) => {
 
     return (
         <>
-            <CardTitle as="h5" className="mb-2">
-                {title}
+            <CardTitle className="fs-6 mb-1">
             </CardTitle>
             <CustomQuill 
                 key="snow" 

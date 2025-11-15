@@ -6,6 +6,7 @@ import SnowEditor from "@/views/forms/editors/index";
 import ComponentCard from "@/components/ComponentCard";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import "@/global.css";
 
 const blogValidationSchema = Yup.object({
   blogs_title: Yup.string().required("Blog title is required"),
@@ -211,7 +212,7 @@ const AddBlogs = () => {
                     <Row className="g-3">
                       <Col md={6}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold">
+                          <Form.Label className="fs-6 fw-semibold">
                             Blog Title <span className="text-danger">*</span>
                           </Form.Label>
                           <Form.Control
@@ -233,7 +234,7 @@ const AddBlogs = () => {
 
                       <Col md={6}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold">
+                          <Form.Label className="fs-6 fw-semibold">
                             Blog SKU <span className="text-danger">*</span>
                           </Form.Label>
                           <Form.Control
@@ -253,7 +254,7 @@ const AddBlogs = () => {
 
                       <Col md={6}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold">
+                          <Form.Label className="fs-6 fw-semibold">
                             Category <span className="text-danger">*</span>
                           </Form.Label>
                           <Form.Select
@@ -278,7 +279,7 @@ const AddBlogs = () => {
 
                       <Col md={6}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold">
+                          <Form.Label className="fs-6 fw-semibold">
                             Force Keywords
                           </Form.Label>
                           <Form.Control
@@ -294,8 +295,11 @@ const AddBlogs = () => {
 
                       <Col md={12}>
                         <Form.Group>
+                          <Form.Label className="fs-6 fw-semibold">
+                            Short Description{" "}
+                            <span className="text-danger">*</span>
+                          </Form.Label>
                           <SnowEditor
-                            title="Short Description"
                             value={values.blogs_short_desc}
                             onChange={(value: string) =>
                               setFieldValue("blogs_short_desc", value)
@@ -312,8 +316,11 @@ const AddBlogs = () => {
 
                       <Col md={12}>
                         <Form.Group>
+                          <Form.Label className="fs-6 fw-semibold">
+                            Long Description{" "}
+                            <span className="text-danger">*</span>
+                          </Form.Label>
                           <SnowEditor
-                            title="Long Description"
                             value={values.blogs_long_desc}
                             onChange={(value: string) =>
                               setFieldValue("blogs_long_desc", value)
@@ -331,7 +338,7 @@ const AddBlogs = () => {
                 <Card className="border">
                   <Card.Body>
                     <Form.Group>
-                      <Form.Label className="fw-semibold">
+                      <Form.Label className="fs-6 fw-semibold">
                         Blog Image{" "}
                         {!isEditMode && <span className="text-danger">*</span>}
                       </Form.Label>
@@ -379,7 +386,7 @@ const AddBlogs = () => {
                     <Row className="g-3">
                       <Col md={6}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold">
+                          <Form.Label className="fs-6 fw-semibold">
                             Meta Title <span className="text-danger">*</span>
                           </Form.Label>
                           <Form.Control
@@ -402,7 +409,7 @@ const AddBlogs = () => {
 
                       <Col md={6}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold">
+                          <Form.Label className="fs-6 fw-semibold">
                             Meta Keywords <span className="text-danger">*</span>
                           </Form.Label>
                           <Form.Control
@@ -423,9 +430,9 @@ const AddBlogs = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={12}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold">
+                          <Form.Label className="fs-6 fw-semibold">
                             Meta Description{" "}
                             <span className="text-danger">*</span>
                           </Form.Label>
@@ -448,14 +455,14 @@ const AddBlogs = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={12}>
                         <Form.Group>
-                          <Form.Label className="fw-semibold">
+                          <Form.Label className="fs-6 fw-semibold">
                             Schema Markup
                           </Form.Label>
                           <Form.Control
                             as="textarea"
-                            rows={3}
+                            rows={10}
                             name="blogs_schema"
                             value={values.blogs_schema}
                             onChange={handleChange}
@@ -472,13 +479,13 @@ const AddBlogs = () => {
               {/* Action Buttons */}
               <Col lg={12}>
                 <div className="d-flex gap-2 justify-content-end">
-                  <Button
-                    variant="secondary"
+                  <button
+              className="px-3 rounded text-black"
                     onClick={() => navigate("/blogs")}
                     disabled={submitting}
                   >
                     Cancel
-                  </Button>
+                  </button>
                   <Button variant="primary" type="submit" disabled={submitting}>
                     {submitting
                       ? isEditMode
