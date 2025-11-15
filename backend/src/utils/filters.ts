@@ -20,6 +20,14 @@ export const buildFilters = (
     let startTimestamp: number | null = null;
     let endTimestamp: number | null = null;
 
+    // ⭐ NEW: Smart date column wrapper (auto UNIX conversion)
+    const dateColSQL = `(
+        CASE 
+            WHEN ${dateColumn} REGEXP '^[0-9]+$' THEN ${dateColumn} 
+            ELSE UNIX_TIMESTAMP(${dateColumn})
+        END
+    )`;
+
     switch (date) {
         case "today": {
             const start = new Date();
@@ -59,7 +67,7 @@ export const buildFilters = (
     }
 
     if (startTimestamp && endTimestamp) {
-        whereClauses.push(`${dateColumn} BETWEEN ? AND ?`);
+        whereClauses.push(`${dateColSQL} BETWEEN ? AND ?`);
         params.push(startTimestamp, endTimestamp);
     }
 
