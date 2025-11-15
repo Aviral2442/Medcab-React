@@ -208,7 +208,7 @@ const ExportDataWithButtons = ({
         root.render(
           <div className="d-flex align-items-center gap-2">
             <button
-              className="edit-icon p-0 ps-1 py-1 border-0 text-white rounded-1 d-flex align-items-center justify-content-center"
+              className="edit-icon p-0 p-1 border-0 text-white rounded-1 d-flex align-items-center justify-content-center"
               onClick={() => onEditRow(rowData)}
             >
               <TbEdit className="me-1" />

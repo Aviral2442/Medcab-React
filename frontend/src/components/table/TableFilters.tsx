@@ -1,5 +1,5 @@
-import { InputPicker } from "rsuite";
-import DatePicker from "react-datepicker";
+import { InputPicker, DateRangePicker } from "rsuite";
+import type { DateRange } from "rsuite/esm/DateRangePicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "rsuite/dist/rsuite.min.css";
 
@@ -31,69 +31,141 @@ const TableFilters = ({
   showDateRange = true,
   showDateFilter = true,
   showStatusFilter = true,
-  dateFilterPlaceholder = "Date filter",
+  dateFilterPlaceholder = "Quick filter",
   statusFilterPlaceholder = "Status",
-  dateRangePlaceholder = "Select date range",
+  dateRangePlaceholder = "Custom date range",
   className = "",
 }: TableFiltersProps) => {
   const [startDate, endDate] = dateRange;
 
-  const DateFilterOptions = [
-    "today",
-    "yesterday",
-    "thisWeek",
-    "thisMonth",
-    "custom",
-  ].map((item) => ({
-    label:
-      item.charAt(0).toUpperCase() + item.slice(1).replace(/([A-Z])/g, " $1"),
-    value: item,
-  }));
+  // const predefinedRanges = [
+  //   {
+  //     label: 'Today',
+  //     value: [new Date(), new Date()] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'Yesterday',
+  //     value: [addDays(new Date(), -1), addDays(new Date(), -1)] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'This week',
+  //     value: [startOfWeek(new Date(), { weekStartsOn: 0 }), endOfWeek(new Date(), { weekStartsOn: 0 })] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'Last 7 days',
+  //     value: [subDays(new Date(), 6), new Date()] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'Last 30 days',
+  //     value: [subDays(new Date(), 29), new Date()] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'This month',
+  //     value: [startOfMonth(new Date()), new Date()] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'Last month',
+  //     value: [startOfMonth(addMonths(new Date(), -1)), endOfMonth(addMonths(new Date(), -1))] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'This year',
+  //     value: [new Date(new Date().getFullYear(), 0, 1), new Date()] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  //   {
+  //     label: 'Last year',
+  //     value: [new Date(new Date().getFullYear() - 1, 0, 1), new Date(new Date().getFullYear() - 1, 11, 31)] as DateRange,
+  //     placement: 'left' as const
+  //   },
+  // ];
+
+  const handleDateRangeChange = (value: DateRange | null) => {
+    if (value && value[0] && value[1]) {
+      onDateRangeChange([value[0], value[1]]);
+    } else {
+      onDateRangeChange([null, null]);
+    }
+  };
+
+  const handleDateFilterChange = (value: string | null) => {
+    onDateFilterChange(value);
+    // Clear date range when switching away from custom
+    if (value !== "custom") {
+      onDateRangeChange([null, null]);
+    }
+  };
+
+  // Check if custom is selected
+  const isCustomSelected = dateFilter === "custom";
 
   return (
-    <div className={`d-flex align-items-center gap-2 flex-nowrap ${className}`} style={{ minWidth: 0 }}>
-      {showDateRange && (
-        <div style={{ width: '200px', flexShrink: 0, marginRight: '20px' }}>
-          <DatePicker
-            selectsRange={true}
-            startDate={startDate}
-            endDate={endDate}
-            onChange={onDateRangeChange}
-            dateFormat="MM/dd/yyyy"
-            placeholderText={dateRangePlaceholder}
-            className="form-control form-control-sm"
-            disabled={dateFilter !== "custom"}
-            isClearable
-            maxDate={new Date()}
-            showMonthDropdown
-            showYearDropdown
-            dropdownMode="select"
+    <div
+      className={`d-flex align-items-center gap-2 flex-wrap ${className}`}
+      style={{ minWidth: 0 }}
+    >
+      {/* {showDateRange && (
+        <div style={{ width: "280px", flexShrink: 0 }}>
+          <DateRangePicker
+            // ranges={predefinedRanges}
+            showOneCalendar
+            placeholder={dateRangePlaceholder}
+            style={{ width: "100%" }}
+            value={startDate && endDate ? [startDate, endDate] : null}
+            onChange={handleDateRangeChange}
+            cleanable
+            size="sm"
+            disabled={!isCustomSelected}
           />
         </div>
+      )} */}
+
+      {showDateRange && (
+        <DateRangePicker 
+          placeholder={dateRangePlaceholder}
+          style={{ width: 280 }}
+          value={startDate && endDate ? [startDate, endDate] : null}
+          onChange={handleDateRangeChange}
+          cleanable
+          size="sm"
+          disabled={!isCustomSelected}
+        />
       )}
-      
+
       {showDateFilter && (
-        <div style={{ width: '130px', flexShrink: 0 }}>
+        <div style={{ width: "150px", flexShrink: 0 }}>
           <InputPicker
-            data={DateFilterOptions}
+            data={[
+              { label: "Today", value: "today" },
+              { label: "Yesterday", value: "yesterday" },
+              { label: "This Week", value: "thisWeek" },
+              { label: "This Month", value: "thisMonth" },
+              { label: "Custom", value: "custom" },
+            ]}
             value={dateFilter}
-            onChange={onDateFilterChange}
+            onChange={handleDateFilterChange}
             placeholder={dateFilterPlaceholder}
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             cleanable
             size="sm"
           />
         </div>
       )}
-      
+
       {showStatusFilter && (
-        <div style={{ width: '120px', flexShrink: 0 }}>
+        <div style={{ width: "120px", flexShrink: 0 }}>
           <InputPicker
             data={statusOptions}
             value={statusFilter}
             onChange={onStatusFilterChange}
             placeholder={statusFilterPlaceholder}
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             cleanable
             size="sm"
           />

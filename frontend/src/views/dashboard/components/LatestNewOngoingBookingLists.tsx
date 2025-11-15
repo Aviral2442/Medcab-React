@@ -98,7 +98,7 @@ const RecentSessions = () => {
                                     <div className="d-flex align-items-center">
                                         <div>
                                             <span className="text-muted fs-xs">Vendor</span>
-                                            <h5 className="fs-base mb-0">
+                                            <h5 className="fs-6 mb-0">
                                                 <Link to="" className="text-body">
                                                     {booking.mpo_vendor_id || 'Not Assigned'}
                                                 </Link>
@@ -110,7 +110,7 @@ const RecentSessions = () => {
                                     <div className="d-flex align-items-center">
                                         <div>
                                             <span className="text-muted fs-xs">Consumer</span>
-                                            <h5 className="fs-base mb-0">
+                                            <h5 className="fs-6 mb-0">
                                                 <Link to="" className="text-body">
                                                     {booking.consumer_name || 'N/A'}
                                                 </Link>

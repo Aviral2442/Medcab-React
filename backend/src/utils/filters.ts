@@ -6,6 +6,9 @@ export const buildFilters = (
         dateColumn?: string; // e.g. column name like "created_at" or "updated_at"
     }
 ) => {
+
+    console.log("Filters received:", filters);
+
     const whereClauses: string[] = [];
     const params: any[] = [];
 

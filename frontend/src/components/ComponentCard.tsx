@@ -38,7 +38,7 @@ const ComponentCard = ({
   if (!isVisible) return null;
 
   return (
-    <Card className={clsx(isCollapsed && "card-collapse", className)}>
+    <Card className={clsx(isCollapsed && "card-collapse", 'mt-3 mx-2', className)}>
       {isRefreshing && (
         <div className="card-overlay">
           <div className="spinner-border text-primary" />
