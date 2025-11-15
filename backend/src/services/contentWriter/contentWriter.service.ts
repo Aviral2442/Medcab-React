@@ -75,7 +75,7 @@ export const getBlogListService = async (filters?: {
         const queryParams = [...params, limit, offset];
         const [rows]: any = await db.query(query, queryParams);
 
-        console.log("Blog List Rows:", rows);
+        // console.log("Blog List Rows:", rows);
         
 
         const [countRows]: any = await db.query(
