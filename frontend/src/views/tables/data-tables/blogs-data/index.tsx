@@ -64,7 +64,7 @@ const ExportDataWithButtons = ({
   const [totalPages, setTotalPages] = useState(0);
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
-  const basePath = "http://localhost:4000";
+  const basePath = (import.meta as any).env?.basePath ?? "";
 
   const toggleStatus = async (blogId: number, currentStatus: number) => {
     try {
