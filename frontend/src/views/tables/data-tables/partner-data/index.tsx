@@ -42,9 +42,10 @@ const tableConfig: Record<
       "ID",
       "Name",
       "Mobile",
-      "Email",
+      "Img",
       "Wallet",
-      "City",
+      "Reg_Step",
+      // "City",
       "Date",
       "Status",
     ],
@@ -264,7 +265,7 @@ const ExportDataWithButtons = ({
                   {headers.map((header, idx) => (
                     <th key={idx}>{header}</th>
                   ))}
-                  <th>Actions</th>
+                  {/* <th>Actions</th> */}
                 </tr>
               </thead>
             </DataTable>

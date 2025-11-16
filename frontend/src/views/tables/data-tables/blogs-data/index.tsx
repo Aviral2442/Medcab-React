@@ -65,6 +65,7 @@ const ExportDataWithButtons = ({
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   const basePath = (import.meta as any).env?.basePath ?? "";
+  console.log("Base Path:", basePath);
 
   const toggleStatus = async (blogId: number, currentStatus: number) => {
     try {

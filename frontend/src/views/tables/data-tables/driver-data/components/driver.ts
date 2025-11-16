@@ -4,14 +4,14 @@ const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 type DriverInfoType = {
     driver_id: number;
     driver_name: string;
-    driver_last_name: string;
+    // driver_last_name: string;
     driver_mobile: string;
     driver_wallet_amount: number;
-    driver_city_id: number;
-    driver_created_by: number;
+    // driver_city_id: number;
+    driver_created_by: number; // 0: Self, 1: Partner
     driver_profile_img: string;
     driver_registration_step: number;
-    driver_duty_status: number;
+    driver_duty_status: string;
     driver_status: number;
     created_at: string;
 }
@@ -37,7 +37,7 @@ export const getDriverList = async () => {
 export const driverColumns = [
     { data: 'driver_id' },
     { data: 'driver_name' },
-    { data: 'driver_last_name' },
+    // { data: 'driver_last_name' },
     { data: 'driver_mobile' },
     { 
         data: 'driver_wallet_amount',
@@ -45,7 +45,7 @@ export const driverColumns = [
             return `₹${data || 0}`;
         }
     },
-    { data: 'driver_city_id' },
+    // { data: 'driver_city_id' },
     {
         data: 'driver_created_by',
         render: (data: number) => {
@@ -63,13 +63,12 @@ export const driverColumns = [
     },
     {
         data: 'driver_duty_status',
-        render: (data: number) => {
-            const dutyStatusMap: Record<number, { label: string; class: string }> = {
-                0: { label: 'Off Duty', class: 'secondary' },
-                1: { label: 'On Duty', class: 'success' },
-            };
-            const status = dutyStatusMap[data] || { label: 'Unknown', class: 'secondary' };
-            return `<span class="badge badge-label badge-soft-${status.class}">${status.label}</span>`;
+        render: (data: any) => {
+            if (data == 'OFF') {
+                return `<span class="badge badge-label badge-soft-danger">OFF</span>`;
+            } else {
+                return `<span class="badge badge-label badge-soft-success">ON</span>`;
+            }
         }
     },
     {
@@ -101,10 +100,10 @@ export const driverTableData: TableType<DriverInfoType> = {
         "S.No.",
         "ID",
         "Name",
-        "Last Name",
+        // "Last Name",
         "Mobile",
         "Wallet",
-        "City ID",
+        // "City ID",
         "Created By",
         "Profile",
         "Duty Status",

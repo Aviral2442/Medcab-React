@@ -35,7 +35,7 @@ const tableConfig: Record<
   { endpoint: string; columns: any[]; headers: string[] }
 > = {
   1: {
-    endpoint: "/driver/get_drivers",
+    endpoint: "/driver/get_drivers_list",
     columns: driverColumns,
     headers: [
       "S.No.",
@@ -43,7 +43,7 @@ const tableConfig: Record<
       "Name",
       "Mobile",
       "Wallet",
-      "City ID",
+      // "City ID",
       "Created By",
       "Profile",
       "Duty Status",
@@ -276,7 +276,7 @@ const ExportDataWithButtons = ({
                   {headers.map((header, idx) => (
                     <th key={idx}>{header}</th>
                   ))}
-                  <th>Actions</th>
+                  {/* <th>Actions</th> */}
                 </tr>
               </thead>
             </DataTable>

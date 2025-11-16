@@ -1,15 +1,17 @@
+import { render } from "@fullcalendar/core/preact.js";
 import axios from "axios";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+const basePath = (import.meta as any).env?.basePath ?? "";
 
 type PartnerInfoType = {
     partner_id: number;
     partner_f_name: string;
-    partner_l_name: string;
+    // partner_l_name: string;
     partner_mobile: string;
     partner_wallet: Number;
     partner_profile_img: string;
     partner_registration_step: string;
-    partner_city_id: number;
+    // partner_city_id: number;
     partner_created_by: string;
     partner_status: number;
 }
@@ -35,16 +37,23 @@ export const getPartnerList = async () => {
 export const partnerColumns = [
     { data: 'partner_id' },
     { data: 'partner_f_name' },
-    { data: 'partner_l_name' },
+    // { data: 'partner_l_name' },
     { data: 'partner_mobile' },
-    { data: 'partner_profile_img' },
+    { data: 'partner_profile_img',
+        render: (data: string) => {
+            if (data) {
+                return `<img src="${basePath}/${data}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />`;
+            }
+            return 'N/A';
+        } 
+    },
     { 
         data: 'partner_wallet_amount',
         render: (data: number) => {
             return `₹${data || 0}`;
         }
     },
-    { data: 'partner_city_id' },
+    // { data: 'partner_city_id' },
     { data: 'partner_registration_step' },
     {
         data: 'created_at',
@@ -75,7 +84,7 @@ export const partnerTableData: TableType<PartnerInfoType> = {
         "ID",
         "Name",
         "Mobile",
-        "Email",
+        "Img",
         "Wallet",
         "City",
         "Created At",

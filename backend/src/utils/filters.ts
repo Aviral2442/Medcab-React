@@ -7,7 +7,7 @@ export const buildFilters = (
     }
 ) => {
 
-    console.log("Filters received:", filters);
+    // console.log("Filters received:", filters);
 
     const whereClauses: string[] = [];
     const params: any[] = [];
