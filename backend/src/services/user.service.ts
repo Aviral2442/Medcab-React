@@ -143,3 +143,86 @@ export const getDriverEmergencyList = async (filters?: {
   }
 
 };
+
+// Consumer Emergency List with Filters and Pagination
+export const getConsumerEmergencyList = async (filters?: {
+  date?: string;
+  status?: string;
+  fromDate?: string;
+  toDate?: string;
+  page?: number;
+  limit?: number;
+}) => {
+
+  try {
+    const page = filters?.page && filters.page > 0 ? filters.page : 1;
+    const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+    const offset = (page - 1) * limit;
+
+    const { whereSQL, params } = buildFilters({
+      ...filters,
+      dateColumn: "consumer_emergency.created_at",
+    });
+
+    let finalWhereSQL = whereSQL;
+
+    if (filters?.status) {
+      const statusConditionMap: Record<string, string> = {
+        active: "consumer_emergency.consumer_emergency_status = 0",
+        inactive: "consumer_emergency.consumer_emergency_status = 1",
+      };
+
+      const condition = statusConditionMap[filters.status];
+
+      if (condition) {
+        if (/where\s+/i.test(finalWhereSQL)) {
+          finalWhereSQL += ` AND ${condition}`;
+        } else {
+          finalWhereSQL = `WHERE ${condition}`;
+        }
+      }
+    }
+
+    const query = `
+        SELECT 
+            consumer_emergency.*, driver.driver_name, driver.driver_mobile, booking_view.booking_category, booking_view.booking_schedule_time, booking_view.booking_pickup, booking_view.booking_drop, booking_view.booking_total_amount, booking_view.booking_con_name, booking_view.booking_con_mobile, consumer.consumer_name, consumer.consumer_mobile_no
+        FROM consumer_emergency
+        LEFT JOIN consumer ON consumer.consumer_id = consumer_emergency.consumer_emergency_consumer_id
+        LEFT JOIN booking_view ON booking_view.booking_id = consumer_emergency.consumer_emergency_booking_id
+        LEFT JOIN driver ON driver.driver_id = booking_view.booking_acpt_driver_id
+        ${finalWhereSQL}
+        ORDER BY consumer_emergency.consumer_emergency_id DESC
+        LIMIT ? OFFSET ?
+    `;
+
+    const queryParams = [...params, limit, offset];
+    const [rows]: any = await db.query(query, queryParams);
+
+    const [countRows]: any = await db.query(
+      `SELECT COUNT(*) as total FROM consumer_emergency ${finalWhereSQL}`,
+      params
+    );
+
+    const total = countRows[0]?.total || 0;
+
+    return {
+      status: 200,
+      message: "Consumer emergency list fetched successfully",
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+      jsonData: {
+        consumer_emergency_list: rows
+      },
+    };
+
+  } catch (error) {
+    console.log(error);
+
+    throw new ApiError(500, "Get Consumer Emergency List Error On Fetching");
+  }
+
+};
