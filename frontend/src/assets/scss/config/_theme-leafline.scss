@@ -138,9 +138,10 @@ $theme-leafline-colors: (
 
     @if $enable-dark-mode {
         @include color-mode(dark, true) {
-            &[data-skin="leafline"] {
+            html[data-skin="leafline"] {
                 // Body
                 --#{$prefix}body-bg:                   #121912; // deep forest green
+                --#{$prefix}body-bg-rgb:               #{to-rgb(#121912)};
                 --#{$prefix}body-color:               #b6c3a3; // soft sage text
                 --#{$prefix}body-color-rgb:           #{to-rgb(#b6c3a3)};
                 --#{$prefix}heading-color:            #dce9cc; // pale green cream
@@ -186,5 +187,66 @@ $theme-leafline-colors: (
             }
 
         }
+    }
+    
+    // Add this block to ensure the dark mode works properly
+    html[data-bs-theme="dark"][data-skin="leafline"] {
+        --#{$prefix}body-bg:                   #121912;
+        --#{$prefix}body-bg-rgb:               #{to-rgb(#121912)};
+        --#{$prefix}secondary-bg:              #192319;
+        --#{$prefix}tertiary-bg:               #1f2a1f;
+    }
+}
+
+// Move this block OUTSIDE the @if $theme-leafline block to ensure it always applies at the root level
+html[data-bs-theme="dark"][data-skin="leafline"] {
+    --#{$prefix}body-bg:                   #121912 !important;
+    --#{$prefix}body-bg-rgb:               #{to-rgb(#121912)};
+    --#{$prefix}secondary-bg:              #192319 !important;
+    --#{$prefix}tertiary-bg:               #1f2a1f !important;
+    --#{$prefix}body-color:                #b6c3a3;
+    --#{$prefix}body-color-rgb:            #{to-rgb(#b6c3a3)};
+    
+    // Force background on html and body
+    &, body {
+        background-color: #121912 !important;
+        background: #121912 !important;
+    }
+    
+    body[style] {
+        background-color: #121912 !important;
+        background: #121912 !important;
+    }
+    
+    .wrapper,
+    .app-wrapper,
+    #root {
+        background-color: #121912 !important;
+    }
+    
+    .container,
+    .container-fluid {
+        background-color: transparent !important;
+    }
+    
+    // Card backgrounds
+    .card {
+        background-color: #192319 !important;
+        border-color: #2a382a;
+    }
+    
+    // Table backgrounds
+    .table {
+        --#{$prefix}table-bg: #192319;
+        --#{$prefix}table-striped-bg: #1f2a1f;
+        --#{$prefix}table-hover-bg: #243124;
+        color: #b6c3a3;
+    }
+    
+    // Override any inline styles
+    [style*="background-color: #fff"],
+    [style*="background-color: white"],
+    [style*="background-color: rgb(255, 255, 255)"] {
+        background-color: #121912 !important;
     }
 }

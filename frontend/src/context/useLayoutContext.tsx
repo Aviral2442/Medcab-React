@@ -181,6 +181,17 @@ const LayoutProvider = ({children}: ChildrenType) => {
         toggleAttribute('data-sidenav-user', settings.sidenav.user.toString())
         toggleAttribute('data-layout-position', settings.position)
         toggleAttribute('class', settings.monochrome ? 'monochrome' : '')
+        
+        // Apply body background color based on theme and skin
+        if (settings.theme === 'dark' && settings.skin === 'leafline') {
+            document.body.style.backgroundColor = '#121912'
+        } else if (settings.theme === 'light' && settings.skin === 'leafline') {
+            document.body.style.backgroundColor = '#f5f6f7'
+        } else if (settings.theme === 'dark') {
+            document.body.style.backgroundColor = '#17181e' // default dark mode color
+        } else {
+            document.body.style.backgroundColor = '#f5f6f7' // default light mode color
+        }
     }, [settings])
 
     const {width} = useViewPort()

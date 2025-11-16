@@ -232,7 +232,7 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto ">
             <DataTable
               key={`driver-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
               data={data}
