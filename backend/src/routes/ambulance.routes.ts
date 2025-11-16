@@ -27,4 +27,6 @@ router.get("/get_ambulance_facilities_rate/:id", getAmbulanceFacilitiesRateContr
 router.put("/edit_ambulance_facilities_rate/:id", editAmbulanceFacilitiesRateController);
 router.patch("/update_ambulance_facilities_rate_status/:id", updateAmbulanceFacilitiesRateStatusController);
 
+// Booking Routes
+
 export default router;

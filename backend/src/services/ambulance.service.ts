@@ -881,8 +881,3 @@ export const updateAmbulanceFacilitiesRateStatusService = async (rateId: number,
     }
 
 };
-
-
-
-
-
