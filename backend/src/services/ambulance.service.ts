@@ -881,3 +881,98 @@ export const updateAmbulanceFacilitiesRateStatusService = async (rateId: number,
     }
 
 };
+
+// SERVICE TO GET AMBULANCE BOOKING LIST WITH FILTERS AND PAGINATION
+export const getAmbulanceBookingListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+
+    try {
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "booking_view.created_at",
+        });
+
+        let finalWhereSQL = whereSQL;
+
+        if (filters?.status) {
+            const statusConditionMap: Record<string, string> = {
+                enquery: "booking_view.booking_status = 0",
+                confirmBooking: "booking_view.booking_status = 1",
+                driverAssign: "booking_view.booking_status = 2",
+                invoice: "booking_view.booking_status = 3",
+                complete: "booking_view.booking_status = 4",
+                cancel: "booking_view.booking_status = 5",
+            };
+
+            const condition = statusConditionMap[filters.status];
+
+            if (condition) {
+                if (/where\s+/i.test(finalWhereSQL)) {
+                    finalWhereSQL += ` AND ${condition}`;
+                } else {
+                    finalWhereSQL = `WHERE ${condition}`;
+                }
+            }
+        }
+
+        const query = `
+            SELECT 
+                booking_view.booking_id,
+                booking_view.booking_source,
+                booking_view.booking_type,
+                booking_view.booking_con_name,
+                booking_view.booking_con_mobile,
+                booking_view.booking_category,
+                booking_view.booking_schedule_time,
+                booking_view.booking_pickup,
+                booking_view.booking_drop,
+                booking_view.booking_status,
+                booking_view.booking_total_amount,
+                booking_view.created_at
+            FROM booking_view
+            ${finalWhereSQL}
+            ORDER BY booking_view.booking_id DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "Ambulance booking list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                booking_list: rows
+            },
+        };
+
+    } catch (error) {
+        console.log(error);
+
+        throw new ApiError(500, "Get Ambulance Booking List Error On Fetching");
+    }
+
+};
