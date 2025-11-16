@@ -2,6 +2,7 @@ import { db } from "../config/db";
 import { ApiError } from "../utils/api-error";
 import { buildFilters } from "../utils/filters";
 
+// Get All Users
 export const getAllUsers = async (): Promise<any[]> => {
   const [rows] = await db.query("SELECT id, username, email FROM users");
   return rows as any[];
