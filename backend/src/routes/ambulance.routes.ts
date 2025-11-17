@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { addAmbulanceCategoryController, addAmbulanceFacilitiesRateController, addAmbulanceFaqController, ambulanceBookingDetailController, editAmbulanceCategoryController, editAmbulanceFacilitiesRateController, editAmbulanceFaqController, getAmbulanceBookingListController, getAmbulanceCategoryController, getAmbulanceCategoryListController, getAmbulanceFacilitiesRateController, getAmbulanceFacilitiesRateListController, getAmbulanceFaqController, getAmbulanceFaqListController, updateAmbulanceCategoryStatusController, updateAmbulanceFacilitiesRateStatusController, updateAmbulanceFaqStatusController } from '../controllers/ambulance.controller';
+import { addAmbulanceCategoryController, addAmbulanceFacilitiesRateController, addAmbulanceFaqController, ambulanceBookingDetailController, editAmbulanceCategoryController, editAmbulanceFacilitiesRateController, editAmbulanceFaqController, getAmbulanceBookingListController, getAmbulanceCategoryController, getAmbulanceCategoryListController, getAmbulanceFacilitiesRateController, getAmbulanceFacilitiesRateListController, getAmbulanceFaqController, getAmbulanceFaqListController, getBulkAmbulanceBookingListController, getRegularAmbulanceBookingListController, getRentalAmbulanceBookingListController, updateAmbulanceCategoryStatusController, updateAmbulanceFacilitiesRateStatusController, updateAmbulanceFaqStatusController } from '../controllers/ambulance.controller';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -29,6 +29,9 @@ router.patch("/update_ambulance_facilities_rate_status/:id", updateAmbulanceFaci
 
 // Booking Routes
 router.get('/get_ambulance_booking_list', getAmbulanceBookingListController);
+router.get('/get_regular_ambulance_booking_list', getRegularAmbulanceBookingListController);
+router.get('/get_rental_ambulance_booking_list', getRentalAmbulanceBookingListController);
+router.get('/get_bulk_ambulance_booking_list', getBulkAmbulanceBookingListController);
 router.get('/ambulance_booking_detail/:id', ambulanceBookingDetailController);
 
 export default router;
