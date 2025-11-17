@@ -6,7 +6,7 @@ import {
   DropdownItem,
   DropdownToggle,
 } from "react-bootstrap";
-
+import '@/global.css';
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
