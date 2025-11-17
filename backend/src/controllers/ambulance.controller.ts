@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
 
 // Get Ambulance Category List Controller
 export const getAmbulanceCategoryListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -409,4 +409,85 @@ export const getAmbulanceBookingListController = async (req: Request, res: Respo
         next(error);
     }
 
+};
+
+// CONTROLLER TO GET REGULAR AMBULANCE BOOKING LIST
+export const getRegularAmbulanceBookingListController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        }
+
+        const result = await getRegularAmbulanceBookingListService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO GET RENTAL AMBULANCE BOOKING LIST
+export const getRentalAmbulanceBookingListController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        }
+
+        const result = await getRentalAmbulanceBookingListService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO GET RENTAL AMBULANCE BOOKING LIST
+export const getBulkAmbulanceBookingListController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        }
+
+        const result = await getBulkAmbulanceBookingListService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO GET AMBULANCE BOOKING DETAIL
+export const ambulanceBookingDetailController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const bookingId = parseInt(req.params.id);
+        const result = await ambulanceBookingDetailService(bookingId);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
 };

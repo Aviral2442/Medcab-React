@@ -977,3 +977,311 @@ export const getAmbulanceBookingListService = async (filters?: {
     }
 
 };
+
+// SERVICE TO GET REGULAR AMBULANCE BOOKING LIST WITH FILTERS AND PAGINATION
+export const getRegularAmbulanceBookingListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+
+    try {
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "booking_view.created_at",
+        });
+
+        let finalWhereSQL = "WHERE booking_view.booking_type = 0";
+
+        if (whereSQL) {
+            finalWhereSQL += whereSQL.replace(/^\s*WHERE/i, " AND");
+        }
+
+        if (filters?.status) {
+            const statusConditionMap: Record<string, string> = {
+                enquery: "booking_view.booking_status = 0",
+                confirmBooking: "booking_view.booking_status = 1",
+                driverAssign: "booking_view.booking_status = 2",
+                invoice: "booking_view.booking_status = 3",
+                complete: "booking_view.booking_status = 4",
+                cancel: "booking_view.booking_status = 5",
+            };
+
+            const condition = statusConditionMap[filters.status];
+
+            if (condition) {
+                finalWhereSQL += ` AND ${condition}`;
+            }
+        }
+
+        const query = `
+            SELECT 
+                booking_view.booking_id,
+                booking_view.booking_source,
+                booking_view.booking_type,
+                booking_view.booking_con_name,
+                booking_view.booking_con_mobile,
+                booking_view.booking_category,
+                booking_view.booking_schedule_time,
+                booking_view.booking_pickup,
+                booking_view.booking_drop,
+                booking_view.booking_status,
+                booking_view.booking_total_amount,
+                booking_view.created_at
+            FROM booking_view
+            ${finalWhereSQL}
+            ORDER BY booking_view.booking_id DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "Regular Ambulance booking list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                regular_ambulance_booking_list: rows
+            },
+        };
+
+    } catch (error) {
+        console.log(error);
+
+        throw new ApiError(500, "Get Regular Ambulance Booking List Error On Fetching");
+    }
+};
+
+// SERVICE TO GET RENTAL AMBULANCE BOOKING LIST WITH FILTERS AND PAGINATION
+export const getRentalAmbulanceBookingListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+
+    try {
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "booking_view.created_at",
+        });
+
+        let finalWhereSQL = "WHERE booking_view.booking_type = 1";
+
+        if (whereSQL) {
+            finalWhereSQL += whereSQL.replace(/^\s*WHERE/i, " AND");
+        }
+
+        if (filters?.status) {
+            const statusConditionMap: Record<string, string> = {
+                enquery: "booking_view.booking_status = 0",
+                confirmBooking: "booking_view.booking_status = 1",
+                driverAssign: "booking_view.booking_status = 2",
+                invoice: "booking_view.booking_status = 3",
+                complete: "booking_view.booking_status = 4",
+                cancel: "booking_view.booking_status = 5",
+            };
+
+            const condition = statusConditionMap[filters.status];
+
+            if (condition) {
+                finalWhereSQL += ` AND ${condition}`;
+            }
+        }
+
+        const query = `
+            SELECT 
+                booking_view.booking_id,
+                booking_view.booking_source,
+                booking_view.booking_type,
+                booking_view.booking_con_name,
+                booking_view.booking_con_mobile,
+                booking_view.booking_category,
+                booking_view.booking_schedule_time,
+                booking_view.booking_pickup,
+                booking_view.booking_drop,
+                booking_view.booking_status,
+                booking_view.booking_total_amount,
+                booking_view.created_at
+            FROM booking_view
+            ${finalWhereSQL}
+            ORDER BY booking_view.booking_id DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "Rental Ambulance booking list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                rental_ambulance_booking_list: rows
+            },
+        };
+
+    } catch (error) {
+        console.log(error);
+
+        throw new ApiError(500, "Get Rental Ambulance Booking List Error On Fetching");
+    }
+};
+
+// SERVICE TO GET BULK AMBULANCE BOOKING LIST WITH FILTERS AND PAGINATION
+export const getBulkAmbulanceBookingListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+
+    try {
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "booking_view.created_at",
+        });
+
+        let finalWhereSQL = "WHERE booking_view.booking_type = 2";
+
+        if (whereSQL) {
+            finalWhereSQL += whereSQL.replace(/^\s*WHERE/i, " AND");
+        }
+
+        if (filters?.status) {
+            const statusConditionMap: Record<string, string> = {
+                enquery: "booking_view.booking_status = 0",
+                confirmBooking: "booking_view.booking_status = 1",
+                driverAssign: "booking_view.booking_status = 2",
+                invoice: "booking_view.booking_status = 3",
+                complete: "booking_view.booking_status = 4",
+                cancel: "booking_view.booking_status = 5",
+            };
+
+            const condition = statusConditionMap[filters.status];
+
+            if (condition) {
+                finalWhereSQL += ` AND ${condition}`;
+            }
+        }
+
+        const query = `
+            SELECT 
+                booking_view.booking_id,
+                booking_view.booking_source,
+                booking_view.booking_type,
+                booking_view.booking_con_name,
+                booking_view.booking_con_mobile,
+                booking_view.booking_category,
+                booking_view.booking_schedule_time,
+                booking_view.booking_pickup,
+                booking_view.booking_drop,
+                booking_view.booking_status,
+                booking_view.booking_total_amount,
+                booking_view.created_at
+            FROM booking_view
+            ${finalWhereSQL}
+            ORDER BY booking_view.booking_id DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "Bulk Ambulance booking list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                bulk_ambulance_booking_list: rows
+            },
+        };
+
+    } catch (error) {
+        console.log(error);
+
+        throw new ApiError(500, "Get Bulk Ambulance Booking List Error On Fetching");
+    }
+};
+
+// SERVICE TO GET AMBULANCE BOOKING DETAIL
+export const ambulanceBookingDetailService = async (bookingId: number) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT * FROM booking_view WHERE booking_id = ?`,
+            [bookingId]
+        );
+
+        if (!rows || rows.length === 0) {
+            throw new ApiError(404, "Ambulance booking not found");
+        }
+
+        return {
+            status: 200,
+            message: "Ambulance booking detail fetched successfully",
+            jsonData: {
+                booking_detail: rows[0]
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Get Ambulance Booking Detail Error On Fetching");
+    }
+}
