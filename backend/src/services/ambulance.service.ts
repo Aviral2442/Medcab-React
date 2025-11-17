@@ -685,7 +685,7 @@ export const getAmbulanceFacilitiesRateListService = async (filters?: {
 
         const { whereSQL, params } = buildFilters({
             ...filters,
-            dateColumn: "ambulance_facilities_rate.ambulance_facilities_rate_id",
+            dateColumn: "ambulance_facilities_rate.ambulance_facilities_rate_date",
         });
 
         let finalWhereSQL = whereSQL;
@@ -716,7 +716,8 @@ export const getAmbulanceFacilitiesRateListService = async (filters?: {
                 ambulance_facilities_rate.ambulance_facilities_rate_increase_per_km,
                 ambulance_facilities_rate.ambulance_facilities_rate_from,
                 ambulance_facilities_rate.ambulance_facilities_rate_to,
-                ambulance_facilities_rate.ambulance_facilities_rate_status
+                ambulance_facilities_rate.ambulance_facilities_rate_status,
+                ambulance_facilities_rate.ambulance_facilities_rate_date
             FROM ambulance_facilities_rate
             ${finalWhereSQL}
             ORDER BY ambulance_facilities_rate.ambulance_facilities_rate_id DESC

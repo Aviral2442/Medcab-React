@@ -507,7 +507,7 @@ const ExportDataWithButtons = ({
               }}
               className="table table-striped dt-responsive align-middle mb-0"
             >
-              <thead className="thead-sm text-uppercase fs-xxs">
+              <thead className="thead-sm text-capitalize fs-xxs">
                 <tr>
                   {getHeaders().map((header, idx) => (
                     <th key={idx}>{header}</th>
