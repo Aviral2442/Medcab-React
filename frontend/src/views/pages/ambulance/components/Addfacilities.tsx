@@ -158,9 +158,10 @@ const Addfacilities: React.FC<AddfacilitiesProps> = ({ mode, data, onCancel, onD
           </Col>
         </Row>
         <div className="d-flex justify-content-end gap-2">
-          <Button variant="secondary" onClick={onCancel}>
+          <button  className="px-3 rounded text-black"
+ onClick={onCancel}>
             Cancel
-          </Button>
+          </button>
           <Button type="submit" variant="primary" disabled={loading}>
             {loading ? 'Saving...' : mode === 'add' ? 'Add' : 'Update'}
           </Button>

@@ -11,6 +11,7 @@ import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
+import '@/global.css';
 
 import { TbDotsVertical, TbEye, TbReceipt } from "react-icons/tb";
 
@@ -186,26 +187,18 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-          <Dropdown align="end" className="text-muted">
-            <DropdownToggle
-              variant="link"
-              className="drop-arrow-none fs-xxl link-reset p-0"
+          <div className="d-flex flex-row gap-1">
+            <button className="eye-icon p-1"
+              onClick={() => {
+                navigate(`/driver-detail/${rowData.driver_id}`);
+              }}
             >
-              <TbDotsVertical />
-            </DropdownToggle>
-            <DropdownMenu>
-              <DropdownItem
-                onClick={() => {
-                  navigate(`/driver-details/${rowData.driver_id}`);
-                }}
-              >
-                <TbEye className="me-1" /> View
-              </DropdownItem>
-              <DropdownItem onClick={() => handleRemark(rowData)}>
-                <TbReceipt className="me-1" /> Remark
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+              <TbEye className="me-1" />
+            </button>
+              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
+              <TbReceipt className="me-1" />
+            </button>
+          </div>
         );
       },
     },

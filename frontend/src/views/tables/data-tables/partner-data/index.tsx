@@ -6,7 +6,7 @@ import {
   DropdownItem,
   DropdownToggle,
 } from "react-bootstrap";
-
+import '@/global.css';
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
@@ -175,26 +175,18 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-          <Dropdown align="end" className="text-muted">
-            <DropdownToggle
-              variant="link"
-              className="drop-arrow-none fs-xxl link-reset p-0"
+           <div className="d-flex flex-row gap-1">
+            <button className="eye-icon p-1"
+              onClick={() => {
+                navigate(`/partner-detail/${rowData.selectedPartnerId}`);
+              }}
             >
-              <TbDotsVertical />
-            </DropdownToggle>
-            <DropdownMenu>
-              <DropdownItem
-                onClick={() => {
-                  navigate(`/partner-details/${rowData.partner_id}`);
-                }}
-              >
-                <TbEye className="me-1" /> View
-              </DropdownItem>
-              <DropdownItem onClick={() => handleRemark(rowData)}>
-                <TbReceipt className="me-1" /> Remark
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+              <TbEye className="me-1" />
+            </button>
+              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
+              <TbReceipt className="me-1" />
+            </button>
+          </div>
         );
       },
     },

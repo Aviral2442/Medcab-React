@@ -95,7 +95,7 @@ const ExportDataWithButtons = ({
     currentStatus: number
   ) => {
     try {
-      const newStatus = currentStatus === 1 ? 0 : 1;
+      const newStatus = currentStatus === 0 ? 1 : 0;
       await axios.patch(
         `${baseURL}/ambulance/update_ambulance_category_status/${categoryId}`,
         { status: newStatus }
@@ -113,21 +113,17 @@ const ExportDataWithButtons = ({
     }
   };
 
+  // Line 128-143 - Fix toggleFAQStatus function
   const toggleFAQStatus = async (faqId: number, currentStatus: number) => {
     try {
       const newStatus = currentStatus === 0 ? 1 : 0;
-      await axios.patch(
-        `${baseURL}/ambulance/update_ambulance_faq_status/${faqId}`,
-        { status: newStatus }
-      );
-      setTableData((prevData) =>
-        prevData.map((item) =>
-          item.ambulance_faq_id === faqId
-            ? { ...item, ambulance_faq_status: newStatus }
-            : item
-        )
-      );
+      
+      await axios.patch(`${baseURL}/ambulance/update_ambulance_faq_status/${faqId}`, {
+        ambulance_faq_status: newStatus,
+      });
+
       if (onDataChanged) onDataChanged();
+      fetchData();
     } catch (error) {
       console.error("Error updating FAQ status:", error);
     }
@@ -173,8 +169,8 @@ const ExportDataWithButtons = ({
   const { endpoint } = tableConfig[tabKey];
 
   const statusFilterOptions = [
-    { label: "Active", value: "0" },
-    { label: "Inactive", value: "1" },
+    { label: "Active", value: "1" },
+    { label: "Inactive", value: "0" },
   ];
 
   const fetchData = async () => {
@@ -279,15 +275,14 @@ const ExportDataWithButtons = ({
       {
         title: "Status",
         data: "ambulance_category_status",
-        render: (data: any) => {
-          const status = typeof data === "string" ? parseInt(data) : data;
-          if (status === 1 || status === "1") {
-            return `<span class="badge badge-label badge-soft-success">Active</span>`;
-          } else if (status === 0 || status === "0") {
-            return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
-          }
-          return `<span class="badge badge-label badge-soft-secondary">Unknown</span>`;
-        },
+        defaultContent: "N/A",
+      render: (data: any) => {
+        if (data == 0 || data == "0") {
+          return `<span class="badge badge-label badge-soft-success">Active</span>`;
+        } else if (data == 1 || data == "1") {
+          return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
+        }
+      },
       },
       {
         title: "Actions",
@@ -377,14 +372,13 @@ const ExportDataWithButtons = ({
       {
         title: "Status",
         data: "ambulance_faq_status",
+        defaultContent: "N/A",
         render: (data: any) => {
-          const status = typeof data === "string" ? parseInt(data) : data;
-          if (status === 0 || status === "0") {
+          if (data == 0 || data == "0") {
             return `<span class="badge badge-label badge-soft-success">Active</span>`;
-          } else if (status === 1 || status === "1") {
+          } else if (data == 1 || data == "1") {
             return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
           }
-          return `<span class="badge badge-label badge-soft-secondary">Unknown</span>`;
         },
       },
       {
@@ -396,6 +390,7 @@ const ExportDataWithButtons = ({
         createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
           td.innerHTML = "";
           const root = createRoot(td);
+          // Line 393-420 - Fix FAQ Toggle Button (reversed)
           root.render(
             <div className="d-flex flex-row gap-1">
               <button
@@ -413,7 +408,9 @@ const ExportDataWithButtons = ({
                 }
                 style={{
                   backgroundColor:
-                    rowData.ambulance_faq_status === 0 ? "#d9534f" : "#3a833a",
+                    rowData.ambulance_faq_status === 0
+                      ? "#d9534f"
+                      : "#3a833a",
                 }}
               >
                 {rowData.ambulance_faq_status === 0 ? (
@@ -481,15 +478,13 @@ const ExportDataWithButtons = ({
         title: "Status",
         data: "ambulance_facilities_rate_status",
         defaultContent: "N/A",
-        render: (data: any) => {
-          const status = typeof data === "string" ? parseInt(data) : data;
-          if (status === 1 || status === "1") {
-            return `<span class="badge badge-label badge-soft-success">Active</span>`;
-          } else if (status === 0 || status === "0") {
-            return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
-          }
-          return `<span class="badge badge-label badge-soft-secondary">Unknown</span>`;
-        },
+      render: (data: any) => {
+        if (data == 0 || data == "0") {
+          return `<span class="badge badge-label badge-soft-success">Active</span>`;
+        } else if (data == 1 || data == "1") {
+          return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
+        }
+      }
       },
       {
         title: "Created At",
