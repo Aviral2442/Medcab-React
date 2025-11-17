@@ -98,3 +98,40 @@ export const getDriverService = async (filters: {
     }
 
 };
+
+// Get Driver Detail
+export const driverDetailService = async (driverId: number) => {
+
+    try {
+
+        const [rows]: any = await db.query(
+            `
+            SELECT 
+            driver.*, vehicle.v_vehicle_name, vehicle.vehicle_rc_number, vehicle.vehicle_category_type, city.city_name,
+            partner.partner_f_name, partner.partner_l_name, partner.partner_mobile
+            FROM driver 
+            LEFT JOIN vehicle ON driver.driver_assigned_vehicle_id = vehicle.vehicle_id
+            LEFT JOIN city ON driver.driver_city_id = city.city_id
+            LEFT JOIN partner ON driver.driver_created_by > 0 AND driver.driver_created_partner_id = partner.partner_id
+            WHERE driver.driver_id = ?
+            `, [driverId]
+        );
+
+        if (rows.length === 0) {
+            throw new ApiError(404, 'Driver not found');
+        }
+
+        return {
+            status: 200,
+            message: 'Driver Detail Fetch Successful',
+            jsonData: {
+                driver: rows[0]
+            }
+        };
+
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'Failed to retrieve driver details service');
+    }
+
+};

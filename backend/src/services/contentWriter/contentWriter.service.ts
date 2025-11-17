@@ -76,7 +76,7 @@ export const getBlogListService = async (filters?: {
         const [rows]: any = await db.query(query, queryParams);
 
         // console.log("Blog List Rows:", rows);
-        
+
 
         const [countRows]: any = await db.query(
             `SELECT COUNT(*) as total FROM blogs ${finalWhereSQL}`,
@@ -639,6 +639,6 @@ export const updateCityContentFaqStatusService = async (faqId: number, status: n
             message: "City Content FAQ status updated successfully",
         };
     } catch (error) {
-        throw new ApiError(500, "Update City Content FAQ Status Error On Updating");    
+        throw new ApiError(500, "Update City Content FAQ Status Error On Updating");
     }
 };

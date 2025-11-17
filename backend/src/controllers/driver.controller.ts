@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { getDriverService } from '../services/driver.service';
+import { driverDetailService, getDriverService } from '../services/driver.service';
 
+// Get Drivers List
 export const getDriversController = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
@@ -22,3 +23,21 @@ export const getDriversController = async (req: Request, res: Response, next: Ne
     }
 
 };
+
+// Get Driver Detail
+export const driverDetailController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const driverId = parseInt(req.params.id);
+
+        if (isNaN(driverId)) {
+            return res.status(400).json({ message: 'Invalid driver ID' });
+        }
+
+        const result = await driverDetailService(driverId);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+}
