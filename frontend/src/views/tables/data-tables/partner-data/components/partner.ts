@@ -1,4 +1,3 @@
-import { render } from "@fullcalendar/core/preact.js";
 import axios from "axios";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 const basePath = (import.meta as any).env?.basePath ?? "";

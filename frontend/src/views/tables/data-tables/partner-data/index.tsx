@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
-import {
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  DropdownToggle,
-} from "react-bootstrap";
+// import {
+//   Dropdown,
+//   DropdownMenu,
+//   DropdownItem,
+//   DropdownToggle,
+// } from "react-bootstrap";
 import '@/global.css';
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import { TbDotsVertical, TbEye, TbReceipt } from "react-icons/tb";
+import { TbEye, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";

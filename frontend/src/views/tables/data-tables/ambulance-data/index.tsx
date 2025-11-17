@@ -10,7 +10,6 @@ import jszip from "jszip";
 import pdfmake from "pdfmake";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -79,7 +78,6 @@ const ExportDataWithButtons = ({
   filterParams = {},
   onDataChanged,
 }: ExportDataWithButtonsProps) => {
-  const navigate = useNavigate();
   const [tableData, setTableData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const tableRef = useRef<any>(null);
