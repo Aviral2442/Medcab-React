@@ -70,7 +70,9 @@ const ExportDataWithButtons = ({
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isRemarkOpen, setIsRemarkOpen] = useState(false);
-  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(
+    null
+  );
 
   const [pageSize] = useState(10);
   const [_total, setTotal] = useState(0);
@@ -109,7 +111,7 @@ const ExportDataWithButtons = ({
       const params = getFilterParams(pageSize, filterParams);
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
       console.log("Fetched data:", res.data);
-      
+
       switch (tabKey) {
         case 1:
           setRows(res.data?.jsonData?.bookingsLists || []);
@@ -165,7 +167,15 @@ const ExportDataWithButtons = ({
 
   useEffect(() => {
     fetchData();
-  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange]);
+  }, [
+    tabKey,
+    refreshFlag,
+    currentPage,
+    pageSize,
+    dateFilter,
+    statusFilter,
+    dateRange,
+  ]);
 
   const columnsWithActions = [
     {
@@ -188,22 +198,22 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-          <Dropdown align="end" className="text-muted">
-            <DropdownToggle
-              variant="link"
-              className="drop-arrow-none fs-xxl link-reset p-0"
+          <div className="d-flex flex-row gap-1">
+            <button
+              className="eye-icon p-1"
+              onClick={() => {
+                handleView(rowData);
+              }}
             >
-              <TbDotsVertical />
-            </DropdownToggle>
-            <DropdownMenu>
-              <DropdownItem onClick={() => handleView(rowData)}>
-                <TbEye className="me-1" /> View
-              </DropdownItem>
-              <DropdownItem onClick={() => handleRemark(rowData)}>
-                <TbReceipt className="me-1" /> Remark
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+              <TbEye className="me-1" />
+            </button>
+            <button
+              className="remark-icon"
+              onClick={() => handleRemark(rowData)}
+            >
+              <TbReceipt className="me-1" />
+            </button>
+          </div>
         );
       },
     },
@@ -245,9 +255,15 @@ const ExportDataWithButtons = ({
                 },
                 buttons: [
                   { extend: "copy", className: "btn btn-sm btn-secondary" },
-                  { extend: "csv", className: "btn btn-sm btn-secondary active" },
+                  {
+                    extend: "csv",
+                    className: "btn btn-sm btn-secondary active",
+                  },
                   { extend: "excel", className: "btn btn-sm btn-secondary" },
-                  { extend: "pdf", className: "btn btn-sm btn-secondary active" },
+                  {
+                    extend: "pdf",
+                    className: "btn btn-sm btn-secondary active",
+                  },
                 ],
               }}
               className="table table-striped dt-responsive align-middle mb-0"
@@ -262,18 +278,22 @@ const ExportDataWithButtons = ({
               </thead>
             </DataTable>
 
-                        <TablePagination
+            <TablePagination
               // totalItems={total}
               start={currentPage + 1}
               // end={totalPages}
               // itemsName="items"
               showInfo={true}
-              previousPage={() => handlePageChange(Math.max(0, currentPage - 1))}
+              previousPage={() =>
+                handlePageChange(Math.max(0, currentPage - 1))
+              }
               canPreviousPage={currentPage > 0}
               pageCount={totalPages}
               pageIndex={currentPage}
               setPageIndex={handlePageChange}
-              nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+              nextPage={() =>
+                handlePageChange(Math.min(totalPages - 1, currentPage + 1))
+              }
               canNextPage={currentPage < totalPages - 1}
             />
           </div>
