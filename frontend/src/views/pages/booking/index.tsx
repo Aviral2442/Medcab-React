@@ -5,7 +5,7 @@ import "rsuite/dist/rsuite.min.css";
 const Page = () => {
 
   return (
-    <Container fluid className="p-2">
+    <Container fluid className="p-0">
       <ExportDataWithButtons
         tabKey={1}
         refreshFlag={0}

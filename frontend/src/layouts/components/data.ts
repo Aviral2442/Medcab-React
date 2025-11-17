@@ -122,6 +122,7 @@ export const menuItems: MenuItemType[] = [
     label: 'Ambulance',
     icon: LuAmbulance,
     children: [
+      { key: 'category-list', label: 'Category', url: '/ambulance/category' },
       { key: 'driver-list', label: 'Driver', url: '/driver-list' },
       { key: 'partner-list', label: 'Partner', url: '/Partner-list' },
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
