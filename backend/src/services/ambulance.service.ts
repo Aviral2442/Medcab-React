@@ -976,3 +976,29 @@ export const getAmbulanceBookingListService = async (filters?: {
     }
 
 };
+
+// SERVICE TO GET AMBULANCE BOOKING DETAIL
+export const ambulanceBookingDetailService = async (bookingId: number) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT * FROM booking_view WHERE booking_id = ?`,
+            [bookingId]
+        );
+
+        if (!rows || rows.length === 0) {
+            throw new ApiError(404, "Ambulance booking not found");
+        }
+
+        return {
+            status: 200,
+            message: "Ambulance booking detail fetched successfully",
+            jsonData: {
+                booking_detail: rows[0]
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Get Ambulance Booking Detail Error On Fetching");
+    }
+}
