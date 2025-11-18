@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX } from "react-icons/tb";
-import '@/global.css';
+import "@/global.css";
+import DateConversion from "../DateConversion";
 
 interface BookingDetailsFormProps {
   data: any;
@@ -21,7 +22,7 @@ const Section: React.FC<SectionProps> = ({
   titleColor = "primary",
 }) => (
   <div className="pb-0 pt-0 mb-0 mt-0">
-    <h5 className={`text-${titleColor} mb-2 `}>{title}</h5>
+    <h6 className={`text-${titleColor} mb-2 `}>{title}</h6>
     {children}
   </div>
 );
@@ -75,7 +76,11 @@ const Field: React.FC<FieldProps> = ({
         if (isNaN(date.getTime())) return valStr;
 
         const pad = (n: number) => String(n).padStart(2, "0");
-        if (type === "date") return date.toISOString().split("T")[0];
+        if (type === "date") {
+          // Use DateConversion for date display
+          return DateConversion(date.toISOString());
+        }
+        // For datetime-local, format as YYYY-MM-DDTHH:mm for input
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
           date.getDate()
         )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
@@ -104,7 +109,7 @@ const Field: React.FC<FieldProps> = ({
   }, [value]);
 
   return (
-    <div className="mb-3">
+    <div className="mb-2">
       <Form.Label className="text-muted mb-1 fs-6">{label}</Form.Label>
       <div className="d-flex align-items-center gap-2">
         {isEditing ? (
@@ -113,7 +118,7 @@ const Field: React.FC<FieldProps> = ({
               <Form.Select
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="flex-grow-1 input-field"
+                className="flex-grow-1"
               >
                 {options.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -127,7 +132,7 @@ const Field: React.FC<FieldProps> = ({
                 type={type !== "textarea" ? type : undefined}
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="flex-grow-1 input-field"
+                className="flex-grow-1"
                 {...(type === "textarea" ? { rows } : {})}
               />
             )}
@@ -155,7 +160,7 @@ const Field: React.FC<FieldProps> = ({
               plaintext
               value={displayValue}
               as={type === "textarea" ? "textarea" : "input"}
-              className="flex-grow-1 p-2 input-field"
+              className="flex-grow-1 px-2 input-field"
             />
             {editable && onEdit && (
               <Button
@@ -174,12 +179,6 @@ const Field: React.FC<FieldProps> = ({
   );
 };
 
-// Enum options
-const paymentTypeOptions = [
-  { value: "COD", label: "COD (Cash on Delivery)" },
-  { value: "Online", label: "Online Payment" },
-];
-
 const mpodStatusOptions = [
   { value: 0, label: "Pending" },
   { value: 1, label: "Started" },
@@ -196,90 +195,129 @@ const mpoStatusOptions = [
   { value: 6, label: "Assigned" },
 ];
 
+// Safely build period duration string; fall back to "N/A" when parts are missing
+
 // 🌀 Config-driven field groups
-const fieldGroups = {
+const getFieldGroups = (periodDuration: string) => ({
   orderInfo: [
-    {
-      label: "Order ID",
-      name: "manpower_order_id",
-      type: "text",
-      editable: false,
-    },
-    { label: "Order Date", name: "mpo_order_date", type: "date" },
-    {
-      label: "Status",
-      name: "mpo_status",
-      type: "select",
-      options: mpoStatusOptions,
-    },
-    { label: "User ID", name: "mpo_user_id", type: "number" },
-    { label: "Address ID", name: "mpo_address_id", type: "number" },
+    { label: "Order Category", name: "mpsc_name" },
+    // {
+    //   label: "Order ID",
+    //   name: "manpower_order_id",
+    //   type: "text",
+    //   editable: false,
+    // },
+    // {
+    //   label: "Status",
+    //   name: "mpo_status",
+    //   type: "select",
+    //   options: mpoStatusOptions,
+    //   editable: false,
+    // },
     {
       label: "Created At",
       name: "mpo_created_at",
       type: "datetime-local",
       editable: false,
     },
+  ],
+  consumer: [
+    { label: "Consumer Name", name: "consumer_name", editable: false },
     {
-      label: "Updated At",
-      name: "mpo_updated_at",
-      type: "datetime-local",
+      label: "Consumer Mobile",
+      name: "consumer_mobile_no",
+      type: "tel",
+      editable: false,
+    },
+    {
+      label: "Consumer Wallet",
+      name: "consumer_wallet_amount",
+      type: "number",
+      editable: false,
+    },
+    {
+      label: "Consumer Registered Date",
+      name: "consumer_registred_date",
+      type: "date",
+      editable: false,
+    },
+    { label: "OTP", name: "mpo_otp", type: "number", editable: false },
+    {
+      label: "Verify OTP",
+      name: "mpod_verify_otp",
+      type: "number",
       editable: false,
     },
   ],
-  consumer: [
-    // { label: "Consumer ID", name: "consumer_id", type: "number", editable: false},
-    { label: "Consumer Name", name: "consumer_name",editable: false },
-    { label: "Consumer Mobile", name: "consumer_mobile_no", type: "tel", editable: false },
-    // { label: "Consumer Email", name: "consumer_email_id", type: "email", editable: false },
-    // { label: "Consumer City", name: "consumer_city_id", type: "number", editable: false },
-    { label: "Consumer Wallet", name: "consumer_wallet_amount", type: "number", editable: false },
-    // { label: "Consumer Referral", name: "consumer_my_referal_code", type: "number", editable: false },
-    // { label: "Consumer Refered By", name: "consumer_refered_by", type: "number", editable: false },
-    { label: "Consumer Registered Date", name:"consumer_registred_date", type: "date", editable: false },
-    { label: "Consumer Status", name: "consumer_status", type: "number", editable: false },
-    { label: "OTP", name: "mpo_otp" },
-    { label: "Verify OTP", name: "mpod_verify_otp" },
-  ],
   payment: [
-    { label: "Payment Mode", name: "mpo_payment_mode" },
+    { label: "Transaction ID", name: "mpo_transection_id", editable: false },
+    { label: "Bank Reference No", name: "mpo_bank_ref_no", editable: false },
     {
-      label: "Payment Type",
-      name: "mpo_payment_type",
-      type: "select",
-      options: paymentTypeOptions,
+      label: "Transfer Amount",
+      name: "mpo_transfer_amount",
+      type: "number",
+      editable: false,
     },
-    { label: "Payment Mobile", name: "mpo_payment_mobile", type: "tel" },
-    { label: "Transaction ID", name: "mpo_transection_id" },
-    { label: "Bank Reference No", name: "mpo_bank_ref_no" },
-    { label: "Transfer Amount", name: "mpo_transfer_amount", type: "number" },
-    { label: "Final Price", name: "mpo_final_price", type: "number" },
-  ],
-  tax: [
-    { label: "GST Percentage", name: "mpo_gst_percentage", type: "number" },
-    { label: "GST Amount", name: "mpo_gst_amount", type: "number" },
+    {
+      label: "Final Price",
+      name: "mpo_final_price",
+      type: "number",
+      editable: true,
+    },
+    {
+      label: "GST Percentage",
+      name: "mpo_gst_percentage",
+      type: "number",
+      editable: true,
+    },
+    {
+      label: "GST Amount",
+      name: "mpo_gst_amount",
+      type: "number",
+      editable: true,
+    },
     {
       label: "Health Card Charges",
       name: "mpo_health_card_charges",
       type: "number",
+      editable: true,
     },
     {
       label: "Health Card Discount",
       name: "mpo_health_card_discount",
       type: "number",
+      editable: true,
     },
-    { label: "Coupon Discount", name: "mpo_coupon_discount", type: "number" },
+    {
+      label: "Coupon Discount",
+      name: "mpo_coupon_discount",
+      type: "number",
+      editable: true,
+    },
   ],
+  // tax: [
+  // ],
   vendor: [
-    { label: "Vendor ID", name: "mpo_vendor_id", type: "number" },
-    { label: "Vendor Name", name: "mpo_vendor_name" },
-    { label: "Vendor Mobile", name: "mpo_vendor_mobile", type: "tel" },
-    { label: "Vendor Picture", name: "mpo_vender_picture" },
-  ],
-  otp: [
+    {
+      label: "Vendor Name",
+      name: "mpo_vendor_name",
+      type: "text",
+      editable: true,
+    },
+    {
+      label: "Vendor Mobile",
+      name: "mpo_vendor_mobile",
+      type: "tel",
+      editable: true,
+    },
+    {
+      label: "Vendor Picture",
+      name: "mpo_vender_picture",
+      type: "text",
+      editable: true,
+    },
   ],
   orderDetails: [
-    { label: "Product ID", name: "mpod_product_id", type: "number" },
     {
       label: "Product Quantity",
       name: "mpod_product_quantity",
@@ -289,8 +327,12 @@ const fieldGroups = {
     { label: "Tax", name: "mpod_tax", type: "number" },
     { label: "Offer Amount", name: "mpod_offer_amount", type: "number" },
     { label: "Company Charge", name: "mpod_company_charge", type: "number" },
-    { label: "Period Type", name: "mpod_period_type" },
-    { label: "Period Duration", name: "mpod_period_duration", type: "number" },
+    {
+      label: "Period Duration",
+      name: periodDuration,
+      type: "text",
+      editable: false,
+    },
     { label: "Till Date", name: "mpod_till_date", type: "date" },
     {
       label: "Status (Detail)",
@@ -299,13 +341,6 @@ const fieldGroups = {
       options: mpodStatusOptions,
     },
     { label: "Assign Time", name: "mpod_assign_time", type: "datetime-local" },
-    { label: "Vendor ID (Detail)", name: "mpod_vendor_id", type: "number" },
-    { label: "Vendor Name (Detail)", name: "mpod_vendor_name" },
-    {
-      label: "Vendor Number (Detail)",
-      name: "mpod_vendor_number",
-      type: "tel",
-    },
     {
       label: "Instruction",
       name: "mpod_instruction",
@@ -313,7 +348,7 @@ const fieldGroups = {
       rows: 3,
     },
   ],
-};
+});
 
 const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
   data,
@@ -322,28 +357,6 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
 }) => {
   const handleFieldUpdate = (field: string, value: string) =>
     onUpdate?.(field, value);
-
-  // const getStatusBadge = (status: number) => {
-  //   const map: Record<number, [string, string]> = {
-  //     1: ["success", "New"],
-  //     2: ["warning", "Ongoing"],
-  //     3: ["danger", "Canceled"],
-  //     4: ["secondary", "Completed"],
-  //     5: ["info", "Processing"],
-  //     6: ["primary", "Assigned"],
-  //   };
-  //   const [variant, text] = map[status] || ["secondary", "Unknown"];
-  //   return <Badge bg={variant}>{text}</Badge>;
-  // };
-
-  // const getPaymentTypeBadge = (type: string) => {
-  //   const map: Record<string, [string, string]> = {
-  //     COD: ["success", "COD"],
-  //     Online: ["info", "Online"],
-  //   };
-  //   const [variant, text] = map[type] || ["secondary", type || "N/A"];
-  //   return <Badge bg={variant}>{text}</Badge>;
-  // };
 
   const formatDate = (value: string | number) => {
     if (!value && value !== 0) return "N/A";
@@ -356,44 +369,19 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
 
       if (isNaN(date.getTime())) return valStr;
 
-      const pad = (n: number) => String(n).padStart(2, "0");
-      const month = pad(date.getMonth() + 1);
-      const day = pad(date.getDate());
-      const year = date.getFullYear();
-
-      return `${month}/${day}/${year}`;
+      // Use DateConversion component for consistent formatting
+      return DateConversion(date.toISOString());
     } catch {
       return valStr;
     }
   };
 
-  const renderFields = (fields: any[]) => (
-    <Row>
-      {fields.map(
-        ({
-          label,
-          name,
-          type = "text",
-          editable: customEditable = true,
-          rows,
-          options,
-        }: any) => (
-          <Col md={3} key={name}>
-            <Field
-              label={label}
-              value={data?.[name]}
-              fieldName={name}
-              type={type}
-              rows={rows}
-              options={options}
-              editable={editable && customEditable}
-              onEdit={(value) => handleFieldUpdate(name, value)}
-            />
-          </Col>
-        )
-      )}
-    </Row>
-  );
+  const periodDuration =
+    [data?.mpod_period_duration, data?.mpod_period_type]
+      .filter((v) => v !== null && v !== undefined && String(v).trim() !== "")
+      .join(" ") || "N/A";
+
+  const fieldGroups = getFieldGroups(periodDuration);
 
   return (
     <div>
@@ -412,6 +400,33 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
               {formatDate(data?.mpo_order_date)}
             </strong>
           </div>
+          <div>
+            <span className="h4 fs-4 fw-semibold">Status:</span>{" "}
+            <strong className="fs-4">
+              {(() => {
+                const status = data?.mpo_status;
+                const statusOption = mpoStatusOptions.find(
+                  (opt) => opt.value.toString() === status?.toString()
+                );
+                const statusText = statusOption?.label || "Unknown";
+                const statusClass =
+                  status === 1 || status === "1"
+                    ? "text-primary"
+                    : status === 2 || status === "2"
+                    ? "text-warning"
+                    : status === 3 || status === "3"
+                    ? "text-danger"
+                    : status === 4 || status === "4"
+                    ? "text-success"
+                    : status === 5 || status === "5"
+                    ? "text-info"
+                    : status === 6 || status === "6"
+                    ? "text-secondary"
+                    : "text-muted";
+                return <span className={statusClass}>{statusText}</span>;
+              })()}
+            </strong>
+          </div>
         </Card.Body>
       </Card>
 
@@ -419,7 +434,21 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="Consumer Information">
-            {renderFields(fieldGroups.consumer)}
+            <div className="">
+              <Row>
+                {fieldGroups.consumer.map((f) => (
+                  <Col lg={2} md={4} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      editable={editable && f.editable !== false}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
           </Section>
         </Card.Body>
       </Card>
@@ -427,24 +456,52 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="Order Information">
-            {renderFields(fieldGroups.orderInfo)}
+            <div className="">
+              <Row>
+                {fieldGroups.orderInfo.map((f) => (
+                  <Col className="col-12 col-sm-6 col-md-3" key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      editable={false}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+                <Col className="col-12 col-md-6">
+                  <Field
+                    label="Address"
+                    value={data?.ua_address}
+                    fieldName="ua_address"
+                    editable={false}
+                    onEdit={(value) => handleFieldUpdate("ua_address", value)}
+                  />
+                </Col>
+              </Row>
+            </div>
           </Section>
         </Card.Body>
       </Card>
-
 
       <Card className="mb-4">
         <Card.Body>
           <Section title="Payment Information">
-            {renderFields(fieldGroups.payment)}
-          </Section>
-        </Card.Body>
-      </Card>
-
-      <Card className="mb-4">
-        <Card.Body>
-          <Section title="Tax & Charges">
-            {renderFields(fieldGroups.tax)}
+            <div className="">
+              <Row>
+                {fieldGroups.payment.map((f) => (
+                  <Col lg={2} md={4} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      editable={editable && f.editable !== false}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
           </Section>
         </Card.Body>
       </Card>
@@ -452,15 +509,21 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="Vendor Information">
-            {renderFields(fieldGroups.vendor)}
-          </Section>
-        </Card.Body>
-      </Card>
-
-      <Card className="mb-4">
-        <Card.Body>
-          <Section title="OTP Verification">
-            {renderFields(fieldGroups.otp)}
+            <div className="">
+              <Row>
+                {fieldGroups.vendor.map((f) => (
+                  <Col lg={4} md={6} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      editable={editable && f.editable !== false}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
           </Section>
         </Card.Body>
       </Card>
@@ -468,7 +531,40 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="Order Details">
-            {renderFields(fieldGroups.orderDetails)}
+            <div className="">
+              <Row>
+                {fieldGroups.orderDetails.map((f) => (
+                  <Col lg={2} md={4} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      editable={editable && f.editable !== false}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          </Section>
+        </Card.Body>
+      </Card>
+
+      <Card className="mb-4">
+        <Card.Body>
+          <Section title="">
+            <Button variant="" className="me-2 mb-2 bg-light text-dark">
+              Cancel
+            </Button>
+            <Button variant="secondary" className="me-2 mb-2">
+              OTP Match
+            </Button>
+            <Button variant="success" className="me-2 mb-2">
+              Complete
+            </Button>
+            <Button variant="info" className="me-2 mb-2">
+              Assign
+            </Button>
           </Section>
         </Card.Body>
       </Card>

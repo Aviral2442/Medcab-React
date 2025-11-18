@@ -41,11 +41,7 @@ export const vendorDetailController = async (req: Request, res: Response, next: 
       });
     }
 
-    res.status(200).json({
-      status: 200,
-      message: "Vendor details fetched successfully",
-      jsonData: vendorDetails,
-    });
+    res.status(200).json(vendorDetails);
   } catch (error) {
     next(error);
   }

@@ -23,7 +23,7 @@ const vendorDetails = () => {
     try {
       setLoading(true);
       const res = await axios.post(`${baseURL}/vendor/vendor_detail/${id}`);
-      console.log("Vendor Details:", res.data);
+      console.log("Vendor:", res.data?.jsonData);
       setVendorData(res.data?.jsonData);
     } catch (error) {
       console.error("Error fetching vendor details:", error);

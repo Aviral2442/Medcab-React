@@ -20,7 +20,7 @@ const Section: React.FC<SectionProps> = ({
   titleColor = "primary",
 }) => (
   <div className="mb-0 pb-0">
-    <h5 className={`text-${titleColor} mb-2 `}>{title}</h5>
+    <h6 className={`text-${titleColor} mb-2 `}>{title}</h6>
     {children}
   </div>
 );
@@ -38,6 +38,7 @@ interface FieldProps {
     | "email"
     | "date"
     | "datetime-local"
+    | "image"
     | "textarea"
     | "select";
   rows?: number;
@@ -56,36 +57,36 @@ const Field: React.FC<FieldProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value?.toString() || "");
 
-  const formatDisplayValue = (val: string | number) => {
+  // Convert value to readable text
+  const formatTextValue = (val: string | number | undefined): string => {
     if (val === null || val === undefined || val === "") return "N/A";
-    const valStr = val.toString();
+    const s = String(val);
 
     if (type === "select" && options.length > 0) {
-      const option = options.find((opt) => opt.value.toString() === valStr);
-      return option ? option.label : valStr;
+      const opt = options.find((o) => String(o.value) === s);
+      return opt ? opt.label : s;
     }
 
     if (type === "date" || type === "datetime-local") {
       try {
-        const date = /^\d+$/.test(valStr)
-          ? new Date(parseInt(valStr) * 1000)
-          : new Date(valStr);
-        if (isNaN(date.getTime())) return valStr;
+        const date = /^\d+$/.test(s) ? new Date(parseInt(s) * 1000) : new Date(s);
+        if (isNaN(date.getTime())) return s;
 
         const pad = (n: number) => String(n).padStart(2, "0");
+
         if (type === "date") return date.toISOString().split("T")[0];
+
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
           date.getDate()
         )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
       } catch {
-        return valStr;
+        return s;
       }
     }
-
-    return valStr;
+    return s;
   };
 
-  const displayValue = formatDisplayValue(value);
+  const displayText = formatTextValue(value);
 
   const handleSave = () => {
     onEdit?.(editValue);
@@ -104,6 +105,22 @@ const Field: React.FC<FieldProps> = ({
   return (
     <div className="mb-3">
       <Form.Label className="text-muted mb-1 fs-6">{label}</Form.Label>
+
+      {/* ✅ Show image ABOVE input (never inside the input) */}
+      {type === "image" && value && (
+        <div className="mb-2 w-100">
+          <img
+            src={String(value)}
+            alt={label}
+            style={{
+              maxWidth: "100px",
+              maxHeight: "100px",
+            }}
+            className="img-thumbnail"
+          />
+        </div>
+      )}
+
       <div className="d-flex align-items-center gap-2">
         {isEditing ? (
           <>
@@ -122,48 +139,39 @@ const Field: React.FC<FieldProps> = ({
             ) : (
               <Form.Control
                 as={type === "textarea" ? "textarea" : "input"}
-                type={type !== "textarea" ? type : undefined}
+                type={type === "image" ? "text" : type}
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
                 className="flex-grow-1"
                 {...(type === "textarea" ? { rows } : {})}
               />
             )}
-            <Button
-              variant="success"
-              size="sm"
-              onClick={handleSave}
-              className="p-1"
-            >
+
+            <button onClick={handleSave} className="p-1 rounded bg-black text-white">
               <TbCheck size={18} />
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={handleCancel}
-              className="p-1"
-            >
+            </button>
+            <button  onClick={handleCancel} className="p-1 rounded ">
               <TbX size={18} />
-            </Button>
+            </button>
           </>
         ) : (
-          <div className="d-flex align-items-center flex-grow-1 border rounded">
+          <div className="d-flex align-items-center flex-grow-1 border rounded p-0">
             <Form.Control
               readOnly
               plaintext
-              value={displayValue}
+              value={displayText}
               as={type === "textarea" ? "textarea" : "input"}
-              className="flex-grow-1 p-2 "
+              className="flex-grow-1 p-2"
             />
+
             {editable && onEdit && (
-              <Button
-                variant="link"
-                size="sm"
+              <button
+
                 onClick={() => setIsEditing(true)}
-                className="text-muted p-1"
+                className="text-muted bg-transparent border-0 p-1"
               >
                 <TbPencil size={18} />
-              </Button>
+              </button>
             )}
           </div>
         )}
@@ -171,6 +179,7 @@ const Field: React.FC<FieldProps> = ({
     </div>
   );
 };
+
 
 // Standard option maps
 const genderOptions = [
@@ -191,12 +200,20 @@ const vendorStatusOptions = [
 
 // Field configuration for vendor - expanded with your full list
 const vendorFieldGroups = {
+  images: [
+    { label: "Vendor Picture", name: "vendor_picture", type: "image" },
+    {
+      label: "Vendor Aadhar Front",
+      name: "vendor_aadhar_front",
+      type: "image",
+    },
+    { label: "Vendor Aadhar Back", name: "vendor_aadhar_back", type: "image" },
+  ],
   main: [
     { label: "Vendor ID", name: "vendor_id", type: "number", editable: false },
     { label: "Vendor Name", name: "vendor_name" },
     { label: "Vendor Mobile", name: "vendor_mobile", type: "tel" },
     { label: "Vendor Email", name: "vendor_email", type: "email" },
-    { label: "Vendor Picture", name: "vendor_picture" },
     {
       label: "Vendor Status",
       name: "vendor_status",
@@ -227,8 +244,6 @@ const vendorFieldGroups = {
   ],
   ids_and_refs: [
     { label: "Vendor Aadhar No", name: "vendor_aadhar_no" },
-    { label: "Vendor Aadhar Front", name: "vendor_aadhar_front" },
-    { label: "Vendor Aadhar Back", name: "vendor_aadhar_back" },
     { label: "Pancard No", name: "vendor_pancard_no" },
     { label: "Vendor Ref Code", name: "vendor_ref_code" },
     { label: "Vendor Own Ref Code", name: "vendor_own_ref_code" },
@@ -303,22 +318,6 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
   const handleFieldUpdate = (field: string, value: string) =>
     onUpdate?.(field, value);
 
-  // const getStatusBadge = (status: any) => {
-  //   const s = String(status ?? "unknown");
-  //   const map: Record<string, [string, string]> = {
-  //     "0": ["secondary", "Inactive"],
-  //     "1": ["success", "Active"],
-  //     "2": ["info", "New"],
-  //     "3": ["warning", "Pending Approval"],
-  //     "4": ["primary", "Assigned"],
-  //     "5": ["success", "Free"],
-  //     "6": ["primary", "On Duty"],
-  //     "7": ["secondary", "Off Duty"],
-  //   };
-  //   const [variant, text] = map[s] || ["secondary", s];
-  //   return <Badge bg={variant}>{text}</Badge>;
-  // };
-
   const formatDate = (value: string | number) => {
     if (value === null || value === undefined || value === "") return "N/A";
     const valStr = String(value);
@@ -365,22 +364,36 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
     </Row>
   );
 
+  // console.log("VendorDetails data----:", data);
+
   return (
     <div>
-      <Card className="mb-4 bg-light">
+      <Card className="mb-4 detailPage-header">
         <Card.Body className="py-3 d-flex flex-wrap align-items-center gap-3 justify-content-center">
           <div>
-            <span className="h4 fw-semibold fs-3">Vendor:</span>{" "}
-            <strong className="fs-3 text-muted">
-              {data?.vendor_name ?? "N/A"}
+            <span className="h4 fw-semibold fs-4">Venodr ID:</span>{" "}
+            <strong className="fs-4 text-muted">
+              {data?.vendor_id || "N/A"}
             </strong>
           </div>
+          <div className="h5 mb-0 fs-4 fw-semibold">
+            {data?.vendor_name ?? "N/A"}
+          </div>
+
           <div>
-            <span className="h4 fs-3 fw-semibold">Created:</span>{" "}
-            <strong className="fs-3 text-muted">
+            <span className="h4 fs-4 fw-semibold">Registered:</span>{" "}
+            <strong className="fs-4 text-muted">
               {formatDate(data?.vendor_created_at)}
             </strong>
           </div>
+        </Card.Body>
+      </Card>
+
+      <Card className="mb-4">
+        <Card.Body>
+          <Section title="Vendor Images">
+            {renderFields(vendorFieldGroups.images)}
+          </Section>
         </Card.Body>
       </Card>
 

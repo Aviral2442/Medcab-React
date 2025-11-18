@@ -152,9 +152,19 @@
   margin-bottom: 0.1rem;
 }
 
-/* When editor title is present, tighten its spacing as well */
-.custom-quill, /* if your CustomQuill wrapper has this class */
+.custom-quill, 
 .ql-container {
   margin-top: 0;
 }
 
+.five-col-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px; 
+}
+.four-col-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px; 
+  margin-bottom: 0px;
+}
