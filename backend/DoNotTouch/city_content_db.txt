@@ -1,0 +1,37 @@
+id ---- city_id
+city name ---- city_name
+title ---- city_title
+title_sku ---- city_title_sku
+
+image ---- city_thumbnail
+image_alt ---- city_thumbnail_alt
+image_title ---- city_thumbnail_title
+
+section1_heading ---- city_heading
+section1_desc- ckeditor ---- city_body_desc
+
+section2_heading ---- city_block1_heading
+section2_desc ---- city_block1_body
+
+section3_heading ---- city_block2_heading
+section3_desc ---- city_block2_body
+
+section4_heading ---- city_block3_heading
+section4_desc- ckeditor ---- city_block3_body
+
+section5_heading ---- city_why_choose_us
+section5_desc- ckeditor ---- why_choose_meta_desc
+
+section6_heading ---- city_emergency_heading
+section6_desc- ckeditor ---- city_emergency_desc
+
+section_faq_heading ---- city_faq_heading
+section_faq_desc ---- city_faq_desc
+
+meta_title ---- city_meta_title
+meta_desc ---- city_meta_desc
+meta_keyword ---- city_meta_keyword
+meta_force_keyword ---- city_force_keyword
+
+status ---- city_status
+createdAt ---- city_timestamp

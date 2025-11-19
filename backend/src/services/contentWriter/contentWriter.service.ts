@@ -269,13 +269,18 @@ interface cityContentData {
     city_block1_body?: string;
     city_block2_heading?: string;
     city_block2_body?: string;
+    city_block3_heading?: string;
+    city_block3_body?: string;
     city_thumbnail?: Express.Multer.File;
     city_thumbnail_alt?: string;
+    city_thumbnail_title?: string;
     city_meta_title?: string;
     city_meta_desc?: string;
     city_meta_keyword?: string;
     city_force_keyword?: string;
     city_faq_heading?: string;
+    city_faq_desc?: string;
+    city_emergency_heading?: string;
     city_emergency_desc?: string;
 }
 
@@ -366,13 +371,18 @@ export const addCityContentService = async (data: cityContentData) => {
             city_block1_body: data.city_block1_body,
             city_block2_heading: data.city_block2_heading,
             city_block2_body: data.city_block2_body,
+            city_block3_heading: data.city_block3_heading,
+            city_block3_body: data.city_block3_body,
             city_thumbnail: imagePath,
             city_thumbnail_alt: data.city_thumbnail_alt,
+            city_thumbnail_title: data.city_thumbnail_title,
             city_meta_title: data.city_meta_title,
             city_meta_desc: data.city_meta_desc,
             city_meta_keyword: data.city_meta_keyword,
             city_force_keyword: data.city_force_keyword,
             city_faq_heading: data.city_faq_heading,
+            city_faq_desc: data.city_faq_desc,
+            city_emergency_heading: data.city_emergency_heading,
             city_emergency_desc: data.city_emergency_desc,
             city_status: 0,
             city_timestamp: currentUnixTime(),
@@ -433,16 +443,21 @@ export const editCityContentService = async (cityId: number, data: cityContentDa
         if (data.city_block1_body) updateData.city_block1_body = data.city_block1_body;
         if (data.city_block2_heading) updateData.city_block2_heading = data.city_block2_heading;
         if (data.city_block2_body) updateData.city_block2_body = data.city_block2_body;
+        if (data.city_block3_heading) updateData.city_block3_heading = data.city_block3_heading;
+        if (data.city_block3_body) updateData.city_block3_body = data.city_block3_body;
         if (data.city_thumbnail) {
             const uploadedPath = uploadFileCustom(data.city_thumbnail, "/city_content");
             updateData.city_thumbnail = uploadedPath;
         }
         if (data.city_thumbnail_alt) updateData.city_thumbnail_alt = data.city_thumbnail_alt;
+        if (data.city_thumbnail_title) updateData.city_thumbnail_title = data.city_thumbnail_title;
         if (data.city_meta_title) updateData.city_meta_title = data.city_meta_title;
         if (data.city_meta_desc) updateData.city_meta_desc = data.city_meta_desc;
         if (data.city_meta_keyword) updateData.city_meta_keyword = data.city_meta_keyword;
         if (data.city_force_keyword) updateData.city_force_keyword = data.city_force_keyword;
         if (data.city_faq_heading) updateData.city_faq_heading = data.city_faq_heading;
+        if (data.city_faq_desc) updateData.city_faq_desc = data.city_faq_desc;
+        if (data.city_emergency_heading) updateData.city_emergency_heading = data.city_emergency_heading;
         if (data.city_emergency_desc) updateData.city_emergency_desc = data.city_emergency_desc;
 
         const [result]: any = await db.query(
