@@ -181,3 +181,37 @@ export const getDriverTransactionListService = async (filters: {
     }
 
 };
+
+// Get Driver Transaction Data
+export const driverTransDataService = async (driverId: number) => {
+
+    try {
+
+        const [rows]: any = await db.query(
+            `
+            SELECT 
+                driver_transection.*,
+                driver.driver_name, driver.driver_mobile 
+            FROM driver_transection
+            LEFT JOIN driver 
+                ON driver_transection.driver_transection_by_type = 0 
+                AND driver_transection.driver_transection_by = driver.driver_id
+            WHERE driver_transection.driver_transection_by_type = 0
+            AND driver_transection.driver_transection_by = ?
+            ORDER BY driver_transection.driver_transection_id DESC;
+            `, [driverId]
+        );
+
+        return {
+            status: 200,
+            message: 'Driver Transaction Data Fetch Successful',
+            jsonData: {
+                driverTransactions: rows
+            }
+        };
+
+    } catch (error) {
+        throw new ApiError(500, 'Failed to retrieve driver transaction data');
+    }
+
+};
