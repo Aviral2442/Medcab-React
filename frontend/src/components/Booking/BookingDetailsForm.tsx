@@ -136,22 +136,18 @@ const Field: React.FC<FieldProps> = ({
                 {...(type === "textarea" ? { rows } : {})}
               />
             )}
-            <Button
-              variant="success"
-              size="sm"
+            <button
               onClick={handleSave}
-              className="p-1"
+              className="p-1 rounded bg-black text-white"
             >
               <TbCheck size={18} />
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
+            </button>
+            <button
               onClick={handleCancel}
-              className="p-1"
+              className="p-1 rounded border-0"
             >
               <TbX size={18} />
-            </Button>
+            </button>
           </>
         ) : (
           <div className="d-flex align-items-center flex-grow-1 border rounded">
@@ -163,14 +159,12 @@ const Field: React.FC<FieldProps> = ({
               className="flex-grow-1 px-2 input-field"
             />
             {editable && onEdit && (
-              <Button
-                variant="link"
-                size="sm"
+              <button
                 onClick={() => setIsEditing(true)}
-                className="text-muted p-1 input-field "
+                className="text-muted bg-transparent border-0 p-1"
               >
                 <TbPencil size={18} />
-              </Button>
+              </button>
             )}
           </div>
         )}
@@ -474,7 +468,7 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
                     label="Address"
                     value={data?.ua_address}
                     fieldName="ua_address"
-                    editable={false}
+                    editable={true}
                     onEdit={(value) => handleFieldUpdate("ua_address", value)}
                   />
                 </Col>

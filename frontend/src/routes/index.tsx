@@ -26,14 +26,16 @@ const VendorList = lazy(() => import('@/views/pages/vendorlist'))
 const ConsumerList = lazy(() => import('@/views/pages/consumer'))
 const VendorDetails = lazy(() => import('@/views/pages/vendorlist/vendorDetails'))
 const ConsumerDetails = lazy(() => import('@/views/pages/consumer/consumerDetails'))
-const PartnerList = lazy(() => import('@/views/pages/partner'))
-const DriverList = lazy(() => import('@/views/pages/driver'))
+const PartnerList = lazy(() => import('@/views/pages/partner-ambulance'))
+const DriverList = lazy(() => import('@/views/pages/driver-ambulance'))
 const BlogList = lazy(() => import('@/views/pages/blogs'))
 const AddBlogs = lazy(() => import('@/views/pages/blogs/components/AddBlogs'))
 const CityList = lazy(() => import('@/views/pages/city'))
 const AddCity = lazy(() => import('@/views/pages/city/components/AddCity'))
 const EditCity = lazy(() => import('@/views/pages/city/components/AddCity'))
 const AmbulanceList = lazy(() => import('@/views/pages/ambulance'))
+const DriverEmergency = lazy(() => import('@/views/pages/emergency/driver'))
+const ConsumerEmergency = lazy(() => import('@/views/pages/emergency/consumer'))
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -132,15 +134,17 @@ const pagesRoutes: RouteObject[] = [
   { path: "/consumer-list", element: <ConsumerList/>},
   { path: "/vendor-details/:id", element: <VendorDetails/>},
   { path: "/consumer-details/:id", element: <ConsumerDetails/> },
-  { path: "/partner-list", element: <PartnerList/> },
-  { path: "/driver-list", element: <DriverList/> },
-  { path: "/blogs", element: <BlogList/> },
+  { path: "/ambulance/partner", element: <PartnerList/> },
+  { path: "/ambulance/driver", element: <DriverList/> },
+  { path: "/content-seo/blogs", element: <BlogList/> },
   { path: "/add-blog", element: <AddBlogs/> },
   { path: "/edit-blog/:id", element: <AddBlogs/> },
   { path: "/city", element: <CityList/> },
   { path: "/add-city", element: <AddCity/> },
   { path: "/edit-city/:id", element: <EditCity/> },
   { path: "/ambulance/category", element: <AmbulanceList/> },
+  { path: "/emergency/driver", element: <DriverEmergency/> },
+  { path: "/emergency/consumer", element: <ConsumerEmergency/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 

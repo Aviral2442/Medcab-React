@@ -41,7 +41,7 @@ const Field: React.FC<{
         if (type === "date") return date.toISOString().split("T")[0];
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
           date.getDate()
-        )} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        )}`;
       } catch {
         return s;
       }
@@ -67,7 +67,7 @@ const Field: React.FC<{
     <div className="mb-3">
       <Form.Label className="text-muted mb-1 fs-6">{label}</Form.Label>
       <div className="d-flex align-items-center">
-        <div className="d-flex align-items-center flex-grow-1 border rounded p-2">
+        <div className="d-flex align-items-center flex-grow-1 border rounded px-2 py-1">
           <div className="flex-grow-1 text-truncate">{format(value)}</div>
         </div>
       </div>
@@ -75,14 +75,18 @@ const Field: React.FC<{
   );
 };
 
-// const statusMap: Record<string, [string, string]> = {
-//   "2": ["info", "Inactive"],
-//   "1": ["warning", "Active"],
-//   "0": ["success", "New User"],
-// };
+const statusMap: Record<string, [string, string]> = {
+  "2": ["info", "Inactive"],
+  "1": ["warning", "Active"],
+  "0": ["success", "New User"],
+};
+
+const statusOptions: FieldDef["options"] = Object.entries(statusMap).map(
+  ([value, [, label]]) => ({ value, label })
+);
 
 const consumerFields: FieldDef[] = [
-  { label: "Consumer ID", name: "consumer_id", type: "number" },
+  // { label: "Consumer ID", name: "consumer_id", type: "number" },
   { label: "Name", name: "consumer_name", type: "text" },
   { label: "Mobile", name: "consumer_mobile_no", type: "tel" },
   { label: "Email", name: "consumer_email_id", type: "email" },
@@ -94,7 +98,12 @@ const consumerFields: FieldDef[] = [
     name: "consumer_registred_date",
     type: "datetime-local",
   },
-  { label: "Status", name: "consumer_status", type: "select" },
+  {
+    label: "Status",
+    name: "consumer_status",
+    type: "select",
+    options: statusOptions,
+  },
   { label: "Wallet Amount", name: "consumer_wallet_amount", type: "number" },
 ];
 
@@ -148,16 +157,14 @@ const ConsumerDetails: React.FC<ConsumerDetailsProps> = ({ data }) => {
           <h5 className="mb-3">Consumer Information</h5>
           <Row>
             {consumerFields.map((f) => (
-              <Col md={3} key={f.name}>
+              <Col lg={2} md={4} key={f.name}>
                 {f.name === "consumer_status" ? (
                   <div className="mb-3">
-                    <Form.Label className="text-muted mb-1 fs-6">
-                      Status
-                    </Form.Label>
+                    <Form.Label className="text-muted mb-1 fs-6">Status</Form.Label>
                     <div className="d-flex align-items-center">
-                      <div className="d-flex align-items-center flex-grow-1 border rounded p-2">
+                      <div className="d-flex align-items-center flex-grow-1 border rounded px-2 py-1">
                         <div className="flex-grow-1">
-                          {data?.consumer_status}
+                          {statusMap[String(data?.consumer_status)]?.[1] ?? "N/A"}
                         </div>
                       </div>
                     </div>
