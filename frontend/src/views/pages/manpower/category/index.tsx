@@ -1,12 +1,12 @@
 import React from "react";
 import { Container } from "react-bootstrap";
-import ExportDataWithButtons from "@/views/tables/data-tables/export-data/";
-import AddCategory from "../manpower/components/AddCategory";
-import AddSubCategory from "../manpower/components/AddSubCategory";
-import AddFAQ from "../manpower/components/AddFAQ";
-import AddBanner from "../manpower/components/AddBanner";
-import AddCoupons from "../manpower/components/AddCoupons";
-import AddPriceMapper from "../manpower/components/AddPriceMapper";
+import ExportDataWithButtons from "@/views/tables/data-tables/manpower/category/";
+import AddCategory from "../category/components/AddCategory";
+import AddSubCategory from "../category/components/AddSubCategory";
+import AddFAQ from "../category/components/AddFAQ";
+import AddBanner from "../category/components/AddBanner";
+import AddCoupons from "../category/components/AddCoupons";
+import AddPriceMapper from "../category/components/AddPriceMapper";
 
 const Page = () => {
   const [activeTab, setActiveTab] = React.useState(1);

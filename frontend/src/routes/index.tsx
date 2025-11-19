@@ -19,21 +19,21 @@ const Invoice = lazy(() => import("@/views/pages/invoice"));
 const Pricing = lazy(() => import("@/views/pages/pricing"));
 const TermsConditions = lazy(() => import("@/views/pages/terms-conditions"));
 const Timeline = lazy(() => import("@/views/pages/timeline"));
-const Manpower = lazy(() => import("@/views/pages/manpower"));
-const Booking = lazy(() => import("@/views/pages/booking"));
-const BookingDetails = lazy(() => import("@/views/pages/booking/bookingDetails"));
-const VendorList = lazy(() => import('@/views/pages/vendorlist'))
+const ManpowerCategory = lazy(() => import("@/views/pages/manpower/category"));
+const Booking = lazy(() => import("@/views/pages/manpower/booking"));
+const BookingDetails = lazy(() => import("@/views/pages/manpower/booking/bookingDetails"));
+const VendorList = lazy(() => import('@/views/pages/manpower/vendorlist'))
 const ConsumerList = lazy(() => import('@/views/pages/consumer'))
-const VendorDetails = lazy(() => import('@/views/pages/vendorlist/vendorDetails'))
+const VendorDetails = lazy(() => import('@/views/pages/manpower/vendorlist/vendorDetails'))
 const ConsumerDetails = lazy(() => import('@/views/pages/consumer/consumerDetails'))
-const PartnerList = lazy(() => import('@/views/pages/partner-ambulance'))
-const DriverList = lazy(() => import('@/views/pages/driver-ambulance'))
-const BlogList = lazy(() => import('@/views/pages/blogs'))
-const AddBlogs = lazy(() => import('@/views/pages/blogs/components/AddBlogs'))
-const CityList = lazy(() => import('@/views/pages/city'))
-const AddCity = lazy(() => import('@/views/pages/city/components/AddCity'))
-const EditCity = lazy(() => import('@/views/pages/city/components/AddCity'))
-const AmbulanceList = lazy(() => import('@/views/pages/ambulance'))
+const PartnerList = lazy(() => import('@/views/pages/ambulance/partner'))
+const DriverList = lazy(() => import('@/views/pages/ambulance/driver'))
+const BlogList = lazy(() => import('@/views/pages/content-writing/blogs'))
+const AddBlogs = lazy(() => import('@/views/pages/content-writing/blogs/components/AddBlogs'))
+const CityList = lazy(() => import('@/views/pages/content-writing/city'))
+const AddCity = lazy(() => import('@/views/pages/content-writing/city/components/AddCity'))
+const EditCity = lazy(() => import('@/views/pages/content-writing/city/components/AddCity'))
+const AmbulanceList = lazy(() => import('@/views/pages/ambulance/category'))
 const DriverEmergency = lazy(() => import('@/views/pages/emergency/driver'))
 const ConsumerEmergency = lazy(() => import('@/views/pages/emergency/consumer'))
 
@@ -127,7 +127,7 @@ const pagesRoutes: RouteObject[] = [
   { path: "/pages/pricing", element: <Pricing /> },
   { path: "/pages/terms-conditions", element: <TermsConditions /> },
   { path: "/pages/timeline", element: <Timeline /> },
-  { path: "/manpower-category", element: <Manpower /> },
+  { path: "/manpower-category", element: <ManpowerCategory /> },
   { path: "/manpower-bookings", element: <Booking/> },
   { path: "/booking-details/:id", element: <BookingDetails/> },
   { path: "/manpower-vendors", element: <VendorList/>},

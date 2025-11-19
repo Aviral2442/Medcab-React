@@ -16,7 +16,7 @@ import { TbEye, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
-import { vendorColumns } from "@/views/tables/data-tables/vendor-data/vendor/vendor.ts";
+import { vendorColumns } from "@/views/tables/data-tables/manpower/vendor/components/vendor";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";

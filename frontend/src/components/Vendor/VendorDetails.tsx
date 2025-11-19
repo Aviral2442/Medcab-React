@@ -267,14 +267,15 @@ const vendorStatusOptions = [
 // Field configuration for vendor - expanded with your full list
 const vendorFieldGroups = {
   images: [
-    { label: "Vendor Picture", name: "vendor_picture", type: "image", editable: true },
+    { label: "Picture", name: "vendor_picture", type: "image", editable: true },
     {
-      label: "Vendor Aadhar Front",
+      label: "Aadhar Front",
       name: "vendor_aadhar_front",
       type: "image",
       editable: true,
     },
-    { label: "Vendor Aadhar Back", name: "vendor_aadhar_back", type: "image", editable: true },
+    { label: "Aadhar Back", name: "vendor_aadhar_back", type: "image", editable: true },
+    { label: "Certificate", name: "vpd_certificate", type: "image", editable: true },
   ],
   main: [
     { label: "Vendor ID", name: "vendor_id", type: "number", editable: false },
@@ -379,12 +380,12 @@ const vendorFieldGroups = {
     //   type: "number",
     //   editable: true,
     // },
-    {
-      label: "Professional Details ID",
-      name: "vendor_professional_details_id",
-      type: "number",
-      editable: true,
-    },
+    // {
+    //   label: "Professional Details ID",
+    //   name: "vendor_professional_details_id",
+    //   type: "number",
+    //   editable: true,
+    // },
   ],
   account_details: [
     { label: "Holder Name", name: "vad_account_holder", type: "text", editable: true },
@@ -394,9 +395,8 @@ const vendorFieldGroups = {
   ],
   professional_details: [
     { label: "Qualification", name: "vpd_qualification", type: "text", editable: true },
-    { label: "Certificate", name: "vpd_certificate", type: "image", editable: true },
     { label: "License", name: "vpd_license", type: "text", editable: true },
-    
+    { label: "Created Date", name: "vpd_created_at", type: "date", editable: false }
   ],
   
 };
@@ -609,7 +609,32 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
             <div>
               <Row>
                 {vendorFieldGroups.account_details.map((f) => (
-                  <Col lg={4} md={6} key={f.name}>
+                  <Col lg={3} md={6} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      type={f.type}
+                      rows={f.rows}
+                      options={f.options}
+                      editable={!!(editable && f.editable !== false)}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />  
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          </Section>
+        </Card.Body>
+      </Card>
+
+      <Card className="mb-4">
+        <Card.Body>
+          <Section title="Professional Details">
+            <div>
+              <Row>
+                {vendorFieldGroups.professional_details.map((f) => (
+                  <Col lg={3} md={6} key={f.name}>
                     <Field
                       label={f.label}
                       value={data?.[f.name]}
