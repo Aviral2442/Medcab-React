@@ -123,8 +123,8 @@ export const menuItems: MenuItemType[] = [
     icon: LuAmbulance,
     children: [
       { key: 'category-list', label: 'Category', url: '/ambulance/category' },
-      { key: 'driver-list', label: 'Driver', url: '/driver-list' },
-      { key: 'partner-list', label: 'Partner', url: '/Partner-list' },
+      { key: 'driver-list', label: 'Driver', url: '/ambulance/driver' },
+      { key: 'partner-list', label: 'Partner', url: '/ambulance/Partner' },
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
     ],
   },
@@ -157,7 +157,8 @@ export const menuItems: MenuItemType[] = [
     label: 'Emergency',
     icon: LuFileType,
     children: [
-      // { key: 'manpower', label: 'Manpower', url: '/manpower' },
+      { key: 'driver-emergency', label: 'Driver', url: '/emergency/driver' },
+      { key: 'consumer-emergency', label: 'Consumer', url: '/emergency/consumer' },
     ],
   },
   {
@@ -166,7 +167,7 @@ export const menuItems: MenuItemType[] = [
     icon: LuTableOfContents,
     children: [
       { key: 'city', label: 'City', url: '/city', },
-      { key: 'blogs', label: 'Blogs', url: '/blogs' },
+      { key: 'blogs', label: 'Blogs', url: '/content-seo/blogs' },
     ],
   },
   {

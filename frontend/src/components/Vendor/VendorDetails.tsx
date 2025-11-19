@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
-import { TbPencil, TbCheck, TbX } from "react-icons/tb";
+import { TbPencil, TbCheck, TbX, TbUpload } from "react-icons/tb";
 
 interface VendorDetailsProps {
   data: any;
@@ -56,6 +56,8 @@ const Field: React.FC<FieldProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value?.toString() || "");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Convert value to readable text
   const formatTextValue = (val: string | number | undefined): string => {
@@ -69,7 +71,9 @@ const Field: React.FC<FieldProps> = ({
 
     if (type === "date" || type === "datetime-local") {
       try {
-        const date = /^\d+$/.test(s) ? new Date(parseInt(s) * 1000) : new Date(s);
+        const date = /^\d+$/.test(s)
+          ? new Date(parseInt(s) * 1000)
+          : new Date(s);
         if (isNaN(date.getTime())) return s;
 
         const pad = (n: number) => String(n).padStart(2, "0");
@@ -78,7 +82,7 @@ const Field: React.FC<FieldProps> = ({
 
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
           date.getDate()
-        )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        )}`; //T${pad(date.getHours())}:${pad(date.getMinutes())}
       } catch {
         return s;
       }
@@ -88,14 +92,34 @@ const Field: React.FC<FieldProps> = ({
 
   const displayText = formatTextValue(value);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = () => {
-    onEdit?.(editValue);
+    if (type === "image" && selectedFile) {
+      onEdit?.(previewUrl || editValue);
+    } else {
+      onEdit?.(editValue);
+    }
     setIsEditing(false);
+    setSelectedFile(null);
+    setPreviewUrl(null);
   };
 
   const handleCancel = () => {
     setEditValue(value?.toString() || "");
     setIsEditing(false);
+    setSelectedFile(null);
+    setPreviewUrl(null);
   };
 
   React.useEffect(() => {
@@ -103,18 +127,31 @@ const Field: React.FC<FieldProps> = ({
   }, [value]);
 
   return (
-    <div className="mb-3">
+    <div className="mb-2">
       <Form.Label className="text-muted mb-1 fs-6">{label}</Form.Label>
 
-      {/* ✅ Show image ABOVE input (never inside the input) */}
-      {type === "image" && value && (
+      {type === "image" && (
         <div className="mb-2 w-100">
+          <input
+            type="file"
+            id={`file-${label}`}
+            accept="image/*"
+            onChange={handleFileSelect}
+            style={{ display: "none" }}
+          />
+
           <img
-            src={String(value)}
+            src={previewUrl || String(value)}
             alt={label}
+            onClick={() => document.getElementById(`file-${label}`)?.click()}
             style={{
               maxWidth: "100px",
               maxHeight: "100px",
+              objectFit: "cover",
+              aspectRatio: "1/1",
+              cursor: "pointer",
+              borderRadius: "6px",
+              border: "1px solid #ddd",
             }}
             className="img-thumbnail"
           />
@@ -136,10 +173,21 @@ const Field: React.FC<FieldProps> = ({
                   </option>
                 ))}
               </Form.Select>
+            ) : type === "image" ? (
+              <div className="flex-grow-1">
+                <label
+                  htmlFor={`file-${label}`}
+                  className="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 mb-0"
+                  style={{ cursor: "pointer" }}
+                >
+                  <TbUpload size={18} />
+                  {/* {selectedFile ? selectedFile.name : "Choose Image"} */}
+                </label>
+              </div>
             ) : (
               <Form.Control
                 as={type === "textarea" ? "textarea" : "input"}
-                type={type === "image" ? "text" : type}
+                type={type !== "textarea" ? type : undefined}
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
                 className="flex-grow-1"
@@ -147,39 +195,57 @@ const Field: React.FC<FieldProps> = ({
               />
             )}
 
-            <button onClick={handleSave} className="p-1 rounded bg-black text-white">
+            <button
+              onClick={handleSave}
+              className="p-1 rounded bg-black text-white"
+            >
               <TbCheck size={18} />
             </button>
-            <button  onClick={handleCancel} className="p-1 rounded ">
+            <button onClick={handleCancel} className="p-1 rounded border-0">
               <TbX size={18} />
             </button>
           </>
         ) : (
-          <div className="d-flex align-items-center flex-grow-1 border rounded p-0">
-            <Form.Control
-              readOnly
-              plaintext
-              value={displayText}
-              as={type === "textarea" ? "textarea" : "input"}
-              className="flex-grow-1 p-2"
-            />
+          <>
+            {type === "image" ? (
+              /* For image type, only show upload button */
+              editable &&
+              onEdit && (
+                <label
+                  htmlFor={`file-${label}`}
+                  className="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 mb-0"
+                  style={{ cursor: "pointer" }}
+                >
+                  <TbUpload size={18} />
+                </label>
+              )
+            ) : (
+              /* For other types, show the input field with value */
+              <div className="d-flex align-items-center flex-grow-1 border rounded p-0">
+                <Form.Control
+                  readOnly
+                  plaintext
+                  value={displayText}
+                  as={type === "textarea" ? "textarea" : "input"}
+                  className="flex-grow-1 px-2 "
+                />
 
-            {editable && onEdit && (
-              <button
-
-                onClick={() => setIsEditing(true)}
-                className="text-muted bg-transparent border-0 p-1"
-              >
-                <TbPencil size={18} />
-              </button>
+                {editable && onEdit && (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="text-muted bg-transparent border-0 p-1"
+                  >
+                    <TbPencil size={18} />
+                  </button>
+                )}
+              </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>
   );
 };
-
 
 // Standard option maps
 const genderOptions = [
@@ -201,28 +267,30 @@ const vendorStatusOptions = [
 // Field configuration for vendor - expanded with your full list
 const vendorFieldGroups = {
   images: [
-    { label: "Vendor Picture", name: "vendor_picture", type: "image" },
+    { label: "Vendor Picture", name: "vendor_picture", type: "image", editable: true },
     {
       label: "Vendor Aadhar Front",
       name: "vendor_aadhar_front",
       type: "image",
+      editable: true,
     },
-    { label: "Vendor Aadhar Back", name: "vendor_aadhar_back", type: "image" },
+    { label: "Vendor Aadhar Back", name: "vendor_aadhar_back", type: "image", editable: true },
   ],
   main: [
     { label: "Vendor ID", name: "vendor_id", type: "number", editable: false },
-    { label: "Vendor Name", name: "vendor_name" },
-    { label: "Vendor Mobile", name: "vendor_mobile", type: "tel" },
-    { label: "Vendor Email", name: "vendor_email", type: "email" },
+    { label: "Vendor Name", name: "vendor_name", type: "text", editable: true },
+    { label: "Vendor Mobile", name: "vendor_mobile", type: "tel", editable: true },
+    { label: "Vendor Email", name: "vendor_email", type: "email", editable: true },
     {
       label: "Vendor Status",
       name: "vendor_status",
       type: "select",
+      editable: true,
       options: vendorStatusOptions,
     },
-    { label: "Vendor Type", name: "vendor_type" },
-    { label: "Vendor Rating", name: "vendor_rating", type: "number" },
-    { label: "Vendor Wallet", name: "vendor_wallet", type: "number" },
+    { label: "Vendor Type", name: "vendor_type", type: "text", editable: true },
+    { label: "Vendor Rating", name: "vendor_rating", type: "number", editable: false },
+    { label: "Vendor Wallet", name: "vendor_wallet", type: "number", editable: false },
     {
       label: "Vendor Created At",
       name: "vendor_created_at",
@@ -239,75 +307,98 @@ const vendorFieldGroups = {
       label: "Vendor Approved At",
       name: "vendor_approved_at",
       type: "datetime-local",
+      editable: false,
     },
-    { label: "Vendor DOB", name: "vendor_dob", type: "date" },
+    { label: "Vendor DOB", name: "vendor_dob", type: "date", editable: true },
   ],
   ids_and_refs: [
-    { label: "Vendor Aadhar No", name: "vendor_aadhar_no" },
-    { label: "Pancard No", name: "vendor_pancard_no" },
-    { label: "Vendor Ref Code", name: "vendor_ref_code" },
-    { label: "Vendor Own Ref Code", name: "vendor_own_ref_code" },
+    { label: "Vendor Aadhar No", name: "vendor_aadhar_no", type: "text", editable: true },
+    { label: "Pancard No", name: "vendor_pancard_no", type: "text", editable: true },
+    { label: "Vendor Ref Code", name: "vendor_ref_code", type: "text", editable: true },
+    { label: "Vendor Own Ref Code", name: "vendor_own_ref_code", type: "text", editable: true },
   ],
   relations_and_meta: [
-    { label: "City", name: "city_name" },
-    { label: "Category Name", name: "mp_cat_name" },
+    { label: "City", name: "city_name", type: "text", editable: true },
+    { label: "Category Name", name: "mp_cat_name", type: "text", editable: true },
     {
       label: "Vendor Category Details ID",
       name: "vendor_category_details_id",
       type: "number",
+      editable: true,
     },
     {
       label: "Vendor Account Details ID",
       name: "vendor_account_details_id",
       type: "number",
+      editable: true,
     },
     {
       label: "Vendor Address Details ID",
       name: "vendor_address_details_id",
       type: "number",
+      editable: true,
     },
     {
       label: "Vendor Professional Details ID",
       name: "vendor_professional_details_id",
       type: "number",
+      editable: true,
     },
     {
       label: "Prefer Location ID",
       name: "vendor_prefer_location_id",
       type: "number",
+      editable: true,
     },
-    { label: "MP Partner ID", name: "vendor_mp_partner_id", type: "number" },
+    { label: "MP Partner ID", name: "vendor_mp_partner_id", type: "number", editable: true },
   ],
   status_and_tokens: [
-    { label: "OTP Verification Status", name: "v_otp_verification_status" },
-    { label: "Duty Status", name: "vendor_duty_status" },
+    { label: "OTP Verification Status", name: "v_otp_verification_status", type: "number", editable: true },
+    { label: "Duty Status", name: "vendor_duty_status", type: "number", editable: true },
     {
       label: "Last Booking Notified Time",
       name: "vendor_last_booking_notified_time",
       type: "datetime-local",
+      editable: true,
     },
-    { label: "FCM Token", name: "vendor_fcm_token" },
-    { label: "Auth Key", name: "vendor_auth_key" },
-    { label: "Wallet", name: "vendor_wallet", type: "number" },
+    { label: "FCM Token", name: "vendor_fcm_token", type: "text", editable: true },
+    { label: "Auth Key", name: "vendor_auth_key", type: "text", editable: true },
+    { label: "Wallet", name: "vendor_wallet", type: "number", editable: true },
   ],
   gender_and_misc: [
     {
       label: "Gender",
       name: "vendor_gender",
       type: "select",
+      editable: true,
       options: genderOptions,
     },
-    {
-      label: "A/c Details ID",
-      name: "vendor_account_details_id",
-      type: "number",
-    },
+    // {
+    //   label: "A/c Details ID",
+    //   name: "vendor_account_details_id",
+    //   type: "number",
+    //   editable: true,
+    // },
     {
       label: "Professional Details ID",
       name: "vendor_professional_details_id",
       type: "number",
+      editable: true,
     },
   ],
+  account_details: [
+    { label: "Holder Name", name: "vad_account_holder", type: "text", editable: true },
+    { label: "Account Number", name: "vad_account_no", type: "text", editable: true },
+    { label: "IFSC Code", name: "vad_ifsc", type: "text", editable: true },
+    { label: "Created Date", name: "vad_created_at", type: "date", editable: false },
+  ],
+  professional_details: [
+    { label: "Qualification", name: "vpd_qualification", type: "text", editable: true },
+    { label: "Certificate", name: "vpd_certificate", type: "image", editable: true },
+    { label: "License", name: "vpd_license", type: "text", editable: true },
+    
+  ],
+  
 };
 
 const VendorDetails: React.FC<VendorDetailsProps> = ({
@@ -335,34 +426,6 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
       return valStr;
     }
   };
-
-  const renderFields = (fields: any[]) => (
-    <Row>
-      {fields.map(
-        ({
-          label,
-          name,
-          type = "text",
-          editable: customEditable = true,
-          rows,
-          options,
-        }: any) => (
-          <Col md={4} key={name}>
-            <Field
-              label={label}
-              value={data?.[name]}
-              fieldName={name}
-              type={type}
-              rows={rows}
-              options={options}
-              editable={!!(editable && customEditable)}
-              onEdit={(value) => handleFieldUpdate(name, value)}
-            />
-          </Col>
-        )
-      )}
-    </Row>
-  );
 
   // console.log("VendorDetails data----:", data);
 
@@ -392,7 +455,24 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="Vendor Images">
-            {renderFields(vendorFieldGroups.images)}
+            <div>
+              <Row className="d-flex justify-content-center">
+                {vendorFieldGroups.images.map((f) => (
+                  <Col md={2} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      type={f.type}
+                      rows={f.rows}
+                      options={f.options}
+                      editable={!!(editable && f.editable !== false)}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
           </Section>
         </Card.Body>
       </Card>
@@ -400,7 +480,24 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="Vendor Information">
-            {renderFields(vendorFieldGroups.main)}
+            <div>
+              <Row>
+                {vendorFieldGroups.main.map((f) => (
+                  <Col lg={2} md={4} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      type={f.type}
+                      rows={f.rows}
+                      options={f.options}
+                      editable={!!(editable && f.editable !== false)}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
           </Section>
         </Card.Body>
       </Card>
@@ -408,7 +505,24 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="IDs & Documents">
-            {renderFields(vendorFieldGroups.ids_and_refs)}
+            <div>
+              <Row>
+                {vendorFieldGroups.ids_and_refs.map((f) => (
+                  <Col md={3} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      type={f.type}
+                      rows={f.rows}
+                      options={f.options}
+                      editable={!!(editable && f.editable !== false)}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
           </Section>
         </Card.Body>
       </Card>
@@ -416,7 +530,24 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="Relations & Meta">
-            {renderFields(vendorFieldGroups.relations_and_meta)}
+            <div>
+              <Row>
+                {vendorFieldGroups.relations_and_meta.map((f) => (
+                  <Col lg={2} md={4} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      type={f.type}
+                      rows={f.rows}
+                      options={f.options}
+                      editable={!!(editable && f.editable !== false)}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
           </Section>
         </Card.Body>
       </Card>
@@ -424,7 +555,24 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="Status & Tokens">
-            {renderFields(vendorFieldGroups.status_and_tokens)}
+            <div>
+              <Row>
+                {vendorFieldGroups.status_and_tokens.map((f) => (
+                  <Col lg={2} md={4} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      type={f.type}
+                      rows={f.rows}
+                      options={f.options}
+                      editable={!!(editable && f.editable !== false)}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
           </Section>
         </Card.Body>
       </Card>
@@ -432,7 +580,50 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="Gender & Misc">
-            {renderFields(vendorFieldGroups.gender_and_misc)}
+            <div>
+              <Row>
+                {vendorFieldGroups.gender_and_misc.map((f) => (
+                  <Col lg={4} md={6} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      type={f.type}
+                      rows={f.rows}
+                      options={f.options}
+                      editable={!!(editable && f.editable !== false)}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          </Section>
+        </Card.Body>
+      </Card>
+
+
+      <Card className="mb-4">
+        <Card.Body>
+          <Section title="Account Details">
+            <div>
+              <Row>
+                {vendorFieldGroups.account_details.map((f) => (
+                  <Col lg={4} md={6} key={f.name}>
+                    <Field
+                      label={f.label}
+                      value={data?.[f.name]}
+                      fieldName={f.name}
+                      type={f.type}
+                      rows={f.rows}
+                      options={f.options}
+                      editable={!!(editable && f.editable !== false)}
+                      onEdit={(value) => handleFieldUpdate(f.name, value)}
+                    />  
+                  </Col>
+                ))}
+              </Row>
+            </div>
           </Section>
         </Card.Body>
       </Card>
