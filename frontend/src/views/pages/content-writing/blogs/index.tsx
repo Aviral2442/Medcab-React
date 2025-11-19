@@ -1,6 +1,6 @@
 import React from "react";
 import { Container } from "react-bootstrap";
-import ExportDataWithButtons from "@/views/tables/data-tables/blogs-data/";
+import ExportDataWithButtons from "@/views/tables/data-tables/content-writing/blogs/";
 import { useNavigate } from "react-router-dom";
 
 const Page: React.FC = () => {

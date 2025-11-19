@@ -1,6 +1,6 @@
 import React from "react";
 import { Container } from "react-bootstrap";
-import ExportDataWithButtons from "@/views/tables/data-tables/city-data/";
+import ExportDataWithButtons from "@/views/tables/data-tables/content-writing/city/";
 import AddCity from "./components/AddCity";
 import AddCityFAQ from "./components/AddCityFAQ";
 

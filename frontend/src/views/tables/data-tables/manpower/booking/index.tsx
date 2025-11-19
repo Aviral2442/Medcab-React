@@ -6,50 +6,46 @@ import ComponentCard from "@/components/ComponentCard";
 //   DropdownItem,
 //   DropdownToggle,
 // } from "react-bootstrap";
-
+import '@/global.css';
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-import '@/global.css';
+import AddRemark from "@/components/AddRemark";
 
 import { TbEye, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
-import { driverColumns } from "@/views/tables/data-tables/driver-data/components/driver.ts";
+import { bookingColumns } from "@/views/tables/data-tables/manpower/booking/booking/bookings";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
 
-// Register DataTable plugins
-DataTable.use(DT);
-DT.Buttons.jszip(jszip);
-DT.Buttons.pdfMake(pdfmake);
-
 const tableConfig: Record<
   number,
-  { endpoint: string; columns: any[]; headers: string[] }
+  {
+    endpoint: string;
+    columns: any[];
+    headers: string[];
+  }
 > = {
   1: {
-    endpoint: "/driver/get_drivers_list",
-    columns: driverColumns,
+    endpoint: "/booking/get_bookings",
+    columns: bookingColumns,
     headers: [
       "S.No.",
-      "ID",
-      "Name",
-      "Mobile",
-      "Wallet",
-      // "City ID",
-      "Created By",
-      "Profile",
-      "Duty Status",
-      "Status",
-      "Date",
+      "id",
+      "name",
+      "mobile",
+      "address",
+      "Price",
+      "payment",
+      "date",
+      "status",
     ],
   },
 };
@@ -58,8 +54,12 @@ type ExportDataWithButtonsProps = {
   tabKey: number;
   refreshFlag: number;
   filterParams?: Record<string, any>;
-  onDataChanged?: () => void;
+  onDataChanged: () => void;
 };
+
+DataTable.use(DT);
+DT.Buttons.jszip(jszip);
+DT.Buttons.pdfMake(pdfmake);
 
 const ExportDataWithButtons = ({
   tabKey,
@@ -67,10 +67,12 @@ const ExportDataWithButtons = ({
   filterParams = {},
   onDataChanged,
 }: ExportDataWithButtonsProps) => {
-  const [data, setData] = useState<any[]>([]);
+  const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isRemarkOpen, setIsRemarkOpen] = useState(false);
-  const [selectedDriverId, setSelectedDriverId] = useState<number | null>(null);
+  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(
+    null
+  );
 
   const [pageSize] = useState(100);
   const [_total, setTotal] = useState(0);
@@ -97,11 +99,10 @@ const ExportDataWithButtons = ({
   const { endpoint, columns, headers } = tableConfig[tabKey];
 
   const StatusFilterOptions = [
-    { label: "New", value: "new" },
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inActive" },
-    { label: "Delete", value: "delete" },
-    { label: "Verification", value: "verification" },
+    { label: "New", value: "1" },
+    { label: "Ongoing", value: "2" },
+    { label: "Canceled", value: "3" },
+    { label: "Completed", value: "4" },
   ];
 
   const fetchData = async () => {
@@ -109,23 +110,22 @@ const ExportDataWithButtons = ({
     try {
       const params = getFilterParams(pageSize, filterParams);
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
-      console.log("API Response:", res.data);
+      console.log("Fetched data:", res.data);
 
-      const drivers = res.data?.jsonData?.drivers || [];
-      setData(drivers);
-
-      if (res.data.paginations) {
-        setTotal(res.data.paginations.total);
-        setTotalPages(res.data.paginations.totalPages);
-      } else {
-        setTotal(res.data?.total || drivers.length);
-        setTotalPages(
-          res.data?.totalPages || Math.ceil(drivers.length / pageSize)
-        );
+      switch (tabKey) {
+        case 1:
+          setRows(res.data?.jsonData?.bookingsLists || []);
+          setTotal(res.data?.pagination?.total || 0);
+          setTotalPages(res.data?.pagination?.totalPages || 0);
+          break;
+        default:
+          setRows(res.data.remark || []);
+          setTotal(res.data?.total || 0);
+          setTotalPages(res.data?.totalPages || 0);
       }
-    } catch (error) {
-      console.error("Error fetching driver data:", error);
-      setData([]);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setRows([]);
       setTotal(0);
       setTotalPages(0);
     } finally {
@@ -133,22 +133,33 @@ const ExportDataWithButtons = ({
     }
   };
 
+  const handleView = (rowData: any) => {
+    const id =
+      rowData?.manpower_order_id ?? rowData?.mpo_order_id ?? rowData?.id;
+    if (id !== undefined && id !== null) {
+      navigate(`/booking-details/${id}`);
+    } else {
+      console.warn("No id found for row", rowData);
+    }
+  };
+
   const handleRemark = (rowData: any) => {
-    const id = rowData?.driver_id ?? rowData?.id;
-    console.log("Selected Driver ID for Remark:", id);
-    setSelectedDriverId(id);
+    const id =
+      rowData?.manpower_order_id ?? rowData?.mpo_order_id ?? rowData?.id;
+    console.log("Selected Booking ID for Remark:", id);
+    setSelectedBookingId(id);
     setIsRemarkOpen(true);
   };
 
   const handleSaveRemark = async (remark: string) => {
     try {
-      await axios.post(`${baseURL}/add_remarks/${selectedDriverId}`, {
-        remarkType: "DRIVER",
+      await axios.post(`${baseURL}/add_remarks/${selectedBookingId}`, {
+        remarkType: "BOOKING",
         remarks: remark,
       });
       console.log("Remark saved successfully");
       fetchData();
-      onDataChanged?.();
+      onDataChanged();
     } catch (error) {
       console.error("Error saving remark:", error);
     }
@@ -188,14 +199,18 @@ const ExportDataWithButtons = ({
         const root = createRoot(td);
         root.render(
           <div className="d-flex flex-row gap-1">
-            <button className="eye-icon p-1"
+            <button
+              className="eye-icon p-1"
               onClick={() => {
-                navigate(`/driver-detail/${rowData.driver_id}`);
+                handleView(rowData);
               }}
             >
               <TbEye className="me-1" />
             </button>
-              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
+            <button
+              className="remark-icon"
+              onClick={() => handleRemark(rowData)}
+            >
               <TbReceipt className="me-1" />
             </button>
           </div>
@@ -207,8 +222,8 @@ const ExportDataWithButtons = ({
   return (
     <>
       <ComponentCard
-        title={tabKey === 1 ? "Manage Drivers" : ""}
-        className="mb-2 overflow-x-auto"
+        title={tabKey === 1 ? "Manage Booking" : ""}
+        className="mb-4 overflow-x-auto"
         headerActions={
           <TableFilters
             dateFilter={dateFilter}
@@ -218,17 +233,16 @@ const ExportDataWithButtons = ({
             onStatusFilterChange={handleStatusFilterChange}
             onDateRangeChange={handleDateRangeChange}
             statusOptions={StatusFilterOptions}
-            className="w-100"
           />
         }
       >
         {loading ? (
-          <div className="text-center py-4">Loading...</div>
+          <div className="text-center p-4">Loading...</div>
         ) : (
-          <div className="overflow-x-auto ">
+          <div className="overflow-x-auto">
             <DataTable
-              key={`driver-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
-              data={data}
+              key={`booking-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
+              data={rows}
               columns={columnsWithActions}
               options={{
                 responsive: true,
@@ -240,25 +254,15 @@ const ExportDataWithButtons = ({
                   topStart: "buttons",
                 },
                 buttons: [
+                  { extend: "copy", className: "btn btn-sm btn-secondary" },
                   {
-                    extend: "copyHtml5",
-                    className: "btn btn-sm btn-primary",
-                    text: "Copy",
+                    extend: "csv",
+                    className: "btn btn-sm btn-secondary active",
                   },
+                  { extend: "excel", className: "btn btn-sm btn-secondary" },
                   {
-                    extend: "excelHtml5",
-                    className: "btn btn-sm btn-primary",
-                    text: "Excel",
-                  },
-                  {
-                    extend: "csvHtml5",
-                    className: "btn btn-sm btn-primary",
-                    text: "CSV",
-                  },
-                  {
-                    extend: "pdfHtml5",
-                    className: "btn btn-sm btn-primary",
-                    text: "PDF",
+                    extend: "pdf",
+                    className: "btn btn-sm btn-secondary active",
                   },
                 ],
               }}
@@ -266,10 +270,10 @@ const ExportDataWithButtons = ({
             >
               <thead className="thead-sm text-capitalize fs-xxs">
                 <tr>
-                  {headers.map((header, idx) => (
-                    <th key={idx}>{header}</th>
+                  {headers.map((col, idx) => (
+                    <th key={idx}>{col}</th>
                   ))}
-                  {/* <th>Actions</th> */}
+                  <th>Actions</th>
                 </tr>
               </thead>
             </DataTable>
@@ -305,5 +309,4 @@ const ExportDataWithButtons = ({
   );
 };
 
-// Export the component directly, not wrapped in another component
 export default ExportDataWithButtons;

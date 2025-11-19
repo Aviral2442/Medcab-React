@@ -33,19 +33,15 @@ export const useTableFilters = ({
 }: UseTableFiltersProps = {}): UseTableFiltersReturn => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Initialize filters from URL
+  // Initialize filters from URL - remove filter initialization from URL
   const [dateFilter, setDateFilter] = useState<string | null>(
-    () => searchParams.get("date") || defaultDateFilter
+    defaultDateFilter // Remove: () => searchParams.get("date") || defaultDateFilter
   );
   const [statusFilter, setStatusFilter] = useState<string | null>(
-    () => searchParams.get("status") || null
+    null // Remove: () => searchParams.get("status") || null
   );
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>(() => {
-    const fromDate = searchParams.get("fromDate");
-    const toDate = searchParams.get("toDate");
-    if (fromDate && toDate) {
-      return [new Date(fromDate), new Date(toDate)];
-    }
+    // Remove dateRange initialization from URL
     return [null, null];
   });
 
@@ -57,7 +53,7 @@ export const useTableFilters = ({
     return page ? parseInt(page) - 1 : 0;
   });
 
-  // Update URL with all current filter and pagination values
+  // Update URL with only page value - remove filter updates
   const updateURL = (updates: {
     page?: number;
     date?: string | null;
@@ -72,34 +68,35 @@ export const useTableFilters = ({
       newParams.set("page", (pageValue + 1).toString());
     }
 
-    const dateValue = updates.date !== undefined ? updates.date : dateFilter;
-    if (dateValue) {
-      newParams.set("date", dateValue);
-    }
+    // Remove setting filter params in URL
+    // const dateValue = updates.date !== undefined ? updates.date : dateFilter;
+    // if (dateValue) {
+    //   newParams.set("date", dateValue);
+    // }
 
-    const statusValue =
-      updates.status !== undefined ? updates.status : statusFilter;
-    if (statusValue) {
-      newParams.set("status", statusValue);
-    }
+    // const statusValue =
+    //   updates.status !== undefined ? updates.status : statusFilter;
+    // if (statusValue) {
+    //   newParams.set("status", statusValue);
+    // }
 
-    const fromDateValue =
-      updates.fromDate !== undefined
-        ? updates.fromDate
-        : startDate
-        ? startDate.toISOString().split("T")[0]
-        : null;
-    const toDateValue =
-      updates.toDate !== undefined
-        ? updates.toDate
-        : endDate
-        ? endDate.toISOString().split("T")[0]
-        : null;
+    // const fromDateValue =
+    //   updates.fromDate !== undefined
+    //     ? updates.fromDate
+    //     : startDate
+    //     ? startDate.toISOString().split("T")[0]
+    //     : null;
+    // const toDateValue =
+    //   updates.toDate !== undefined
+    //     ? updates.toDate
+    //     : endDate
+    //     ? endDate.toISOString().split("T")[0]
+    //     : null;
 
-    if (fromDateValue && toDateValue) {
-      newParams.set("fromDate", fromDateValue);
-      newParams.set("toDate", toDateValue);
-    }
+    // if (fromDateValue && toDateValue) {
+    //   newParams.set("fromDate", fromDateValue);
+    //   newParams.set("toDate", toDateValue);
+    // }
 
     setSearchParams(newParams);
   };
@@ -110,30 +107,25 @@ export const useTableFilters = ({
     updateURL({ page: newPage });
   };
 
-  // Handle date filter change
+  // Handle date filter change - remove URL update
   const handleDateFilterChange = (value: string | null) => {
     setDateFilter(value);
     setCurrentPage(0);
-
-    if (value !== "custom") {
-      setDateRange([null, null]);
-      updateURL({ page: 0, date: value, fromDate: null, toDate: null });
-    } else {
-      updateURL({ page: 0, date: value });
-    }
-
+    // Remove: updateURL({ page: 0, date: value, fromDate: null, toDate: null });
+    updateURL({ page: 0 });
     onFilterChange?.();
   };
 
-  // Handle status filter change
+  // Handle status filter change - remove URL update
   const handleStatusFilterChange = (value: string | null) => {
     setStatusFilter(value);
     setCurrentPage(0);
-    updateURL({ page: 0, status: value });
+    // Remove: updateURL({ page: 0, status: value });
+    updateURL({ page: 0 });
     onFilterChange?.();
   };
 
-  // Handle date range change
+  // Handle date range change - remove URL update
   const handleDateRangeChange = (update: [Date | null, Date | null]) => {
     setDateRange(update);
     setCurrentPage(0);
@@ -141,19 +133,14 @@ export const useTableFilters = ({
     const [start, end] = update;
 
     if (start && end) {
-      const fromDate = start.toISOString().split("T")[0];
-      const toDate = end.toISOString().split("T")[0];
-      updateURL({
-        page: 0,
-        date: "custom",
-        fromDate,
-        toDate,
-      });
+      // Remove: updateURL({ page: 0, date: "custom", fromDate, toDate });
+      updateURL({ page: 0 });
       if (dateFilter !== "custom") {
         setDateFilter("custom");
       }
     } else if (!start && !end) {
-      updateURL({ page: 0, fromDate: null, toDate: null });
+      // Remove: updateURL({ page: 0, fromDate: null, toDate: null });
+      updateURL({ page: 0 });
       if (dateFilter === "custom") {
         setDateFilter(defaultDateFilter);
       }
@@ -163,39 +150,38 @@ export const useTableFilters = ({
   };
 
   // Get filter params for API call
-const getFilterParams = (pageSize: number, additionalParams = {}) => {
-  const params: any = {
-    ...additionalParams,
-    page: currentPage + 1,
-    limit: pageSize,
+  const getFilterParams = (pageSize: number, additionalParams = {}) => {
+    const params: any = {
+      ...additionalParams,
+      page: currentPage + 1,
+      limit: pageSize,
+    };
+
+    // Normal quick filters
+    if (dateFilter && dateFilter !== "custom") {
+      params.date = dateFilter;
+    }
+
+    // Custom date range filter
+    if (startDate && endDate) {
+      params.date = "custom"; // 🔥 MUST SEND THIS
+      params.fromDate = startDate.toISOString().split("T")[0];
+      params.toDate = endDate.toISOString().split("T")[0];
+    }
+
+    if (statusFilter) {
+      params.status = statusFilter;
+    }
+
+    return params;
   };
 
-  // Normal quick filters
-  if (dateFilter && dateFilter !== "custom") {
-    params.date = dateFilter;
-  }
-
-  // Custom date range filter
-  if (startDate && endDate) {
-    params.date = "custom"; // 🔥 MUST SEND THIS
-    params.fromDate = startDate.toISOString().split("T")[0];
-    params.toDate = endDate.toISOString().split("T")[0];
-  }
-
-  if (statusFilter) {
-    params.status = statusFilter;
-  }
-
-  return params;
-};
-
-
-  // Set default filter on mount if no filter in URL
-  useEffect(() => {
-    if (!searchParams.get("date") && dateFilter === defaultDateFilter) {
-      updateURL({ date: defaultDateFilter });
-    }
-  }, []);
+  // Remove: Set default filter on mount if no filter in URL
+  // useEffect(() => {
+  //   if (!searchParams.get("date") && dateFilter === defaultDateFilter) {
+  //     updateURL({ date: defaultDateFilter });
+  //   }
+  // }, []);
 
   return {
     dateFilter,

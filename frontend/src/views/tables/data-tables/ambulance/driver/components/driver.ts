@@ -3,13 +3,13 @@ const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
 type DriverInfoType = {
     driver_id: number;
+    driver_profile_img: string;
     driver_name: string;
     // driver_last_name: string;
     driver_mobile: string;
     driver_wallet_amount: number;
     // driver_city_id: number;
     driver_created_by: number; // 0: Self, 1: Partner
-    driver_profile_img: string;
     driver_registration_step: number;
     driver_duty_status: string;
     driver_status: number;
@@ -36,6 +36,15 @@ export const getDriverList = async () => {
 
 export const driverColumns = [
     { data: 'driver_id' },
+    {
+        data: 'driver_profile_img',
+        render: (data: string) => {
+            if (data) {
+                return `<img src="${data}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />`;
+            }
+            return 'N/A';
+        }
+    },
     { data: 'driver_name' },
     // { data: 'driver_last_name' },
     { data: 'driver_mobile' },
@@ -50,15 +59,6 @@ export const driverColumns = [
         data: 'driver_created_by',
         render: (data: number) => {
             return data === 0 ? 'Self' : 'Partner';
-        }
-    },
-    {
-        data: 'driver_profile_img',
-        render: (data: string) => {
-            if (data) {
-                return `<img src="${data}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />`;
-            }
-            return 'N/A';
         }
     },
     {

@@ -28,7 +28,7 @@ import {
   bannerColumns,
   priceMapperColumns,
   faqColumns,
-} from "@/views/tables/data-tables/export-data/manpower/category.ts";
+} from "@/views/tables/data-tables/manpower/category/manpower/category";
 
 import { createRoot } from "react-dom/client";
 import axios from "axios";

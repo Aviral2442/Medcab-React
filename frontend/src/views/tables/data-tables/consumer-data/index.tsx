@@ -189,7 +189,7 @@ const ExportDataWithButtons = ({
         const root = createRoot(td);
         root.render(
           <div className="d-flex flex-row gap-1">
-            <button className="eye-icon p-1"
+            <button className="eye-icon"
               onClick={() => {
                 navigate(`/consumer-details/${rowData.consumer_id}`);
               }}

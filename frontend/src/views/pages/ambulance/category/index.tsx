@@ -1,9 +1,9 @@
 import React from "react";
 import { Container } from "react-bootstrap";
-import ExportDataWithButtons from "@/views/tables/data-tables/ambulance-data/";
-import AddCategory from "../ambulance/components/AddCategory";
-import Addfacilities from "../ambulance/components/Addfacilities";
-import AddAmbulanceFAQ from "../ambulance/components/AddAmbulanceFAQ";
+import ExportDataWithButtons from "@/views/tables/data-tables/ambulance/category";
+import AddCategory from "../category/components/AddCategory";
+import Addfacilities from "../category/components/Addfacilities";
+import AddAmbulanceFAQ from "../category/components/AddAmbulanceFAQ";
 
 const Page = () => {
   const [activeTab, setActiveTab] = React.useState(1);

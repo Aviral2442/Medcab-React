@@ -1,6 +1,6 @@
 import React from "react";
 import {Container} from "react-bootstrap";
-import ExportDataWithButtons from "@/views/tables/data-tables/vendor-data/";
+import ExportDataWithButtons from "@/views/tables/data-tables/manpower/vendor/";
 import "rsuite/dist/rsuite.min.css";
 
 const Page: React.FC = () => {

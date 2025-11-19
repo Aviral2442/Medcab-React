@@ -4,11 +4,11 @@ const basePath = (import.meta as any).env?.basePath ?? "";
 
 type PartnerInfoType = {
     partner_id: number;
+    partner_profile_img: string;
     partner_f_name: string;
     // partner_l_name: string;
     partner_mobile: string;
     partner_wallet: Number;
-    partner_profile_img: string;
     partner_registration_step: string;
     // partner_city_id: number;
     partner_created_by: string;
@@ -35,9 +35,6 @@ export const getPartnerList = async () => {
 
 export const partnerColumns = [
     { data: 'partner_id' },
-    { data: 'partner_f_name' },
-    // { data: 'partner_l_name' },
-    { data: 'partner_mobile' },
     { data: 'partner_profile_img',
         render: (data: string) => {
             if (data) {
@@ -46,6 +43,9 @@ export const partnerColumns = [
             return 'N/A';
         } 
     },
+    { data: 'partner_f_name' },
+    // { data: 'partner_l_name' },
+    { data: 'partner_mobile' },
     { 
         data: 'partner_wallet_amount',
         render: (data: number) => {

@@ -6,17 +6,18 @@ import ComponentCard from "@/components/ComponentCard";
 //   DropdownItem,
 //   DropdownToggle,
 // } from "react-bootstrap";
-import '@/global.css';
+
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
+import '@/global.css';
 
 import { TbEye, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
-import { partnerColumns } from "@/views/tables/data-tables/partner-data/components/partner";
+import { driverColumns } from "@/views/tables/data-tables/ambulance/driver/components/driver";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -35,19 +36,20 @@ const tableConfig: Record<
   { endpoint: string; columns: any[]; headers: string[] }
 > = {
   1: {
-    endpoint: "/partner/get_partners_list",
-    columns: partnerColumns,
+    endpoint: "/driver/get_drivers_list",
+    columns: driverColumns,
     headers: [
       "S.No.",
       "ID",
+      "Profile",
       "Name",
       "Mobile",
-      "Img",
       "Wallet",
-      "Reg_Step",
-      // "City",
-      "Date",
+      // "City ID",
+      "Created By",
+      "Duty Status",
       "Status",
+      "Date",
     ],
   },
 };
@@ -68,7 +70,7 @@ const ExportDataWithButtons = ({
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isRemarkOpen, setIsRemarkOpen] = useState(false);
-  const [selectedPartnerId, setSelectedPartnerId] = useState<number | null>(null);
+  const [selectedDriverId, setSelectedDriverId] = useState<number | null>(null);
 
   const [pageSize] = useState(100);
   const [_total, setTotal] = useState(0);
@@ -98,6 +100,8 @@ const ExportDataWithButtons = ({
     { label: "New", value: "new" },
     { label: "Active", value: "active" },
     { label: "Inactive", value: "inActive" },
+    { label: "Delete", value: "delete" },
+    { label: "Verification", value: "verification" },
   ];
 
   const fetchData = async () => {
@@ -107,20 +111,20 @@ const ExportDataWithButtons = ({
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
       console.log("API Response:", res.data);
 
-      const partners = res.data?.jsonData?.partners || [];
-      setData(partners);
+      const drivers = res.data?.jsonData?.drivers || [];
+      setData(drivers);
 
       if (res.data.paginations) {
         setTotal(res.data.paginations.total);
         setTotalPages(res.data.paginations.totalPages);
       } else {
-        setTotal(res.data?.total || partners.length);
+        setTotal(res.data?.total || drivers.length);
         setTotalPages(
-          res.data?.totalPages || Math.ceil(partners.length / pageSize)
+          res.data?.totalPages || Math.ceil(drivers.length / pageSize)
         );
       }
     } catch (error) {
-      console.error("Error fetching partner data:", error);
+      console.error("Error fetching driver data:", error);
       setData([]);
       setTotal(0);
       setTotalPages(0);
@@ -130,16 +134,16 @@ const ExportDataWithButtons = ({
   };
 
   const handleRemark = (rowData: any) => {
-    const id = rowData?.partner_id ?? rowData?.id;
-    console.log("Selected Partner ID for Remark:", id);
-    setSelectedPartnerId(id);
+    const id = rowData?.driver_id ?? rowData?.id;
+    console.log("Selected Driver ID for Remark:", id);
+    setSelectedDriverId(id);
     setIsRemarkOpen(true);
   };
 
   const handleSaveRemark = async (remark: string) => {
     try {
-      await axios.post(`${baseURL}/add_remarks/${selectedPartnerId}`, {
-        remarkType: "PARTNER",
+      await axios.post(`${baseURL}/add_remarks/${selectedDriverId}`, {
+        remarkType: "DRIVER",
         remarks: remark,
       });
       console.log("Remark saved successfully");
@@ -152,7 +156,15 @@ const ExportDataWithButtons = ({
 
   useEffect(() => {
     fetchData();
-  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange]);
+  }, [
+    tabKey,
+    refreshFlag,
+    currentPage,
+    pageSize,
+    dateFilter,
+    statusFilter,
+    dateRange,
+  ]);
 
   const columnsWithActions = [
     {
@@ -175,10 +187,10 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-           <div className="d-flex flex-row gap-1">
+          <div className="d-flex flex-row gap-1">
             <button className="eye-icon p-1"
               onClick={() => {
-                navigate(`/partner-detail/${rowData.selectedPartnerId}`);
+                navigate(`/driver-detail/${rowData.driver_id}`);
               }}
             >
               <TbEye className="me-1" />
@@ -195,7 +207,7 @@ const ExportDataWithButtons = ({
   return (
     <>
       <ComponentCard
-        title={tabKey === 1 ? "Manage Partners" : ""}
+        title={tabKey === 1 ? "Manage Drivers" : ""}
         className="mb-2 overflow-x-auto"
         headerActions={
           <TableFilters
@@ -213,9 +225,9 @@ const ExportDataWithButtons = ({
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto ">
             <DataTable
-              key={`partner-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
+              key={`driver-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
               data={data}
               columns={columnsWithActions}
               options={{
@@ -262,18 +274,22 @@ const ExportDataWithButtons = ({
               </thead>
             </DataTable>
 
-                        <TablePagination
+            <TablePagination
               // totalItems={total}
               start={currentPage + 1}
               // end={totalPages}
               // itemsName="items"
               showInfo={true}
-              previousPage={() => handlePageChange(Math.max(0, currentPage - 1))}
+              previousPage={() =>
+                handlePageChange(Math.max(0, currentPage - 1))
+              }
               canPreviousPage={currentPage > 0}
               pageCount={totalPages}
               pageIndex={currentPage}
               setPageIndex={handlePageChange}
-              nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+              nextPage={() =>
+                handlePageChange(Math.min(totalPages - 1, currentPage + 1))
+              }
               canNextPage={currentPage < totalPages - 1}
             />
           </div>
@@ -289,4 +305,5 @@ const ExportDataWithButtons = ({
   );
 };
 
+// Export the component directly, not wrapped in another component
 export default ExportDataWithButtons;

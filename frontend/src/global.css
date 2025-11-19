@@ -120,7 +120,7 @@
   /* background: #4a5e70 !important; */
   color: #ffff !important;
   border-radius: 0.24rem !important;
-  /* padding: 0.2rem !important;  */
+  padding: 0.2rem 0.4rem !important; 
 }
 
 .table tbody tr td div button svg{
