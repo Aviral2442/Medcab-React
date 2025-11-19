@@ -49,6 +49,35 @@ export const getVendorTransactionList = async () => {
     }
 };
 
+// Get Vendor Transaction Data
+export const vendorTransDataService = async (vendorId: number) => {
+
+    try {
+        const [rows]: any = await db.query(
+            `
+            SELECT vendor_transection.*, vendor.vendor_name, vendor.vendor_mobile
+            FROM vendor_transection
+            LEFT JOIN vendor 
+                ON vendor_transection.vendor_transection_by_type = 0 
+                AND vendor_transection.vendor_transection_by = vendor.vendor_id
+            WHERE vendor_transection.vendor_transection_by = ?
+            ORDER BY vendor_transection.vendor_transection_id DESC;
+            `,
+            [vendorId]
+        );
+
+        if (rows.length === 0 || !rows) {
+            throw new ApiError(404, "No vendor transactions found for the given vendor ID");
+        }
+
+        return {
+            transactions: rows,
+        };
+    } catch (error) {
+        throw new ApiError(500, "Failed to fetch vendor transaction data");
+    }
+};
+
 // Get Driver Transaction List
 export const getDriverTransactionListService = async (filters: {
     date?: string;

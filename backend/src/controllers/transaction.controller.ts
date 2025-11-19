@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { driverTransDataService, getConsumerTransactionList, getDriverTransactionListService, getVendorTransactionList } from "../services/transaction.service";
+import { driverTransDataService, getConsumerTransactionList, getDriverTransactionListService, getVendorTransactionList, vendorTransDataService } from "../services/transaction.service";
 
 // GET CONSUMER TRANSACTION LIST CONTROLLER
 export const consumerTransactionList = async (req: Request, res: Response, next: NextFunction) => {
@@ -26,6 +26,22 @@ export const vendorTransactionList = async (req: Request, res: Response, next: N
             message: "Vendor transaction list fetched successfully",
             jsonData: result,
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// GET VENDOR TRANSACTION DATA CONTROLLER
+export const vendorTransDataController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const vendorId = parseInt(req.params.id);
+        if (isNaN(vendorId)) {
+            return res.status(400).json({ message: 'Invalid vendor ID' });
+        }
+
+        const result = await vendorTransDataService(vendorId);
+        res.status(200).json(result);
     } catch (error) {
         next(error);
     }
