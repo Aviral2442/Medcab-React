@@ -124,7 +124,8 @@ export const menuItems: MenuItemType[] = [
     children: [
       { key: 'category-list', label: 'Category', url: '/ambulance/category' },
       { key: 'driver-list', label: 'Driver', url: '/ambulance/driver' },
-      { key: 'partner-list', label: 'Partner', url: '/ambulance/Partner' },
+      { key: 'partner-list', label: 'Partner', url: '/ambulance/partner' },
+      { key: 'booking-list', label: 'Booking', url: '/ambulance/booking' },
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
     ],
   },

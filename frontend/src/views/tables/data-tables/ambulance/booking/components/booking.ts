@@ -1,0 +1,124 @@
+import axios from "axios";
+const baseURL = (import.meta as any).env?.VITE_IMAGE_PATH ?? "";
+
+let bookingRows: any[] = [];
+const getAmbulanceBooking = async () => {
+    try {
+        const rows = await axios.get(`${baseURL}/ambulance/get_ambulance_booking_list`);
+        console.log("Bookings fetched:", rows);
+        bookingRows = rows.data.jsonData?.booking_list || [];
+    } catch (error) {
+        console.error("Error fetching bookings:", error);
+    }
+}
+await getAmbulanceBooking();
+
+type TableType<T> = {
+    header: string[]
+    body: T[]
+}
+
+type AmbulanceBookingInfoType = {
+    booking_id: number
+    booking_source: string
+    booking_type: string
+    booking_con_name: string
+    booking_con_mobile: string
+    booking_category: string
+    booking_schedule_time: string
+    booking_pickup: string
+    booking_drop: string
+    booking_status: number
+    booking_total_amount: string
+    created_at: string
+}
+
+// Status map for ambulance bookings (matches backend)
+const statusMap: Record<number, [string, string]> = {
+    0: ["secondary", "Enquery"],
+    1: ["primary", "Confirm Booking"],
+    2: ["info", "Driver Assign"],
+    3: ["warning", "Invoice"],
+    4: ["success", "Complete"],
+    5: ["danger", "Cancel"],
+};
+
+// BOOKING COLUMNS
+export const bookingColumns = [
+    {
+        data: null,
+        orderable: false,
+        searchable: false,
+        render: (_data: any, _type: any, _row: any, meta: any) => {
+            return meta.row + 1;
+        }
+    },
+    {
+        data: 'booking_id',
+        defaultContent: '-'
+    },
+    {
+        data: 'booking_source',
+        defaultContent: '-'
+    },
+    {
+        data: 'booking_type',
+        defaultContent: '',
+        render: (data: any) => {
+            // Map booking_type if needed (e.g., 0=Regular, 1=Rental, 2=Bulk)
+            const typeMap: Record<number, string> = { 0: "Regular", 1: "Rental", 2: "Bulk" };
+            return typeMap[data] || data;
+        }
+    },
+    {
+        data: 'booking_con_name',
+        defaultContent: '-',
+    },
+    {
+        data: 'booking_con_mobile',
+        defaultContent: '-',
+    },
+    {
+        data: 'booking_category',
+        defaultContent: '-',
+    },
+    {
+        data: 'booking_schedule_time',
+        defaultContent: '-',
+        render: (data: any) => {
+            return data.toLocaleString();
+        },
+    },
+    {
+        data: 'booking_pickup',
+        defaultContent: '-',
+    },
+    {
+        data: 'booking_drop',
+        defaultContent: '-',
+    },
+    {
+        data: 'booking_total_amount',
+        defaultContent: '-',
+    },
+    {
+        data: 'created_at',
+        defaultContent: '-',
+        render: (data: any) => {
+            return data.toLocaleString();
+        },
+    },
+    {
+        data: 'booking_status',
+        defaultContent: 0,
+        render: (data: number) => {
+            const [variant, text] = statusMap[data] || ["secondary", "Unknown"];
+            return `<span class="badge badge-label badge-soft-${variant}">${text}</span>`;
+        }
+    },
+];
+
+export const bookingTableData: TableType<AmbulanceBookingInfoType> = {
+    header: ["S.No.", 'ID', 'Source', 'Type', 'Consumer', 'Mobile', 'Category', 'Schedule', 'Pickup', 'Drop', ' Amount', 'Date', 'Status'],
+    body: bookingRows,
+};
