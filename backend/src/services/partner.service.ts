@@ -15,7 +15,7 @@ export const getPartnerServices = async (filters?: {
     try {
 
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'created_at' });
@@ -108,7 +108,7 @@ export const getManpowerPartnerServices = async (filters?: {
     try {
 
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'created_at' });
@@ -203,7 +203,7 @@ export const getPartnerTransactionServices = async (filters?: {
     try {
 
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'partner_transection.created_at' });

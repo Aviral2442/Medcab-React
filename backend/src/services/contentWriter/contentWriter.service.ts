@@ -31,7 +31,7 @@ export const getBlogListService = async (filters?: {
 
     try {
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({
@@ -177,7 +177,6 @@ export const getBlogService = async (blogId: number) => {
 
 // SERVICE TO EDIT EXISTING BLOG
 export const editBlogService = async (blogId: number, data: blogData) => {
-
     try {
 
         // const updateData: any = {
@@ -293,7 +292,7 @@ export const getCityContentService = async (filters?: {
     try {
 
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({
@@ -498,7 +497,7 @@ export const getCityContentFaqListService = async (filters?: {
     try {
 
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({

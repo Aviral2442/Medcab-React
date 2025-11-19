@@ -74,7 +74,7 @@ const ExportDataWithButtons = ({
     null
   );
 
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(100);
   const [_total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 

@@ -72,7 +72,7 @@ const ExportDataWithButtons = ({
   const [isRemarkOpen, setIsRemarkOpen] = useState(false);
   const [selectedDriverId, setSelectedDriverId] = useState<number | null>(null);
 
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(100);
   const [_total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 

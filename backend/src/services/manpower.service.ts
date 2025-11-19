@@ -814,7 +814,7 @@ export const getAllFaqsService = async (filters?: {
   try {
     // ✅ Pagination defaults
     const page = filters?.page && filters.page > 0 ? filters.page : 1;
-    const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+    const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
     const offset = (page - 1) * limit;
 
     // ✅ Generate WHERE clause from filters util

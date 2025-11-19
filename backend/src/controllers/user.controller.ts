@@ -41,7 +41,7 @@ export const getDriverEmergencyListController = async (req: Request, res: Respon
       fromDate: req.query.fromDate as string,
       toDate: req.query.toDate as string,
       page: req.query.page ? parseInt(req.query.page as string) : 1,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
     }
 
     const result = await getDriverEmergencyList(filters);
@@ -64,7 +64,7 @@ export const getConsumerEmergencyListController = async (req: Request, res: Resp
       fromDate: req.query.fromDate as string,
       toDate: req.query.toDate as string,
       page: req.query.page ? parseInt(req.query.page as string) : 1,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
     }
 
     const result = await getConsumerEmergencyList(filters);
