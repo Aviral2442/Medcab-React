@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService, getCityContentFaqListService, addCityContentFaqService, fetchCityContentFaqService, editCityContentFaqService, updateCityContentFaqStatusService, updateCityContentManpowerStatusService, editCityContentManpowerService, fetchCityContentManpowerService, addCityContentManpowerService, getCityContentManpowerService, getCityContentVideoConsultService, addCityContentVideoConsultService, fetchCityContentVideoConsultService, editCityContentVideoConsultService, updateCityContentVideoConsultStatusService } from "../../services/contentWriter/contentWriter.service";
+import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService, getCityContentFaqListService, addCityContentFaqService, fetchCityContentFaqService, editCityContentFaqService, updateCityContentFaqStatusService, updateCityContentManpowerStatusService, editCityContentManpowerService, fetchCityContentManpowerService, addCityContentManpowerService, getCityContentManpowerService, getCityContentVideoConsultService, addCityContentVideoConsultService, fetchCityContentVideoConsultService, editCityContentVideoConsultService, updateCityContentVideoConsultStatusService, updateCityContentPathologyStatusService, editCityContentPathologyService, fetchCityContentPathologyService, addCityContentPathologyService, getCityContentPathologyService } from "../../services/contentWriter/contentWriter.service";
 
 
 // --------------------------------------------- BLOGS CONTROLLERS ----------------------------------------------------- //
@@ -598,6 +598,142 @@ export const updateCityContentVideoConsultStatusController = async (req: Request
         const status = req.body.city_status;
 
         const result = await updateCityContentVideoConsultStatusService(cityId, status);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
+// ----------------------------------------- PATHOLOGY CITY CONTENT CONTROLLERS ----------------------------------- //
+
+
+
+// PATHOLOGY CITY CONTENT CONTROLLER LIST
+export const getCityContentPathologyController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+        }
+
+        const result = await getCityContentPathologyService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO ADD NEW PATHOLOGY CITY CONTENT
+export const addCityContentPathologyController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const cityContent = {
+            city_pathology_thumbnail: req.file ?? undefined,
+            city_pathology_name: req.body.city_pathology_name,
+            city_pathology_title_sku: req.body.city_pathology_title_sku,
+            city_pathology_title: req.body.city_pathology_title,
+            city_pathology_heading: req.body.city_pathology_heading,
+            city_pathology_body_desc: req.body.city_pathology_body_desc,
+            city_pathology_why_choose_us: req.body.city_pathology_why_choose_us,
+            why_choose_meta_desc: req.body.why_choose_meta_desc,
+            city_pathology_block1_heading: req.body.city_pathology_block1_heading,
+            city_pathology_block1_body: req.body.city_pathology_block1_body,
+            city_pathology_block2_heading: req.body.city_pathology_block2_heading,
+            city_pathology_block2_body: req.body.city_pathology_block2_body,
+            city_pathology_block3_heading: req.body.city_pathology_block3_heading,
+            city_pathology_block3_body: req.body.city_pathology_block3_body,
+            city_pathology_thumbnail_title: req.body.city_pathology_thumbnail_title,
+            city_pathology_thumbnail_alt: req.body.city_pathology_thumbnail_alt,
+            city_pathology_meta_title: req.body.city_pathology_meta_title,
+            city_pathology_meta_desc: req.body.city_pathology_meta_desc,
+            city_pathology_meta_keyword: req.body.city_pathology_meta_keyword,
+            city_pathology_force_keyword: req.body.city_pathology_force_keyword,
+            city_pathology_faq_heading: req.body.city_pathology_faq_heading,
+            city_pathology_faq_desc: req.body.city_pathology_faq_desc,
+            city_pathology_emergency_heading: req.body.city_pathology_emergency_heading,
+            city_pathology_emergency_desc: req.body.city_pathology_emergency_desc,
+        };
+
+        const result = await addCityContentPathologyService(cityContent);
+        res.status(result.status).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO FETCH PATHOLOGY CITY CONTENT BY CITY ID
+export const fetchCityContentPathologyController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const cityId = parseInt(req.params.id);
+        const result = await fetchCityContentPathologyService(cityId);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO EDIT PATHOLOGY CITY CONTENT
+export const editCityContentPathologyController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const cityId = parseInt(req.params.id);
+
+        const cityContent = {
+            city_pathology_thumbnail: req.file ?? undefined,
+            city_pathology_name: req.body.city_pathology_name,
+            city_pathology_title_sku: req.body.city_pathology_title_sku,
+            city_pathology_title: req.body.city_pathology_title,
+            city_pathology_heading: req.body.city_pathology_heading,
+            city_pathology_body_desc: req.body.city_pathology_body_desc,
+            city_pathology_why_choose_us: req.body.city_pathology_why_choose_us,
+            why_choose_meta_desc: req.body.why_choose_meta_desc,
+            city_pathology_block1_heading: req.body.city_pathology_block1_heading,
+            city_pathology_block1_body: req.body.city_pathology_block1_body,
+            city_pathology_block2_heading: req.body.city_pathology_block2_heading,
+            city_pathology_block2_body: req.body.city_pathology_block2_body,
+            city_pathology_block3_heading: req.body.city_pathology_block3_heading,
+            city_pathology_block3_body: req.body.city_pathology_block3_body,
+            city_pathology_thumbnail_title: req.body.city_pathology_thumbnail_title,
+            city_pathology_thumbnail_alt: req.body.city_pathology_thumbnail_alt,
+            city_pathology_meta_title: req.body.city_pathology_meta_title,
+            city_pathology_meta_desc: req.body.city_pathology_meta_desc,
+            city_pathology_meta_keyword: req.body.city_pathology_meta_keyword,
+            city_pathology_force_keyword: req.body.city_pathology_force_keyword,
+            city_pathology_faq_heading: req.body.city_pathology_faq_heading,
+            city_pathology_faq_desc: req.body.city_pathology_faq_desc,
+            city_pathology_emergency_heading: req.body.city_pathology_emergency_heading,
+            city_pathology_emergency_desc: req.body.city_pathology_emergency_desc,
+        };
+
+        const result = await editCityContentPathologyService(cityId, cityContent);
+        res.status(result.status).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// PATHOLOGY CONTROLLER TO UPDATE CITY CONTENT STATUS
+export const updateCityContentPathologyStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const cityId = parseInt(req.params.id);
+        const status = req.body.city_pathology_status;
+
+        const result = await updateCityContentPathologyStatusService(cityId, status);
         res.status(200).json(result);
 
     } catch (error) {

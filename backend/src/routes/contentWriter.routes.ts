@@ -1,5 +1,5 @@
 import Router from "express";
-import { getBlogListController, getBlogController, addBlogController, editBlogController, updateBlogStatusController, getCityContentController, addCityContentController, fetchCityContentController, editCityContentController, updateCityContentStatusController, getCityContentFaqListController, addCityContentFaqController, fetchCityContentFaqController, editCityContentFaqController, updateCityContentFaqStatusController, updateCityContentVideoConsultStatusController, editCityContentVideoConsultController, fetchCityContentVideoConsultController, addCityContentVideoConsultController, getCityContentVideoConsultController, updateCityContentManpowerStatusController, editCityContentManpowerController, fetchCityContentManpowerController, addCityContentManpowerController, getCityContentManpowerController } from "../controllers/contentWriter/contentWriter.controller"
+import { getBlogListController, getBlogController, addBlogController, editBlogController, updateBlogStatusController, getCityContentController, addCityContentController, fetchCityContentController, editCityContentController, updateCityContentStatusController, getCityContentFaqListController, addCityContentFaqController, fetchCityContentFaqController, editCityContentFaqController, updateCityContentFaqStatusController, updateCityContentVideoConsultStatusController, editCityContentVideoConsultController, fetchCityContentVideoConsultController, addCityContentVideoConsultController, getCityContentVideoConsultController, updateCityContentManpowerStatusController, editCityContentManpowerController, fetchCityContentManpowerController, addCityContentManpowerController, getCityContentManpowerController, updateCityContentPathologyStatusController, editCityContentPathologyController, fetchCityContentPathologyController, addCityContentPathologyController, getCityContentPathologyController } from "../controllers/contentWriter/contentWriter.controller"
 import multer from "multer";
 
 const router = Router();
@@ -47,5 +47,14 @@ router.patch("/update_video_consult_city_content_status/:id", updateCityContentV
 
 
 // ----------------------------------------- PATHOLOGY CITY CONTENT ROUTER's ------------------------------------------ //
+
+
+router.get("/get_pathology_city_content", getCityContentPathologyController);
+router.post("/add_pathology_city_content", upload.single("city_thumbnail"), addCityContentPathologyController);
+router.get("/fetch_pathology_city_content/:id", fetchCityContentPathologyController);
+router.put("/edit_pathology_city_content/:id", upload.single("city_thumbnail"), editCityContentPathologyController);
+router.patch("/update_pathology_city_content_status/:id", updateCityContentPathologyStatusController);
+
+
 
 export default router;

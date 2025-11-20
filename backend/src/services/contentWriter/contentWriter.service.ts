@@ -1128,30 +1128,33 @@ export const updateCityContentVideoConsultStatusService = async (cityId: number,
 
 
 interface cityContentPathologyData {
-    city_name?: string;
-    city_title_sku?: string;
-    city_title?: string;
-    city_heading?: string;
-    city_body_desc?: string;
-    city_why_choose_us?: string;
+    // city_pathology_id?: number;
+    city_pathology_name?: string;
+    city_pathology_title?: string;
+    city_pathology_title_sku?: string;
+    city_pathology_thumbnail?: Express.Multer.File;
+    city_pathology_thumbnail_alt?: string;
+    city_pathology_thumbnail_title?: string;
+    city_pathology_heading?: string;
+    city_pathology_body_desc?: string;
+    city_pathology_block1_heading?: string;
+    city_pathology_block1_body?: string;
+    city_pathology_block2_heading?: string;
+    city_pathology_block2_body?: string;
+    city_pathology_block3_heading?: string;
+    city_pathology_block3_body?: string;
+    city_pathology_why_choose_us?: string;
     why_choose_meta_desc?: string;
-    city_block1_heading?: string;
-    city_block1_body?: string;
-    city_block2_heading?: string;
-    city_block2_body?: string;
-    city_block3_heading?: string;
-    city_block3_body?: string;
-    city_thumbnail?: Express.Multer.File;
-    city_thumbnail_alt?: string;
-    city_thumbnail_title?: string;
-    city_meta_title?: string;
-    city_meta_desc?: string;
-    city_meta_keyword?: string;
-    city_force_keyword?: string;
-    city_faq_heading?: string;
-    city_faq_desc?: string;
-    city_emergency_heading?: string;
-    city_emergency_desc?: string;
+    city_pathology_emergency_heading?: string;
+    city_pathology_emergency_desc?: string;
+    city_pathology_faq_heading?: string;
+    city_pathology_faq_desc?: string;
+    city_pathology_meta_title?: string;
+    city_pathology_meta_desc?: string;
+    city_pathology_meta_keyword?: string;
+    city_pathology_force_keyword?: string;
+    // city_pathology_status?: number;
+    // city_pathology_timestamp?: number;
 }
 
 // PATHOLOGY CITY CONSTENT LIST SERVICE
@@ -1172,19 +1175,19 @@ export const getCityContentPathologyService = async (filters?: {
 
         const { whereSQL, params } = buildFilters({
             ...filters,
-            dateColumn: "city_content.city_timestamp",
+            dateColumn: "city_pathology_content.city_pathology_timestamp",
         });
 
         const query = `
             SELECT 
-                city_content.city_id,
-                city_content.city_name,
-                city_content.city_title,
-                city_content.city_status,
-                city_content.city_timestamp
-            FROM city_content
+                city_pathology_content.city_pathology_id,
+                city_pathology_content.city_pathology_name,
+                city_pathology_content.city_pathology_title,
+                city_pathology_content.city_pathology_status,
+                city_pathology_content.city_pathology_timestamp
+            FROM city_pathology_content
             ${whereSQL}
-            ORDER BY city_content.city_id DESC
+            ORDER BY city_pathology_content.city_pathology_id DESC
             LIMIT ? OFFSET ?
         `;
 
@@ -1192,7 +1195,7 @@ export const getCityContentPathologyService = async (filters?: {
         const [rows]: any = await db.query(query, queryParams);
 
         const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM city_content ${whereSQL}`,
+            `SELECT COUNT(*) as total FROM city_pathology_content ${whereSQL}`,
             params
         );
 
@@ -1200,7 +1203,7 @@ export const getCityContentPathologyService = async (filters?: {
 
         return {
             status: 200,
-            message: "City content list fetched successfully",
+            message: "Pathology City content list fetched successfully",
             pagination: {
                 page,
                 limit,
@@ -1208,12 +1211,12 @@ export const getCityContentPathologyService = async (filters?: {
                 totalPages: Math.ceil(total / limit),
             },
             jsonData: {
-                city_content_list: rows
+                pathology_city_content_list: rows
             },
         };
 
     } catch (error) {
-        throw new ApiError(500, "Get City Content Error On Fetching");
+        throw new ApiError(500, "Get Pathology City Content Error On Fetching");
     }
 
 };
@@ -1225,51 +1228,50 @@ export const addCityContentPathologyService = async (data: cityContentPathologyD
 
         let imagePath: string | null = null;
 
-        if (data.city_thumbnail) {
-            imagePath = uploadFileCustom(data.city_thumbnail, "/city_content");
+        if (data.city_pathology_thumbnail) {
+            imagePath = uploadFileCustom(data.city_pathology_thumbnail, "/city_content_pathology");
         }
 
         const insertData = {
-            city_name: data.city_name,
-            city_title_sku: generateSlug(data.city_title_sku || ""),
-            city_title: data.city_title,
-            city_heading: data.city_heading,
-            city_body_desc: data.city_body_desc,
-            city_why_choose_us: data.city_why_choose_us,
-            why_choose_meta_desc: data.why_choose_meta_desc,
-            city_block1_heading: data.city_block1_heading,
-            city_block1_body: data.city_block1_body,
-            city_block2_heading: data.city_block2_heading,
-            city_block2_body: data.city_block2_body,
-            city_block3_heading: data.city_block3_heading,
-            city_block3_body: data.city_block3_body,
-            city_thumbnail: imagePath,
-            city_thumbnail_alt: data.city_thumbnail_alt,
-            city_thumbnail_title: data.city_thumbnail_title,
-            city_meta_title: data.city_meta_title,
-            city_meta_desc: data.city_meta_desc,
-            city_meta_keyword: data.city_meta_keyword,
-            city_force_keyword: data.city_force_keyword,
-            city_faq_heading: data.city_faq_heading,
-            city_faq_desc: data.city_faq_desc,
-            city_emergency_heading: data.city_emergency_heading,
-            city_emergency_desc: data.city_emergency_desc,
-            city_status: 0,
-            city_timestamp: currentUnixTime(),
+            city_pathology_name: data.city_pathology_name,
+            city_pathology_title_sku: generateSlug(data.city_pathology_title_sku || ""),
+            city_pathology_title: data.city_pathology_title,
+            city_pathology_heading: data.city_pathology_heading,
+            city_pathology_body_desc: data.city_pathology_body_desc,
+            city_pathology_why_choose_us: data.city_pathology_why_choose_us,
+            city_pathology_block1_heading: data.city_pathology_block1_heading,
+            city_pathology_block1_body: data.city_pathology_block1_body,
+            city_pathology_block2_heading: data.city_pathology_block2_heading,
+            city_pathology_block2_body: data.city_pathology_block2_body,
+            city_pathology_block3_heading: data.city_pathology_block3_heading,
+            city_pathology_block3_body: data.city_pathology_block3_body,
+            city_pathology_thumbnail: imagePath,
+            city_pathology_thumbnail_alt: data.city_pathology_thumbnail_alt,
+            city_pathology_thumbnail_title: data.city_pathology_thumbnail_title,
+            city_pathology_meta_title: data.city_pathology_meta_title,
+            city_pathology_meta_desc: data.city_pathology_meta_desc,
+            city_pathology_meta_keyword: data.city_pathology_meta_keyword,
+            city_pathology_force_keyword: data.city_pathology_force_keyword,
+            city_pathology_faq_heading: data.city_pathology_faq_heading,
+            city_pathology_faq_desc: data.city_pathology_faq_desc,
+            city_pathology_emergency_heading: data.city_pathology_emergency_heading,
+            city_pathology_emergency_desc: data.city_pathology_emergency_desc,
+            city_pathology_status: 0,
+            city_pathology_timestamp: currentUnixTime(),
         };
 
         const [result]: any = await db.query(
-            `INSERT INTO city_content SET ?`,
+            `INSERT INTO city_pathology_content SET ?`,
             [insertData]
         );
 
         return {
             status: 200,
-            message: "City content added successfully",
+            message: "City pathology content added successfully",
         };
 
     } catch (error) {
-        throw new ApiError(500, "Add City Content Error On Inserting");
+        throw new ApiError(500, "Add City Pathology Content Error On Inserting");
     }
 
 };
@@ -1279,20 +1281,20 @@ export const fetchCityContentPathologyService = async (cityId: number) => {
     try {
 
         const [rows]: any = await db.query(
-            `SELECT * FROM city_content WHERE city_content.city_id = ?`,
+            `SELECT * FROM city_pathology_content WHERE city_pathology_content.city_pathology_id = ?`,
             [cityId]
         )
 
         return {
             status: 200,
-            message: "City content fetched successfully",
+            message: "City pathology content fetched successfully",
             jsonData: {
-                city_content: rows[0] || null
+                city_pathology_content: rows[0] || null
             }
         };
 
     } catch (error) {
-        throw new ApiError(500, "Fetch City Content Error On Fetching");
+        throw new ApiError(500, "Fetch City Pathology Content Error On Fetching");
     }
 };
 
@@ -1302,46 +1304,46 @@ export const editCityContentPathologyService = async (cityId: number, data: city
 
         const updateData: any = {};
 
-        if (data.city_name) updateData.city_name = data.city_name;
-        if (data.city_title_sku) updateData.city_title_sku = generateSlug(data.city_title_sku);
-        if (data.city_title) updateData.city_title = data.city_title;
-        if (data.city_heading) updateData.city_heading = data.city_heading;
-        if (data.city_body_desc) updateData.city_body_desc = data.city_body_desc;
-        if (data.city_why_choose_us) updateData.city_why_choose_us = data.city_why_choose_us;
+        if (data.city_pathology_name) updateData.city_pathology_name = data.city_pathology_name;
+        if (data.city_pathology_title_sku) updateData.city_pathology_title_sku = generateSlug(data.city_pathology_title_sku);
+        if (data.city_pathology_title) updateData.city_pathology_title = data.city_pathology_title;
+        if (data.city_pathology_heading) updateData.city_pathology_heading = data.city_pathology_heading;
+        if (data.city_pathology_body_desc) updateData.city_pathology_body_desc = data.city_pathology_body_desc;
+        if (data.city_pathology_why_choose_us) updateData.city_pathology_why_choose_us = data.city_pathology_why_choose_us;
         if (data.why_choose_meta_desc) updateData.why_choose_meta_desc = data.why_choose_meta_desc;
-        if (data.city_block1_heading) updateData.city_block1_heading = data.city_block1_heading;
-        if (data.city_block1_body) updateData.city_block1_body = data.city_block1_body;
-        if (data.city_block2_heading) updateData.city_block2_heading = data.city_block2_heading;
-        if (data.city_block2_body) updateData.city_block2_body = data.city_block2_body;
-        if (data.city_block3_heading) updateData.city_block3_heading = data.city_block3_heading;
-        if (data.city_block3_body) updateData.city_block3_body = data.city_block3_body;
-        if (data.city_thumbnail) {
-            const uploadedPath = uploadFileCustom(data.city_thumbnail, "/city_content");
-            updateData.city_thumbnail = uploadedPath;
+        if (data.city_pathology_block1_heading) updateData.city_pathology_block1_heading = data.city_pathology_block1_heading;
+        if (data.city_pathology_block1_body) updateData.city_pathology_block1_body = data.city_pathology_block1_body;
+        if (data.city_pathology_block2_heading) updateData.city_pathology_block2_heading = data.city_pathology_block2_heading;
+        if (data.city_pathology_block2_body) updateData.city_pathology_block2_body = data.city_pathology_block2_body;
+        if (data.city_pathology_block3_heading) updateData.city_pathology_block3_heading = data.city_pathology_block3_heading;
+        if (data.city_pathology_block3_body) updateData.city_pathology_block3_body = data.city_pathology_block3_body;
+        if (data.city_pathology_thumbnail) {
+            const uploadedPath = uploadFileCustom(data.city_pathology_thumbnail, "/city_content");
+            updateData.city_pathology_thumbnail = uploadedPath;
         }
-        if (data.city_thumbnail_alt) updateData.city_thumbnail_alt = data.city_thumbnail_alt;
-        if (data.city_thumbnail_title) updateData.city_thumbnail_title = data.city_thumbnail_title;
-        if (data.city_meta_title) updateData.city_meta_title = data.city_meta_title;
-        if (data.city_meta_desc) updateData.city_meta_desc = data.city_meta_desc;
-        if (data.city_meta_keyword) updateData.city_meta_keyword = data.city_meta_keyword;
-        if (data.city_force_keyword) updateData.city_force_keyword = data.city_force_keyword;
-        if (data.city_faq_heading) updateData.city_faq_heading = data.city_faq_heading;
-        if (data.city_faq_desc) updateData.city_faq_desc = data.city_faq_desc;
-        if (data.city_emergency_heading) updateData.city_emergency_heading = data.city_emergency_heading;
-        if (data.city_emergency_desc) updateData.city_emergency_desc = data.city_emergency_desc;
+        if (data.city_pathology_thumbnail_alt) updateData.city_pathology_thumbnail_alt = data.city_pathology_thumbnail_alt;
+        if (data.city_pathology_thumbnail_title) updateData.city_pathology_thumbnail_title = data.city_pathology_thumbnail_title;
+        if (data.city_pathology_meta_title) updateData.city_pathology_meta_title = data.city_pathology_meta_title;
+        if (data.city_pathology_meta_desc) updateData.city_pathology_meta_desc = data.city_pathology_meta_desc;
+        if (data.city_pathology_meta_keyword) updateData.city_pathology_meta_keyword = data.city_pathology_meta_keyword;
+        if (data.city_pathology_force_keyword) updateData.city_pathology_force_keyword = data.city_pathology_force_keyword;
+        if (data.city_pathology_faq_heading) updateData.city_pathology_faq_heading = data.city_pathology_faq_heading;
+        if (data.city_pathology_faq_desc) updateData.city_pathology_faq_desc = data.city_pathology_faq_desc;
+        if (data.city_pathology_emergency_heading) updateData.city_pathology_emergency_heading = data.city_pathology_emergency_heading;
+        if (data.city_pathology_emergency_desc) updateData.city_pathology_emergency_desc = data.city_pathology_emergency_desc;
 
         const [result]: any = await db.query(
-            `UPDATE city_content SET ? WHERE city_id = ?`,
+            `UPDATE city_content_pathology SET ? WHERE city_pathology_id = ?`,
             [updateData, cityId]
         );
 
         return {
             status: 200,
-            message: "City content updated successfully",
+            message: "City pathology content updated successfully",
         };
 
     } catch (error) {
-        throw new ApiError(500, "Edit City Content Error On Updating");
+        throw new ApiError(500, "Edit City Pathology Content Error On Updating");
     }
 };
 
@@ -1350,15 +1352,15 @@ export const updateCityContentPathologyStatusService = async (cityId: number, st
     try {
 
         const [result]: any = await db.query(`
-            UPDATE city_content SET city_status = ? WHERE city_id = ?
+            UPDATE city_content_pathology SET city_pathology_status = ? WHERE city_pathology_id = ?
         `, [status, cityId]);
 
         return {
             status: 200,
-            message: "City content status updated successfully",
+            message: "City pathology content status updated successfully",
         };
 
     } catch (error) {
-        throw new ApiError(500, "Update City Content Status Error On Updating");
+        throw new ApiError(500, "Update City Pathology Content Status Error On Updating");
     }
 };
