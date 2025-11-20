@@ -359,7 +359,7 @@ const AddCity: React.FC<AddCityProps> = ({
                             </Form.Control.Feedback>
                           </Form.Group>
                         </Col>
-                        
+
                         <Col md={6}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
@@ -405,7 +405,7 @@ const AddCity: React.FC<AddCityProps> = ({
                               {errors.city_title_sku}
                             </Form.Control.Feedback>
                           </Form.Group>
-                        </Col>                        
+                        </Col>
 
                         <Col md={6}>
                           <Form.Group>
