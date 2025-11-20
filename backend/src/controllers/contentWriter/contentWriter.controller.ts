@@ -104,7 +104,7 @@ export const updateBlogStatusController = async (req: Request, res: Response, ne
 
         const blogId = parseInt(req.params.id);
 
-        const status = req.body.status;
+        const status = req.body.blogs_status;
 
         const result = await updateBlogStatusService(blogId, status);
         res.status(200).json(result);
@@ -238,7 +238,7 @@ export const updateCityContentStatusController = async (req: Request, res: Respo
 
     try {
         const cityId = parseInt(req.params.id);
-        const status = req.body.status;
+        const status = req.body.city_status;
 
         const result = await updateCityContentStatusService(cityId, status);
         res.status(200).json(result);
@@ -325,7 +325,7 @@ export const updateCityContentFaqStatusController = async (req: Request, res: Re
 
     try {
         const faqId = parseInt(req.params.id);
-        const status = req.body.status;
+        const status = req.body.city_faq_status;
         const result = await updateCityContentFaqStatusService(faqId, status);
         res.status(200).json(result);
     } catch (error) {
@@ -459,7 +459,7 @@ export const updateCityContentManpowerStatusController = async (req: Request, re
 
     try {
         const cityId = parseInt(req.params.id);
-        const status = req.body.status;
+        const status = req.body.city_status;
 
         const result = await updateCityContentManpowerStatusService(cityId, status);
         res.status(200).json(result);
@@ -595,7 +595,7 @@ export const updateCityContentVideoConsultStatusController = async (req: Request
 
     try {
         const cityId = parseInt(req.params.id);
-        const status = req.body.status;
+        const status = req.body.city_status;
 
         const result = await updateCityContentVideoConsultStatusService(cityId, status);
         res.status(200).json(result);
