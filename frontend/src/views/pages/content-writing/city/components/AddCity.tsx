@@ -17,19 +17,20 @@ const cityValidationSchema = Yup.object().shape({
   city_meta_desc: Yup.string().required("Meta Description is required"),
   city_body_desc: Yup.string().required("Body Description is required"),
   city_why_choose_us: Yup.string().required("Why Choose Us is required"),
-  why_choose_meta_desc: Yup.string().required(
-    "Why Choose Meta Description is required"
-  ),
+  why_choose_meta_desc: Yup.string().required("Why Choose Meta Description is required"),
   city_block1_heading: Yup.string().required("Block 1 Heading is required"),
   city_block1_body: Yup.string().required("Block 1 Body is required"),
   city_block2_heading: Yup.string().required("Block 2 Heading is required"),
   city_block2_body: Yup.string().required("Block 2 Body is required"),
+  city_block3_heading: Yup.string().required("Block 3 Heading is required"),
+  city_block3_body: Yup.string().required("Block 3 Body is required"),
   city_thumbnail_alt: Yup.string().required("Thumbnail Alt Text is required"),
+  city_thumbnail_title: Yup.string().required("Thumbnail Title is required"),
   city_force_keyword: Yup.string().required("Force Keyword is required"),
   city_faq_heading: Yup.string().required("FAQ Heading is required"),
-  city_emergency_desc: Yup.string().required(
-    "Emergency Description is required"
-  ),
+  city_faq_desc: Yup.string().required("FAQ Description is required"),
+  city_emergency_heading: Yup.string().required("Emergency Heading is required"),
+  city_emergency_desc: Yup.string().required("Emergency Description is required"),
 });
 
 // Make all props optional since component can be used standalone
@@ -70,12 +71,17 @@ const AddCity: React.FC<AddCityProps> = ({
     city_block1_body: "",
     city_block2_heading: "",
     city_block2_body: "",
+    city_block3_heading: "",
+    city_block3_body: "",
     city_thumbnail_alt: "",
+    city_thumbnail_title: "",
     city_meta_title: "",
     city_meta_desc: "",
     city_meta_keyword: "",
     city_force_keyword: "",
     city_faq_heading: "",
+    city_faq_desc: "",
+    city_emergency_heading: "",
     city_emergency_desc: "",
   });
 
@@ -106,12 +112,17 @@ const AddCity: React.FC<AddCityProps> = ({
         city_block1_body: data.city_block1_body || "",
         city_block2_heading: data.city_block2_heading || "",
         city_block2_body: data.city_block2_body || "",
+        city_block3_heading: data.city_block3_heading || "",
+        city_block3_body: data.city_block3_body || "",
         city_thumbnail_alt: data.city_thumbnail_alt || "",
+        city_thumbnail_title: data.city_thumbnail_title || "",
         city_meta_title: data.city_meta_title || "",
         city_meta_desc: data.city_meta_desc || "",
         city_meta_keyword: data.city_meta_keyword || "",
         city_force_keyword: data.city_force_keyword || "",
         city_faq_heading: data.city_faq_heading || "",
+        city_faq_desc: data.city_faq_desc || "",
+        city_emergency_heading: data.city_emergency_heading || "",
         city_emergency_desc: data.city_emergency_desc || "",
       });
 
@@ -142,12 +153,17 @@ const AddCity: React.FC<AddCityProps> = ({
         city_block1_body: city.city_block1_body || "",
         city_block2_heading: city.city_block2_heading || "",
         city_block2_body: city.city_block2_body || "",
+        city_block3_heading: city.city_block3_heading || "",
+        city_block3_body: city.city_block3_body || "",
         city_thumbnail_alt: city.city_thumbnail_alt || "",
+        city_thumbnail_title: city.city_thumbnail_title || "",
         city_meta_title: city.city_meta_title || "",
         city_meta_desc: city.city_meta_desc || "",
         city_meta_keyword: city.city_meta_keyword || "",
         city_force_keyword: city.city_force_keyword || "",
         city_faq_heading: city.city_faq_heading || "",
+        city_faq_desc: city.city_faq_desc || "",
+        city_emergency_heading: city.city_emergency_heading || "",
         city_emergency_desc: city.city_emergency_desc || "",
       });
 
@@ -199,12 +215,17 @@ const AddCity: React.FC<AddCityProps> = ({
       formData.append("city_block1_body", values.city_block1_body);
       formData.append("city_block2_heading", values.city_block2_heading);
       formData.append("city_block2_body", values.city_block2_body);
+      formData.append("city_block3_heading", values.city_block3_heading);
+      formData.append("city_block3_body", values.city_block3_body);
+      formData.append("city_thumbnail_title", values.city_thumbnail_title);
       formData.append("city_thumbnail_alt", values.city_thumbnail_alt);
       formData.append("city_meta_title", values.city_meta_title);
       formData.append("city_meta_desc", values.city_meta_desc);
       formData.append("city_meta_keyword", values.city_meta_keyword);
       formData.append("city_force_keyword", values.city_force_keyword);
       formData.append("city_faq_heading", values.city_faq_heading);
+      formData.append("city_faq_desc", values.city_faq_desc);
+      formData.append("city_emergency_heading", values.city_emergency_heading);
       formData.append("city_emergency_desc", values.city_emergency_desc);
 
       let response;
@@ -253,7 +274,7 @@ const AddCity: React.FC<AddCityProps> = ({
       console.error(`Error ${isEditMode ? "updating" : "adding"} city:`, err);
       setError(
         err.response?.data?.message ||
-          `Failed to ${isEditMode ? "update" : "add"} city`
+        `Failed to ${isEditMode ? "update" : "add"} city`
       );
     } finally {
       setSubmitting(false);
@@ -316,6 +337,29 @@ const AddCity: React.FC<AddCityProps> = ({
                     </Card.Header>
                     <Card.Body>
                       <Row className="g-3">
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              City Title <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="city_title"
+                              value={values.city_title}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_title && !!errors.city_title
+                              }
+                              placeholder="Enter city title"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.city_title}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+                        
                         <Col md={6}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
@@ -361,52 +405,7 @@ const AddCity: React.FC<AddCityProps> = ({
                               {errors.city_title_sku}
                             </Form.Control.Feedback>
                           </Form.Group>
-                        </Col>
-
-                        <Col md={6}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              City Title <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name="city_title"
-                              value={values.city_title}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={
-                                touched.city_title && !!errors.city_title
-                              }
-                              placeholder="Enter city title"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {errors.city_title}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={6}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              City Heading{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name="city_heading"
-                              value={values.city_heading}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={
-                                touched.city_heading && !!errors.city_heading
-                              }
-                              placeholder="Enter city heading"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {errors.city_heading}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
+                        </Col>                        
 
                         <Col md={6}>
                           <Form.Group>
@@ -435,108 +434,27 @@ const AddCity: React.FC<AddCityProps> = ({
                         <Col md={6}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
-                              FAQ Heading <span className="text-danger">*</span>
+                              Thumbnail Title{" "}
+                              <span className="text-danger">*</span>
                             </Form.Label>
                             <Form.Control
                               type="text"
-                              name="city_faq_heading"
-                              value={values.city_faq_heading}
+                              name="city_thumbnail_title"
+                              value={values.city_thumbnail_title}
                               onChange={handleChange}
                               onBlur={handleBlur}
                               isInvalid={
-                                touched.city_faq_heading &&
-                                !!errors.city_faq_heading
+                                touched.city_thumbnail_title &&
+                                !!errors.city_thumbnail_title
                               }
-                              placeholder="Enter FAQ heading"
+                              placeholder="Enter thumbnail title"
                             />
                             <Form.Control.Feedback type="invalid">
-                              {errors.city_faq_heading}
+                              {errors.city_thumbnail_title}
                             </Form.Control.Feedback>
                           </Form.Group>
                         </Col>
 
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Body Description <span className="text-danger">*</span>
-                            </Form.Label>
-                            <SnowEditor
-                              value={values.city_body_desc}
-                              onChange={(value: string) =>
-                                setFieldValue("city_body_desc", value)
-                              }
-                            />
-                            {touched.city_body_desc &&
-                              errors.city_body_desc && (
-                                <div className="text-danger small mt-1">
-                                  {errors.city_body_desc}
-                                </div>
-                              )}
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Why Choose Us{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <SnowEditor
-                              value={values.city_why_choose_us}
-                              onChange={(value: string) =>
-                                setFieldValue("city_why_choose_us", value)
-                              }
-                            />
-                            {touched.city_why_choose_us &&
-                              errors.city_why_choose_us && (
-                                <div className="text-danger small mt-1">
-                                  {errors.city_why_choose_us}
-                                </div>
-                              )}
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Why Choose Meta Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <SnowEditor
-                              value={values.why_choose_meta_desc}
-                              onChange={(value: string) =>
-                                setFieldValue("why_choose_meta_desc", value)
-                              }
-                            />
-                            {touched.why_choose_meta_desc &&
-                              errors.why_choose_meta_desc && (
-                                <div className="text-danger small mt-1">
-                                  {errors.why_choose_meta_desc}
-                                </div>
-                              )}
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Emergency Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <SnowEditor
-                              value={values.city_emergency_desc}
-                              onChange={(value: string) =>
-                                setFieldValue("city_emergency_desc", value)
-                              }
-                            />
-                            {touched.city_emergency_desc &&
-                              errors.city_emergency_desc && (
-                                <div className="text-danger small mt-1">
-                                  {errors.city_emergency_desc}
-                                </div>
-                              )}
-                          </Form.Group>
-                        </Col>
                         <Col lg={10}>
                           <Card className="border">
                             <Card.Body>
@@ -574,7 +492,7 @@ const AddCity: React.FC<AddCityProps> = ({
                                 alt="Preview"
                                 thumbnail
                                 style={{
-                                  maxWidth: "200px",
+                                  maxWidth: "182px",
                                   maxHeight: "200px",
                                 }}
                               />
@@ -590,14 +508,58 @@ const AddCity: React.FC<AddCityProps> = ({
                 <Col lg={12}>
                   <Card className="border">
                     <Card.Header className="bg-light">
-                      <h6 className="mb-0">Content Blocks</h6>
+                      <h6 className="mb-0">Main Body Content</h6>
                     </Card.Header>
                     <Card.Body>
                       <Row className="g-3">
+
                         <Col md={6}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
-                              Block 1 Heading{" "}
+                              City Heading{" "}
+                              <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="city_heading"
+                              value={values.city_heading}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_heading && !!errors.city_heading
+                              }
+                              placeholder="Enter city heading"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.city_heading}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Body Description <span className="text-danger">*</span>
+                            </Form.Label>
+                            <SnowEditor
+                              value={values.city_body_desc}
+                              onChange={(value: string) =>
+                                setFieldValue("city_body_desc", value)
+                              }
+                            />
+                            {touched.city_body_desc &&
+                              errors.city_body_desc && (
+                                <div className="text-danger small mt-1">
+                                  {errors.city_body_desc}
+                                </div>
+                              )}
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Section 1 Heading{" "}
                               <span className="text-danger">*</span>
                             </Form.Label>
                             <Form.Control
@@ -618,10 +580,32 @@ const AddCity: React.FC<AddCityProps> = ({
                           </Form.Group>
                         </Col>
 
-                        <Col md={6}>
+
+
+                        <Col md={12}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
-                              Block 2 Heading{" "}
+                              Section 1 Description <span className="text-danger">*</span>
+                            </Form.Label>
+                            <SnowEditor
+                              value={values.city_block1_body}
+                              onChange={(value: string) =>
+                                setFieldValue("city_block1_body", value)
+                              }
+                            />
+                            {touched.city_block1_body &&
+                              errors.city_block1_body && (
+                                <div className="text-danger small mt-1">
+                                  {errors.city_block1_body}
+                                </div>
+                              )}
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Section 2 Heading{" "}
                               <span className="text-danger">*</span>
                             </Form.Label>
                             <Form.Control
@@ -645,27 +629,7 @@ const AddCity: React.FC<AddCityProps> = ({
                         <Col md={12}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
-                              Block 1 Body <span className="text-danger">*</span>
-                            </Form.Label>
-                            <SnowEditor
-                              value={values.city_block1_body}
-                              onChange={(value: string) =>
-                                setFieldValue("city_block1_body", value)
-                              }
-                            />
-                            {touched.city_block1_body &&
-                              errors.city_block1_body && (
-                                <div className="text-danger small mt-1">
-                                  {errors.city_block1_body}
-                                </div>
-                              )}
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Block 2 Body <span className="text-danger">*</span>
+                              Section 2 Description <span className="text-danger">*</span>
                             </Form.Label>
                             <SnowEditor
                               value={values.city_block2_body}
@@ -681,6 +645,188 @@ const AddCity: React.FC<AddCityProps> = ({
                               )}
                           </Form.Group>
                         </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Section 3 Heading{" "}
+                              <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="city_block3_heading"
+                              value={values.city_block3_heading}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_block3_heading &&
+                                !!errors.city_block3_heading
+                              }
+                              placeholder="Enter block 2 heading"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.city_block3_heading}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Section 3 Description <span className="text-danger">*</span>
+                            </Form.Label>
+                            <SnowEditor
+                              value={values.city_block3_body}
+                              onChange={(value: string) =>
+                                setFieldValue("city_block3_body", value)
+                              }
+                            />
+                            {touched.city_block3_body &&
+                              errors.city_block3_body && (
+                                <div className="text-danger small mt-1">
+                                  {errors.city_block3_body}
+                                </div>
+                              )}
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Why Choose Us{" "}
+                              <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="city_why_choose_us"
+                              value={values.city_why_choose_us}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_why_choose_us &&
+                                !!errors.city_why_choose_us
+                              }
+                              placeholder="Enter why choose us heading"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.city_why_choose_us}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Why Choose Description{" "}
+                              <span className="text-danger">*</span>
+                            </Form.Label>
+                            <SnowEditor
+                              value={values.why_choose_meta_desc}
+                              onChange={(value: string) =>
+                                setFieldValue("why_choose_meta_desc", value)
+                              }
+                            />
+                            {touched.why_choose_meta_desc &&
+                              errors.why_choose_meta_desc && (
+                                <div className="text-danger small mt-1">
+                                  {errors.why_choose_meta_desc}
+                                </div>
+                              )}
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Emergency Heading{" "}
+                              <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="city_emergency_heading"
+                              value={values.city_emergency_heading}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_emergency_heading &&
+                                !!errors.city_emergency_heading
+                              }
+                              placeholder="Enter emergency heading"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.city_emergency_heading}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Emergency Description{" "}
+                              <span className="text-danger">*</span>
+                            </Form.Label>
+                            <SnowEditor
+                              value={values.city_emergency_desc}
+                              onChange={(value: string) =>
+                                setFieldValue("city_emergency_desc", value)
+                              }
+                            />
+                            {touched.city_emergency_desc &&
+                              errors.city_emergency_desc && (
+                                <div className="text-danger small mt-1">
+                                  {errors.city_emergency_desc}
+                                </div>
+                              )}
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              FAQ Heading <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="city_faq_heading"
+                              value={values.city_faq_heading}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_faq_heading &&
+                                !!errors.city_faq_heading
+                              }
+                              placeholder="Enter FAQ heading"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.city_faq_heading}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Faq Description{" "}
+                              <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              rows={3}
+                              name="city_faq_desc"
+                              value={values.city_faq_desc}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_faq_desc &&
+                                !!errors.city_faq_desc
+                              }
+                              placeholder="Enter FAQ description"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.city_faq_desc}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
                       </Row>
                     </Card.Body>
                   </Card>
@@ -694,7 +840,7 @@ const AddCity: React.FC<AddCityProps> = ({
                     </Card.Header>
                     <Card.Body>
                       <Row className="g-3">
-                        <Col md={6}>
+                        <Col md={12}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
                               Meta Title <span className="text-danger">*</span>
@@ -724,7 +870,8 @@ const AddCity: React.FC<AddCityProps> = ({
                               <span className="text-danger">*</span>
                             </Form.Label>
                             <Form.Control
-                              type="text"
+                              as="textarea"
+                              rows={3}
                               name="city_meta_keyword"
                               value={values.city_meta_keyword}
                               onChange={handleChange}
@@ -733,35 +880,10 @@ const AddCity: React.FC<AddCityProps> = ({
                                 touched.city_meta_keyword &&
                                 !!errors.city_meta_keyword
                               }
-                              placeholder="Enter meta keywords (comma separated)"
+                              placeholder="Enter force keywords"
                             />
                             <Form.Control.Feedback type="invalid">
                               {errors.city_meta_keyword}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={6}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Meta Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              as="textarea"
-                              rows={3}
-                              name="city_meta_desc"
-                              value={values.city_meta_desc}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={
-                                touched.city_meta_desc &&
-                                !!errors.city_meta_desc
-                              }
-                              placeholder="Enter meta description"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {errors.city_meta_desc}
                             </Form.Control.Feedback>
                           </Form.Group>
                         </Col>
@@ -790,6 +912,33 @@ const AddCity: React.FC<AddCityProps> = ({
                             </Form.Control.Feedback>
                           </Form.Group>
                         </Col>
+
+                        <Col md={12}>
+                          <Form.Group>
+                            <Form.Label className="fs-6 fw-semibold">
+                              Meta Description{" "}
+                              <span className="text-danger">*</span>
+                            </Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              rows={10}
+                              name="city_meta_desc"
+                              value={values.city_meta_desc}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_meta_desc &&
+                                !!errors.city_meta_desc
+                              }
+                              placeholder="Enter meta description"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.city_meta_desc}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+                        </Col>
+
+
                       </Row>
                     </Card.Body>
                   </Card>
@@ -799,7 +948,7 @@ const AddCity: React.FC<AddCityProps> = ({
                 <Col lg={12}>
                   <div className="d-flex gap-2 justify-content-end">
                     <button
-              className="px-3 rounded text-black"
+                      className="px-3 rounded text-black"
                       onClick={handleCancel}
                       disabled={submitting}
                     >
@@ -815,8 +964,8 @@ const AddCity: React.FC<AddCityProps> = ({
                           ? "Updating..."
                           : "Saving..."
                         : isEditMode
-                        ? "Update City"
-                        : "Save City"}
+                          ? "Update City"
+                          : "Save City"}
                     </Button>
                   </div>
                 </Col>
