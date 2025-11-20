@@ -177,6 +177,7 @@ export const getBlogService = async (blogId: number) => {
 
 // SERVICE TO EDIT EXISTING BLOG
 export const editBlogService = async (blogId: number, data: blogData) => {
+
     try {
 
         const updateData: any = {};
@@ -215,8 +216,6 @@ export const editBlogService = async (blogId: number, data: blogData) => {
         };
 
     } catch (error) {
-        console.log(error);
-
         throw new ApiError(500, "Edit Blog Error On Updating");
     }
 
