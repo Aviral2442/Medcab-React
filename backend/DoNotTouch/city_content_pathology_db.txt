@@ -1,0 +1,77 @@
+city_pathology_id
+city_pathology_name
+city_pathology_title
+city_pathology_title_sku
+
+city_pathology_thumbnail
+city_pathology_thumbnail_alt
+city_pathology_thumbnail_title
+
+city_pathology_heading
+city_pathology_body_desc
+
+city_pathology_block1_heading
+city_pathology_block1_body
+
+city_pathology_block2_heading
+city_pathology_block2_body
+
+city_pathology_block3_heading
+city_pathology_block3_body
+
+city_pathology_why_choose_us
+why_choose_meta_desc
+
+city_pathology_emergency_heading
+city_pathology_emergency_desc
+
+city_pathology_faq_heading
+city_pathology_faq_desc
+
+city_pathology_meta_title
+city_pathology_meta_desc
+city_pathology_meta_keyword
+city_pathology_force_keyword
+
+city_pathology_status
+city_pathology_timestamp
+
+------------------------------------------------------------------------------------------------------------------------
+
+id ---- city_pathology_id
+city name ---- city_pathology_name
+title ---- city_pathology_title
+title_sku ---- city_pathology_title_sku
+
+image ---- city_pathology_thumbnail
+image_alt ---- city_pathology_thumbnail_alt
+image_title ---- city_pathology_thumbnail_title
+
+section1_heading ---- city_pathology_heading
+section1_desc- ckeditor ---- city_pathology_body_desc
+
+section2_heading ---- city_pathology_block1_heading
+section2_desc ---- city_pathology_block1_body
+
+section3_heading ---- city_pathology_block2_heading
+section3_desc ---- city_pathology_block2_body
+
+section4_heading ---- city_pathology_block3_heading
+section4_desc- ckeditor ---- city_pathology_block3_body
+
+section5_heading ---- city_pathology_why_choose_us
+section5_desc- ckeditor ---- why_choose_meta_desc
+
+section6_heading ---- city_pathology_emergency_heading
+section6_desc- ckeditor ---- city_pathology_emergency_desc
+
+section_faq_heading ---- city_pathology_faq_heading
+section_faq_desc ---- city_pathology_faq_desc
+
+meta_title ---- city_pathology_meta_title
+meta_desc ---- city_pathology_meta_desc
+meta_keyword ---- city_pathology_meta_keyword
+meta_force_keyword ---- city_pathology_force_keyword
+
+status ---- city_pathology_status
+createdAt ---- city_pathology_timestamp
