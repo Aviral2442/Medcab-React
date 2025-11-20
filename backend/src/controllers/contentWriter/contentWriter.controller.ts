@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService, getCityContentFaqListService, addCityContentFaqService, fetchCityContentFaqService, editCityContentFaqService, updateCityContentFaqStatusService, updateCityContentManpowerStatusService, editCityContentManpowerService, fetchCityContentManpowerService, addCityContentManpowerService, getCityContentManpowerService, getCityContentVideoConsultService, addCityContentVideoConsultService, fetchCityContentVideoConsultService, editCityContentVideoConsultService, updateCityContentVideoConsultStatusService, updateCityContentPathologyStatusService, editCityContentPathologyService, fetchCityContentPathologyService, addCityContentPathologyService, getCityContentPathologyService } from "../../services/contentWriter/contentWriter.service";
+import { getBlogListService, getBlogService, addBlogService, editBlogService, updateBlogStatusService, getCityContentService, addCityContentService, fetchCityContentService, editCityContentService, updateCityContentStatusService, getCityContentFaqListService, addCityContentFaqService, fetchCityContentFaqService, editCityContentFaqService, updateCityContentFaqStatusService, updateCityContentManpowerStatusService, editCityContentManpowerService, fetchCityContentManpowerService, addCityContentManpowerService, getCityContentManpowerService, getCityContentVideoConsultService, addCityContentVideoConsultService, fetchCityContentVideoConsultService, editCityContentVideoConsultService, updateCityContentVideoConsultStatusService, updateCityContentPathologyStatusService, editCityContentPathologyService, fetchCityContentPathologyService, addCityContentPathologyService, getCityContentPathologyService, updateCityContentPathologyFaqStatusService, editCityContentPathologyFaqService, fetchCityContentPathologyFaqService, addCityContentPathologyFaqService, getCityContentPathologyFaqListService, updateCityContentVideoConsultFaqStatusService, editCityContentVideoConsultFaqService, fetchCityContentVideoConsultFaqService, addCityContentVideoConsultFaqService, getCityContentVideoConsultFaqListService, updateCityContentManpowerFaqStatusService, editCityContentManpowerFaqService, fetchCityContentManpowerFaqService, addCityContentManpowerFaqService, getCityContentManpowerFaqListService } from "../../services/contentWriter/contentWriter.service";
 
 
 // --------------------------------------------- BLOGS CONTROLLERS ----------------------------------------------------- //
@@ -470,6 +470,91 @@ export const updateCityContentManpowerStatusController = async (req: Request, re
 };
 
 
+// CONTROLLER TO GET CITY CONTENT Manpower FAQ LIST
+export const getCityContentManpowerFaqListController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+        }
+
+        const result = await getCityContentManpowerFaqListService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO ADD NEW CITY CONTENT Manpower FAQ
+export const addCityContentManpowerFaqController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const faqData = {
+            city_id: req.body.city_id || 0,
+            city_faq_que: req.body.city_faq_que,
+            city_faq_ans: req.body.city_faq_ans,
+        };
+
+        const result = await addCityContentManpowerFaqService(faqData);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO FETCH CITY CONTENT Manpower FAQ BY FAQ ID
+export const fetchCityContentManpowerFaqController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const faqId = parseInt(req.params.id);
+        const result = await fetchCityContentManpowerFaqService(faqId);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO EDIT CITY CONTENT Manpower FAQ
+export const editCityContentManpowerFaqController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const faqId = parseInt(req.params.id);
+        const faqData = {
+            city_id: req.body.city_id || 0,
+            city_faq_que: req.body.city_faq_que,
+            city_faq_ans: req.body.city_faq_ans,
+        };
+        const result = await editCityContentManpowerFaqService(faqId, faqData);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+}
+
+// CONTROLLER TO UPDATE CITY CONTENT Manpower FAQ STATUS
+export const updateCityContentManpowerFaqStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const faqId = parseInt(req.params.id);
+        const status = req.body.city_faq_status;
+        const result = await updateCityContentManpowerFaqStatusService(faqId, status);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 // ----------------------------------------- VIDEO CONSULT CITY CONTENT CONTROLLERS ----------------------------------- //
 
@@ -606,6 +691,91 @@ export const updateCityContentVideoConsultStatusController = async (req: Request
 };
 
 
+// CONTROLLER TO GET CITY CONTENT VIDEO CONSULT FAQ LIST
+export const getCityContentVideoConsultFaqListController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+        }
+
+        const result = await getCityContentVideoConsultFaqListService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO ADD NEW CITY CONTENT VIDEO CONSULT FAQ
+export const addCityContentVideoConsultFaqController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const faqData = {
+            city_id: req.body.city_id || 0,
+            city_faq_que: req.body.city_faq_que,
+            city_faq_ans: req.body.city_faq_ans,
+        };
+
+        const result = await addCityContentVideoConsultFaqService(faqData);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO FETCH CITY CONTENT VIDEO CONSULT FAQ BY FAQ ID
+export const fetchCityContentVideoConsultFaqController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const faqId = parseInt(req.params.id);
+        const result = await fetchCityContentVideoConsultFaqService(faqId);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO EDIT CITY CONTENT VIDEO CONSULT FAQ
+export const editCityContentVideoConsultFaqController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const faqId = parseInt(req.params.id);
+        const faqData = {
+            city_id: req.body.city_id || 0,
+            city_faq_que: req.body.city_faq_que,
+            city_faq_ans: req.body.city_faq_ans,
+        };
+        const result = await editCityContentVideoConsultFaqService(faqId, faqData);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+}
+
+// CONTROLLER TO UPDATE CITY CONTENT VIDEO CONSULT FAQ STATUS
+export const updateCityContentVideoConsultFaqStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const faqId = parseInt(req.params.id);
+        const status = req.body.city_faq_status;
+        const result = await updateCityContentVideoConsultFaqStatusService(faqId, status);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 // ----------------------------------------- PATHOLOGY CITY CONTENT CONTROLLERS ----------------------------------- //
 
@@ -736,6 +906,92 @@ export const updateCityContentPathologyStatusController = async (req: Request, r
         const result = await updateCityContentPathologyStatusService(cityId, status);
         res.status(200).json(result);
 
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+// CONTROLLER TO GET CITY CONTENT PATHOLOGY FAQ LIST
+export const getCityContentPathologyFaqListController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+        }
+
+        const result = await getCityContentPathologyFaqListService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO ADD NEW CITY CONTENT PATHOLOGY FAQ
+export const addCityContentPathologyFaqController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+
+        const faqData = {
+            city_pathology_id: req.body.city_pathology_id || 0,
+            city_pathology_faq_que: req.body.city_pathology_faq_que,
+            city_pathology_faq_ans: req.body.city_pathology_faq_ans,
+        };
+
+        const result = await addCityContentPathologyFaqService(faqData);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+// CONTROLLER TO FETCH CITY CONTENT PATHOLOGY FAQ BY FAQ ID
+export const fetchCityContentPathologyFaqController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const faqId = parseInt(req.params.id);
+        const result = await fetchCityContentPathologyFaqService(faqId);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO EDIT CITY CONTENT PATHOLOGY FAQ
+export const editCityContentPathologyFaqController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const faqId = parseInt(req.params.id);
+        const faqData = {
+            city_pathology_id: req.body.city_pathology_id || 0,
+            city_pathology_faq_que: req.body.city_pathology_faq_que,
+            city_pathology_faq_ans: req.body.city_pathology_faq_ans,
+        };
+        const result = await editCityContentPathologyFaqService(faqId, faqData);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+}
+
+// CONTROLLER TO UPDATE CITY CONTENT PATHOLOGY FAQ STATUS
+export const updateCityContentPathologyFaqStatusController = async (req: Request, res: Response, next: NextFunction) => {
+
+    try {
+        const faqId = parseInt(req.params.id);
+        const status = req.body.city_pathology_faq_status;
+        const result = await updateCityContentPathologyFaqStatusService(faqId, status);
+        res.status(200).json(result);
     } catch (error) {
         next(error);
     }

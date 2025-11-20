@@ -884,6 +884,170 @@ export const updateCityContentManpowerStatusService = async (cityId: number, sta
 };
 
 
+interface cityContentManpowerFaqData {
+    city_id?: number;
+    city_faq_que?: string;
+    city_faq_ans?: string;
+}
+
+// CITY CONTENT Manpower FAQ LIST SERVICE
+export const getCityContentManpowerFaqListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+    try {
+
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "city_manpower_faq.city_faq_timestamp",
+        });
+
+        const query = `
+        
+        SELECT city_manpower_faq.*, city_content.city_name
+        FROM city_manpower_faq
+        LEFT JOIN city_content ON city_manpower_faq.city_id = city_content.city_id
+        ${whereSQL}
+        ORDER BY city_manpower_faq.city_faq_id DESC
+        LIMIT ? OFFSET ?
+
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM city_manpower_faq ${whereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "City Content Manpower FAQ list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                city_content_faq_list: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Get City Content Manpower FAQ List Error On Fetching");
+    }
+};
+
+// SERVICE TO ADD NEW CITY CONTENT Manpower FAQ
+export const addCityContentManpowerFaqService = async (data: cityContentManpowerFaqData) => {
+
+    try {
+
+        const insertData = {
+            city_id: data.city_id,
+            city_faq_que: data.city_faq_que,
+            city_faq_ans: data.city_faq_ans,
+            city_faq_status: 0,
+            city_faq_timestamp: currentUnixTime(),
+        }
+
+        const [result]: any = await db.query(
+            `INSERT INTO city_manpower_faq SET ?`,
+            [insertData]
+        );
+
+        return {
+            status: 200,
+            message: "City Content Manpower FAQ added successfully",
+            insert_id: result.insertId,
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Add City Content Manpower FAQ Error On Inserting");
+    }
+
+};
+
+// SERVICE TO FETCH SINGLE CITY CONTENT Manpower FAQ
+export const fetchCityContentManpowerFaqService = async (faqId: number) => {
+
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT * FROM city_manpower_faq WHERE city_manpower_faq.city_faq_id = ?`,
+            [faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content Manpower FAQ fetched successfully",
+            jsonData: {
+                city_content_manpower_faq: rows[0] || null
+            }
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Fetch City Content Manpower FAQ Error On Fetching");
+    }
+
+};
+
+// SERVICE TO EDIT EXISTING CITY CONTENT Manpower FAQ
+export const editCityContentManpowerFaqService = async (faqId: number, data: cityContentManpowerFaqData) => {
+    try {
+
+        const updateData: any = {};
+
+        if (data.city_id) updateData.city_id = data.city_id;
+        if (data.city_faq_que) updateData.city_faq_que = data.city_faq_que;
+        if (data.city_faq_ans) updateData.city_faq_ans = data.city_faq_ans;
+
+        const [result]: any = await db.query(
+            `UPDATE city_manpower_faq SET ? WHERE city_faq_id = ?`,
+            [updateData, faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content Manpower FAQ updated successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Edit City Content Manpower FAQ Error On Updating");
+    }
+};
+
+// SERVICE TO UPDATE CITY CONTENT Manpower FAQ STATUS
+export const updateCityContentManpowerFaqStatusService = async (faqId: number, status: number) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `UPDATE city_manpower_faq SET city_faq_status = ? WHERE city_faq_id = ?`,
+            [status, faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content Manpower FAQ status updated successfully",
+        };
+    } catch (error) {
+        throw new ApiError(500, "Update City Content Manpower FAQ Status Error On Updating");
+    }
+};
+
+
 // ------------------------------------------- VIDEO CONSULTENCY CITY CONTENT SERVICES ------------------------------------------- //
 
 
@@ -1120,6 +1284,170 @@ export const updateCityContentVideoConsultStatusService = async (cityId: number,
 
     } catch (error) {
         throw new ApiError(500, "Update Video Consult City Content Status Error On Updating");
+    }
+};
+
+
+interface cityContentVideoConsultFaqData {
+    city_id?: number;
+    city_faq_que?: string;
+    city_faq_ans?: string;
+}
+
+// CITY CONTENT VideoConsult FAQ LIST SERVICE
+export const getCityContentVideoConsultFaqListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+    try {
+
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "city_video_consultancy_faq.city_faq_timestamp",
+        });
+
+        const query = `
+        
+        SELECT city_video_consultancy_faq.*, city_content.city_name
+        FROM city_video_consultancy_faq
+        LEFT JOIN city_content ON city_video_consultancy_faq.city_id = city_content.city_id
+        ${whereSQL}
+        ORDER BY city_video_consultancy_faq.city_faq_id DESC
+        LIMIT ? OFFSET ?
+
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM city_video_consultancy_faq ${whereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "City Content VideoConsult FAQ list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                city_content_video_consult_faq_list: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Get City Content VideoConsult FAQ List Error On Fetching");
+    }
+};
+
+// SERVICE TO ADD NEW CITY CONTENT FAQ
+export const addCityContentVideoConsultFaqService = async (data: cityContentVideoConsultFaqData) => {
+
+    try {
+
+        const insertData = {
+            city_id: data.city_id,
+            city_faq_que: data.city_faq_que,
+            city_faq_ans: data.city_faq_ans,
+            city_faq_status: 0,
+            city_faq_timestamp: currentUnixTime(),
+        }
+
+        const [result]: any = await db.query(
+            `INSERT INTO city_video_consultancy_faq SET ?`,
+            [insertData]
+        );
+
+        return {
+            status: 200,
+            message: "City Content VideoConsult FAQ added successfully",
+            insert_id: result.insertId,
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Add City Content VideoConsult FAQ Error On Inserting");
+    }
+
+};
+
+// SERVICE TO FETCH SINGLE CITY CONTENT FAQ
+export const fetchCityContentVideoConsultFaqService = async (faqId: number) => {
+
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT * FROM city_video_consultancy_faq WHERE city_video_consultancy_faq.city_faq_id = ?`,
+            [faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content VideoConsult FAQ fetched successfully",
+            jsonData: {
+                city_content_video_consult_faq: rows[0] || null
+            }
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Fetch City Content VideoConsult FAQ Error On Fetching");
+    }
+
+};
+
+// SERVICE TO EDIT EXISTING CITY CONTENT VideoConsult FAQ
+export const editCityContentVideoConsultFaqService = async (faqId: number, data: cityContentVideoConsultFaqData) => {
+    try {
+
+        const updateData: any = {};
+
+        if (data.city_id) updateData.city_id = data.city_id;
+        if (data.city_faq_que) updateData.city_faq_que = data.city_faq_que;
+        if (data.city_faq_ans) updateData.city_faq_ans = data.city_faq_ans;
+
+        const [result]: any = await db.query(
+            `UPDATE city_video_consultancy_faq SET ? WHERE city_faq_id = ?`,
+            [updateData, faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content VideoConsult FAQ updated successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Edit City Content VideoConsult FAQ Error On Updating");
+    }
+};
+
+// SERVICE TO UPDATE CITY CONTENT VideoConsult FAQ STATUS
+export const updateCityContentVideoConsultFaqStatusService = async (faqId: number, status: number) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `UPDATE city_video_consultancy_faq SET city_faq_status = ? WHERE city_faq_id = ?`,
+            [status, faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content VideoConsult FAQ status updated successfully",
+        };
+    } catch (error) {
+        throw new ApiError(500, "Update City Content VideoConsult FAQ Status Error On Updating");
     }
 };
 
@@ -1362,5 +1690,169 @@ export const updateCityContentPathologyStatusService = async (cityId: number, st
 
     } catch (error) {
         throw new ApiError(500, "Update City Pathology Content Status Error On Updating");
+    }
+};
+
+
+interface cityContentPathologyFaqData {
+    city_pathology_id?: number;
+    city_pathology_faq_que?: string;
+    city_pathology_faq_ans?: string;
+}
+
+// CITY CONTENT Pathology FAQ LIST SERVICE
+export const getCityContentPathologyFaqListService = async (filters?: {
+    date?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    limit?: number;
+}) => {
+    try {
+
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const offset = (page - 1) * limit;
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "city_pathology_faq.city_pathology_faq_timestamp",
+        });
+
+        const query = `
+        
+        SELECT city_pathology_faq.*, city_content.city_name
+        FROM city_pathology_faq
+        LEFT JOIN city_content ON city_pathology_faq.city_pathology_id = city_content.city_pathology_id
+        ${whereSQL}
+        ORDER BY city_pathology_faq.city_pathology_faq_id DESC
+        LIMIT ? OFFSET ?
+
+        `;
+
+        const queryParams = [...params, limit, offset];
+        const [rows]: any = await db.query(query, queryParams);
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM city_pathology_faq ${whereSQL}`,
+            params
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "City Content Pathology FAQ list fetched successfully",
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+            jsonData: {
+                city_content_pathology_faq_list: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Get City Content Pathology FAQ List Error On Fetching");
+    }
+};
+
+// SERVICE TO ADD NEW CITY CONTENT Pathology FAQ
+export const addCityContentPathologyFaqService = async (data: cityContentPathologyFaqData) => {
+
+    try {
+
+        const insertData = {
+            city_pathology_id: data.city_pathology_id,
+            city_pathology_faq_que: data.city_pathology_faq_que,
+            city_pathology_faq_ans: data.city_pathology_faq_ans,
+            city_pathology_faq_status: 0,
+            city_pathology_faq_timestamp: currentUnixTime(),
+        }
+
+        const [result]: any = await db.query(
+            `INSERT INTO city_pathology_faq SET ?`,
+            [insertData]
+        );
+
+        return {
+            status: 200,
+            message: "City Content Pathology FAQ added successfully",
+            insert_id: result.insertId,
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Add City Content Pathology FAQ Error On Inserting");
+    }
+
+};
+
+// SERVICE TO FETCH SINGLE CITY CONTENT Pathology FAQ
+export const fetchCityContentPathologyFaqService = async (faqId: number) => {
+
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT * FROM city_pathology_faq WHERE city_pathology_faq.city_pathology_faq_id = ?`,
+            [faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content Pathology FAQ fetched successfully",
+            jsonData: {
+                city_content_pathology_faq: rows[0] || null
+            }
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Fetch City Content Pathology FAQ Error On Fetching");
+    }
+
+};
+
+// SERVICE TO EDIT EXISTING CITY CONTENT Pathology FAQ
+export const editCityContentPathologyFaqService = async (faqId: number, data: cityContentPathologyFaqData) => {
+    try {
+
+        const updateData: any = {};
+
+        if (data.city_pathology_id) updateData.city_pathology_id = data.city_pathology_id;
+        if (data.city_pathology_faq_que) updateData.city_pathology_faq_que = data.city_pathology_faq_que;
+        if (data.city_pathology_faq_ans) updateData.city_pathology_faq_ans = data.city_pathology_faq_ans;
+
+        const [result]: any = await db.query(
+            `UPDATE city_pathology_faq SET ? WHERE city_pathology_faq_id = ?`,
+            [updateData, faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content Pathology FAQ updated successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Edit City Content Pathology FAQ Error On Updating");
+    }
+};
+
+// SERVICE TO UPDATE CITY CONTENT Pathology FAQ STATUS
+export const updateCityContentPathologyFaqStatusService = async (faqId: number, status: number) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `UPDATE city_pathology_faq SET city_pathology_faq_status = ? WHERE city_pathology_faq_id = ?`,
+            [status, faqId]
+        );
+
+        return {
+            status: 200,
+            message: "City Content Pathology FAQ status updated successfully",
+        };
+    } catch (error) {
+        throw new ApiError(500, "Update City Content Pathology FAQ Status Error On Updating");
     }
 };
