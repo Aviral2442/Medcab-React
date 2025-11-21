@@ -1,6 +1,23 @@
 import { db } from '../config/db';
 import { ApiError } from '../utils/api-error';
 import { buildFilters } from '../utils/filters';
+import { currentUnixTime } from '../utils/current_unixtime';
+import { uploadFileCustom } from '../utils/file_uploads';
+import { log } from 'console';
+
+interface PartnerData {
+    partner_f_name?: string;
+    partner_l_name?: string;
+    partner_mobile?: string;
+    partner_dob?: string;
+    partner_gender?: string;
+    partner_city_id?: number;
+    partner_profile_img?: Express.Multer.File;
+    partner_aadhar_front?: Express.Multer.File;
+    partner_aadhar_back?: Express.Multer.File;
+    partner_aadhar_no?: string;
+    referral_referral_by?: string;
+}
 
 // Get Partners List
 export const getPartnerServices = async (filters?: {
@@ -93,6 +110,91 @@ export const getPartnerServices = async (filters?: {
         throw new ApiError(500, 'Failed to retrieve partner services');
     }
 
+};
+
+// Add Partner Service
+export const addPartnerService = async (data: PartnerData) => {
+
+    try {
+
+        let dobTimestamp: number | null = null;
+        if (data.partner_dob) {
+            const t = Math.floor(new Date(data.partner_dob).getTime() / 1000);
+            dobTimestamp = Number.isFinite(t) && t > 0 ? t : null;
+        }
+
+        let profile, aadharFrontPath, aadharBackPath = null;
+
+        // profile image
+        if (data.partner_profile_img) {
+            const uploadedPath = uploadFileCustom(data.partner_profile_img, "/partners");
+            profile = uploadedPath;
+        }
+
+        // aadhar front
+        if (data.partner_aadhar_front) {
+            const uploadedPath = uploadFileCustom(data.partner_aadhar_front, "/partners/aadhar");
+            aadharFrontPath = uploadedPath;
+        }
+
+        // aadhar back
+        if (data.partner_aadhar_back) {
+            const uploadedPath = uploadFileCustom(data.partner_aadhar_back, "/partners/aadhar");
+            aadharBackPath = uploadedPath;
+        }
+
+        if (data.referral_referral_by) {
+            const checkExistReferral = `SELECT partner_id FROM partner WHERE partner_referral = ?`;
+            const [referralData]: any = await db.query(checkExistReferral, [data.referral_referral_by]);
+
+            if (referralData.length === 0) {
+                throw new ApiError(400, 'Invalid referral ID provided');
+            } else {
+                data.referral_referral_by = referralData[0].partner_id;
+            }
+        }
+
+        const insertData = {
+            partner_f_name: data.partner_f_name,
+            partner_l_name: data.partner_l_name,
+            partner_mobile: data.partner_mobile,
+            partner_wallet: 0,
+            partner_pending_wallet_to_comp: 0,
+            partner_dob: dobTimestamp,
+            partner_gender: data.partner_gender || null,
+            partner_city_id: data.partner_city_id || null,
+            partner_created_by: 0,
+            partner_profile_img: profile,
+            partner_aadhar_front: aadharFrontPath,
+            partner_aadhar_back: aadharBackPath,
+            partner_aadhar_no: data.partner_aadhar_no,
+            partner_registration_step: 0,
+            partner_auth_key: ' ',
+            partner_referral: 'MEDCAB' + currentUnixTime(),
+            referral_referral_by: data.referral_referral_by || " ",
+            created_at: new Date(),
+            updated_at: new Date(),
+            partner_status: 0,
+        };
+
+        const [result]: any = await db.query(
+            `INSERT INTO partner SET ?`,
+            [insertData]
+        );
+
+        return {
+            status: 201,
+            message: 'Partner added successfully',
+            jsonData: {
+                partnerId: result.insertId
+            }
+        };
+
+    } catch (error) {
+        console.log(error);
+
+        throw new ApiError(500, 'Failed to add partner service');
+    }
 };
 
 // Get Manpower Partners List
