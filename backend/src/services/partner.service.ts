@@ -197,6 +197,36 @@ export const addPartnerService = async (data: PartnerData) => {
     }
 };
 
+// Fetch Partner By ID Service
+export const fetchPartnerByIdService = async (partnerId: number) => {
+    try {
+        
+        if(!partnerId) {
+            throw new ApiError(400, 'Partner ID is required');
+        }
+
+        const [rows]: any = await db.query(
+            `SELECT * FROM partner WHERE partner_id = ?`,
+            [partnerId]
+        )
+
+        if(rows.length === 0) {
+            throw new ApiError(404, 'Partner not found');
+        }
+
+        return {
+            status: 200,
+            message: 'Partner fetched successfully',
+            jsonData: {
+                partner: rows[0]
+            }
+        };
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'Failed to fetch partner');
+    }
+}
+
 // Get Manpower Partners List
 export const getManpowerPartnerServices = async (filters?: {
     date?: string;
