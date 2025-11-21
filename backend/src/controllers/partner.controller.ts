@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { getPartnerServices, getManpowerPartnerServices, getPartnerTransactionServices, getPartnerDetailServices, addPartnerService, fetchPartnerByIdService } from '..//services/partner.service';
+import { getPartnerServices, getManpowerPartnerServices, getPartnerTransactionServices, getPartnerDetailServices, addPartnerService, fetchPartnerByIdService, updatePartnerService } from '..//services/partner.service';
 
 // Get Partners List
 export const getPartnersController = async (req: Request, res: Response, next: NextFunction) => {
@@ -61,6 +61,39 @@ export const fetchPartnerByIdController = async (req: Request, res: Response, ne
         const response = await fetchPartnerByIdService(partnerId);
 
         return res.status(200).json(response);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Update Partner Controller
+export const updatePartnerController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const partnerId = parseInt(req.params.partnerId);
+
+        const files = req.files as {
+            [fieldname: string]: Express.Multer.File[];
+        };
+
+        const updateData = {
+            partner_f_name: req.body.partner_f_name as string | undefined,
+            partner_l_name: req.body.partner_l_name as string | undefined,
+            partner_mobile: req.body.partner_mobile as string | undefined,
+            partner_dob: req.body.partner_dob as string | undefined,
+            partner_gender: req.body.partner_gender as string | undefined,
+            partner_city_id: req.body.partner_city_id !== undefined ? Number(req.body.partner_city_id) : undefined,
+            partner_aadhar_no: req.body.partner_aadhar_no as string | undefined,
+            referral_referral_by: req.body.referral_referral_by as string | undefined,
+            partner_profile_img: files?.partner_profile_img?.[0] || undefined,
+            partner_aadhar_front: files?.partner_aadhar_front?.[0] || undefined,
+            partner_aadhar_back: files?.partner_aadhar_back?.[0] || undefined,
+        };
+
+        const response = await updatePartnerService(partnerId, updateData);
+
+        return res.status(response.status).json(response);
 
     } catch (error) {
         next(error);

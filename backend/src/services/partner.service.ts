@@ -3,7 +3,6 @@ import { ApiError } from '../utils/api-error';
 import { buildFilters } from '../utils/filters';
 import { currentUnixTime } from '../utils/current_unixtime';
 import { uploadFileCustom } from '../utils/file_uploads';
-import { log } from 'console';
 
 interface PartnerData {
     partner_f_name?: string;
@@ -200,8 +199,8 @@ export const addPartnerService = async (data: PartnerData) => {
 // Fetch Partner By ID Service
 export const fetchPartnerByIdService = async (partnerId: number) => {
     try {
-        
-        if(!partnerId) {
+
+        if (!partnerId) {
             throw new ApiError(400, 'Partner ID is required');
         }
 
@@ -210,7 +209,7 @@ export const fetchPartnerByIdService = async (partnerId: number) => {
             [partnerId]
         )
 
-        if(rows.length === 0) {
+        if (rows.length === 0) {
             throw new ApiError(404, 'Partner not found');
         }
 
@@ -226,6 +225,68 @@ export const fetchPartnerByIdService = async (partnerId: number) => {
         throw new ApiError(500, 'Failed to fetch partner');
     }
 }
+
+// Update Partner Service
+export const updatePartnerService = async (partnerId: number, data: PartnerData) => {
+    try {
+
+        if (!partnerId) {
+            throw new ApiError(400, 'Partner ID is required');
+        }        
+
+        let dobTimestamp: number | null = null;
+        if (data.partner_dob) {
+            const t = Math.floor(new Date(data.partner_dob).getTime() / 1000);
+            dobTimestamp = Number.isFinite(t) && t > 0 ? t: null;
+        }
+
+        const updatePartnerData: any = {};
+
+        if (data.partner_f_name) updatePartnerData.partner_f_name = data.partner_f_name;
+        if (data.partner_l_name) updatePartnerData.partner_l_name = data.partner_l_name;
+        if (data.partner_mobile) updatePartnerData.partner_mobile = data.partner_mobile;
+        if (data.partner_dob) updatePartnerData.partner_dob = dobTimestamp;
+        if (data.partner_gender) updatePartnerData.partner_gender = data.partner_gender;
+        if (data.partner_city_id) updatePartnerData.partner_city_id = data.partner_city_id;
+        if (data.partner_aadhar_no) updatePartnerData.partner_aadhar_no = data.partner_aadhar_no;
+
+        if (data.partner_profile_img) {
+            const uploadedPath = uploadFileCustom(data.partner_profile_img, "/partners");
+            updatePartnerData.partner_profile_img = uploadedPath;
+        }
+
+        if (data.partner_aadhar_front) {
+            const uploadedPath = uploadFileCustom(data.partner_aadhar_front, "/partners/aadhar");
+            updatePartnerData.partner_aadhar_front = uploadedPath;
+        }
+
+        if (data.partner_aadhar_back) {
+            const uploadedPath = uploadFileCustom(data.partner_aadhar_back, "/partners/aadhar");
+            updatePartnerData.partner_aadhar_back = uploadedPath;
+        }
+
+        updatePartnerData.updated_at = new Date();
+
+        console.log('Partner Id:', partnerId, 'data:', data, 'updateData:', updatePartnerData);
+
+
+        await db.query(
+            `UPDATE partner SET ? WHERE partner_id = ?`,
+            [updatePartnerData, partnerId]
+        );
+
+        return {
+            status: 200,
+            message: 'Partner updated successfully',
+            jsonData: {
+                partnerId: partnerId
+            }
+        }
+
+    } catch (error) {
+        throw new ApiError(500, 'Failed to update partner service');
+    }
+};
 
 // Get Manpower Partners List
 export const getManpowerPartnerServices = async (filters?: {
