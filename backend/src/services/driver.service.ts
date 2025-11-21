@@ -1,6 +1,38 @@
 import { db } from '../config/db';
 import { ApiError } from '../utils/api-error';
+import { uploadFileCustom } from '../utils/file_uploads';
 import { buildFilters } from '../utils/filters';
+
+interface DriverData {
+    driver_name?: string;
+    driver_last_name?: string;
+    driver_mobile?: string;
+    driver_dob?: string;
+    driver_gender?: string;
+    driver_city_id?: number;
+    driver_created_by?: number;
+    driver_created_partner_id?: number | null;
+    driver_auth_key?: string;
+    partner_auth_key?: string;
+
+    driver_profile_img?: Express.Multer.File;
+
+    // Driver Details
+    driver_details_dl_front_img?: Express.Multer.File;
+    driver_details_dl_back_image?: Express.Multer.File;
+    driver_details_dl_number?: string;
+
+    driver_details_dl_exp_date?: string; // normal datetime
+    driver_details_aadhar_front_img?: Express.Multer.File;
+    driver_details_aadhar_back_img?: Express.Multer.File;
+    driver_details_aadhar_number?: string;
+
+    driver_details_pan_card_front_img?: Express.Multer.File;
+    driver_details_pan_card_number?: string;
+
+    driver_details_police_verification_image?: Express.Multer.File;
+    driver_details_police_verification_date?: string; // normal datetime
+}
 
 // Get Driver List
 export const getDriverService = async (filters: {
@@ -98,6 +130,255 @@ export const getDriverService = async (filters: {
     }
 
 };
+
+export const addDriverService = async (data: DriverData) => {
+    try {
+
+        let dobTimestamp: number | null = null;
+        if (data.driver_dob) {
+            const t = Math.floor(new Date(data.driver_dob).getTime() / 1000);
+            dobTimestamp = Number.isFinite(t) && t > 0 ? t : null;
+        }
+
+        // Conditional partner id
+        const createdPartnerId =
+            data.driver_created_by === 1 ? data.driver_created_partner_id : null;
+
+        // Upload files
+        const profileImg = data.driver_profile_img
+            ? uploadFileCustom(data.driver_profile_img, "/drivers")
+            : null;
+
+        // INSERT INTO driver
+        const driverInsertQuery = `
+            INSERT INTO driver (
+                driver_name, driver_last_name, driver_mobile, driver_dob,
+                driver_gender, driver_city_id, driver_created_by,
+                driver_created_partner_id, driver_auth_key, driver_profile_img,
+                partner_auth_key, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        `;
+
+        const driverResult = await db.query(driverInsertQuery, [
+            data.driver_name,
+            data.driver_last_name,
+            data.driver_mobile,
+            dobTimestamp,
+            data.driver_gender,
+            data.driver_city_id,
+            data.driver_created_by,
+            createdPartnerId || 0,
+            data.driver_auth_key || ' ',
+            profileImg,
+            data.partner_auth_key || ' '
+        ]);
+
+        const insertResult: any = Array.isArray(driverResult) ? driverResult[0] : driverResult;
+        const driverId = insertResult?.insertId;
+        if (!driverId) throw new ApiError(500, 'Failed to retrieve inserted driver id');
+
+        // Handle driver_details uploads
+        const dlFrontImg = data.driver_details_dl_front_img
+            ? uploadFileCustom(data.driver_details_dl_front_img, "/drivers/dl")
+            : null;
+
+        const dlBackImg = data.driver_details_dl_back_image
+            ? uploadFileCustom(data.driver_details_dl_back_image, "/drivers/dl")
+            : null;
+
+        const aadharFront = data.driver_details_aadhar_front_img
+            ? uploadFileCustom(data.driver_details_aadhar_front_img, "/drivers/aadhar")
+            : null;
+
+        const aadharBack = data.driver_details_aadhar_back_img
+            ? uploadFileCustom(data.driver_details_aadhar_back_img, "/drivers/aadhar")
+            : null;
+
+        const panFront = data.driver_details_pan_card_front_img
+            ? uploadFileCustom(data.driver_details_pan_card_front_img, "/drivers/pan")
+            : null;
+
+        const policeImg = data.driver_details_police_verification_image
+            ? uploadFileCustom(
+                data.driver_details_police_verification_image,
+                "/drivers/police"
+            )
+            : null;
+
+        // INSERT INTO driver_details table
+        const driverDetailsQuery = `
+            INSERT INTO driver_details (
+                driver_details_driver_id,
+                driver_details_dl_front_img,
+                driver_details_dl_back_image,
+                driver_details_dl_number,
+                driver_details_dl_exp_date,
+                driver_details_aadhar_front_img,
+                driver_details_aadhar_back_img,
+                driver_details_aadhar_number,
+                driver_details_pan_card_front_img,
+                driver_details_pan_card_number,
+                driver_details_police_verification_image,
+                driver_details_police_verification_date,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        `;
+
+        await db.query(driverDetailsQuery, [
+            driverId,
+            dlFrontImg,
+            dlBackImg,
+            data.driver_details_dl_number,
+            data.driver_details_dl_exp_date,
+            aadharFront,
+            aadharBack,
+            data.driver_details_aadhar_number,
+            panFront,
+            data.driver_details_pan_card_number,
+            policeImg,
+            data.driver_details_police_verification_date
+        ]);
+
+        return { status: 200, message: "Driver created successfully", driverId };
+
+    } catch (error) {
+        console.log(error);
+        
+        throw new ApiError(500, "Failed to add driver");
+    }
+};
+
+
+export const fetchDriverService = async (driverId: number) => {
+    try {
+        const query = `
+            SELECT d.*, dd.*
+            FROM driver d
+            LEFT JOIN driver_details dd
+            ON d.driver_id = dd.driver_details_driver_id
+            WHERE d.driver_id = ?
+        `;
+
+        const rows = await db.query(query, [driverId]);
+
+        return { status: 200, message: "Driver fetched successfully", jsonData: { driver_fetch: rows[0] } };
+
+    } catch (error) {
+        throw new ApiError(500, "Failed to fetch driver");
+    }
+};
+
+
+
+export const updateDriverService = async (driverId: number, data: DriverData) => {
+    try {
+        if (!driverId) throw new ApiError(400, "Driver ID is required");
+
+        // Convert DOB
+        let dobTimestamp: number | null = null;
+        if (data.driver_dob) {
+            const t = Math.floor(new Date(data.driver_dob).getTime() / 1000);
+            dobTimestamp = Number.isFinite(t) && t > 0 ? t : null;
+        }
+
+        const updateDriverData: any = {};
+
+        if (data.driver_name !== undefined) updateDriverData.driver_name = data.driver_name;
+        if (data.driver_last_name !== undefined) updateDriverData.driver_last_name = data.driver_last_name;
+        if (data.driver_mobile !== undefined) updateDriverData.driver_mobile = data.driver_mobile;
+        if (data.driver_dob !== undefined) updateDriverData.driver_dob = dobTimestamp;
+        if (data.driver_gender !== undefined) updateDriverData.driver_gender = data.driver_gender;
+        if (data.driver_city_id !== undefined) updateDriverData.driver_city_id = data.driver_city_id;
+
+        if (data.driver_created_by !== undefined) {
+            updateDriverData.driver_created_by = data.driver_created_by;
+            updateDriverData.driver_created_partner_id =
+                data.driver_created_by === 1 ? data.driver_created_partner_id : null;
+        }
+
+        if (data.driver_profile_img) {
+            const uploaded = uploadFileCustom(data.driver_profile_img, "/drivers");
+            updateDriverData.driver_profile_img = uploaded;
+        }
+
+        updateDriverData.updated_at = new Date();
+
+        await db.query(`UPDATE driver SET ? WHERE driver_id = ?`, [
+            updateDriverData,
+            driverId
+        ]);
+
+        // Update driver_details
+        const updateDetails: any = {};
+
+        const dlFields = [
+            "driver_details_dl_number",
+            "driver_details_dl_exp_date",
+            "driver_details_aadhar_number",
+            "driver_details_pan_card_number",
+            "driver_details_police_verification_date"
+        ];
+
+        dlFields.forEach((f) => {
+            if ((data as any)[f] !== undefined) updateDetails[f] = (data as any)[f];
+        });
+
+        if (data.driver_details_dl_front_img) {
+            updateDetails.driver_details_dl_front_img = uploadFileCustom(
+                data.driver_details_dl_front_img,
+                "/drivers/dl"
+            );
+        }
+
+        if (data.driver_details_dl_back_image) {
+            updateDetails.driver_details_dl_back_image = uploadFileCustom(
+                data.driver_details_dl_back_image,
+                "/drivers/dl"
+            );
+        }
+
+        if (data.driver_details_aadhar_front_img) {
+            updateDetails.driver_details_aadhar_front_img = uploadFileCustom(
+                data.driver_details_aadhar_front_img,
+                "/drivers/aadhar"
+            );
+        }
+
+        if (data.driver_details_aadhar_back_img) {
+            updateDetails.driver_details_aadhar_back_img = uploadFileCustom(
+                data.driver_details_aadhar_back_img,
+                "/drivers/aadhar"
+            );
+        }
+
+        if (data.driver_details_pan_card_front_img) {
+            updateDetails.driver_details_pan_card_front_img = uploadFileCustom(
+                data.driver_details_pan_card_front_img,
+                "/drivers/pan"
+            );
+        }
+
+        if (data.driver_details_police_verification_image) {
+            updateDetails.driver_details_police_verification_image = uploadFileCustom(
+                data.driver_details_police_verification_image,
+                "/drivers/police"
+            );
+        }
+
+        updateDetails.updated_at = new Date();
+
+        await db.query(
+            `UPDATE driver_details SET ? WHERE driver_details_driver_id = ?`,
+            [updateDetails, driverId]
+        );
+
+        return { status: 200, message: "Driver updated successfully" };
+
+    } catch (error) {
+        throw new ApiError(500, "Failed to update driver");
+    }
+};
+
 
 // Get Driver Detail
 export const driverDetailService = async (driverId: number) => {
