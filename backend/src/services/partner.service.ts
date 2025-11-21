@@ -169,7 +169,7 @@ export const addPartnerService = async (data: PartnerData) => {
             partner_aadhar_no: data.partner_aadhar_no,
             partner_registration_step: 0,
             partner_auth_key: ' ',
-            partner_referral: 'MEDCAB' + currentUnixTime(),
+            partner_referral: ' ',
             referral_referral_by: data.referral_referral_by || " ",
             created_at: new Date(),
             updated_at: new Date(),
@@ -180,6 +180,10 @@ export const addPartnerService = async (data: PartnerData) => {
             `INSERT INTO partner SET ?`,
             [insertData]
         );
+
+        const updateReferralCode = `UPDATE partner SET partner_referral = ? WHERE partner_id = ?`;
+        const referralCode = `MEDCAB${result.insertId}`;
+        await db.query(updateReferralCode, [referralCode, result.insertId]);
 
         return {
             status: 201,
