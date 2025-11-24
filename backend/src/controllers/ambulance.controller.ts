@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, dashboardAmbulanceBookingService, dashboardAmbulancePartnerService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, dashboardAmbulanceBookingService, dashboardAmbulanceDriverService, dashboardAmbulancePartnerService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
 
+// DASHBOARD AMBULANCE BOOKING CONTROLLER
 export const dashboardAmbulanceBookingController = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
@@ -12,6 +13,7 @@ export const dashboardAmbulanceBookingController = async (req: Request, res: Res
     }
 };
 
+// DASHBOARD AMBULANCE PARTNER CONTROLLER
 export const dashboardAmbulancePartnerController = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
@@ -22,6 +24,17 @@ export const dashboardAmbulancePartnerController = async (req: Request, res: Res
         next(error);
     }
 };
+
+// DASHBOARD AMBULANCE DRIVER CONTROLLER
+export const dashboardAmbulanceDriverController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const result = await dashboardAmbulanceDriverService();
+        res.status(result.status).json(result);
+    } catch (error) {
+        next(error);
+    }
+};  
 
 // Get Ambulance Category List Controller
 export const getAmbulanceCategoryListController = async (req: Request, res: Response, next: NextFunction) => {

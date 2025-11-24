@@ -5,6 +5,7 @@ import { currentUnixTime } from "../utils/current_unixtime";
 import { generateSlug } from "../utils/generate_sku";
 import { uploadFileCustom } from "../utils/file_uploads";
 
+// DASHBOARD AMBULANCE BOOKINGS SERVICE
 export const dashboardAmbulanceBookingService = async () => {
     try {
 
@@ -42,6 +43,7 @@ export const dashboardAmbulanceBookingService = async () => {
     }
 };
 
+// DASHBOARD AMBULANCE PARTNERS SERVICE
 export const dashboardAmbulancePartnerService = async () => {
     try {
         const [rows]: any = await db.query(
@@ -74,6 +76,45 @@ export const dashboardAmbulancePartnerService = async () => {
 
     } catch (error) {
         throw new ApiError(500, "Dashboard Ambulance Partner Error On Fetching");
+    }
+};
+
+// DASHBOARD AMBULANCE DRIVERS SERVICE
+export const dashboardAmbulanceDriverService = async () => {
+    try {
+
+        const [rows]: any = await db.query(
+            `
+            SELECT 
+                driver_id,
+                driver_name,
+                driver_last_name,
+                driver_mobile,
+                driver_wallet_amount,
+                driver_city_id,
+                driver_created_by, /* 0 for Self 1 for Partner */
+                driver_profile_img,
+                driver_registration_step,
+                driver_duty_status,
+                driver_status,
+                driver_duty_status,
+                created_at
+            FROM driver
+            ORDER BY driver_id DESC
+            LIMIT 5 OFFSET 0;
+            `
+        );
+
+        return {
+            status: 200,
+            message: "Dashboard ambulance drivers fetched successfully",
+            jsonData: {
+                dashboard_ambulance_drivers: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Dashboard Ambulance Driver Error On Fetching");
     }
 };
 
