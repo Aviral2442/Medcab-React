@@ -1,4 +1,5 @@
 import { db } from "../config/db";
+import Razorpay from "razorpay";
 import { ApiError } from "../utils/api-error";
 import { buildFilters } from "../utils/filters";
 import { currentUnixTime } from "../utils/current_unixtime";
@@ -42,39 +43,39 @@ const remarkColumnMap: Record<number, string> = {
 
 // ADD REMARK SERVICE
 export const addRemarksById = async (remarkData: RemarkData) => {
-    try {
-      const columnName = remarkColumnMap[remarkData.remark_category_type];
+  try {
+    const columnName = remarkColumnMap[remarkData.remark_category_type];
 
-      if (!columnName) {
-        throw new ApiError(400, "Invalid remark category type");
-      }
-
-      // Prepare final insert object
-      const remarkInsertData: any = {
-        remark_type: remarkData.remark_type,
-        remark_category_type: remarkData.remark_category_type,
-        remark_text: remarkData.remark_text,
-        remark_add_unix_time: currentUnixTime(),
-        created_at: new Date(),
-        updated_at: new Date(),
-      };
-
-      // Set only the target column
-      remarkInsertData[columnName] = remarkData.remark_list_primary_key;
-
-      // Insert
-      const query = `INSERT INTO remark_data SET ?`;
-      await db.query(query, remarkInsertData);
-
-      return {
-        status: 200,
-        message: "Remark added successfully"
-      };
-
-    } catch (error) {
-      console.error("Error in addRemarksById:", error);
-      throw new ApiError(500, "Failed to insert remark");
+    if (!columnName) {
+      throw new ApiError(400, "Invalid remark category type");
     }
+
+    // Prepare final insert object
+    const remarkInsertData: any = {
+      remark_type: remarkData.remark_type,
+      remark_category_type: remarkData.remark_category_type,
+      remark_text: remarkData.remark_text,
+      remark_add_unix_time: currentUnixTime(),
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    // Set only the target column
+    remarkInsertData[columnName] = remarkData.remark_list_primary_key;
+
+    // Insert
+    const query = `INSERT INTO remark_data SET ?`;
+    await db.query(query, remarkInsertData);
+
+    return {
+      status: 200,
+      message: "Remark added successfully"
+    };
+
+  } catch (error) {
+    console.error("Error in addRemarksById:", error);
+    throw new ApiError(500, "Failed to insert remark");
+  }
 };
 
 // Driver Emergency List with Filters and Pagination
@@ -288,5 +289,58 @@ export const getCityService = async (stateId: number) => {
   } catch (error) {
     console.log(error);
     throw new ApiError(500, "Get City Service Error On Fetching");
+  }
+};
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY!,
+  key_secret: process.env.RAZORPAY_SECRET!,
+});
+
+// Get Razorpay Transactions Service
+export const getRazorpayTransService = async (filters?: {
+  fromDate?: string;
+  toDate?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  try {
+    const page = filters?.page && filters.page > 0 ? filters.page : 1;
+    const limit = filters?.limit && filters.limit > 0 ? filters.limit : 50;
+    const skip = (page - 1) * limit;
+
+    // Convert dates to UNIX timestamps
+    const from = filters?.fromDate
+      ? Math.floor(new Date(filters.fromDate).getTime() / 1000)
+      : undefined;
+
+    const to = filters?.toDate
+      ? Math.floor(new Date(filters.toDate).getTime() / 1000)
+      : undefined;
+
+    const response = await razorpay.payments.all({
+      from: from,
+      to: to,
+      count: limit,
+      skip: skip,
+    });
+
+    return {
+      status: 200,
+      message: "Razorpay transactions fetched successfully",
+      pagination: {
+        page,
+        limit,
+        // Razorpay does NOT provide total count → we show only current list
+        totalFetched: response.items.length,
+      },
+      jsonData: {
+        razorpay_transactions_list: response.items,
+      },
+    };
+  } catch (error: any) {
+    console.error("Razorpay API Error:", error);
+    throw new ApiError(500, "Failed to fetch Razorpay transactions");
   }
 };

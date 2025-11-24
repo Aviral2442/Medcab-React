@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addRemarksById, getAllUsers, getCityService, getConsumerEmergencyList, getDriverEmergencyList, getStateService } from "../services/user.service";
+import { addRemarksById, getAllUsers, getCityService, getConsumerEmergencyList, getDriverEmergencyList, getRazorpayTransService, getStateService } from "../services/user.service";
 import { ApiError } from "../utils/api-error";
 
 // Get All Users
@@ -23,7 +23,6 @@ export const addRemarks = async (req: Request, res: Response, next: NextFunction
     next(error);
   }
 };
-
 
 // Driver Emergency List Controller
 export const getDriverEmergencyListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -89,5 +88,26 @@ export const getCityController = async (req: Request, res: Response) => {
     res.json(cities);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch cities" });
+  }
+};
+
+// Get Razorpay Transactions Controller
+export const getRazorpayTransactions = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const filters = {
+      fromDate: req.query.fromDate as string,
+      toDate: req.query.toDate as string,
+      page: req.query.page ? Number(req.query.page) : undefined,
+      limit: req.query.limit ? Number(req.query.limit) : undefined,
+    };
+
+    const result = await getRazorpayTransService(filters);
+    return res.status(result.status).json(result);
+  } catch (error) {
+    next(error);
   }
 };
