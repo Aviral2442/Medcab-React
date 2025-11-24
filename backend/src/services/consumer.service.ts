@@ -15,7 +15,7 @@ export const getConsumerList = async (filters?: {
 }) => {
     try {
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
         // 🧠 Build WHERE + params for DATE only

@@ -12,7 +12,7 @@ export const getVehicleListController = async (req: Request, res: Response, next
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getVehicleListService(filters);

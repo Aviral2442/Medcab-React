@@ -176,7 +176,7 @@ export const getAmbulanceFaqListController = async (req: Request, res: Response,
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         };
 
         const result = await getAmbulanceFaqListService(filters);
@@ -271,7 +271,7 @@ export const getAmbulanceFacilitiesListController = async (req: Request, res: Re
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getAmbulanceFacilitiesListService(filters);
@@ -365,7 +365,7 @@ export const getAmbulanceFacilitiesRateListController = async (req: Request, res
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         };
 
         const result = await getAmbulanceFacilitiesRateListService(filters);
@@ -468,7 +468,7 @@ export const getAmbulanceBookingListController = async (req: Request, res: Respo
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getAmbulanceBookingListService(filters);
@@ -491,7 +491,7 @@ export const getRegularAmbulanceBookingListController = async (req: Request, res
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getRegularAmbulanceBookingListService(filters);
@@ -514,7 +514,7 @@ export const getRentalAmbulanceBookingListController = async (req: Request, res:
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getRentalAmbulanceBookingListService(filters);
@@ -537,7 +537,7 @@ export const getBulkAmbulanceBookingListController = async (req: Request, res: R
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getBulkAmbulanceBookingListService(filters);
