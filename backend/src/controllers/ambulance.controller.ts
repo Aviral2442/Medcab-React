@@ -1,5 +1,16 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, dashboardAmbulanceBookingService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
+
+export const dashboardAmbulanceBookingController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const result = await dashboardAmbulanceBookingService();
+        res.status(result.status).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 // Get Ambulance Category List Controller
 export const getAmbulanceCategoryListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -17,7 +28,7 @@ export const getAmbulanceCategoryListController = async (req: Request, res: Resp
     } catch (error) {
         next(error);
     }
-}
+};
 
 // CONTROLLER TO ADD NEW AMBULANCE CATEGORY
 export const addAmbulanceCategoryController = async (req: Request, res: Response, next: NextFunction) => {

@@ -5,6 +5,43 @@ import { currentUnixTime } from "../utils/current_unixtime";
 import { generateSlug } from "../utils/generate_sku";
 import { uploadFileCustom } from "../utils/file_uploads";
 
+export const dashboardAmbulanceBookingService = async () => {
+    try {
+
+        const [rows]: any = await db.query(
+            `
+            SELECT 
+                booking_view.booking_id,
+                booking_view.booking_source,
+                booking_view.booking_type,
+                booking_view.booking_con_name,
+                booking_view.booking_con_mobile,
+                booking_view.booking_category,
+                booking_view.booking_schedule_time,
+                booking_view.booking_pickup,
+                booking_view.booking_drop,
+                booking_view.booking_status,
+                booking_view.booking_total_amount,
+                booking_view.created_at
+            FROM booking_view
+            ORDER BY booking_view.booking_id DESC
+            LIMIT 5 OFFSET 0
+            `
+        )
+
+        return {
+            status: 200,
+            message: "Dashboard ambulance bookings fetched successfully",
+            jsonData: {
+                dashboard_ambulance_bookings: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Dashboard Ambulance Booking Error On Fetching");
+    }
+}
+
 interface ambulanceCategoryData {
     ambulance_category_type: string;
     ambulance_category_service_type: string; // enum('0','1')

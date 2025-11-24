@@ -1,10 +1,13 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { addAmbulanceCategoryController, addAmbulanceFacilitiesRateController, addAmbulanceFaqController, ambulanceBookingDetailController, editAmbulanceCategoryController, editAmbulanceFacilitiesRateController, editAmbulanceFaqController, getAmbulanceBookingListController, getAmbulanceCategoryController, getAmbulanceCategoryListController, getAmbulanceFacilitiesRateController, getAmbulanceFacilitiesRateListController, getAmbulanceFaqController, getAmbulanceFaqListController, getBulkAmbulanceBookingListController, getRegularAmbulanceBookingListController, getRentalAmbulanceBookingListController, updateAmbulanceCategoryStatusController, updateAmbulanceFacilitiesRateStatusController, updateAmbulanceFaqStatusController } from '../controllers/ambulance.controller';
+import { addAmbulanceCategoryController, addAmbulanceFacilitiesRateController, addAmbulanceFaqController, ambulanceBookingDetailController, dashboardAmbulanceBookingController, editAmbulanceCategoryController, editAmbulanceFacilitiesRateController, editAmbulanceFaqController, getAmbulanceBookingListController, getAmbulanceCategoryController, getAmbulanceCategoryListController, getAmbulanceFacilitiesRateController, getAmbulanceFacilitiesRateListController, getAmbulanceFaqController, getAmbulanceFaqListController, getBulkAmbulanceBookingListController, getRegularAmbulanceBookingListController, getRentalAmbulanceBookingListController, updateAmbulanceCategoryStatusController, updateAmbulanceFacilitiesRateStatusController, updateAmbulanceFaqStatusController } from '../controllers/ambulance.controller';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 const router = Router();
+
+// DASHBOARD AMBULANCE ROUTE
+router.get('/dashboard_ambulance_bookings', dashboardAmbulanceBookingController);
 
 // AMBULANCE CATEGORY ROUTER
 router.get('/get_ambulance_categories_list', getAmbulanceCategoryListController);
