@@ -45,6 +45,7 @@ interface AddCityProps {
   data?: any;
   onCancel?: () => void;
   onDataChanged?: () => void;
+  sectionId?: number;
 }
 
 const AddCity: React.FC<AddCityProps> = ({
@@ -670,12 +671,18 @@ const AddCity: React.FC<AddCityProps> = ({
                               Section 3 Heading{" "}
                               <span className="text-danger">*</span>
                             </Form.Label>
-                              <SnowEditor
-                                value={values.city_block3_heading}
-                                onChange={(value: string) =>
-                                  setFieldValue("city_block3_heading", value)
-                                }
-                              />
+                            <Form.Control
+                              type="text"
+                              name="city_block3_heading"
+                              value={values.city_block3_heading}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_block3_heading &&
+                                !!errors.city_block3_heading
+                              }
+                              placeholder="Enter block 3 heading"
+                            />
                             <Form.Control.Feedback type="invalid">
                               {errors.city_block3_heading}
                             </Form.Control.Feedback>
@@ -688,19 +695,12 @@ const AddCity: React.FC<AddCityProps> = ({
                               Section 3 Description{" "}
                               <span className="text-danger">*</span>
                             </Form.Label>
-                            <Form.Control
-                              as="textarea"
-                              rows={3}
-                              name="city_block3_body"
-                              value={values.city_block3_body}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={
-                                touched.city_block3_body &&
-                                !!errors.city_block3_body
-                              }
-                              placeholder="Enter block 3 description"
-                            />
+                              <SnowEditor
+                                value={values.city_block3_body}
+                                onChange={(value: string) =>
+                                  setFieldValue("city_block3_body", value)
+                                }
+                              />
                             {touched.city_block3_body &&
                               errors.city_block3_body && (
                                 <div className="text-danger small mt-1">

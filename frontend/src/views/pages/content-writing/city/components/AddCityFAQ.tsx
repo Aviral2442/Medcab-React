@@ -16,6 +16,7 @@ interface AddCityFAQProps {
   data?: any;
   onCancel: () => void;
   onDataChanged: () => void;
+  sectionId: number;
 }
 
 interface FAQItem {
