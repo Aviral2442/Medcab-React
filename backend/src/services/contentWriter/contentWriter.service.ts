@@ -941,7 +941,7 @@ export const getCityContentManpowerFaqListService = async (filters?: {
                 totalPages: Math.ceil(total / limit),
             },
             jsonData: {
-                city_content_faq_list: rows
+                city_manpower_content_faq_list: rows
             },
         };
 
@@ -1724,7 +1724,7 @@ export const getCityContentPathologyFaqListService = async (filters?: {
         
         SELECT city_pathology_faq.*, city_content.city_name
         FROM city_pathology_faq
-        LEFT JOIN city_content ON city_pathology_faq.city_pathology_id = city_content.city_pathology_id
+        LEFT JOIN city_content ON city_pathology_faq.city_pathology_id = city_content.city_id
         ${whereSQL}
         ORDER BY city_pathology_faq.city_pathology_faq_id DESC
         LIMIT ? OFFSET ?
@@ -1756,6 +1756,7 @@ export const getCityContentPathologyFaqListService = async (filters?: {
         };
 
     } catch (error) {
+        console.log(error);
         throw new ApiError(500, "Get City Content Pathology FAQ List Error On Fetching");
     }
 };

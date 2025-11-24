@@ -11,7 +11,7 @@ import jszip from "jszip";
 import pdfmake from "pdfmake";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -19,33 +19,72 @@ import _pdfFonts from "pdfmake/build/vfs_fonts";
 import _pdfMake from "pdfmake/build/pdfmake";
 import { FaRegTimesCircle, FaRegCheckCircle } from "react-icons/fa";
 
-
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
 DT.Buttons.pdfMake(pdfmake);
 
-const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
+const headersCity = [
+  "S.No.",
+  "City ID",
+  "City Name",
+  "City Title",
+  "Created At",
+  "Status",
+];
+
+const headersCityFAQ = [
+  "S.No.", "FAQ ID", "City Name", "Question", "Answer", "Status"
+]
+
+// Map section names to their IDs
+const sectionMap: Record<string, number> = {
+  'ambulance': 1,
+  'manpower': 2,
+  'video-consultation': 3,
+  'pathology': 4,
+};
+
+const tableConfig: Record<number, Record<number, { endpoint: string; headers: string[] }>> = {
   1: {
-    endpoint: "/content_writer/get_city_content",
-    headers: [
-      "S.No.",
-      "City ID",
-      "City Name",
-      "City Title",
-      "Created At",
-      "Status",
-    ],
+    1: {
+      endpoint: "/content_writer/get_city_content",
+      headers: headersCity,
+    },
+    2: {
+      endpoint: "/content_writer/get_city_content_faq_list",
+      headers: headersCityFAQ,
+    },
   },
   2: {
-    endpoint: "/content_writer/get_city_content_faq_list",
-    headers: [
-      "S.No.",
-      "FAQ ID",
-      "Question",
-      "Answer",
-      "Status",
-    ],
+    1: {
+      endpoint: "/content_writer/get_manpower_city_content",
+      headers: headersCity,
+    },
+    2: {
+      endpoint: "/content_writer/get_city_manpower_content_faq_list",
+      headers: headersCityFAQ,
+    },
   },
+  3: {
+    1: {
+      endpoint: "/content_writer/get_video_consult_city_content",
+      headers: headersCity,
+    },
+    2: {
+      endpoint: "/content_writer/get_city_video_consult_content_faq_list",
+      headers: headersCityFAQ,
+    },
+  },
+  4: {
+    1: {
+      endpoint: "/content_writer/get_pathology_city_content",
+      headers: headersCity,
+    },
+    2: {
+      endpoint: "/content_writer/get_city_pathology_content_faq_list",
+      headers: headersCityFAQ,
+    },
+  }
 };
 
 type ExportDataWithButtonsProps = {
@@ -55,6 +94,7 @@ type ExportDataWithButtonsProps = {
   onEditRow?: (rowData: any) => void;
   onDataChanged?: () => void;
   filterParams?: Record<string, any>;
+  sectionId?: number; // Add this prop
 };
 
 const ExportDataWithButtons = ({
@@ -63,8 +103,10 @@ const ExportDataWithButtons = ({
   onAddNew,
   onEditRow,
   filterParams = {},
+  sectionId, // Add this parameter
 }: ExportDataWithButtonsProps) => {
   const navigate = useNavigate();
+  const params = useParams();
   const [tableData, setTableData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const tableRef = useRef<any>(null);
@@ -74,6 +116,20 @@ const ExportDataWithButtons = ({
   const [totalPages, setTotalPages] = useState(0);
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
+  // Determine the section ID from props or URL params
+  const currentSectionId = sectionId || sectionMap[params.section || 'ambulance'] || 1;
+
+  // Get section name for display
+  const getSectionName = () => {
+    const sectionNames: Record<number, string> = {
+      1: 'Ambulance',
+      2: 'Manpower',
+      3: 'Video Consultation',
+      4: 'Pathology',
+    };
+    return sectionNames[currentSectionId] || 'Ambulance';
+  };
 
   const toggleStatus = async (cityId: number, currentStatus: number) => {
     try {
@@ -87,9 +143,7 @@ const ExportDataWithButtons = ({
 
       setTableData((prevData) =>
         prevData.map((city) =>
-          city.city_id === cityId
-            ? { ...city, city_status: newStatus }
-            : city
+          city.city_id === cityId ? { ...city, city_status: newStatus } : city
         )
       );
     } catch (error) {
@@ -99,10 +153,12 @@ const ExportDataWithButtons = ({
 
   const toggleFAQStatus = async (faqId: number, currentStatus: any) => {
     try {
-      // Convert string to number
-      const status = typeof currentStatus === 'string' ? parseInt(currentStatus) : currentStatus;
+      const status =
+        typeof currentStatus === "string"
+          ? parseInt(currentStatus)
+          : currentStatus;
       const newStatus = status === 1 ? 0 : 1;
-      
+
       await axios.patch(
         `${baseURL}/content_writer/update_city_content_faq_status/${faqId}`,
         {
@@ -136,7 +192,9 @@ const ExportDataWithButtons = ({
     defaultDateFilter: "today",
   });
 
-  const { endpoint, headers } = tableConfig[tabKey];
+  // Use currentSectionId instead of tabKey for table config
+  const config = tableConfig[currentSectionId]?.[tabKey];
+  const { endpoint, headers } = config || { endpoint: "", headers: [] };
 
   const statusFilterOptions = [
     { label: "Active", value: "1" },
@@ -151,14 +209,34 @@ const ExportDataWithButtons = ({
       console.log("API Response:", res.data);
 
       let dataArray: any[] = [];
-      
-      if (tabKey === 1) {
-        dataArray = res.data?.jsonData?.city_content_list || [];
-      } else if (tabKey === 2) {
-        dataArray = res.data?.jsonData?.city_content_faq_list || [];
+
+      // Fix: Use currentSectionId directly instead of sectionMap[currentSectionId]
+      if (currentSectionId === 1) {
+        if (tabKey === 1) {
+          dataArray = res.data?.jsonData?.city_content_list || [];
+        } else if (tabKey === 2) {
+          dataArray = res.data?.jsonData?.city_content_faq_list || [];
+        }
+      } else if (currentSectionId === 2) {
+        if (tabKey === 1) {
+          dataArray = res.data?.jsonData?.city_manpower_content_list || [];
+        } else if (tabKey === 2) {
+          dataArray = res.data?.jsonData?.city_manpower_content_faq_list || [];
+        }
+      } else if (currentSectionId === 3) {
+        if (tabKey === 1) {
+          dataArray = res.data?.jsonData?.city_video_consultancy_content_list || [];
+        } else if (tabKey === 2) {
+          dataArray = res.data?.jsonData?.city_content_video_consult_faq_list || [];
+        }
+      } else if (currentSectionId === 4) {
+        if (tabKey === 1) {
+          dataArray = res.data?.jsonData?.pathology_city_content_list || [];
+        } else if (tabKey === 2) {
+          dataArray = res.data?.jsonData?.city_content_pathology_faq_list || [];
+        }
       }
-      
-      // Ensure data is an array and has proper structure
+
       const validData = Array.isArray(dataArray) ? dataArray : [];
       setTableData(validData);
 
@@ -182,6 +260,7 @@ const ExportDataWithButtons = ({
   useEffect(() => {
     fetchData();
   }, [
+    currentSectionId,
     tabKey,
     refreshFlag,
     currentPage,
@@ -238,8 +317,7 @@ const ExportDataWithButtons = ({
       title: "Status",
       data: "city_status",
       render: (data: any) => {
-        // Convert string to number for comparison
-        const status = typeof data === 'string' ? parseInt(data) : data;
+        const status = typeof data === "string" ? parseInt(data) : data;
         if (status === 1 || status === "1") {
           return `<span class="badge badge-label badge-soft-success">Active</span>`;
         } else if (status === 0 || status === "0") {
@@ -294,6 +372,109 @@ const ExportDataWithButtons = ({
     },
   ];
 
+  const cityFAQColumns = [
+    {
+      title: "S.No.",
+      data: null,
+      orderable: false,
+      searchable: false,
+      render: (_data: any, _type: any, _row: any, meta: any) => {
+        return currentPage * pageSize + meta.row + 1;
+      },
+    },
+    {
+      title: "ID",
+      data: "city_faq_id",
+      defaultContent: "N/A",
+      render: (data: any) => {
+        return data || "N/A";
+      },
+    },
+    {
+      title: "City Name",
+      data: "city_name",
+      defaultContent: "N/A",
+    },
+    {
+      title: "Question",
+      data: "city_faq_que",
+      defaultContent: "N/A",
+      render: (data: string) => {
+        return data || "N/A";
+      },
+    },
+    {
+      title: "Answer",
+      data: "city_faq_ans",
+      defaultContent: "N/A",
+      render: (data: string) => {
+        const maxLength = 100;
+        if (!data) return "N/A";
+        return data.length > maxLength
+          ? data.substring(0, maxLength) + "..."
+          : data;
+      },
+    },
+    {
+      title: "Status",
+      data: "city_faq_status",
+      defaultContent: "0",
+      render: (data: any) => {
+        const status = typeof data === "string" ? parseInt(data) : data;
+        if (status === 1 || status === "1") {
+          return `<span class="badge badge-label badge-soft-success">Active</span>`;
+        } else if (status === 0 || status === "0") {
+          return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
+        }
+        return `<span class="badge badge-label badge-soft-secondary">Unknown</span>`;
+      },
+    },
+    {
+      title: "Actions",
+      data: null,
+      orderable: false,
+      searchable: false,
+      render: () => "",
+      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
+        td.innerHTML = "";
+        const root = createRoot(td);
+        const status =
+          typeof rowData.city_faq_status === "string"
+            ? parseInt(rowData.city_faq_status)
+            : rowData.city_faq_status;
+
+        root.render(
+          <div className="d-flex flex-row gap-1">
+            <button
+              className="p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+              onClick={() => {
+                toggleFAQStatus(rowData.city_faq_id, rowData.city_faq_status);
+              }}
+              title={status === 1 ? "Click to deactivate" : "Click to activate"}
+              style={{
+                backgroundColor: status === 1 ? "#d9534f" : "#3a833a",
+              }}
+            >
+              {status === 1 ? (
+                <FaRegTimesCircle className="me-1" />
+              ) : (
+                <FaRegCheckCircle className="me-1" />
+              )}
+            </button>
+            <button
+              className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+              onClick={() => {
+                if (onEditRow) onEditRow(rowData);
+              }}
+            >
+              <TbEdit className="me-1" />
+            </button>
+          </div>
+        );
+      },
+    },
+  ];
+
   const getColumns = () => {
     if (tabKey === 1) {
       return cityColumns;
@@ -320,142 +501,39 @@ const ExportDataWithButtons = ({
         "City Name",
         "Question",
         "Answer",
-        "Status", // Removed "Created At" to match cityFAQColumns
+        "Status",
       ];
     }
     return headers;
   };
-
-  const cityFAQColumns = [
-    {
-      title: "S.No.",
-      data: null,
-      orderable: false,
-      searchable: false,
-      render: (_data: any, _type: any, _row: any, meta: any) => {
-        return currentPage * pageSize + meta.row + 1;
-      },
-    },
-    {
-      title: "ID",
-      data: "city_faq_id",
-      defaultContent: "N/A", // Add this to handle missing data
-      render: (data: any) => {
-        return data || "N/A";
-      },
-    },
-    {
-      title: "City Name",
-      data: "city_name",
-      defaultContent: "N/A", // Add this
-    },
-    {
-      title: "Question",
-      data: "city_faq_que",
-      defaultContent: "N/A", // Add this
-      render: (data: string) => {
-        return data || "N/A";
-      },
-    },
-    {
-      title: "Answer",
-      data: "city_faq_ans",
-      defaultContent: "N/A", // Add this
-      render: (data: string) => {
-        const maxLength = 100;
-        if (!data) return "N/A";
-        return data.length > maxLength 
-          ? data.substring(0, maxLength) + "..." 
-          : data;
-      },
-    },
-    {
-      title: "Status",
-      data: "city_faq_status",
-      defaultContent: "0", // Add this
-      render: (data: any) => {
-        // Convert string to number for comparison
-        const status = typeof data === 'string' ? parseInt(data) : data;
-        if (status === 1 || status === "1") {
-          return `<span class="badge badge-label badge-soft-success">Active</span>`;
-        } else if (status === 0 || status === "0") {
-          return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
-        }
-        return `<span class="badge badge-label badge-soft-secondary">Unknown</span>`;
-      },
-    },
-    {
-      title: "Actions",
-      data: null,
-      orderable: false,
-      searchable: false,
-      render: () => "",
-      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
-        td.innerHTML = "";
-        const root = createRoot(td);
-        const status = typeof rowData.city_faq_status === 'string' 
-          ? parseInt(rowData.city_faq_status) 
-          : rowData.city_faq_status;
-          
-        root.render(
-          <div className="d-flex flex-row gap-1">
-            <button
-              className="p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
-              onClick={() => {
-                toggleFAQStatus(rowData.city_faq_id, rowData.city_faq_status);
-              }}
-              title={status === 1 ? "Click to deactivate" : "Click to activate"}
-              style={{
-                backgroundColor: status === 1 ? "#d9534f" : "#3a833a",
-              }}
-            >
-              {status === 1 ? (
-                <FaRegTimesCircle  className="me-1" />
-              ) : (
-                <FaRegCheckCircle  className="me-1" />
-              )}
-            </button>
-            <button
-              className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
-              onClick={() => {
-                if (onEditRow) onEditRow(rowData);
-              }}
-            >
-              <TbEdit className="me-1" />
-            </button>
-          </div>
-        );
-      },
-    },
-  ];
 
   return (
     <>
       <ComponentCard
         title={
           <div className="w-100">
-            {tabKey === 1 ? "Manage City" : "Manage City FAQ"}
+            {getSectionName()} - {tabKey === 1 ? "Manage City" : "Manage City FAQ"}
           </div>
         }
         className="mb-2"
         headerActions={
           <div className="d-flex gap-2 align-items-center">
-      <TableFilters
-        dateFilter={dateFilter}
-        statusFilter={statusFilter}
-        dateRange={dateRange}
-        onDateFilterChange={handleDateFilterChange}
-        onStatusFilterChange={handleStatusFilterChange}
-        onDateRangeChange={handleDateRangeChange}
-        statusOptions={statusFilterOptions}
-        showDateRange={true}
-        showDateFilter={true} // Now showing both
-        showStatusFilter={true}
-        dateFilterPlaceholder="Quick filter"
-        dateRangePlaceholder="Custom date range"
-        statusFilterPlaceholder="Status"
-      />
-            <button 
+            <TableFilters
+              dateFilter={dateFilter}
+              statusFilter={statusFilter}
+              dateRange={dateRange}
+              onDateFilterChange={handleDateFilterChange}
+              onStatusFilterChange={handleStatusFilterChange}
+              onDateRangeChange={handleDateRangeChange}
+              statusOptions={statusFilterOptions}
+              showDateRange={true}
+              showDateFilter={true}
+              showStatusFilter={true}
+              dateFilterPlaceholder="Quick filter"
+              dateRangePlaceholder="Custom date range"
+              statusFilterPlaceholder="Status"
+            />
+            <button
               className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
               onClick={onAddNew}
             >
@@ -470,7 +548,7 @@ const ExportDataWithButtons = ({
           <div className="overflow-x-auto">
             <DataTable
               ref={tableRef}
-              key={`city-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
+              key={`city-table-${currentSectionId}-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
               data={tableData}
               columns={getColumns()}
               options={{

@@ -169,39 +169,35 @@ export const menuItems: MenuItemType[] = [
     label: 'Content SEO',
     icon: LuTableOfContents,
     children: [
+      { key: 'blogs', label: 'Blogs', url: '/content-seo/blogs' },
       { 
         key: 'ambulance', 
         label: 'Ambulance', 
-        icon: LuAlignLeft,
         children: [
-        {  key: 'city',
-          label: 'City',
-          url: '/city',
-        },
-        { key: 'blogs', label: 'Blogs', url: '/content-seo/blogs' },
+          { key: 'city-ambulance', label: 'City Content', url: '/city/ambulance' },
         ]
-       },
+      },
       { 
         key: 'manpower', 
         label: 'Manpower', 
-        icon: LuAlignLeft,
         children: [
-          {key: 'city',
-          label: 'City',
-          url: '/city',}
+          { key: 'city-manpower', label: 'City Content', url: '/city/manpower' }
         ]
-       },
+      },
       { 
-        key: 'city', 
-        label: 'Ambulance', 
-        icon: LuAlignLeft,
+        key: 'pathology', 
+        label: 'Pathology', 
         children: [
-         { key: 'city',
-          label: 'City',
-          url: '/city',}
+          { key: 'city-pathology', label: 'City Content', url: '/city/pathology' }
         ]
-       },
-      
+      },
+      { 
+        key: 'video-consultation', 
+        label: 'Video Consultation', 
+        children: [
+          { key: 'city-video', label: 'City Content', url: '/city/video-consultation' }
+        ]
+      },
     ],
   },
   {

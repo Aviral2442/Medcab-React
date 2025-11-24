@@ -71,6 +71,7 @@ const Page: React.FC = () => {
                 onAddNew={handleAddNew}
                 onEditRow={handleEditRow}
                 onDataChanged={triggerRefresh}
+                sectionId={1}
             />
         );
     };

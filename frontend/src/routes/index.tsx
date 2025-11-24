@@ -141,7 +141,7 @@ const pagesRoutes: RouteObject[] = [
   { path: "/content-seo/blogs", element: <BlogList/> },
   { path: "/add-blog", element: <AddBlogs/> },
   { path: "/edit-blog/:id", element: <AddBlogs/> },
-  { path: "/city", element: <CityList/> },
+  { path: "/city/:section", element: <CityList/> },
   { path: "/add-city", element: <AddCity/> },
   { path: "/edit-city/:id", element: <EditCity/> },
   { path: "/ambulance/category", element: <AmbulanceList/> },
@@ -149,6 +149,10 @@ const pagesRoutes: RouteObject[] = [
   { path: "/emergency/consumer", element: <ConsumerEmergency/> },
   { path: "/ambulance/booking", element: <AmbulanceBooking/> },
   { path: "/ambulance/driver-location", element: <DriverLocation/> },
+  { path: "/city/ambulance", element: <CityList/> },
+  { path: "/city/manpower", element: <CityList/> },
+  { path: "/city/pathology", element: <CityList/> },
+  { path: "/city/video-consultation", element: <CityList/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 
