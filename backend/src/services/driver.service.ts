@@ -131,6 +131,7 @@ export const getDriverService = async (filters: {
 
 };
 
+// Add Driver Service
 export const addDriverService = async (data: DriverData) => {
     try {
 
@@ -248,7 +249,7 @@ export const addDriverService = async (data: DriverData) => {
     }
 };
 
-
+// Fetch Driver Service
 export const fetchDriverService = async (driverId: number) => {
     try {
         const query = `
@@ -268,8 +269,7 @@ export const fetchDriverService = async (driverId: number) => {
     }
 };
 
-
-
+// Update Driver Service
 export const updateDriverService = async (driverId: number, data: DriverData) => {
     try {
         if (!driverId) throw new ApiError(400, "Driver ID is required");
@@ -378,7 +378,6 @@ export const updateDriverService = async (driverId: number, data: DriverData) =>
         throw new ApiError(500, "Failed to update driver");
     }
 };
-
 
 // Get Driver Detail
 export const driverDetailService = async (driverId: number) => {

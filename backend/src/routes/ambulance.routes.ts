@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { addAmbulanceCategoryController, addAmbulanceFacilitiesRateController, addAmbulanceFaqController, ambulanceBookingDetailController, dashboardAmbulanceBookingController, dashboardAmbulanceDriverController, dashboardAmbulancePartnerController, editAmbulanceCategoryController, editAmbulanceFacilitiesRateController, editAmbulanceFaqController, getAmbulanceBookingListController, getAmbulanceCategoryController, getAmbulanceCategoryListController, getAmbulanceFacilitiesRateController, getAmbulanceFacilitiesRateListController, getAmbulanceFaqController, getAmbulanceFaqListController, getBulkAmbulanceBookingListController, getRegularAmbulanceBookingListController, getRentalAmbulanceBookingListController, updateAmbulanceCategoryStatusController, updateAmbulanceFacilitiesRateStatusController, updateAmbulanceFaqStatusController } from '../controllers/ambulance.controller';
+import { addAmbulanceCategoryController, addAmbulanceFacilitiesRateController, addAmbulanceFaqController, ambulanceBookingDetailController, dashboardAmbulanceBookingController, dashboardAmbulanceDriverController, dashboardAmbulanceDriverTransController, dashboardAmbulancePartnerController, dashboardAmbulancePartnerTransController, dashboardAmbulanceVehicleController, editAmbulanceCategoryController, editAmbulanceFacilitiesRateController, editAmbulanceFaqController, getAmbulanceBookingListController, getAmbulanceCategoryController, getAmbulanceCategoryListController, getAmbulanceFacilitiesRateController, getAmbulanceFacilitiesRateListController, getAmbulanceFaqController, getAmbulanceFaqListController, getBulkAmbulanceBookingListController, getRegularAmbulanceBookingListController, getRentalAmbulanceBookingListController, updateAmbulanceCategoryStatusController, updateAmbulanceFacilitiesRateStatusController, updateAmbulanceFaqStatusController } from '../controllers/ambulance.controller';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -10,6 +10,9 @@ const router = Router();
 router.get('/dashboard_ambulance_bookings', dashboardAmbulanceBookingController);
 router.get('/dashboard_ambulance_partners', dashboardAmbulancePartnerController);
 router.get('/dashboard_ambulance_drivers', dashboardAmbulanceDriverController);
+router.get('/dashboard_ambulance_vehicles', dashboardAmbulanceVehicleController);
+router.get('/dashboard_ambulance_partner_transactions', dashboardAmbulancePartnerTransController);
+router.get('/dashboard_ambulance_driver_transactions', dashboardAmbulanceDriverTransController);
 
 // AMBULANCE CATEGORY ROUTER
 router.get('/get_ambulance_categories_list', getAmbulanceCategoryListController);

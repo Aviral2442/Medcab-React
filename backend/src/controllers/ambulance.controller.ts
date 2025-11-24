@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, dashboardAmbulanceBookingService, dashboardAmbulanceDriverService, dashboardAmbulancePartnerService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, dashboardAmbulanceBookingService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
 
 // DASHBOARD AMBULANCE BOOKING CONTROLLER
 export const dashboardAmbulanceBookingController = async (req: Request, res: Response, next: NextFunction) => {
@@ -34,7 +34,41 @@ export const dashboardAmbulanceDriverController = async (req: Request, res: Resp
     } catch (error) {
         next(error);
     }
-};  
+};
+
+// DASHBOARD AMBULANCE VEHICLE CONTROLLER
+export const dashboardAmbulanceVehicleController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await dashboardAmbulanceVehicleService();
+        res.status(result.status).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// DASHBOARD AMBULANCE PARTNER TRANSACTION CONTROLLER
+export const dashboardAmbulancePartnerTransController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const result = await dashboardAmbulancePartnerTransService();
+        res.status(result.status).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// DASHBOARD AMBULANCE DRIVER TRANSACTION CONTROLLER
+export const dashboardAmbulanceDriverTransController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const result = await dashboardAmbulanceDriverTransService();
+        res.status(result.status).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 // Get Ambulance Category List Controller
 export const getAmbulanceCategoryListController = async (req: Request, res: Response, next: NextFunction) => {

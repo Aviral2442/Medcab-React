@@ -118,6 +118,133 @@ export const dashboardAmbulanceDriverService = async () => {
     }
 };
 
+// DASHBOARD AMBULANCE VEHICLES SERVICE
+export const dashboardAmbulanceVehicleService = async () => {
+    try {
+        const [rows]: any = await db.query(
+            `
+            SELECT 
+                vehicle.vehicle_id,
+                vehicle.vehicle_added_type,
+                vehicle.vehicle_added_by,
+                vehicle.v_vehicle_name,
+                vehicle.v_vehicle_name_id,
+                vehicle.vehicle_category_type,
+                vehicle.vehicle_category_type_service_id,
+                vehicle.vehicle_exp_date,
+                vehicle.vehicle_verify_date,
+                vehicle.verify_type,
+                vehicle.created_at
+            FROM vehicle
+            ORDER BY vehicle.vehicle_id DESC
+            LIMIT 5 OFFSET 0;
+            `
+        );
+
+        return {
+            status: 200,
+            message: "Dashboard ambulance vehicles fetched successfully",
+            jsonData: {
+                dashboard_ambulance_vehicles: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Dashboard Ambulance Vehicle Error On Fetching");
+    }
+};
+
+// DASHBOARD AMBULANCE PARTNER TRANSACTIONS SERVICE
+export const dashboardAmbulancePartnerTransService = async () => {
+    try {
+
+        const [rows]: any = await db.query(
+            `
+            SELECT *, partner.partner_f_name , partner.partner_mobile , partner.partner_id 
+            FROM partner_transection
+            LEFT JOIN partner ON partner_transection.partner_transection_by = partner.partner_id
+            ORDER BY partner_transection_id DESC
+            LIMIT 5 OFFSET 0;
+            `
+        );
+
+        return {
+            status: 200,
+            message: "Dashboard ambulance partner transactions fetched successfully",
+            jsonData: {
+                dashboard_ambulance_partner_transactions: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Dashboard Ambulance Partner Transactions Error On Fetching");
+    }
+};
+
+// DASHBOARD AMBULANCE DRIVER TRANSACTIONS SERVICE
+export const dashboardAmbulanceDriverTransService = async () => {
+    try {
+        const [rows]: any = await db.query(
+            `
+            SELECT 
+                driver_transection.*,
+
+                -- Unified ID
+                CASE 
+                    WHEN driver_transection.driver_transection_by_type = 0 THEN driver.driver_id
+                    WHEN driver_transection.driver_transection_by_type = 1 THEN partner.partner_id
+                    WHEN driver_transection.driver_transection_by_type = 3 THEN consumer.consumer_id
+                    ELSE NULL
+                END AS trans_by_id,
+
+                -- Unified Name
+                CASE 
+                    WHEN driver_transection.driver_transection_by_type = 0 THEN driver.driver_name
+                    WHEN driver_transection.driver_transection_by_type = 1 THEN partner.partner_f_name
+                    WHEN driver_transection.driver_transection_by_type = 3 THEN consumer.consumer_name
+                    ELSE NULL
+                END AS trans_by_name,
+
+                -- Unified Mobile
+                CASE 
+                    WHEN driver_transection.driver_transection_by_type = 0 THEN driver.driver_mobile
+                    WHEN driver_transection.driver_transection_by_type = 1 THEN partner.partner_mobile
+                    WHEN driver_transection.driver_transection_by_type = 3 THEN consumer.consumer_mobile_no
+                    ELSE NULL
+                END AS trans_by_mobile
+
+            FROM driver_transection
+
+            LEFT JOIN driver 
+                ON driver_transection.driver_transection_by_type = 0 
+                AND driver_transection.driver_transection_by = driver.driver_id
+
+            LEFT JOIN partner 
+                ON driver_transection.driver_transection_by_type = 1 
+                AND driver_transection.driver_transection_by = partner.partner_id
+
+            LEFT JOIN consumer 
+                ON driver_transection.driver_transection_by_type = 3 
+                AND driver_transection.driver_transection_by = consumer.consumer_id
+
+            ORDER BY driver_transection.driver_transection_id DESC
+            LIMIT 5 OFFSET 0;
+            `
+        );
+
+        return {
+            status: 200,
+            message: "Dashboard ambulance driver transactions fetched successfully",
+            jsonData: {
+                dashboard_ambulance_driver_transactions: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Dashboard Ambulance Driver Transactions Error On Fetching");
+    }
+}
+
 interface ambulanceCategoryData {
     ambulance_category_type: string;
     ambulance_category_service_type: string; // enum('0','1')
