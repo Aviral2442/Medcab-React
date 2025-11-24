@@ -128,7 +128,7 @@ const ExportDataWithButtons = ({
       3: 'Video Consultation',
       4: 'Pathology',
     };
-    return sectionNames[currentSectionId] || 'Ambulance';
+    return sectionNames[currentSectionId];
   };
 
   const toggleStatus = async (cityId: number, currentStatus: number) => {
@@ -210,6 +210,7 @@ const ExportDataWithButtons = ({
 
       let dataArray: any[] = [];
 
+      console.log("Current Section ID:", currentSectionId);
       // Fix: Use currentSectionId directly instead of sectionMap[currentSectionId]
       if (currentSectionId === 1) {
         if (tabKey === 1) {

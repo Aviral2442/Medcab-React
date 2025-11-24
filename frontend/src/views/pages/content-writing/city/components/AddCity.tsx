@@ -591,11 +591,17 @@ const AddCity: React.FC<AddCityProps> = ({
                               Section 1 Description{" "}
                               <span className="text-danger">*</span>
                             </Form.Label>
-                            <SnowEditor
+                            <Form.Control
+                              type="text"
+                              name="city_block1_body"
                               value={values.city_block1_body}
-                              onChange={(value: string) =>
-                                setFieldValue("city_block1_body", value)
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_block1_body &&
+                                !!errors.city_block1_body
                               }
+                              placeholder="Enter Section 1 heading"
                             />
                             {touched.city_block1_body &&
                               errors.city_block1_body && (
@@ -664,18 +670,12 @@ const AddCity: React.FC<AddCityProps> = ({
                               Section 3 Heading{" "}
                               <span className="text-danger">*</span>
                             </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name="city_block3_heading"
-                              value={values.city_block3_heading}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={
-                                touched.city_block3_heading &&
-                                !!errors.city_block3_heading
-                              }
-                              placeholder="Enter block 3 heading"
-                            />
+                              <SnowEditor
+                                value={values.city_block3_heading}
+                                onChange={(value: string) =>
+                                  setFieldValue("city_block3_heading", value)
+                                }
+                              />
                             <Form.Control.Feedback type="invalid">
                               {errors.city_block3_heading}
                             </Form.Control.Feedback>
