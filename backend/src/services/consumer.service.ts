@@ -24,7 +24,7 @@ export const getConsumerList = async (filters?: {
             dateColumn: "consumer.consumer_registred_date",
         });
 
-        // 🧩 Handle STATUS filtering separately
+        // Handle STATUS filtering separately
         let finalWhereSQL = whereSQL;
 
         if (filters?.status) {
@@ -98,7 +98,7 @@ export const getConsumerList = async (filters?: {
     }
 };
 
-// 🧩 GET CONSUMER DETAIL SERVICE
+// GET CONSUMER DETAIL SERVICE
 export const consumerDetailService = async (
     consumerId: number
 ) => {
@@ -131,7 +131,7 @@ export const consumerDetailService = async (
 
 };
 
-// 🧩 GET CONSUMER TRANSACTION LIST SERVICE
+// GET CONSUMER TRANSACTION LIST SERVICE
 export const getConsumerTransactionList = async (consumerId: number) => {
     try {
         const query = `
@@ -175,7 +175,7 @@ export const getConsumerTransactionList = async (consumerId: number) => {
     }
 }
 
-// 🧩 GET CONSUMER MANPOWER ORDERS LIST SERVICE
+// GET CONSUMER MANPOWER ORDERS LIST SERVICE
 export const getConsumerManpowerOrdersList = async (consumerId: number) => {
     try {
 
@@ -221,7 +221,7 @@ export const getConsumerManpowerOrdersList = async (consumerId: number) => {
     }
 }
 
-// 🧩 GET CONSUMER AMBULANCE BOOKINGS LIST SERVICE
+// GET CONSUMER AMBULANCE BOOKINGS LIST SERVICE
 export const getConsumerAmbulanceBookingsList = async (consumerId: number) => {
 
     try {
@@ -267,7 +267,7 @@ export const getConsumerAmbulanceBookingsList = async (consumerId: number) => {
 
 }
 
-// 🧩 GET CONSUMER LAB BOOKINGS LIST SERVICE
+// GET CONSUMER LAB BOOKINGS LIST SERVICE
 export const getConsumerLabBookingsList = async (consumerId: number) => {
 
     try {
