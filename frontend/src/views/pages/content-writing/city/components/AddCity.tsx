@@ -64,6 +64,7 @@ const AddCity: React.FC<AddCityProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cityData, setCityData] = useState([])
 
   const [initialValues, setInitialValues] = useState({
     city_thumbnail: null as File | null,
@@ -272,7 +273,7 @@ const AddCity: React.FC<AddCityProps> = ({
           onCancel();
         } else {
           // Otherwise navigate (for standalone route)
-          navigate("/city");
+          navigate("/city/ambulance");
         }
 
         console.log("Data saved successfully");
@@ -306,6 +307,23 @@ const AddCity: React.FC<AddCityProps> = ({
       </ComponentCard>
     );
   }
+
+    const fetchCityContent = async () => {
+      try {
+        const res = await axios.get(
+          `${baseURL}/content_writer/get_city_content`
+        );
+        console.log("City Content fetched:", res.data?.jsonData?.city_content_list);
+        setCityData(res.data?.jsonData?.city_content_list || []);
+      } catch (err) {
+        console.error("Error fetching City Content:", err);
+        return [];
+      }
+    };
+  
+    useEffect(() => {
+      fetchCityContent();
+    }, []);
 
   return (
     <div className="">
@@ -371,18 +389,14 @@ const AddCity: React.FC<AddCityProps> = ({
                             <Form.Label className="fs-6 fw-semibold">
                               City Name <span className="text-danger">*</span>
                             </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name="city_name"
-                              value={values.city_name}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              className=""
-                              isInvalid={
-                                touched.city_name && !!errors.city_name
-                              }
-                              placeholder="Enter city name"
-                            />
+                            <Form.Select>
+                              <option value="">Select City</option>
+                              {cityData.map((city: any) => (
+                                <option key={city.city_id} value={city.city_name}>
+                                  {city.city_name}
+                                </option> 
+                              ))}
+                            </Form.Select>
                             <Form.Control.Feedback type="invalid">
                               {errors.city_name}
                             </Form.Control.Feedback>

@@ -142,7 +142,7 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
   const fetchCityContent = async () => {
     try {
       const res = await axios.get(
-        `${baseURL}/content_writer/get_city_content_faq_list`
+        `${baseURL}/content_writer/get_city_content`
       );
       console.log("City Content in faq fetched:", res.data);
       setCityData(res.data?.jsonData?.city_content_list || []);

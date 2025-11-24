@@ -210,7 +210,8 @@ const ExportDataWithButtons = ({
 
       let dataArray: any[] = [];
 
-      console.log("Current Section ID:", currentSectionId);
+      // console.log("Current Section ID:", currentSectionId);
+      
       // Fix: Use currentSectionId directly instead of sectionMap[currentSectionId]
       if (currentSectionId === 1) {
         if (tabKey === 1) {

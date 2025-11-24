@@ -149,10 +149,6 @@ const pagesRoutes: RouteObject[] = [
   { path: "/emergency/consumer", element: <ConsumerEmergency/> },
   { path: "/ambulance/booking", element: <AmbulanceBooking/> },
   { path: "/ambulance/driver-location", element: <DriverLocation/> },
-  { path: "/city/ambulance", element: <CityList/> },
-  { path: "/city/manpower", element: <CityList/> },
-  { path: "/city/pathology", element: <CityList/> },
-  { path: "/city/video-consultation", element: <CityList/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 
