@@ -24,7 +24,7 @@ export const getConsumerList = async (filters?: {
             dateColumn: "consumer.consumer_registred_date",
         });
 
-        // 🧩 Handle STATUS filtering separately
+        // Handle STATUS filtering separately
         let finalWhereSQL = whereSQL;
 
         if (filters?.status) {
@@ -47,6 +47,19 @@ export const getConsumerList = async (filters?: {
             }
         }
 
+        // Detect filters
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
 
         // ⚡ Data query
         const query = `
@@ -68,16 +81,21 @@ export const getConsumerList = async (filters?: {
             LIMIT ? OFFSET ?
             `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        // 🔢 Count query
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM consumer ${finalWhereSQL}`,
-            params
-        );
+        let total;
 
-        const total = countRows[0]?.total || 0;
+        if (noFiltersApplied) {
+            total = 100;
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM consumer ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
+
 
         return {
             status: 200,
@@ -98,7 +116,7 @@ export const getConsumerList = async (filters?: {
     }
 };
 
-// 🧩 GET CONSUMER DETAIL SERVICE
+// GET CONSUMER DETAIL SERVICE
 export const consumerDetailService = async (
     consumerId: number
 ) => {
@@ -131,7 +149,7 @@ export const consumerDetailService = async (
 
 };
 
-// 🧩 GET CONSUMER TRANSACTION LIST SERVICE
+// GET CONSUMER TRANSACTION LIST SERVICE
 export const getConsumerTransactionList = async (consumerId: number) => {
     try {
         const query = `
@@ -175,7 +193,7 @@ export const getConsumerTransactionList = async (consumerId: number) => {
     }
 }
 
-// 🧩 GET CONSUMER MANPOWER ORDERS LIST SERVICE
+// GET CONSUMER MANPOWER ORDERS LIST SERVICE
 export const getConsumerManpowerOrdersList = async (consumerId: number) => {
     try {
 
@@ -221,7 +239,7 @@ export const getConsumerManpowerOrdersList = async (consumerId: number) => {
     }
 }
 
-// 🧩 GET CONSUMER AMBULANCE BOOKINGS LIST SERVICE
+// GET CONSUMER AMBULANCE BOOKINGS LIST SERVICE
 export const getConsumerAmbulanceBookingsList = async (consumerId: number) => {
 
     try {
@@ -267,7 +285,7 @@ export const getConsumerAmbulanceBookingsList = async (consumerId: number) => {
 
 }
 
-// 🧩 GET CONSUMER LAB BOOKINGS LIST SERVICE
+// GET CONSUMER LAB BOOKINGS LIST SERVICE
 export const getConsumerLabBookingsList = async (consumerId: number) => {
 
     try {
