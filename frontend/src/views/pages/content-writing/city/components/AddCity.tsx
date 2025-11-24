@@ -17,7 +17,9 @@ const cityValidationSchema = Yup.object().shape({
   city_meta_desc: Yup.string().required("Meta Description is required"),
   city_body_desc: Yup.string().required("Body Description is required"),
   city_why_choose_us: Yup.string().required("Why Choose Us is required"),
-  why_choose_meta_desc: Yup.string().required("Why Choose Meta Description is required"),
+  why_choose_meta_desc: Yup.string().required(
+    "Why Choose Meta Description is required"
+  ),
   city_block1_heading: Yup.string().required("Block 1 Heading is required"),
   city_block1_body: Yup.string().required("Block 1 Body is required"),
   city_block2_heading: Yup.string().required("Block 2 Heading is required"),
@@ -29,8 +31,12 @@ const cityValidationSchema = Yup.object().shape({
   city_force_keyword: Yup.string().required("Force Keyword is required"),
   city_faq_heading: Yup.string().required("FAQ Heading is required"),
   city_faq_desc: Yup.string().required("FAQ Description is required"),
-  city_emergency_heading: Yup.string().required("Emergency Heading is required"),
-  city_emergency_desc: Yup.string().required("Emergency Description is required"),
+  city_emergency_heading: Yup.string().required(
+    "Emergency Heading is required"
+  ),
+  city_emergency_desc: Yup.string().required(
+    "Emergency Description is required"
+  ),
 });
 
 // Make all props optional since component can be used standalone
@@ -274,7 +280,7 @@ const AddCity: React.FC<AddCityProps> = ({
       console.error(`Error ${isEditMode ? "updating" : "adding"} city:`, err);
       setError(
         err.response?.data?.message ||
-        `Failed to ${isEditMode ? "update" : "add"} city`
+          `Failed to ${isEditMode ? "update" : "add"} city`
       );
     } finally {
       setSubmitting(false);
@@ -337,7 +343,6 @@ const AddCity: React.FC<AddCityProps> = ({
                     </Card.Header>
                     <Card.Body>
                       <Row className="g-3">
-
                         <Col md={12}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
@@ -512,7 +517,6 @@ const AddCity: React.FC<AddCityProps> = ({
                     </Card.Header>
                     <Card.Body>
                       <Row className="g-3">
-
                         <Col md={6}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
@@ -539,7 +543,8 @@ const AddCity: React.FC<AddCityProps> = ({
                         <Col md={12}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
-                              Body Description <span className="text-danger">*</span>
+                              Body Description{" "}
+                              <span className="text-danger">*</span>
                             </Form.Label>
                             <SnowEditor
                               value={values.city_body_desc}
@@ -580,12 +585,11 @@ const AddCity: React.FC<AddCityProps> = ({
                           </Form.Group>
                         </Col>
 
-
-
                         <Col md={12}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
-                              Section 1 Description <span className="text-danger">*</span>
+                              Section 1 Description{" "}
+                              <span className="text-danger">*</span>
                             </Form.Label>
                             <SnowEditor
                               value={values.city_block1_body}
@@ -629,13 +633,21 @@ const AddCity: React.FC<AddCityProps> = ({
                         <Col md={12}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
-                              Section 2 Description <span className="text-danger">*</span>
+                              Section 2 Description{" "}
+                              <span className="text-danger">*</span>
                             </Form.Label>
-                            <SnowEditor
+                            <Form.Control
+                              as="textarea"
+                              rows={3}
+                              name="city_block2_body"
                               value={values.city_block2_body}
-                              onChange={(value: string) =>
-                                setFieldValue("city_block2_body", value)
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_block2_body &&
+                                !!errors.city_block2_body
                               }
+                              placeholder="Enter block 3 description"
                             />
                             {touched.city_block2_body &&
                               errors.city_block2_body && (
@@ -662,7 +674,7 @@ const AddCity: React.FC<AddCityProps> = ({
                                 touched.city_block3_heading &&
                                 !!errors.city_block3_heading
                               }
-                              placeholder="Enter block 2 heading"
+                              placeholder="Enter block 3 heading"
                             />
                             <Form.Control.Feedback type="invalid">
                               {errors.city_block3_heading}
@@ -673,13 +685,21 @@ const AddCity: React.FC<AddCityProps> = ({
                         <Col md={12}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
-                              Section 3 Description <span className="text-danger">*</span>
+                              Section 3 Description{" "}
+                              <span className="text-danger">*</span>
                             </Form.Label>
-                            <SnowEditor
+                            <Form.Control
+                              as="textarea"
+                              rows={3}
+                              name="city_block3_body"
                               value={values.city_block3_body}
-                              onChange={(value: string) =>
-                                setFieldValue("city_block3_body", value)
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              isInvalid={
+                                touched.city_block3_body &&
+                                !!errors.city_block3_body
                               }
+                              placeholder="Enter block 3 description"
                             />
                             {touched.city_block3_body &&
                               errors.city_block3_body && (
@@ -817,8 +837,7 @@ const AddCity: React.FC<AddCityProps> = ({
                               onChange={handleChange}
                               onBlur={handleBlur}
                               isInvalid={
-                                touched.city_faq_desc &&
-                                !!errors.city_faq_desc
+                                touched.city_faq_desc && !!errors.city_faq_desc
                               }
                               placeholder="Enter FAQ description"
                             />
@@ -937,8 +956,6 @@ const AddCity: React.FC<AddCityProps> = ({
                             </Form.Control.Feedback>
                           </Form.Group>
                         </Col>
-
-
                       </Row>
                     </Card.Body>
                   </Card>
@@ -964,8 +981,8 @@ const AddCity: React.FC<AddCityProps> = ({
                           ? "Updating..."
                           : "Saving..."
                         : isEditMode
-                          ? "Update City"
-                          : "Save City"}
+                        ? "Update City"
+                        : "Save City"}
                     </Button>
                   </div>
                 </Col>

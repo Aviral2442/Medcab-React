@@ -59,7 +59,7 @@ const ExportDataWithButtons = ({
 //   const [searchTerm, setSearchTerm] = useState("");
   const tableRef = useRef<any>(null);
 
-  const [pageSize] = useState(100);
+  const [pageSize] = useState(10);
   const [_total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 

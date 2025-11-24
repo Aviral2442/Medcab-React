@@ -2,6 +2,7 @@ import { type MenuItemType } from '@/types/layout'
 import { type IconType } from 'react-icons'
 import { TbLogout2, TbUserCircle } from 'react-icons/tb'
 import {
+  LuAlignLeft,
   // LuAlignLeft,
   LuAmbulance,
   // LuAmpersands,
@@ -124,6 +125,7 @@ export const menuItems: MenuItemType[] = [
     children: [
       { key: 'category-list', label: 'Category', url: '/ambulance/category' },
       { key: 'driver-list', label: 'Driver', url: '/ambulance/driver' },
+      { key: 'driver-duty', label: 'Driver Duty', url: '/ambulance/driver-duty' },
       { key: 'partner-list', label: 'Partner', url: '/ambulance/partner' },
       { key: 'booking-list', label: 'Booking', url: '/ambulance/booking' },
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
@@ -167,8 +169,39 @@ export const menuItems: MenuItemType[] = [
     label: 'Content SEO',
     icon: LuTableOfContents,
     children: [
-      { key: 'city', label: 'City', url: '/city', },
-      { key: 'blogs', label: 'Blogs', url: '/content-seo/blogs' },
+      { 
+        key: 'ambulance', 
+        label: 'Ambulance', 
+        icon: LuAlignLeft,
+        children: [
+        {  key: 'city',
+          label: 'City',
+          url: '/city',
+        },
+        { key: 'blogs', label: 'Blogs', url: '/content-seo/blogs' },
+        ]
+       },
+      { 
+        key: 'manpower', 
+        label: 'Manpower', 
+        icon: LuAlignLeft,
+        children: [
+          {key: 'city',
+          label: 'City',
+          url: '/city',}
+        ]
+       },
+      { 
+        key: 'city', 
+        label: 'Ambulance', 
+        icon: LuAlignLeft,
+        children: [
+         { key: 'city',
+          label: 'City',
+          url: '/city',}
+        ]
+       },
+      
     ],
   },
   {

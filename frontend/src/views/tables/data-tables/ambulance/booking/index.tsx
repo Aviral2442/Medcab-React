@@ -125,7 +125,7 @@ const ExportDataWithButtons = ({
   );
   const [isRemarkOpen, setIsRemarkOpen] = useState(false);
 
-  const [pageSize] = useState(100);
+  const [pageSize] = useState(10);
   const [_total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
