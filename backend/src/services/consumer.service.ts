@@ -47,6 +47,19 @@ export const getConsumerList = async (filters?: {
             }
         }
 
+        // Detect filters
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
 
         // ⚡ Data query
         const query = `
@@ -68,16 +81,21 @@ export const getConsumerList = async (filters?: {
             LIMIT ? OFFSET ?
             `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        // 🔢 Count query
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM consumer ${finalWhereSQL}`,
-            params
-        );
+        let total;
 
-        const total = countRows[0]?.total || 0;
+        if (noFiltersApplied) {
+            total = 100;
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM consumer ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
+
 
         return {
             status: 200,

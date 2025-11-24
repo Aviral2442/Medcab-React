@@ -28,7 +28,7 @@ interface UseTableFiltersReturn {
 }
 
 export const useTableFilters = ({
-  defaultDateFilter = "today",
+  defaultDateFilter = "",
   onFilterChange,
 }: UseTableFiltersProps = {}): UseTableFiltersReturn => {
   const [searchParams, setSearchParams] = useSearchParams();

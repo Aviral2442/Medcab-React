@@ -11,7 +11,7 @@ export const buildFilters = (
     const params: any[] = [];
 
     const {
-        date = "today",
+        date,
         fromDate,
         toDate,
         dateColumn = "created_at",
