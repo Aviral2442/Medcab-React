@@ -267,7 +267,7 @@ export const getAmbulanceCategoryListService = async (filters?: {
 
     try {
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
         // const { whereSQL, params } = buildFilters({
@@ -491,7 +491,7 @@ export const getAmbulanceFaqListService = async (filters?: {
     try {
 
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({
@@ -697,7 +697,7 @@ export const getAmbulanceFacilitiesListService = async (filters?: {
 
     try {
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({
@@ -920,7 +920,7 @@ export const getAmbulanceFacilitiesRateListService = async (filters?: {
     try {
 
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({
@@ -1135,7 +1135,7 @@ export const getAmbulanceBookingListService = async (filters?: {
 
     try {
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({
@@ -1230,7 +1230,7 @@ export const getRegularAmbulanceBookingListService = async (filters?: {
 
     try {
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({
@@ -1324,7 +1324,7 @@ export const getRentalAmbulanceBookingListService = async (filters?: {
 
     try {
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({
@@ -1418,7 +1418,7 @@ export const getBulkAmbulanceBookingListService = async (filters?: {
 
     try {
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 100;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
         const { whereSQL, params } = buildFilters({

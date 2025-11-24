@@ -16,7 +16,7 @@ export const getBlogListController = async (req: Request, res: Response, next: N
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getBlogListService(filters);
@@ -129,7 +129,7 @@ export const getCityContentController = async (req: Request, res: Response, next
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getCityContentService(filters);
@@ -259,7 +259,7 @@ export const getCityContentFaqListController = async (req: Request, res: Respons
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getCityContentFaqListService(filters);
@@ -350,7 +350,7 @@ export const getCityContentManpowerController = async (req: Request, res: Respon
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getCityContentManpowerService(filters);
@@ -481,7 +481,7 @@ export const getCityContentManpowerFaqListController = async (req: Request, res:
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getCityContentManpowerFaqListService(filters);
@@ -571,7 +571,7 @@ export const getCityContentVideoConsultController = async (req: Request, res: Re
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getCityContentVideoConsultService(filters);
@@ -702,7 +702,7 @@ export const getCityContentVideoConsultFaqListController = async (req: Request, 
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getCityContentVideoConsultFaqListService(filters);
@@ -792,7 +792,7 @@ export const getCityContentPathologyController = async (req: Request, res: Respo
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getCityContentPathologyService(filters);
@@ -923,7 +923,7 @@ export const getCityContentPathologyFaqListController = async (req: Request, res
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getCityContentPathologyFaqListService(filters);

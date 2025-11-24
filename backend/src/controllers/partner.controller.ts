@@ -11,7 +11,7 @@ export const getPartnersController = async (req: Request, res: Response, next: N
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getPartnerServices(filters);
@@ -110,7 +110,7 @@ export const getManpowerPartnersController = async (req: Request, res: Response,
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getManpowerPartnerServices(filters);
@@ -130,7 +130,7 @@ export const getPartnerTransactionsController = async (req: Request, res: Respon
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
-            limit: req.query.limit ? parseInt(req.query.limit as string) : 100,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }
 
         const result = await getPartnerTransactionServices(filters);
