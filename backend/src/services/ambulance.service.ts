@@ -40,7 +40,42 @@ export const dashboardAmbulanceBookingService = async () => {
     } catch (error) {
         throw new ApiError(500, "Dashboard Ambulance Booking Error On Fetching");
     }
-}
+};
+
+export const dashboardAmbulancePartnerService = async () => {
+    try {
+        const [rows]: any = await db.query(
+            `
+            SELECT 
+                partner_id,
+                partner_f_name,
+                partner_l_name,
+                partner_mobile,
+                partner_wallet,
+                partner_profile_img,
+                partner_created_by,
+                partner_city_id,
+                partner_registration_step,
+                created_at,
+                partner_status
+            FROM partner
+            ORDER BY partner_id DESC
+            LIMIT 5 OFFSET 0;   
+            `
+        );
+
+        return {
+            status: 200,
+            message: "Dashboard ambulance partners fetched successfully",
+            jsonData: {
+                dashboard_ambulance_partners: rows
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Dashboard Ambulance Partner Error On Fetching");
+    }
+};
 
 interface ambulanceCategoryData {
     ambulance_category_type: string;
