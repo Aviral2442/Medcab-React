@@ -12,23 +12,18 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
-// Add Remarks Controller
+// Remark 
 export const addRemarks = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const primaryId = parseInt(req.params.id);
-    const { remarkType, remarks } = req.body;
+    const response = await addRemarksById(req.body);
 
-    if (!remarkType || !remarks) {
-      throw new ApiError(400, "remarkType and remarks are required");
-    }
+    return res.status(response.status).json(response);
 
-    const result = await addRemarksById(primaryId, remarkType, remarks);
-
-    return res.status(200).json(result);
   } catch (error) {
     next(error);
   }
 };
+
 
 // Driver Emergency List Controller
 export const getDriverEmergencyListController = async (req: Request, res: Response, next: NextFunction) => {

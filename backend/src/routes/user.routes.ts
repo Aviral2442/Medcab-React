@@ -4,7 +4,7 @@ import { addRemarks, getCityController, getConsumerEmergencyListController, getD
 const router = Router();
 
 router.get("/", getUsers);
-router.post("/add_remarks/:id", addRemarks);
+router.post("/add_remarks", addRemarks);
 
 router.get("/driver_emergency_list", getDriverEmergencyListController);
 router.get("/consumer_emergency_list", getConsumerEmergencyListController);

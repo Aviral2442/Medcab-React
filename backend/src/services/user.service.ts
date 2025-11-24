@@ -1,6 +1,7 @@
 import { db } from "../config/db";
 import { ApiError } from "../utils/api-error";
 import { buildFilters } from "../utils/filters";
+import { currentUnixTime } from "../utils/current_unixtime";
 
 // Get All Users
 export const getAllUsers = async (): Promise<any[]> => {
@@ -8,59 +9,72 @@ export const getAllUsers = async (): Promise<any[]> => {
   return rows as any[];
 };
 
-// Add Remarks by ID
-export const addRemarksById = async (
-  primaryId: number,
-  remarkType: string,
-  remarks: string
-) => {
-  try {
-    // ✅ Validation
-    if (!remarks || remarks.trim() === "") {
-      throw new ApiError(400, "Remarks cannot be empty");
-    }
+// remark.service.ts
+interface RemarkData {
+  remark_type: number;
+  remark_category_type: number;
+  remark_text: string;
+  remark_list_primary_key: number;
+}
 
-    if (isNaN(primaryId)) {
-      throw new ApiError(400, "Invalid ID");
-    }
+// CATEGORY → COLUMN MAPPING
+const remarkColumnMap: Record<number, string> = {
+  1: "remark_booking_id",
+  2: "remark_airbooking_id",
+  3: "remark_consumer_id",
+  4: "remark_partner_id",
+  5: "remark_driver_id",
+  6: "remark_vehicle_id",
+  7: "remark_hospital_id",
+  8: "remark_consumer_dial_id",
+  9: "remark_consumer_enquiry_records_id",
+  10: "ambulance_enquire_id",
+  11: "remark_manpower_vendor_id",
+  12: "remark_manpower_order_id",
+  13: "remark_driver_emergency_id",
+  14: "remark_consumer_emergency_id",
+  15: "remark_pathology_vendor_id",
+  16: "remark_pathology_order_id",
+  17: "remark_pathology_collection_boy_id",
+  18: "remark_video_consultancy_order_id",
+  19: "remark_video_consultancy_patient_id",
+};
 
-    if (!remarkType || !["BOOKING", "VENDOR", "CONSUMER"].includes(remarkType)) {
-      throw new ApiError(400, "Invalid remark type");
-    }
+// ADD REMARK SERVICE
+export const addRemarksById = async (remarkData: RemarkData) => {
+    try {
+      const columnName = remarkColumnMap[remarkData.remark_category_type];
 
-    // ✅ Current timestamps
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const now = new Date();
+      if (!columnName) {
+        throw new ApiError(400, "Invalid remark category type");
+      }
 
-    // ✅ Dynamic column based on remarkType
-    let column = "";
-    if (remarkType === "BOOKING") column = "remark_manpower_order_id";
-    else if (remarkType === "VENDOR") column = "remark_manpower_vendor_id";
-    else if (remarkType === "CONSUMER") column = "remark_consumer_id";
+      // Prepare final insert object
+      const remarkInsertData: any = {
+        remark_type: remarkData.remark_type,
+        remark_category_type: remarkData.remark_category_type,
+        remark_text: remarkData.remark_text,
+        remark_add_unix_time: currentUnixTime(),
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
 
-    // ✅ Build dynamic query safely
-    const query = `
-      INSERT INTO remark_data (${column}, remark_text, remark_add_unix_time, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?)
-    `;
+      // Set only the target column
+      remarkInsertData[columnName] = remarkData.remark_list_primary_key;
 
-    const params = [primaryId, remarks.trim(), currentTimestamp, now, now];
+      // Insert
+      const query = `INSERT INTO remark_data SET ?`;
+      await db.query(query, remarkInsertData);
 
-    // ✅ Execute query
-    const [result]: any = await db.query(query, params);
-
-    if (result?.affectedRows > 0) {
       return {
         status: 200,
-        message: "Remark added successfully",
+        message: "Remark added successfully"
       };
-    } else {
+
+    } catch (error) {
+      console.error("Error in addRemarksById:", error);
       throw new ApiError(500, "Failed to insert remark");
     }
-  } catch (error) {
-    console.error("Error in addRemarksById:", error);
-    throw new ApiError(500, "Failed to insert remark");
-  }
 };
 
 // Driver Emergency List with Filters and Pagination
