@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
-// import {
-//   Dropdown,
-//   DropdownMenu,
-//   DropdownItem,
-//   DropdownToggle,
-// } from "react-bootstrap";
 import '@/global.css';
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
