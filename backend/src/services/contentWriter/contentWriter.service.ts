@@ -1663,7 +1663,7 @@ export const editCityContentPathologyService = async (cityId: number, data: city
         if (data.city_pathology_emergency_desc) updateData.city_pathology_emergency_desc = data.city_pathology_emergency_desc;
 
         const [result]: any = await db.query(
-            `UPDATE city_content_pathology SET ? WHERE city_pathology_id = ?`,
+            `UPDATE city_pathology_content SET ? WHERE city_pathology_id = ?`,
             [updateData, cityId]
         );
 
@@ -1682,7 +1682,7 @@ export const updateCityContentPathologyStatusService = async (cityId: number, st
     try {
 
         const [result]: any = await db.query(`
-            UPDATE city_content_pathology SET city_pathology_status = ? WHERE city_pathology_id = ?
+            UPDATE city_pathology_content SET city_pathology_status = ? WHERE city_pathology_id = ?
         `, [status, cityId]);
 
         return {

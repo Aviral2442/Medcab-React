@@ -98,6 +98,17 @@ type ExportDataWithButtonsProps = {
   sectionId?: number; // Add this prop
 };
 
+// Add a helper function to get section name from ID
+const getSectionNameFromId = (id: number): string => {
+  const sectionNames: Record<number, string> = {
+    1: 'ambulance',
+    2: 'manpower',
+    3: 'video-consultation',
+    4: 'pathology',
+  };
+  return sectionNames[id] || 'ambulance';
+};
+
 const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
@@ -120,6 +131,9 @@ const ExportDataWithButtons = ({
 
   // Determine the section ID from props or URL params
   const currentSectionId = sectionId || sectionMap[params.section || 'ambulance'] || 1;
+  
+  // Get section name for URL navigation
+  const currentSectionName = getSectionNameFromId(currentSectionId);
 
   // Get section name for display
   const getSectionName = () => {
@@ -342,24 +356,29 @@ const ExportDataWithButtons = ({
       createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
         td.innerHTML = "";
         const root = createRoot(td);
+        
+        // Get the correct ID field based on section
+        const cityId = currentSectionId === 4 ? rowData.city_pathology_id : rowData.city_id;
+        const cityStatus = currentSectionId === 4 ? rowData.city_pathology_status : rowData.city_status;
+        
         root.render(
           <div className="d-flex flex-row gap-1">
             <button
               className="p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
               onClick={() => {
-                toggleStatus(rowData.city_id, rowData.city_status);
+                toggleStatus(cityId, cityStatus);
               }}
               title={
-                rowData.city_status === 0
+                cityStatus === 0
                   ? "Click to deactivate"
                   : "Click to activate"
               }
               style={{
                 backgroundColor:
-                  rowData.city_status === 0 ? "#d9534f" : "#3a833a",
+                  cityStatus === 0 ? "#d9534f" : "#3a833a",
               }}
             >
-              {rowData.city_status === 0 ? (
+              {cityStatus === 0 ? (
                 <FaRegTimesCircle className="me-1" />
               ) : (
                 <FaRegCheckCircle className="me-1" />
@@ -368,7 +387,7 @@ const ExportDataWithButtons = ({
             <button
               className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
               onClick={() => {
-                navigate(`/edit-city/${rowData.city_id}`);
+                navigate(`/city/${currentSectionName}/edit-city/${cityId}`);
               }}
             >
               <TbEdit className="me-1" />
