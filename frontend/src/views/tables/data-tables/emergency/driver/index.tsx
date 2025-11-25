@@ -97,7 +97,7 @@ const ExportDataWithButtons = ({
     defaultDateFilter: "today",
   });
 
-  const { endpoint, columns, headers } = tableConfig[tabKey];
+  const { endpoint, headers } = tableConfig[tabKey];
 
   const StatusFilterOptions = [
     { label: "New User", value: "newUser" },

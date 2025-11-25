@@ -2,22 +2,14 @@ import { type MenuItemType } from '@/types/layout'
 import { type IconType } from 'react-icons'
 import { TbLogout2, TbUserCircle } from 'react-icons/tb'
 import {
-  LuAlignLeft,
-  // LuAlignLeft,
   LuAmbulance,
-  // LuAmpersands,
   LuAxis3D,
   LuBed,
   LuCircleGauge,
-  // LuClipboardType,
   LuFileType,
-  // LuMoonStar,
-  // LuNotebookText,
   LuSettings,
-  // LuSquareMenu,
   LuTableOfContents,
   LuUser,
-  // LuUserRound,
   LuUserRoundPlus,
   LuVideo,
 } from 'react-icons/lu'

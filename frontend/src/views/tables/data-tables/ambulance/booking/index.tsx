@@ -6,7 +6,7 @@ import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import { TbArrowRight, TbEdit, TbEye, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEye, TbReceipt } from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
 import axios from "axios";
@@ -17,7 +17,6 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import _pdfMake from "pdfmake/build/pdfmake";
 import { bookingColumns } from "./components/booking";
-import { FaRegCheckCircle, FaRegTimesCircle } from "react-icons/fa";
 import { createRoot } from "react-dom/client";
 import AddRemark from "@/components/AddRemark";
 
@@ -113,7 +112,8 @@ const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
   onAddNew,
-  onEditRow,
+  // onEditRow,
+  onDataChanged,
   filterParams = {},
 }: ExportDataWithButtonsProps) => {
   const navigate = useNavigate();
@@ -183,6 +183,7 @@ const ExportDataWithButtons = ({
         bookings_id =
           res.data?.jsonData?.bulk_ambulance_booking_list?.booking_id || [];
       }
+      console.log("Bookings IDs:", bookings_id);
 
       // Ensure data is an array and has proper structure
       const validData = Array.isArray(dataArray) ? dataArray : [];
@@ -239,15 +240,15 @@ const ExportDataWithButtons = ({
     }
   };
 
-  const formatDate = (timestamp: number) => {
-    if (!timestamp) return "N/A";
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  // const formatDate = (timestamp: number) => {
+  //   if (!timestamp) return "N/A";
+  //   const date = new Date(timestamp * 1000);
+  //   return date.toLocaleDateString("en-IN", {
+  //     year: "numeric",
+  //     month: "short",
+  //     day: "numeric",
+  //   });
+  // };
 
   const columnsWithActions = [
     ...bookingColumns,

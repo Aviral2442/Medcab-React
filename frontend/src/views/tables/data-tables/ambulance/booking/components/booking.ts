@@ -55,17 +55,16 @@ export const bookingColumns = [
     },
     {
         data: 'booking_id',
-        defaultContent: '-'
+        defaultContent: '-'  // Make sure this is a string
     },
     {
         data: 'booking_source',
-        defaultContent: '-'
+        defaultContent: '-'  // Make sure this is a string
     },
     {
         data: 'booking_type',
-        defaultContent: '',
+        defaultContent: '-',  // Change from '' or 0 to '-' or '0'
         render: (data: any) => {
-            // Map booking_type if needed (e.g., 0=Regular, 1=Rental, 2=Bulk)
             const typeMap: Record<number, string> = { 0: "Regular", 1: "Rental", 2: "Bulk" };
             return typeMap[data] || data;
         }
@@ -86,6 +85,7 @@ export const bookingColumns = [
         data: 'booking_schedule_time',
         defaultContent: '-',
         render: (data: any) => {
+            if (!data) return '-';
             return data.toLocaleString();
         },
     },
@@ -99,18 +99,19 @@ export const bookingColumns = [
     },
     {
         data: 'booking_total_amount',
-        defaultContent: '-',
+        defaultContent: '-',  // Change from 0 to '-' or '0'
     },
     {
         data: 'created_at',
         defaultContent: '-',
         render: (data: any) => {
+            if (!data) return '-';
             return data.toLocaleString();
         },
     },
     {
         data: 'booking_status',
-        defaultContent: 0,
+        defaultContent: '0',  // Changed from 0 to '0'
         render: (data: number) => {
             const [variant, text] = statusMap[data] || ["secondary", "Unknown"];
             return `<span class="badge badge-label badge-soft-${variant}">${text}</span>`;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Row, Col, Form, Button } from "react-bootstrap";
+import { Card, Row, Col, Form } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX, TbUpload } from "react-icons/tb";
 
 interface VendorDetailsProps {
@@ -247,6 +247,16 @@ const Field: React.FC<FieldProps> = ({
   );
 };
 
+// Add this interface for field definitions
+interface FieldDef {
+  label: string;
+  name: string;
+  type?: "text" | "number" | "tel" | "email" | "date" | "datetime-local" | "image" | "textarea" | "select";
+  editable?: boolean;
+  rows?: number;
+  options?: { value: string | number; label: string }[];
+}
+
 // Standard option maps
 const genderOptions = [
   { value: "1", label: "Male" },
@@ -265,7 +275,7 @@ const vendorStatusOptions = [
 ];
 
 // Field configuration for vendor - expanded with your full list
-const vendorFieldGroups = {
+const vendorFieldGroups: Record<string, FieldDef[]> = {
   images: [
     { label: "Picture", name: "vendor_picture", type: "image", editable: true },
     {
