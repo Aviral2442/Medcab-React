@@ -18,7 +18,7 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import _pdfMake from "pdfmake/build/pdfmake";
 import { FaRegTimesCircle, FaRegCheckCircle } from "react-icons/fa";
-import { render } from "@fullcalendar/core/preact.js";
+
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -35,7 +35,7 @@ const headersCity = [
 
 const headersCityFAQ = [
   "S.No.", "FAQ ID", "City Name", "Question", "Answer", "Status"
-]
+];
 
 // Map section names to their IDs
 const sectionMap: Record<string, number> = {
@@ -115,7 +115,7 @@ const ExportDataWithButtons = ({
   onAddNew,
   onEditRow,
   filterParams = {},
-  sectionId, // Add this parameter
+  sectionId,
 }: ExportDataWithButtonsProps) => {
   const navigate = useNavigate();
   const params = useParams();
@@ -148,18 +148,48 @@ const ExportDataWithButtons = ({
 
   const toggleStatus = async (cityId: number, currentStatus: number) => {
     try {
-      const newStatus = currentStatus === 1 ? 0 : 1;
-      await axios.patch(
-        `${baseURL}/content_writer/update_city_content_status/${cityId}`,
-        {
-          city_content_status: newStatus,
-        }
-      );
+      // Ensure currentStatus is a number
+      const statusNum = typeof currentStatus === "string" ? parseInt(currentStatus) : currentStatus;
+      const newStatus = statusNum === 0 ? 1 : 0;
+      
+      // Get the correct endpoint based on section
+      let endpoint = "";
+      let statusField = "";
+      
+      switch (currentSectionId) {
+        case 1:
+          endpoint = `/content_writer/update_city_content_status/${cityId}`;
+          statusField = "city_status";
+          break;
+        case 2:
+          endpoint = `/content_writer/update_manpower_city_content_status/${cityId}`;
+          statusField = "city_status";
+          break;
+        case 3:
+          endpoint = `/content_writer/update_video_consult_city_content_status/${cityId}`;
+          statusField = "city_status";
+          break;
+        case 4:
+          endpoint = `/content_writer/update_pathology_city_content_status/${cityId}`;
+          statusField = "city_pathology_status";
+          break;
+        default:
+          endpoint = `/content_writer/update_city_content_status/${cityId}`;
+          statusField = "city_status";
+      }
+
+      await axios.patch(`${baseURL}${endpoint}`, {
+        [statusField]: newStatus,
+      });
 
       setTableData((prevData) =>
-        prevData.map((city) =>
-          city.city_id === cityId ? { ...city, city_status: newStatus } : city
-        )
+        prevData.map((city) => {
+          const itemId = currentSectionId === 4 ? city.city_pathology_id : city.city_id;
+          if (itemId === cityId) {
+            return { ...city, [statusField]: newStatus };
+          }
+          return city;
+        })
       );
     } catch (error) {
       console.error("Error updating city status:", error);
@@ -174,19 +204,44 @@ const ExportDataWithButtons = ({
           : currentStatus;
       const newStatus = status === 0 ? 1 : 0;
 
-      await axios.patch(
-        `${baseURL}/content_writer/update_city_content_faq_status/${faqId}`,
-        {
-          city_faq_status: newStatus,
-        }
-      );
+      // Get the correct endpoint based on section
+      let endpoint = "";
+      let statusField = "";
+      
+      switch (currentSectionId) {
+        case 1:
+          endpoint = `/content_writer/update_city_content_faq_status/${faqId}`;
+          statusField = "city_faq_status";
+          break;
+        case 2:
+          endpoint = `/content_writer/update_city_manpower_content_faq_status/${faqId}`;
+          statusField = "city_faq_status";
+          break;
+        case 3:
+          endpoint = `/content_writer/update_city_video_consult_content_faq_status/${faqId}`;
+          statusField = "city_faq_status";
+          break;
+        case 4:
+          endpoint = `/content_writer/update_city_pathology_content_faq_status/${faqId}`;
+          statusField = "city_pathology_faq_status";
+          break;
+        default:
+          endpoint = `/content_writer/update_city_content_faq_status/${faqId}`;
+          statusField = "city_faq_status";
+      }
+
+      await axios.patch(`${baseURL}${endpoint}`, {
+        [statusField]: newStatus,
+      });
 
       setTableData((prevData) =>
-        prevData.map((faq) =>
-          faq.city_faq_id === faqId
-            ? { ...faq, city_faq_status: newStatus }
-            : faq
-        )
+        prevData.map((faq) => {
+          const itemId = currentSectionId === 4 ? faq.city_pathology_faq_id : faq.city_faq_id;
+          if (itemId === faqId) {
+            return { ...faq, [statusField]: newStatus };
+          }
+          return faq;
+        })
       );
     } catch (error) {
       console.error("Error updating FAQ status:", error);
@@ -456,17 +511,21 @@ const ExportDataWithButtons = ({
       createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
         td.innerHTML = "";
         const root = createRoot(td);
+        
+        // Get the correct ID and status fields based on section
+        const faqId = currentSectionId === 4 ? rowData.city_pathology_faq_id : rowData.city_faq_id;
+        const faqStatus = currentSectionId === 4 ? rowData.city_pathology_faq_status : rowData.city_faq_status;
         const status =
-          typeof rowData.city_faq_status === "string"
-            ? parseInt(rowData.city_faq_status)
-            : rowData.city_faq_status;
+          typeof faqStatus === "string"
+            ? parseInt(faqStatus)
+            : faqStatus;
 
         root.render(
           <div className="d-flex flex-row gap-1">
             <button
               className="p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
               onClick={() => {
-                toggleFAQStatus(rowData.city_faq_id, rowData.city_faq_status);
+                toggleFAQStatus(faqId, faqStatus);
               }}
               title={status === 0 ? "Click to deactivate" : "Click to activate"}
               style={{
