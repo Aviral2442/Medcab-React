@@ -560,7 +560,9 @@ export const addCityContentFaqService = async (data: cityContentFaqData) => {
         }
 
         const [result]: any = await db.query(
-            `INSERT INTO city_faq SET ?`,
+            `INSERT INTO city_faq SET ?
+            
+            `,
             [insertData]
         );
 

@@ -18,6 +18,7 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import _pdfMake from "pdfmake/build/pdfmake";
 import { FaRegTimesCircle, FaRegCheckCircle } from "react-icons/fa";
+import { render } from "@fullcalendar/core/preact.js";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -157,7 +158,7 @@ const ExportDataWithButtons = ({
         typeof currentStatus === "string"
           ? parseInt(currentStatus)
           : currentStatus;
-      const newStatus = status === 1 ? 0 : 1;
+      const newStatus = status === 0 ? 1 : 0;
 
       await axios.patch(
         `${baseURL}/content_writer/update_city_content_faq_status/${faqId}`,
@@ -197,8 +198,8 @@ const ExportDataWithButtons = ({
   const { endpoint, headers } = config || { endpoint: "", headers: [] };
 
   const statusFilterOptions = [
-    { label: "Active", value: "1" },
-    { label: "Inactive", value: "0" },
+    { label: "Active", value: "0" },
+    { label: "Inactive", value: "1" },
   ];
 
   const fetchData = async () => {
@@ -294,38 +295,42 @@ const ExportDataWithButtons = ({
     },
     {
       title: "ID",
-      data: "city_id",
+      data: currentSectionId === 4 ? "city_pathology_id" : "city_id",
+      render: (data: any) => {
+        return data || "N/A";
+      },
     },
     {
       title: "City Name",
-      data: "city_name",
+      data: currentSectionId === 4 ? "city_pathology_name" : "city_name",
       render: (data: string) => {
         return data || "N/A";
       },
     },
     {
       title: "City Title",
-      data: "city_title",
+      data: currentSectionId === 4 ? "city_pathology_title" : "city_title",
       render: (data: string) => {
         return data || "N/A";
       },
     },
     {
       title: "Date",
-      data: "city_timestamp",
-      render: (data: number) => formatDate(data),
+      data: currentSectionId === 4 ? "city_pathology_timestamp" : "city_timestamp",
+      render: (data: any) => {
+        return formatDate(data);
+      },
     },
     {
       title: "Status",
-      data: "city_status",
+      data: currentSectionId === 4 ? "city_pathology_status" : "city_status",
       render: (data: any) => {
         const status = typeof data === "string" ? parseInt(data) : data;
-        if (status === 1 || status === "1") {
+        if (status === 0 || status === "0") {
           return `<span class="badge badge-label badge-soft-success">Active</span>`;
-        } else if (status === 0 || status === "0") {
+        } else if (status === 1 || status === "1") {
           return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
         }
-        return `<span class="badge badge-label badge-soft-secondary">Unknown</span>`;
       },
     },
     {
@@ -345,16 +350,16 @@ const ExportDataWithButtons = ({
                 toggleStatus(rowData.city_id, rowData.city_status);
               }}
               title={
-                rowData.city_status === 1
+                rowData.city_status === 0
                   ? "Click to deactivate"
                   : "Click to activate"
               }
               style={{
                 backgroundColor:
-                  rowData.city_status === 1 ? "#d9534f" : "#3a833a",
+                  rowData.city_status === 0 ? "#d9534f" : "#3a833a",
               }}
             >
-              {rowData.city_status === 1 ? (
+              {rowData.city_status === 0 ? (
                 <FaRegTimesCircle className="me-1" />
               ) : (
                 <FaRegCheckCircle className="me-1" />
@@ -386,8 +391,7 @@ const ExportDataWithButtons = ({
     },
     {
       title: "ID",
-      data: "city_faq_id",
-      defaultContent: "N/A",
+      data: currentSectionId === 4 ? "city_pathology_faq_id" : "city_faq_id",
       render: (data: any) => {
         return data || "N/A";
       },
@@ -399,36 +403,29 @@ const ExportDataWithButtons = ({
     },
     {
       title: "Question",
-      data: "city_faq_que",
-      defaultContent: "N/A",
+      data: currentSectionId === 4 ? "city_pathology_faq_que" : "city_faq_ques",
       render: (data: string) => {
         return data || "N/A";
       },
     },
     {
       title: "Answer",
-      data: "city_faq_ans",
-      defaultContent: "N/A",
+      data: currentSectionId === 4 ? "city_pathology_faq_ans" : "city_faq_ans",
       render: (data: string) => {
-        const maxLength = 100;
-        if (!data) return "N/A";
-        return data.length > maxLength
-          ? data.substring(0, maxLength) + "..."
-          : data;
+        return data || "N/A";
       },
     },
     {
       title: "Status",
-      data: "city_faq_status",
+      data: currentSectionId === 4 ? "city_pathology_faq_status" : "city_faq_status",
       defaultContent: "0",
       render: (data: any) => {
         const status = typeof data === "string" ? parseInt(data) : data;
-        if (status === 1 || status === "1") {
+        if (status === 0 || status === "0") {
           return `<span class="badge badge-label badge-soft-success">Active</span>`;
-        } else if (status === 0 || status === "0") {
+        } else if (status === 1 || status === "1") {
           return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
         }
-        return `<span class="badge badge-label badge-soft-secondary">Unknown</span>`;
       },
     },
     {
@@ -452,12 +449,12 @@ const ExportDataWithButtons = ({
               onClick={() => {
                 toggleFAQStatus(rowData.city_faq_id, rowData.city_faq_status);
               }}
-              title={status === 1 ? "Click to deactivate" : "Click to activate"}
+              title={status === 0 ? "Click to deactivate" : "Click to activate"}
               style={{
-                backgroundColor: status === 1 ? "#d9534f" : "#3a833a",
+                backgroundColor: status === 0 ? "#d9534f" : "#3a833a",
               }}
             >
-              {status === 1 ? (
+              {status === 0 ? (
                 <FaRegTimesCircle className="me-1" />
               ) : (
                 <FaRegCheckCircle className="me-1" />
@@ -514,7 +511,7 @@ const ExportDataWithButtons = ({
       <ComponentCard
         title={
           <div className="w-100">
-            {getSectionName()} - {tabKey === 1 ? "Manage City" : "Manage City FAQ"}
+            {getSectionName()} - {tabKey === 1 ? "City" : "City FAQ"}
           </div>
         }
         className="mb-2"
