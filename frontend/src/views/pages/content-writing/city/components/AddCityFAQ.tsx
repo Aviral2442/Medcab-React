@@ -48,17 +48,30 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
 
   React.useEffect(() => {
     if (mode === "edit" && data) {
-      setSelectedCityId(data.city_id || 0);
-      setFaqList([
-        {
-          city_id: data.city_id || 0,
-          city_faq_que: data.city_faq_que || "",
-          city_faq_ans: data.city_faq_ans || "",
-          city_faq_status: String(data.city_faq_status ?? "1"),
-        },
-      ]);
+      // Handle pathology section differently
+      if (sectionId === 4) {
+        setSelectedCityId(data.city_pathology_id || 0);
+        setFaqList([
+          {
+            city_id: data.city_pathology_id || 0,
+            city_faq_que: data.city_pathology_faq_que || "",
+            city_faq_ans: data.city_pathology_faq_ans || "",
+            city_faq_status: String(data.city_pathology_faq_status ?? "1"),
+          },
+        ]);
+      } else {
+        setSelectedCityId(data.city_id || 0);
+        setFaqList([
+          {
+            city_id: data.city_id || 0,
+            city_faq_que: data.city_faq_que || "",
+            city_faq_ans: data.city_faq_ans || "",
+            city_faq_status: String(data.city_faq_status ?? "1"),
+          },
+        ]);
+      }
     }
-  }, [mode, data]);
+  }, [mode, data, sectionId]);
 
   const handleChange = (index: number, key: keyof FAQItem, value: string) => {
     setFaqList((prev) => {
@@ -99,7 +112,7 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
     }
   };
 
-  // Get the correct API endpoint based on sectionId
+  // Get the correct API endpoint based on sectionId - Updated to match backend routes
   const getApiEndpoints = () => {
     const endpoints: Record<number, { add: string; edit: string }> = {
       1: {
@@ -107,16 +120,16 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
         edit: "/content_writer/edit_city_content_faq",
       },
       2: {
-        add: "/content_writer/add_city_content_manpower_faq",
-        edit: "/content_writer/edit_city_content_manpower_faq",
+        add: "/content_writer/add_city_manpower_content_faq",
+        edit: "/content_writer/edit_city_manpower_content_faq",
       },
       3: {
-        add: "/content_writer/add_city_content_video_consult_faq",
-        edit: "/content_writer/edit_city_content_video_consult_faq",
+        add: "/content_writer/add_city_video_consult_content_faq",
+        edit: "/content_writer/edit_city_video_consult_content_faq",
       },
       4: {
-        add: "/content_writer/add_city_content_pathology_faq",
-        edit: "/content_writer/edit_city_content_pathology_faq",
+        add: "/content_writer/add_city_pathology_content_faq",
+        edit: "/content_writer/edit_city_pathology_content_faq",
       },
     };
     return endpoints[sectionId] || endpoints[1];
@@ -128,30 +141,56 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
       const endpoints = getApiEndpoints();
 
       if (mode === "edit" && data) {
-        const payload = {
-          city_id: selectedCityId,
-          city_faq_que: faqList[0].city_faq_que,
-          city_faq_ans: faqList[0].city_faq_ans,
-          city_faq_status: parseInt(faqList[0].city_faq_status),
-        };
-        await axios.put(
-          `${baseURL}${endpoints.edit}/${data.city_faq_id}`,
-          payload
-        );
+        // Handle pathology section differently
+        if (sectionId === 4) {
+          const payload = {
+            city_pathology_id: selectedCityId,
+            city_pathology_faq_que: faqList[0].city_faq_que,
+            city_pathology_faq_ans: faqList[0].city_faq_ans,
+          };
+          await axios.put(
+            `${baseURL}${endpoints.edit}/${data.city_pathology_faq_id}`,
+            payload
+          );
+        } else {
+          const payload = {
+            city_id: selectedCityId,
+            city_faq_que: faqList[0].city_faq_que,
+            city_faq_ans: faqList[0].city_faq_ans,
+          };
+          await axios.put(
+            `${baseURL}${endpoints.edit}/${data.city_faq_id}`,
+            payload
+          );
+        }
         onDataChanged();
         onCancel();
       } else {
-        const payload = faqList.map((faq) => ({
-          city_id: faq.city_id,
-          city_faq_que: faq.city_faq_que,
-          city_faq_ans: faq.city_faq_ans,
-          city_faq_status: parseInt(faq.city_faq_status),
-        }));
-        await Promise.all(
-          payload.map((faq) =>
-            axios.post(`${baseURL}${endpoints.add}`, faq)
-          )
-        );
+        // Handle add mode
+        if (sectionId === 4) {
+          // Pathology section uses different field names
+          const payload = faqList.map((faq) => ({
+            city_pathology_id: faq.city_id,
+            city_pathology_faq_que: faq.city_faq_que,
+            city_pathology_faq_ans: faq.city_faq_ans,
+          }));
+          await Promise.all(
+            payload.map((faq) =>
+              axios.post(`${baseURL}${endpoints.add}`, faq)
+            )
+          );
+        } else {
+          const payload = faqList.map((faq) => ({
+            city_id: faq.city_id,
+            city_faq_que: faq.city_faq_que,
+            city_faq_ans: faq.city_faq_ans,
+          }));
+          await Promise.all(
+            payload.map((faq) =>
+              axios.post(`${baseURL}${endpoints.add}`, faq)
+            )
+          );
+        }
         onDataChanged();
         onCancel();
         console.log("City FAQs added successfully");

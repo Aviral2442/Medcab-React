@@ -422,7 +422,7 @@ const ExportDataWithButtons = ({
     },
     {
       title: "Question",
-      data: currentSectionId === 4 ? "city_pathology_faq_que" : "city_faq_ques",
+      data: currentSectionId === 4 ? "city_pathology_faq_que" : "city_faq_que",
       render: (data: string) => {
         return data || "N/A";
       },

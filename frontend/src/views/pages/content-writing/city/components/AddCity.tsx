@@ -303,18 +303,12 @@ const AddCity: React.FC<AddCityProps> = ({
         let city;
         const jsonData = response.data?.jsonData;
         
-        // Try to find city data from different possible keys
         if (sectionId === 1) {
           city = jsonData?.city_content;
         } else if (sectionId === 2) {
-          // Manpower section - try multiple possible keys
-          city = jsonData?.city_manpower_content || 
-                 jsonData?.manpower_city_content || 
-                 jsonData?.city_content;
+          city = jsonData?.city_manpower_content;
         } else if (sectionId === 3) {
-          city = jsonData?.city_video_consultancy_content || 
-                 jsonData?.video_consult_city_content ||
-                 jsonData?.city_content;
+          city = jsonData?.city_video_consultancy_content;
         }
 
         if (!city) {
