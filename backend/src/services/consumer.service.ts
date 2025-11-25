@@ -1,8 +1,6 @@
 import { db } from '../config/db';
 import { ApiError } from '../utils/api-error';
 import { buildFilters } from '../utils/filters';
-import path from 'path';
-import fs from 'fs';
 
 // ✅ GET CONSUMER LIST WITH FILTERS + PAGINATION (Fully Fixed)
 export const getConsumerList = async (filters?: {
