@@ -471,7 +471,7 @@ const ExportDataWithButtons = ({
       },
     },
     {
-      title: "City Name",
+      title: "City",
       data: "city_name",
       defaultContent: "N/A",
     },

@@ -24,7 +24,7 @@ type AmbulanceBookingInfoType = {
     booking_type: string
     booking_con_name: string
     booking_con_mobile: string
-    booking_category: string
+    booking_view_category_name: string
     booking_schedule_time: string
     booking_pickup: string
     booking_drop: string
@@ -43,6 +43,22 @@ const statusMap: Record<number, [string, string]> = {
     5: ["danger", "Cancel"],
 };
 
+// Helper function to format date
+const formatDate = (data: any): string => {
+    if (!data) return '-';
+    try {
+        const date = new Date(data);
+        if (isNaN(date.getTime())) return data;
+        
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    } catch {
+        return data;
+    }
+};
+
 // BOOKING COLUMNS
 export const bookingColumns = [
     {
@@ -58,10 +74,6 @@ export const bookingColumns = [
         defaultContent: '-'  // Make sure this is a string
     },
     {
-        data: 'booking_source',
-        defaultContent: '-'  // Make sure this is a string
-    },
-    {
         data: 'booking_type',
         defaultContent: '-',  // Change from '' or 0 to '-' or '0'
         render: (data: any) => {
@@ -72,22 +84,20 @@ export const bookingColumns = [
     {
         data: 'booking_con_name',
         defaultContent: '-',
+        render: (_data: any, _type: any, row: any) => {
+            const name = row['booking_con_name'] || '-';
+            const mobile = row['booking_con_mobile'] || '-';
+            return `${name} <br/> (${mobile})`;
+        }
     },
     {
-        data: 'booking_con_mobile',
-        defaultContent: '-',
-    },
-    {
-        data: 'booking_category',
+        data: 'booking_view_category_name',
         defaultContent: '-',
     },
     {
         data: 'booking_schedule_time',
         defaultContent: '-',
-        render: (data: any) => {
-            if (!data) return '-';
-            return data.toLocaleString();
-        },
+        render: (data: any) => formatDate(data),
     },
     {
         data: 'booking_pickup',
@@ -104,10 +114,7 @@ export const bookingColumns = [
     {
         data: 'created_at',
         defaultContent: '-',
-        render: (data: any) => {
-            if (!data) return '-';
-            return data.toLocaleString();
-        },
+        render: (data: any) => formatDate(data),
     },
     {
         data: 'booking_status',
@@ -120,6 +127,6 @@ export const bookingColumns = [
 ];
 
 export const bookingTableData: TableType<AmbulanceBookingInfoType> = {
-    header: ["S.No.", 'ID', 'Source', 'Type', 'Consumer', 'Mobile', 'Category', 'Schedule', 'Pickup', 'Drop', ' Amount', 'Date', 'Status'],
+    header: ["S.No.", 'ID', 'Type', 'Consumer', 'Category', 'Schedule', 'Pickup', 'Drop', ' Amount', 'Date', 'Status'],
     body: bookingRows,
 };

@@ -1173,7 +1173,7 @@ export const getAmbulanceBookingListService = async (filters?: {
                 booking_view.booking_type,
                 booking_view.booking_con_name,
                 booking_view.booking_con_mobile,
-                booking_view.booking_category,
+                booking_view.booking_view_category_name,
                 booking_view.booking_schedule_time,
                 booking_view.booking_pickup,
                 booking_view.booking_drop,

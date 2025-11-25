@@ -30,10 +30,8 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Source",
       "Type",
       "Consumer",
-      "Mobile",
       "Category",
       "Schedule",
       "Pickup",
@@ -48,10 +46,8 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Source",
       "Type",
       "Consumer",
-      "Mobile",
       "Category",
       "Schedule",
       "Pickup",
@@ -66,10 +62,8 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Source",
       "Type",
       "Consumer",
-      "Mobile",
       "Category",
       "Schedule",
       "Pickup",
@@ -84,10 +78,8 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Source",
       "Type",
       "Consumer",
-      "Mobile",
       "Category",
       "Schedule",
       "Pickup",
