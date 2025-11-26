@@ -58,6 +58,20 @@ export const getBlogListService = async (filters?: {
             }
         }
 
+                // Detect filters
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
+
         const query = `
             SELECT 
                 blogs.blogs_id,
@@ -72,21 +86,32 @@ export const getBlogListService = async (filters?: {
             LIMIT ? OFFSET ?
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        // console.log("Blog List Rows:", rows);
+        let total;
 
+        if (noFiltersApplied) {
+            // determine actual total count and cap at 100 when no filters applied
+            const [countAllRows]: any = await db.query(`SELECT COUNT(*) as total FROM blogs`);
+            const actualTotal = countAllRows[0]?.total || 0;
 
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM blogs ${finalWhereSQL}`,
-            params
-        );
+            if (actualTotal < 100) {
+                total = actualTotal;
+            } else {
+                total = 100;
+            }
 
-        const total = countRows[0]?.total || 0;
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM blogs ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
 
         return {
-            status: 200,
+            status: 200 ,
             message: "Blogs list fetched successfully",
             pagination: {
                 page,
@@ -306,6 +331,8 @@ export const getCityContentService = async (filters?: {
 
         const queryParams = [...params, limit, offset];
         const [rows]: any = await db.query(query, queryParams);
+
+
 
         const [countRows]: any = await db.query(
             `SELECT COUNT(*) as total FROM city_content ${whereSQL}`,

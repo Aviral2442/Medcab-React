@@ -1,4 +1,5 @@
 import axios from "axios";
+import { formatDate } from "@/components/DateFormat";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 const basePath = (import.meta as any).env?.base_Path ?? "http://localhost:4000";
 
@@ -57,8 +58,7 @@ export const partnerColumns = [
     {
         data: 'created_at',
         render: (data: string) => {
-            const date = new Date(data);
-            return date.toLocaleDateString();
+            return formatDate(data);
         }
     },
     { data: 'remark_text' },

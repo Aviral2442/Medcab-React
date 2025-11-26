@@ -40,6 +40,7 @@ const tableConfig: Record<
       "Wallet",
       // "City ID",
       "Created By",
+      "Partner",
       "Duty Status",
       "Date",
       "Remark",
@@ -128,7 +129,7 @@ const ExportDataWithButtons = ({
   };
 
   const handleRemark = (rowData: any) => {
-    const id = rowData?.driver_id ?? rowData?.id;
+    const id = rowData?.driver_id;
     setSelectedDriverId(id);
     setIsRemarkOpen(true);
   };

@@ -50,17 +50,17 @@ export const getDriverService = async (filters: {
         const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
-        const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'created_at' });
+        const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'driver.created_at' });
 
         let finalWhereSQL = whereSQL;
 
         if (filters?.status) {
             const statusConsitionMap: Record<string, string> = {
-                new: "driver_status = 0",
-                active: "driver_status = 1",
-                inActive: "driver_status = 2",
-                delete: "driver_status = 3",
-                verification: "driver_status = 4",
+                new: "driver.driver_status = 0",
+                active: "driver.driver_status = 1",
+                inActive: "driver.driver_status = 2",
+                delete: "driver.driver_status = 3",
+                verification: "driver.driver_status = 4",
             };
 
             const condition = statusConsitionMap[filters.status];
@@ -74,50 +74,74 @@ export const getDriverService = async (filters: {
             }
         }
 
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
+
         const query = `
 
             SELECT 
-                driver_id,
-                driver_name,
-                driver_last_name,
-                driver_mobile,
-                driver_wallet_amount,
-                driver_city_id,
-                driver_created_by, /* 0 for Self 1 for Partner */
-                driver_profile_img,
-                driver_registration_step,
-                driver_duty_status,
-                driver_status,
-                driver_duty_status,
-                created_at
+                driver.driver_id,
+                driver.driver_name,
+                driver.driver_last_name,
+                driver.driver_mobile,
+                driver.driver_wallet_amount,
+                driver.driver_city_id,
+                driver.driver_created_by, /* 0 for Self 1 for Partner */
+                driver.driver_profile_img,
+                driver.driver_registration_step,
+                driver.driver_duty_status,
+                driver.driver_status,
+                driver.driver_duty_status,
+                partner.partner_f_name AS created_partner_name,
+                partner.partner_mobile AS created_partner_mobile,
+                driver.created_at,
+                (
+                    SELECT remark_text
+                    FROM remark_data
+                    WHERE remark_driver_id = driver.driver_id
+                    ORDER BY remark_id DESC
+                    LIMIT 1
+                ) AS remark_text
             FROM driver
+            LEFT JOIN partner ON driver.driver_created_by = 1 AND driver.driver_created_partner_id = partner.partner_id
             ${finalWhereSQL}
-            ORDER BY driver_id DESC
+            ORDER BY driver.driver_id DESC
             LIMIT ? OFFSET ?;
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        const [countRows]: any = await db.query(
-            `
-            SELECT COUNT(*) as total
-            FROM driver
-            ${finalWhereSQL}
-            `, params
-        );
+        let total;
 
-        const totalData = countRows[0]?.total || 0;
-        const totalPages = Math.ceil(totalData / limit);
-
+        if (noFiltersApplied) {
+            total = 100;
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM driver ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
+        
         return {
             status: 200,
             message: 'Drivers List Fetch Successful',
             paginations: {
                 page,
                 limit,
-                total: totalData,
-                totalPages
+                total,
+                totalPages: Math.ceil(total / limit)
             },
             jsonData: {
                 drivers: rows

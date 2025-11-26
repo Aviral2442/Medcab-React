@@ -1,15 +1,15 @@
 import axios from "axios";
-import { data } from "jquery";
+import { formatDate } from "@/components/DateFormat";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
 type DriverInfoType = {
     driver_id: number;
     driver_profile_img: string;
     driver_name: string;
-    // driver_last_name: string;
     driver_mobile: string;
     driver_wallet_amount: number;
-    // driver_city_id: number;
+    created_partner_mobile: string;
+    created_partner_name: string;
     driver_created_by: number; // 0: Self, 1: Partner
     driver_registration_step: number;
     driver_duty_status: string;
@@ -26,7 +26,7 @@ let driverRows: DriverInfoType[] = [];
 
 export const getDriverList = async () => {
     try {
-        const response = await axios.get(`${baseURL}/driver/get_drivers`);
+        const response = await axios.get(`${baseURL}/driver/get_drivers_list`);
         driverRows = response.data.jsonData?.drivers || [];
         return driverRows;
     } catch (error) {
@@ -43,13 +43,13 @@ export const driverColumns = [
             if (data) {
                 return `<img src="${data}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />`;
             }
-            return 'N/A';
+            return '';
         }
     },
     { data: 'driver_name' },
     // { data: 'driver_last_name' },
     { data: 'driver_mobile' },
-    { 
+    {
         data: 'driver_wallet_amount',
         render: (data: number) => {
             return `₹${data || 0}`;
@@ -61,6 +61,16 @@ export const driverColumns = [
         render: (data: number) => {
             return data === 0 ? 'Self' : 'Partner';
         }
+    },
+    {
+        data: 'created_partner_name',
+        defaultContent: '',
+        render: (_data: string, _type: any, row: any) => {
+            const name = row['created_partner_name'] || '';
+            const mobile = row['created_partner_mobile'] || '';
+            if (!name && !mobile) return '';
+            return `${name}${mobile ? ` <br/> (${mobile})` : ''}`;
+        },
     },
     {
         data: 'driver_duty_status',
@@ -75,11 +85,12 @@ export const driverColumns = [
     {
         data: 'created_at',
         render: (data: string) => {
-            const date = new Date(data);
-            return date.toLocaleDateString();
+            return formatDate(data);
         }
     },
-    { data: 'remark_text' },
+    { data: 'remark_text',
+        defaultContent: ' ',
+     },
     {
         data: 'driver_status',
         render: (data: number) => {
@@ -107,6 +118,7 @@ export const driverTableData: TableType<DriverInfoType> = {
         "Wallet",
         // "City ID",
         "Created By",
+        "Partner",
         "Profile",
         "Duty Status",
         "Created At",

@@ -11,8 +11,6 @@ import pdfmake from "pdfmake";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import TablePagination from "@/components/table/TablePagination";
-import TableFilters from "@/components/table/TableFilters";
-import { useTableFilters } from "@/hooks/useTableFilters";
 import { FaRegTimesCircle, FaRegCheckCircle } from "react-icons/fa";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
@@ -39,7 +37,6 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      // "Ambulance ID",
       "Question",
       "Answer",
       "Created At",
@@ -84,6 +81,7 @@ const ExportDataWithButtons = ({
   const [pageSize] = useState(10);
   const [_total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
@@ -110,7 +108,6 @@ const ExportDataWithButtons = ({
     }
   };
 
-  // Line 128-143 - Fix toggleFAQStatus function
   const toggleFAQStatus = async (faqId: number, currentStatus: number) => {
     try {
       const newStatus = currentStatus === 0 ? 1 : 0;
@@ -149,31 +146,16 @@ const ExportDataWithButtons = ({
     }
   };
 
-  const {
-    dateFilter,
-    statusFilter,
-    dateRange,
-    currentPage,
-    handleDateFilterChange,
-    handleStatusFilterChange,
-    handleDateRangeChange,
-    handlePageChange,
-    getFilterParams,
-  } = useTableFilters({
-    defaultDateFilter: "",
-  });
-
   const { endpoint } = tableConfig[tabKey];
-
-  const statusFilterOptions = [
-    { label: "Active", value: "1" },
-    { label: "Inactive", value: "0" },
-  ];
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const params = getFilterParams(pageSize, filterParams);
+      const params = {
+        ...filterParams,
+        page: currentPage + 1,
+        limit: pageSize,
+      };
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
       console.log("Fetched data:", res.data);
       let dataArray: any[] = [];
@@ -186,10 +168,6 @@ const ExportDataWithButtons = ({
       }
 
       const validData = Array.isArray(dataArray) ? dataArray : [];
-      
-      // Add debugging
-      // console.log("Processed data array:", validData);
-      // console.log("First row sample:", validData[2]);
       
       setTableData(validData);
 
@@ -212,9 +190,13 @@ const ExportDataWithButtons = ({
     }
   };
 
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
   useEffect(() => {
     fetchData();
-  }, [refreshFlag, currentPage, dateFilter, statusFilter, dateRange, tabKey]);
+  }, [refreshFlag, currentPage, tabKey]);
 
   const formatDate = (timestamp: number) => {
     if (!timestamp) return "N/A";
@@ -226,7 +208,6 @@ const ExportDataWithButtons = ({
     });
   };
 
-  // Memoize columns to prevent unnecessary re-renders
   const CategoryColumns = useMemo(
     () => [
       {
@@ -345,7 +326,6 @@ const ExportDataWithButtons = ({
         },
       },
       { title: "ID", data: "ambulance_faq_id", defaultContent: "N/A" },
-      // { title: "Ambulance ID", data: "ambulance_id", defaultContent: "N/A" },
       { title: "Question", data: "ambulance_faq_que", defaultContent: "N/A" },
       {
         title: "Answer",
@@ -386,7 +366,6 @@ const ExportDataWithButtons = ({
         createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
           td.innerHTML = "";
           const root = createRoot(td);
-          // Line 393-420 - Fix FAQ Toggle Button (reversed)
           root.render(
             <div className="d-flex flex-row gap-1">
               <button
@@ -442,9 +421,6 @@ const ExportDataWithButtons = ({
           return currentPage * pageSize + meta.row + 1;
         },
       },
-      // Check your console.log output to verify the exact field names
-      // Based on the backend query at line 713-720 of ambulance.service.ts
-      // The fields should be exactly as returned by the SQL query
       { 
         title: "ID", 
         data: "ambulance_facilities_rate_id",
@@ -572,21 +548,6 @@ const ExportDataWithButtons = ({
         className="mb-2"
         headerActions={
           <div className="d-flex gap-2 align-items-center">
-            <TableFilters
-              dateFilter={dateFilter}
-              statusFilter={statusFilter}
-              dateRange={dateRange}
-              onDateFilterChange={handleDateFilterChange}
-              onStatusFilterChange={handleStatusFilterChange}
-              onDateRangeChange={handleDateRangeChange}
-              statusOptions={statusFilterOptions}
-              showDateRange={true}
-              showDateFilter={true}
-              showStatusFilter={true}
-              dateFilterPlaceholder="Quick filter"
-              dateRangePlaceholder="Custom date range"
-              statusFilterPlaceholder="Status"
-            />
             <button
               className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
               onClick={onAddNew}

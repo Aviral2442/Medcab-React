@@ -1,4 +1,5 @@
 import axios from "axios";
+import { formatDate } from "@/components/DateFormat";
 const baseURL = (import.meta as any).env?.VITE_IMAGE_PATH ?? "";
 
 let bookingRows: any[] = [];
@@ -41,22 +42,6 @@ const statusMap: Record<number, [string, string]> = {
     3: ["warning", "Invoice"],
     4: ["success", "Complete"],
     5: ["danger", "Cancel"],
-};
-
-// Helper function to format date
-const formatDate = (data: any): string => {
-    if (!data) return '-';
-    try {
-        const date = new Date(data);
-        if (isNaN(date.getTime())) return data;
-        
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-    } catch {
-        return data;
-    }
 };
 
 // BOOKING COLUMNS

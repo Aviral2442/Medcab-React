@@ -17,7 +17,7 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import { FaRegTimesCircle, FaRegCheckCircle } from "react-icons/fa";
-
+import { formatDate } from "@/components/DateFormat";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -65,7 +65,6 @@ const ExportDataWithButtons = ({
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   const basePath = (import.meta as any).env?.base_Path ?? "http://localhost:4000";
-  console.log("Base Path:", basePath);
 
   const toggleStatus = async (blogId: number, currentStatus: number) => {
     try {
@@ -97,7 +96,7 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, headers } = tableConfig[tabKey];
@@ -145,16 +144,6 @@ const ExportDataWithButtons = ({
     statusFilter,
     dateRange,
   ]);
-
-  const formatDate = (timestamp: number) => {
-    if (!timestamp) return "N/A";
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   const blogColumns = [
     {
@@ -260,48 +249,6 @@ const ExportDataWithButtons = ({
         title={
           <div className="w-100 ">
             {tabKey === 1 ? "Manage Blogs" : ""}
-            {/* <div className="mb-3"></div> */}
-            {/* <div className="d-flex flex-column flex-md-row gap-2 align-items-start align-items-md-center justify-content-between">
-              <div className="d-flex gap-2 flex-wrap">
-                <InputGroup style={{ maxWidth: '300px' }}>
-                  <FormControl
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => handleSearch(e.target.value)}
-                  />
-                </InputGroup>
-                <ButtonGroup>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleExport('copy')}
-                  >
-                    Copy
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleExport('excel')}
-                  >
-                    Excel
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleExport('csv')}
-                  >
-                    CSV
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleExport('pdf')}
-                  >
-                    PDF
-                  </Button>
-                </ButtonGroup>
-              </div>
-            </div> */}
           </div>
         }
         className="mb-2"
