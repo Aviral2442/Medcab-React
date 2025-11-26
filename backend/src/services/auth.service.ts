@@ -46,7 +46,7 @@ export const loginUser = async (role: number, email: string, password: string): 
     name: user.admin_name, 
     email: user.admin_id,
     role: user.user_type
-  }, "1h");
+  }, "7d");
   
   // Return user without password
   const { admin_pass, ...userWithoutPassword } = user;

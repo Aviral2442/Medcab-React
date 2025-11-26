@@ -116,6 +116,9 @@ export const bookingColumns = [
         defaultContent: '-',
         render: (data: any) => formatDate(data),
     },
+    { data: 'remark_text',
+        defaultContent: ' ',
+     },
     {
         data: 'booking_status',
         defaultContent: '0',  // Changed from 0 to '0'
@@ -127,6 +130,6 @@ export const bookingColumns = [
 ];
 
 export const bookingTableData: TableType<AmbulanceBookingInfoType> = {
-    header: ["S.No.", 'ID', 'Type', 'Consumer', 'Category', 'Schedule', 'Pickup', 'Drop', ' Amount', 'Date', 'Status'],
+    header: ["S.No.", 'ID', 'Type', 'Consumer', 'Category', 'Schedule', 'Pickup', 'Drop', ' Amount', 'Date', "Remark", 'Status'],
     body: bookingRows,
 };

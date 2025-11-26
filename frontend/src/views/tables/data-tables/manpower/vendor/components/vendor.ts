@@ -60,6 +60,7 @@ export const vendorColumns = [
             return date.toLocaleDateString();
         }
     },
+    { data: 'remark_text' },
     {
         data: 'vendor_status',
         render: (data: number) => {
@@ -82,6 +83,6 @@ export const vendorColumns = [
 
 // Export table data structure
 export const vendorTableData: TableType<VendorInfoType> = {
-    header: ["S.No.","ID", "Picture", "Name", "Mobile", "Gender", "City", "Category", "Date", "Status"],
+    header: ["S.No.","ID", "Picture", "Name", "Mobile", "Gender", "City", "Category", "Date", "Remark","Status"],
     body: vendorRows,
 };

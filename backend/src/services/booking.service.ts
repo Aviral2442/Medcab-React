@@ -43,7 +43,14 @@ export const getAllBookings = async (filters?: {
         consumer.consumer_name,
         consumer.consumer_mobile_no,
         vendor.vendor_name,
-        vendor.vendor_mobile
+        vendor.vendor_mobile,
+        (
+            SELECT remark_text 
+            FROM remark_data 
+            WHERE remark_manpower_order_id = manpower_order.manpower_order_id 
+            ORDER BY remark_id DESC 
+            LIMIT 1
+        ) AS remark_text
       FROM manpower_order
       LEFT JOIN consumer ON manpower_order.mpo_user_id = consumer.consumer_id
       LEFT JOIN vendor ON manpower_order.mpo_vendor_id = vendor.vendor_id

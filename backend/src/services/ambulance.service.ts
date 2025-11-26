@@ -1169,6 +1169,7 @@ export const getAmbulanceBookingListService = async (filters?: {
             SELECT 
                 booking_view.booking_id,
                 booking_view.booking_source,
+                booking_view.booking_type,
                 booking_view.booking_con_name,
                 booking_view.booking_con_mobile,
                 booking_view.booking_view_category_name,
@@ -1177,7 +1178,14 @@ export const getAmbulanceBookingListService = async (filters?: {
                 booking_view.booking_drop,
                 booking_view.booking_status,
                 booking_view.booking_total_amount,
-                booking_view.created_at
+                booking_view.created_at,
+                (
+                    SELECT remark_text 
+                    FROM remark_data 
+                    WHERE remark_booking_id = booking_view.booking_id 
+                    ORDER BY remark_id DESC 
+                    LIMIT 1
+                ) AS remark_text
             FROM booking_view
             ${finalWhereSQL}
             ORDER BY booking_view.booking_id DESC

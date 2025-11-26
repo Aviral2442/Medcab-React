@@ -1,13 +1,6 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
-import '@/global.css';
-// import {
-//   Dropdown,
-//   DropdownMenu,
-//   DropdownItem,
-//   DropdownToggle,
-// } from "react-bootstrap";
-
+import "@/global.css";
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
@@ -21,7 +14,7 @@ import { consumerColumns } from "@/views/tables/data-tables/consumer-data/consum
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark from "@/components/AddRemark";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -43,14 +36,15 @@ const tableConfig: Record<
     headers: [
       "S.No.",
       "ID",
-      "driver id",
-      "booking id",
-      // "Email",
-      "driver lat",
-      "driver long",
-      "request timing",
-      "created at",
-      "Status",
+      "driver",
+      "Consumer",
+      "Category",
+      "PickUp",
+      "Drop",
+      "Amount",
+      "req time",
+      "Date",
+      "Remark",
     ],
   },
 };
@@ -94,7 +88,7 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, headers } = tableConfig[tabKey];
@@ -112,8 +106,7 @@ const ExportDataWithButtons = ({
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
       console.log("API Response:", res.data);
 
-      const consumers = res.data?.jsonData?.driver_emergency_list
- || [];
+      const consumers = res.data?.jsonData?.driver_emergency_list || [];
       setData(consumers);
 
       if (res.data.pagination) {
@@ -136,24 +129,14 @@ const ExportDataWithButtons = ({
   };
 
   const handleRemark = (rowData: any) => {
-    const id = rowData?.consumer_id ?? rowData?.id;
-    console.log("Selected Consumer ID for Remark:", id);
+    const id = rowData?.driver_emergency_id;
     setSelectedConsumerId(id);
     setIsRemarkOpen(true);
   };
 
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedConsumerId}`, {
-        remarkType: "CONSUMER",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged?.();
-    } catch (error) {
-      console.error("Error saving remark:", error);
-    }
+  const handleRemarkSuccess = () => {
+    fetchData();
+    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -169,19 +152,22 @@ const ExportDataWithButtons = ({
   ]);
 
   const formatDate = (data: any): string => {
-    if (!data) return '-';
+    if (!data) return "-";
     try {
-        const date = new Date(data);
-        if (isNaN(date.getTime())) return data;
-        
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      const date = new Date(data);
+      if (isNaN(date.getTime())) return data;
+
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}-${month}-${year} ${date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
     } catch {
-        return data;
+      return data;
     }
-};
+  };
 
   const columnsWithActions = [
     {
@@ -194,54 +180,60 @@ const ExportDataWithButtons = ({
       },
     },
     {
-        title: "ID",
-        data: "driver_emergency_id",
-        render: (data: any) => data || "N/A",
-      },
+      title: "ID",
+      data: "driver_emergency_id",
+      render: (data: any) => data || "N/A",
+    },
     {
-        title: "driver Id",
-        data: "driver_emergency_driver_id",
-        render: (data: any) => data || "N/A",
+      data: "driver_name",
+      defaultContent: "-",
+      render: (_data: any, _type: any, row: any) => {
+        const name = row["driver_name"] || "-";
+        const mobile = row["driver_mobile"] || "-";
+        return `${name} <br/> (${mobile})`;
       },
-      {
-        title: "booking id",
-        data: "driver_emergency_booking_id",
-        render: (data: any) => data || "N/A",
+    },
+    {
+      data: "booking_con_name",
+      defaultContent: "-",
+      render: (_data: any, _type: any, row: any) => {
+        const name = row["booking_con_name"] || "-";
+        const mobile = row["booking_con_mobile"] || "-";
+        return `${name} <br/> (${mobile})`;
       },
-      {
-        title: "driver lat",
-        data: "driver_emergency_driver_lat",
-        render: (data: any) => data || "N/A",
+    },
+    {
+      data: "booking_view_category_name",
+      defaultContent: "-",
+    },
+    {
+      data: "booking_pickup",
+      defaultContent: "-",
+    },
+    {
+      data: "booking_drop",
+      defaultContent: "-",
+    },
+    {
+      data: "booking_total_amount",
+      defaultContent: "-",
+    },
+    {
+      data: "driver_emergency_request_timing",
+      render: (data: any) => data || "N/A",
+    },
+    {
+      title: "Date",
+      data: "created_at",
+      render: (data: any) => {
+        return formatDate(data);
       },
-      {
-        title: "driver long",
-        data: "driver_emergency_driver_long",
-        render: (data: any) => data || "N/A",
-      },
-      {
-        title: "request timing",
-        data: "driver_emergency_request_timing",
-        render: (data: any) => data || "N/A",
-      },
-      {
-        title: "created at",
-        data: "created_at",
-        render: (data: any) => {
-            return formatDate(data);
-        }
-      },
-      {
-        title: "status",
-        data: "driver_emergency_status",
-        render: (data: any) => {
-            switch (data) {
-                case 0:
-                    return "Emergency";
-                default:
-                    return "N/A";
-            }
-        },
-      },
+    },
+    {
+      title: "Remark",
+      data: "remark_text",
+      render: (data: any) => data || "",
+    },
     {
       title: "Actions",
       data: null,
@@ -253,14 +245,18 @@ const ExportDataWithButtons = ({
         const root = createRoot(td);
         root.render(
           <div className="d-flex flex-row gap-1">
-            <button className="eye-icon p-1"
+            <button
+              className="eye-icon p-1"
               onClick={() => {
                 navigate(`/consumer-details/${rowData.consumer_id}`);
               }}
             >
               <TbEye className="me-1" />
             </button>
-              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
+            <button
+              className="remark-icon"
+              onClick={() => handleRemark(rowData)}
+            >
               <TbReceipt className="me-1" />
             </button>
           </div>
@@ -272,7 +268,7 @@ const ExportDataWithButtons = ({
   return (
     <>
       <ComponentCard
-        title={tabKey === 1 ? "Manage Consumer" : ""}
+        title={tabKey === 1 ? "Manage Driver" : ""}
         className="mb-2"
         headerActions={
           <TableFilters
@@ -285,7 +281,7 @@ const ExportDataWithButtons = ({
             statusOptions={StatusFilterOptions}
           />
         }
-        >
+      >
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
@@ -364,7 +360,9 @@ const ExportDataWithButtons = ({
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.EMERGENCY_DRIVER}
+        primaryKeyId={selectedConsumerId}
+        onSuccess={handleRemarkSuccess}
       />
     </>
   );

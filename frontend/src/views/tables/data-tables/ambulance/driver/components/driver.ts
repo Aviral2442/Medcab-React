@@ -1,4 +1,5 @@
 import axios from "axios";
+import { data } from "jquery";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
 type DriverInfoType = {
@@ -72,6 +73,14 @@ export const driverColumns = [
         }
     },
     {
+        data: 'created_at',
+        render: (data: string) => {
+            const date = new Date(data);
+            return date.toLocaleDateString();
+        }
+    },
+    { data: 'remark_text' },
+    {
         data: 'driver_status',
         render: (data: number) => {
             const statusMap: Record<number, { label: string; class: string }> = {
@@ -83,13 +92,6 @@ export const driverColumns = [
             };
             const status = statusMap[data] || { label: 'Unknown', class: 'secondary' };
             return `<span class="badge badge-label badge-soft-${status.class}">${status.label}</span>`;
-        }
-    },
-    {
-        data: 'created_at',
-        render: (data: string) => {
-            const date = new Date(data);
-            return date.toLocaleDateString();
         }
     },
 ];
@@ -107,8 +109,9 @@ export const driverTableData: TableType<DriverInfoType> = {
         "Created By",
         "Profile",
         "Duty Status",
-        "Status",
-        "Created At"
+        "Created At",
+        "Remark",
+        "Status"
     ],
     body: driverRows,
 };

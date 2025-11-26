@@ -69,7 +69,14 @@ export const getPartnerServices = async (filters?: {
                 partner_city_id,
                 partner_registration_step,
                 created_at,
-                partner_status
+                partner_status,
+                (
+                    SELECT remark_text 
+                    FROM remark_data 
+                    WHERE remark_partner_id = partner.partner_id 
+                    ORDER BY remark_id DESC 
+                    LIMIT 1
+                ) AS remark_text
             FROM partner
             ${finalWhereSQL}
             ORDER BY partner_id DESC

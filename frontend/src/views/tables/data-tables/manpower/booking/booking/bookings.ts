@@ -45,6 +45,7 @@ export const bookingColumns = [
       return date.toLocaleDateString() + ' ' + time;
     }
    },
+   { data: 'remark_text'},
   {
     data: 'mpo_status', render: (data: number) => {
       // console.log(data);
@@ -65,6 +66,6 @@ export const bookingColumns = [
 
 
 export const categoryTableData: TableType<BookingInfoType> = {
-  header: ["S.No.","order id", "name", "mobile_no", "address", "Price", "payment_mode","order_date", "status"],
+  header: ["S.No.","order id", "name", "mobile_no", "address", "Price", "payment_mode","order_date", "Remark", "status"],
   body: bookRows,
 }

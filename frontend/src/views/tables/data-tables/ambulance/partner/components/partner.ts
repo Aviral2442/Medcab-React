@@ -1,6 +1,6 @@
 import axios from "axios";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
-const basePath = (import.meta as any).env?.basePath ?? "";
+const basePath = (import.meta as any).env?.base_Path ?? "http://localhost:4000";
 
 type PartnerInfoType = {
     partner_id: number;
@@ -61,6 +61,7 @@ export const partnerColumns = [
             return date.toLocaleDateString();
         }
     },
+    { data: 'remark_text' },
     {
         data: 'partner_status',
         render: (data: number) => {
@@ -87,6 +88,7 @@ export const partnerTableData: TableType<PartnerInfoType> = {
         "Wallet",
         "City",
         "Created At",
+        "Remark",
         "Status"
     ],
     body: partnerRows,

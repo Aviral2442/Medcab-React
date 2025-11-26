@@ -1,13 +1,6 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
 import '@/global.css';
-// import {
-//   Dropdown,
-//   DropdownMenu,
-//   DropdownItem,
-//   DropdownToggle,
-// } from "react-bootstrap";
-
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
@@ -21,7 +14,7 @@ import { consumerColumns } from "@/views/tables/data-tables/consumer-data/consum
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark from "@/components/AddRemark";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -45,10 +38,7 @@ const tableConfig: Record<
       "ID",
       "consumer id",
       "booking id",
-      // "Email",
-      "consumer lat",
-      "consumer long",
-      "request timing",
+      "request time",
       "created at",
       "Status",
     ],
@@ -94,7 +84,7 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, headers } = tableConfig[tabKey];
@@ -142,18 +132,9 @@ const ExportDataWithButtons = ({
     setIsRemarkOpen(true);
   };
 
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedConsumerId}`, {
-        remarkType: "CONSUMER",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged?.();
-    } catch (error) {
-      console.error("Error saving remark:", error);
-    }
+  const handleRemarkSuccess = () => {
+    fetchData();
+    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -194,17 +175,7 @@ const ExportDataWithButtons = ({
         render: (data: any) => data || "N/A",
       },
       {
-        title: "consumer lat",
-        data: "consumer_emergency_consumer_lat",
-        render: (data: any) => data || "N/A",
-      },
-      {
-        title: "consumer long",
-        data: "consumer_emergency_consumer_long",
-        render: (data: any) => data || "N/A",
-      },
-      {
-        title: "request timing",
+        title: "request time",
         data: "consumer_emergency_request_timing",
         render: (data: any) => data || "N/A",
       },
@@ -349,8 +320,10 @@ const ExportDataWithButtons = ({
 
       <AddRemark
         isOpen={isRemarkOpen}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.EMERGENCY_CONSUMER}
+        primaryKeyId={selectedConsumerId}
         onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
+        onSuccess={handleRemarkSuccess}
       />
     </>
   );

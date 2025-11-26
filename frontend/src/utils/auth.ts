@@ -9,13 +9,11 @@ interface DecodedToken {
   iat?: number;
 }
 
-// Logout user - remove token and redirect to login
 export const logoutUser = (): void => {
   localStorage.removeItem("token");
   window.location.href = "/auth/sign-in";
 };
 
-// Check if token is expired and auto-logout if expired
 export const checkTokenExpiry = (): boolean => {
   try {
     const token = localStorage.getItem("token");

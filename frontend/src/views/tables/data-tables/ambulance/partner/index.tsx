@@ -14,7 +14,7 @@ import { partnerColumns } from "@/views/tables/data-tables/ambulance/partner/com
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark from "@/components/AddRemark";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -41,6 +41,7 @@ const tableConfig: Record<
       "Reg_Step",
       // "City",
       "Date",
+      "Remark",
       "Status",
     ],
   },
@@ -83,7 +84,7 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, columns, headers } = tableConfig[tabKey];
@@ -125,23 +126,13 @@ const ExportDataWithButtons = ({
 
   const handleRemark = (rowData: any) => {
     const id = rowData?.partner_id ?? rowData?.id;
-    console.log("Selected Partner ID for Remark:", id);
     setSelectedPartnerId(id);
     setIsRemarkOpen(true);
   };
 
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedPartnerId}`, {
-        remarkType: "PARTNER",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged?.();
-    } catch (error) {
-      console.error("Error saving remark:", error);
-    }
+  const handleRemarkSuccess = () => {
+    fetchData();
+    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -277,7 +268,9 @@ const ExportDataWithButtons = ({
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.PARTNER} 
+        primaryKeyId={selectedPartnerId}
+        onSuccess={handleRemarkSuccess}
       />
     </>
   );

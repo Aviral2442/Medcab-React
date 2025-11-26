@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
-// import {
-//   Dropdown,
-//   DropdownMenu,
-//   DropdownItem,
-//   DropdownToggle,
-// } from "react-bootstrap";
 import '@/global.css';
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
@@ -20,7 +14,7 @@ import { vendorColumns } from "@/views/tables/data-tables/manpower/vendor/compon
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark from "@/components/AddRemark";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -47,6 +41,7 @@ const tableConfig: Record<
       "City",
       "Category ",
       "Date",
+      "Remark",
       "Status",
     ],
   },
@@ -89,7 +84,7 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, columns, headers } = tableConfig[tabKey];
@@ -140,23 +135,13 @@ const ExportDataWithButtons = ({
 
   const handleRemark = (rowData: any) => {
     const id = rowData?.vendor_id ?? rowData?.id;
-    console.log("Selected Vendor ID for Remark:", id);
     setSelectedVendorId(id);
     setIsRemarkOpen(true);
   };
 
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedVendorId}`, {
-        remarkType: "VENDOR",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged?.();
-    } catch (error) {
-      console.error("Error saving remark:", error);
-    }
+  const handleRemarkSuccess = () => {
+    fetchData();
+    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -304,7 +289,9 @@ const ExportDataWithButtons = ({
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.MANPOWER_VENDOR}
+        primaryKeyId={selectedVendorId}
+        onSuccess={handleRemarkSuccess}
       />
     </>
   );

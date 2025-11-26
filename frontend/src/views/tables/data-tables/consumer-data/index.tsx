@@ -43,6 +43,7 @@ const tableConfig: Record<
       "Ref_Code",
       "Ref_By",
       "Register",
+      "Remark",
       "Status",
     ],
   },
@@ -128,7 +129,6 @@ const ExportDataWithButtons = ({
 
   const handleRemark = (rowData: any) => {
     const id = rowData?.consumer_id ?? rowData?.id;
-    console.log("Selected Consumer ID for Remark:", id);
     setSelectedConsumerId(id);
     setIsRemarkOpen(true);
   };

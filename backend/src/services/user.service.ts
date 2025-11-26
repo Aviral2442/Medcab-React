@@ -119,7 +119,23 @@ export const getDriverEmergencyList = async (filters?: {
 
     const query = `
         SELECT 
-            driver_emergency.*, driver.driver_name, driver.driver_mobile, booking_view.booking_category, booking_view.booking_schedule_time, booking_view.booking_pickup, booking_view.booking_drop, booking_view.booking_total_amount, booking_view.booking_con_name, booking_view.booking_con_mobile
+            driver_emergency.*, 
+            driver.driver_name, 
+            driver.driver_mobile, 
+            booking_view.booking_view_category_name, 
+            booking_view.booking_schedule_time, 
+            booking_view.booking_pickup,
+            booking_view.booking_drop, 
+            booking_view.booking_total_amount, 
+            booking_view.booking_con_name, 
+            booking_view.booking_con_mobile,
+            (
+              SELECT remark_text
+              FROM remark_data
+              WHERE remark_driver_emergency_id = driver_emergency.driver_emergency_id
+              ORDER BY remark_id DESC
+              LIMIT 1
+            ) AS remark_text
         FROM driver_emergency
         LEFT JOIN driver ON driver.driver_id = driver_emergency.driver_emergency_driver_id
         LEFT JOIN booking_view ON booking_view.booking_id = driver_emergency.driver_emergency_booking_id
@@ -201,7 +217,25 @@ export const getConsumerEmergencyList = async (filters?: {
 
     const query = `
         SELECT 
-            consumer_emergency.*, driver.driver_name, driver.driver_mobile, booking_view.booking_category, booking_view.booking_schedule_time, booking_view.booking_pickup, booking_view.booking_drop, booking_view.booking_total_amount, booking_view.booking_con_name, booking_view.booking_con_mobile, consumer.consumer_name, consumer.consumer_mobile_no
+            consumer_emergency.*,
+            driver.driver_name, 
+            driver.driver_mobile, 
+            booking_view.booking_category, 
+            booking_view.booking_schedule_time, 
+            booking_view.booking_pickup, 
+            booking_view.booking_drop, 
+            booking_view.booking_total_amount, 
+            booking_view.booking_con_name, 
+            booking_view.booking_con_mobile, 
+            consumer.consumer_name, 
+            consumer.consumer_mobile_no,
+            (
+              SELECT remark_text
+              FROM remark_data
+              WHERE remark_consumer_emergency_id = consumer_emergency.consumer_emergency_id
+              ORDER BY remark_id DESC
+              LIMIT 1
+            ) AS remark_text
         FROM consumer_emergency
         LEFT JOIN consumer ON consumer.consumer_id = consumer_emergency.consumer_emergency_consumer_id
         LEFT JOIN booking_view ON booking_view.booking_id = consumer_emergency.consumer_emergency_booking_id

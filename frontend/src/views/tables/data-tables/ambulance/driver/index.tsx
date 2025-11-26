@@ -14,7 +14,7 @@ import { driverColumns } from "@/views/tables/data-tables/ambulance/driver/compo
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark from "@/components/AddRemark";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -41,8 +41,9 @@ const tableConfig: Record<
       // "City ID",
       "Created By",
       "Duty Status",
-      "Status",
       "Date",
+      "Remark",
+      "Status",
     ],
   },
 };
@@ -84,7 +85,7 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, columns, headers } = tableConfig[tabKey];
@@ -128,23 +129,13 @@ const ExportDataWithButtons = ({
 
   const handleRemark = (rowData: any) => {
     const id = rowData?.driver_id ?? rowData?.id;
-    console.log("Selected Driver ID for Remark:", id);
     setSelectedDriverId(id);
     setIsRemarkOpen(true);
   };
 
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedDriverId}`, {
-        remarkType: "DRIVER",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged?.();
-    } catch (error) {
-      console.error("Error saving remark:", error);
-    }
+  const handleRemarkSuccess = () => {
+    fetchData();
+    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -268,10 +259,7 @@ const ExportDataWithButtons = ({
             </DataTable>
 
             <TablePagination
-              // totalItems={total}
               start={currentPage + 1}
-              // end={totalPages}
-              // itemsName="items"
               showInfo={true}
               previousPage={() =>
                 handlePageChange(Math.max(0, currentPage - 1))
@@ -292,7 +280,9 @@ const ExportDataWithButtons = ({
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.DRIVER}
+        primaryKeyId={selectedDriverId}
+        onSuccess={handleRemarkSuccess}
       />
     </>
   );
