@@ -27,10 +27,9 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Type",
       "Service Type",
       "Icon",
-      "Category Name",
+      "Category",
       "Created At",
       "Status",
     ],
@@ -240,7 +239,15 @@ const ExportDataWithButtons = ({
         },
       },
       { title: "ID", data: "ambulance_category_id", defaultContent: "N/A" },
-      { title: "Type", data: "ambulance_category_type", defaultContent: "N/A" },
+      {
+        title: "Icon",
+        data: "ambulance_category_icon",
+        defaultContent: "N/A",
+        render: (data: any) =>
+          data
+            ? `<img src="${baseURL}/${data}" alt="Icon" style="width: 30px; height: 30px;" />`
+            : "N/A",
+      },
       {
         title: "Service Type",
         data: "ambulance_category_service_type",
@@ -250,15 +257,6 @@ const ExportDataWithButtons = ({
           else if (data === "2") return "Animal";
           else return "N/A";
         },
-      },
-      {
-        title: "Icon",
-        data: "ambulance_category_icon",
-        defaultContent: "N/A",
-        render: (data: any) =>
-          data
-            ? `<img src="${data}" alt="Icon" style="width: 30px; height: 30px;" />`
-            : "N/A",
       },
       { title: "Category Name", data: "ambulance_category_name", defaultContent: "N/A" },
       {

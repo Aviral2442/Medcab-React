@@ -168,6 +168,21 @@ const ExportDataWithButtons = ({
     dateRange,
   ]);
 
+  const formatDate = (data: any): string => {
+    if (!data) return '-';
+    try {
+        const date = new Date(data);
+        if (isNaN(date.getTime())) return data;
+        
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    } catch {
+        return data;
+    }
+};
+
   const columnsWithActions = [
     {
       title: "S.No.",
@@ -210,10 +225,9 @@ const ExportDataWithButtons = ({
       },
       {
         title: "created at",
-        data: "driver_emergency_created_at",
+        data: "created_at",
         render: (data: any) => {
-            const date = new Date(data);
-            return date.toLocaleDateString() || "N/A";
+            return formatDate(data);
         }
       },
       {

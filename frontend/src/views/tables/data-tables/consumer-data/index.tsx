@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
 import '@/global.css';
-// import {
-//   Dropdown,
-//   DropdownMenu,
-//   DropdownItem,
-//   DropdownToggle,
-// } from "react-bootstrap";
 
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
@@ -21,7 +15,7 @@ import { consumerColumns } from "@/views/tables/data-tables/consumer-data/consum
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark from "@/components/AddRemark";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -45,7 +39,6 @@ const tableConfig: Record<
       "ID",
       "Name",
       "Mobile",
-      // "Email",
       "Wallet",
       "Ref_Code",
       "Ref_By",
@@ -82,7 +75,6 @@ const ExportDataWithButtons = ({
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   const navigate = useNavigate();
 
-  // Use the custom hook for filters
   const {
     dateFilter,
     statusFilter,
@@ -141,18 +133,9 @@ const ExportDataWithButtons = ({
     setIsRemarkOpen(true);
   };
 
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedConsumerId}`, {
-        remarkType: "CONSUMER",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged?.();
-    } catch (error) {
-      console.error("Error saving remark:", error);
-    }
+  const handleRemarkSuccess = () => {
+    fetchData();
+    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -196,7 +179,7 @@ const ExportDataWithButtons = ({
             >
               <TbEye className="me-1" />
             </button>
-              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
+            <button className="remark-icon" onClick={() => handleRemark(rowData)}>
               <TbReceipt className="me-1" />
             </button>
           </div>
@@ -221,7 +204,7 @@ const ExportDataWithButtons = ({
             statusOptions={StatusFilterOptions}
           />
         }
-        >
+      >
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
@@ -239,7 +222,6 @@ const ExportDataWithButtons = ({
                 layout: {
                   topStart: "buttons",
                 },
-                // dom: 'Bfrtip', // Add this line to display buttons
                 buttons: [
                   {
                     extend: "copyHtml5",
@@ -263,7 +245,7 @@ const ExportDataWithButtons = ({
                   },
                 ],
               }}
-              className="table table-striped dt-responsive align-middle mb-0 "
+              className="table table-striped dt-responsive align-middle mb-0"
             >
               <thead className="thead-sm text-capitalize fs-xxs">
                 <tr>
@@ -276,10 +258,7 @@ const ExportDataWithButtons = ({
             </DataTable>
 
             <TablePagination
-              // totalItems={total}
               start={currentPage + 1}
-              // end={totalPages}
-              // itemsName="items"
               showInfo={true}
               previousPage={() =>
                 handlePageChange(Math.max(0, currentPage - 1))
@@ -300,7 +279,9 @@ const ExportDataWithButtons = ({
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.CONSUMER}
+        primaryKeyId={selectedConsumerId}
+        onSuccess={handleRemarkSuccess}
       />
     </>
   );

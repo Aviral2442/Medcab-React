@@ -297,7 +297,6 @@ export const getAmbulanceCategoryListService = async (filters?: {
         const query = `
             SELECT 
                 ambulance_category.ambulance_category_id,
-                ambulance_category.ambulance_category_type,
                 ambulance_category.ambulance_category_service_type,
                 ambulance_category.ambulance_category_name,
                 ambulance_category.ambulance_category_icon,
@@ -1170,7 +1169,6 @@ export const getAmbulanceBookingListService = async (filters?: {
             SELECT 
                 booking_view.booking_id,
                 booking_view.booking_source,
-                booking_view.booking_type,
                 booking_view.booking_con_name,
                 booking_view.booking_con_mobile,
                 booking_view.booking_view_category_name,
