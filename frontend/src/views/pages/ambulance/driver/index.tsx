@@ -8,7 +8,7 @@ const Page: React.FC = () => {
   const [refreshFlag, _setRefreshFlag] = React.useState(0);
 
   const handleAddNew = () => {
-    navigate('/ambulance/adddriver');
+    navigate('/ambulance/add-driver');
   }
 
   return (

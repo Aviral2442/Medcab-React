@@ -6,7 +6,7 @@ import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 import "@/global.css";
 
-import { TbArrowRight, TbEye, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEdit, TbEye, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
@@ -176,12 +176,12 @@ const ExportDataWithButtons = ({
         root.render(
           <div className="d-flex flex-row gap-1">
             <button
-              className="eye-icon p-1"
+              className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
               onClick={() => {
-                navigate(`/driver-detail/${rowData.driver_id}`);
+                navigate(`/edit-driver/${rowData.driver_id}`);
               }}
             >
-              <TbEye className="me-1" />
+              <TbEdit className="me-1" />
             </button>
             <button
               className="remark-icon"
@@ -199,9 +199,7 @@ const ExportDataWithButtons = ({
     <>
       <ComponentCard
         title={
-          <div className="w-100">
-            {tabKey === 1 ? "Manage Drivers" : ""}
-          </div>
+          <div className="w-100">{tabKey === 1 ? "Manage Drivers" : ""}</div>
         }
         className="mb-2"
         headerActions={
