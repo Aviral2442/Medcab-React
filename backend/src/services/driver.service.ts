@@ -544,6 +544,60 @@ export const driverOnOffDataService = async (filters: {
 
 };
 
+// Get Total Driver On Off Map Location
+export const TotaldriverOnOffMapService = async (filters: {
+    status?: string;
+}) => {
+    try {
+        let finalWhereSQL = '';
+        const params: any[] = [];
+
+        // Status filter - FIXED to use proper SQL syntax
+        if (filters?.status) {
+            const statusConditionMap: Record<string, string> = {
+                ON: "driver_on_off_data.dood_status = 'ON'",
+                OFF: "driver_on_off_data.dood_status = 'OFF'",
+            };
+            
+            const condition = statusConditionMap[filters.status];
+            if (condition) {
+                finalWhereSQL = `WHERE ${condition}`;
+            }
+        }
+
+        // Query with city_name included - NO LIMIT
+        const query = `
+            SELECT 
+                driver_on_off_data.dood_id,
+                driver_on_off_data.dood_lat,
+                driver_on_off_data.dood_long,
+                driver_on_off_data.dood_status,
+                driver_on_off_data.dood_time_unix,
+                driver.driver_name,
+                driver.driver_mobile,
+                city.city_name
+            FROM driver_on_off_data
+            JOIN driver ON driver_on_off_data.dood_by_did = driver.driver_id
+            LEFT JOIN city ON driver.driver_city_id = city.city_id
+            ${finalWhereSQL}
+            ORDER BY driver_on_off_data.dood_id DESC
+        `;
+
+        const [rows]: any = await db.query(query, params);
+
+        return {
+            status: 200,
+            message: 'Driver On Off Map Data Fetch Successful',
+            jsonData: {
+                driverOnOffMapData: rows
+            }
+        };
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'Failed to retrieve driver on off map data service');
+    }
+};
+
 // Get Driver On Off Map Location
 export const driverOnOffMapLocationService = async (driverOnOffId: number) => {
     try {

@@ -6,7 +6,7 @@ import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 import "@/global.css";
 
-import { TbEye, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEye } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
@@ -14,10 +14,10 @@ import { driverColumns } from "@/views/tables/data-tables/ambulance/driver-locat
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
+import { ta } from "date-fns/locale";
 
 // Register DataTable plugins
 DataTable.use(DT);
@@ -48,6 +48,7 @@ const tableConfig: Record<
 type ExportDataWithButtonsProps = {
   tabKey: number;
   refreshFlag: number;
+  onMap?: () => void;
   filterParams?: Record<string, any>;
   onDataChanged?: () => void;
 };
@@ -55,13 +56,12 @@ type ExportDataWithButtonsProps = {
 const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
+  onMap = () => {},
+  onDataChanged = () => {},
   filterParams = {},
-  onDataChanged,
 }: ExportDataWithButtonsProps) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isRemarkOpen, setIsRemarkOpen] = useState(false);
-  const [selectedDriverId, setSelectedDriverId] = useState<number | null>(null);
 
   const [pageSize] = useState(10);
   const [_total, setTotal] = useState(0);
@@ -89,7 +89,7 @@ const ExportDataWithButtons = ({
 
   const StatusFilterOptions = [
     { label: "On", value: "ON" },
-    { label: "Off", value: "OFF" }
+    { label: "Off", value: "OFF" },
   ];
 
   const fetchData = async () => {
@@ -119,17 +119,6 @@ const ExportDataWithButtons = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleRemark = (rowData: any) => {
-    const id = rowData?.dood_id;
-    setSelectedDriverId(id);
-    setIsRemarkOpen(true);
-  };
-
-  const handleRemarkSuccess = () => {
-    fetchData();
-    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -165,20 +154,14 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-          <div className="d-flex flex-row gap-1">
+          <div className="d-flex align-content-center">
             <button
               className="eye-icon p-1"
               onClick={() => {
-                navigate(`/driver-detail/${rowData.dood_id}`);
+                navigate(`/ambulance/driver-duty/${rowData.dood_id}`);
               }}
             >
               <TbEye className="me-1" />
-            </button>
-            <button
-              className="remark-icon"
-              onClick={() => handleRemark(rowData)}
-            >
-              <TbReceipt className="me-1" />
             </button>
           </div>
         );
@@ -189,19 +172,31 @@ const ExportDataWithButtons = ({
   return (
     <>
       <ComponentCard
-        title={tabKey === 1 ? "Manage Drivers On/Off" : ""}
+        title={
+          <div className="w-100">
+            {tabKey === 1 ? "Driver Duty Location" : " "}
+          </div>
+        }
         className="mb-2 overflow-x-auto"
         headerActions={
-          <TableFilters
-            dateFilter={dateFilter}
-            statusFilter={statusFilter}
-            dateRange={dateRange}
-            onDateFilterChange={handleDateFilterChange}
-            onStatusFilterChange={handleStatusFilterChange}
-            onDateRangeChange={handleDateRangeChange}
-            statusOptions={StatusFilterOptions}
-            className="w-100"
-          />
+          <div className="d-flex gap-2 align-content-center">
+            <TableFilters
+              dateFilter={dateFilter}
+              statusFilter={statusFilter}
+              dateRange={dateRange}
+              onDateFilterChange={handleDateFilterChange}
+              onStatusFilterChange={handleStatusFilterChange}
+              onDateRangeChange={handleDateRangeChange}
+              statusOptions={StatusFilterOptions}
+              className="w-100"
+            />
+            <button
+              className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
+              onClick={onMap}
+            >
+              Map <TbArrowRight className="fs-5" />
+            </button>
+          </div>
         }
       >
         {loading ? (
@@ -276,14 +271,6 @@ const ExportDataWithButtons = ({
           </div>
         )}
       </ComponentCard>
-
-      <AddRemark
-        isOpen={isRemarkOpen}
-        onClose={() => setIsRemarkOpen(false)}
-        remarkCategoryType={REMARK_CATEGORY_TYPES.DRIVER}
-        primaryKeyId={selectedDriverId}
-        onSuccess={handleRemarkSuccess}
-      />
     </>
   );
 };

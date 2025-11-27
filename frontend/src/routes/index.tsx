@@ -37,8 +37,10 @@ const AmbulanceList = lazy(() => import('@/views/pages/ambulance/category'))
 const DriverEmergency = lazy(() => import('@/views/pages/emergency/driver'))
 const ConsumerEmergency = lazy(() => import('@/views/pages/emergency/consumer'))
 const AmbulanceBooking = lazy(() => import('@/views/pages/ambulance/booking'))
-const DriverLocation = lazy(() => import('@/views/pages/ambulance/driver-duty'))
+const DriverDuty = lazy(() => import('@/views/pages/ambulance/driver-duty'))
+const DriverDutyDetails = lazy(() => import('@/views/pages/ambulance/driver-duty/components/DriverDuty'))
 const AddDriver = lazy(() => import('@/views/pages/ambulance/driver/components/AddDriver'))
+const DriverDutyMap = lazy(() => import('@/views/pages/ambulance/driver-duty/components/DriverDutyMap'))
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -150,7 +152,9 @@ const pagesRoutes: RouteObject[] = [
   { path: "/emergency/driver", element: <DriverEmergency/> },
   { path: "/emergency/consumer", element: <ConsumerEmergency/> },
   { path: "/ambulance/booking", element: <AmbulanceBooking/> },
-  { path: "/ambulance/driver-duty", element: <DriverLocation/> },
+  { path: "/ambulance/driver-duty", element: <DriverDuty/> },
+  { path: "/ambulance/driver-duty/:id", element: <DriverDutyDetails/> },
+  { path: "/ambulance/driver-duty-map", element: <DriverDutyMap/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 

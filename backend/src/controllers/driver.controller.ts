@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { addDriverService, driverDetailService, driverOnOffDataService, driverOnOffMapLocationService, fetchDriverService, getDriverService, updateDriverService } from '../services/driver.service';
+import { addDriverService, driverDetailService, driverOnOffDataService, driverOnOffMapLocationService, fetchDriverService, getDriverService, TotaldriverOnOffMapService, updateDriverService } from '../services/driver.service';
 
 // Get Drivers List
 export const getDriversController = async (req: Request, res: Response, next: NextFunction) => {
@@ -131,6 +131,21 @@ export const driverOnOffDataController = async (req: Request, res: Response, nex
         next(error);
     }
 };
+
+//Get Total Driver On Off Map Location
+export const TotaldriverOnOffMapLocationController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const filters = {
+            status: req.query.status as string || 'ON', // Default to ON
+        }
+
+        const result = await TotaldriverOnOffMapService(filters);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 // Get Driver On Off Map Location
 export const driverOnOffMapLocationController = async (req: Request, res: Response, next: NextFunction) => {
