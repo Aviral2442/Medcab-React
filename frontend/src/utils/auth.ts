@@ -105,7 +105,7 @@ export const getDecodedToken = (): DecodedToken | null => {
 };
 
 // Setup auto-check for token expiry (call this on app initialization)
-export const setupTokenExpiryCheck = (intervalMs: number = 60000): NodeJS.Timeout => {
+export const setupTokenExpiryCheck = (intervalMs: number = 60000): ReturnType<typeof setInterval> => {
   // Check immediately
   checkTokenExpiry();
   

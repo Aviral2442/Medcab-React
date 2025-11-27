@@ -6,7 +6,7 @@ import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 import "@/global.css";
 
-import { TbArrowRight, TbEdit, TbEye, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEdit, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";

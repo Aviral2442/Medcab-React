@@ -17,7 +17,6 @@ import { useNavigate } from "react-router-dom";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
-import { ta } from "date-fns/locale";
 
 // Register DataTable plugins
 DataTable.use(DT);
@@ -57,7 +56,6 @@ const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
   onMap = () => {},
-  onDataChanged = () => {},
   filterParams = {},
 }: ExportDataWithButtonsProps) => {
   const [data, setData] = useState<any[]>([]);

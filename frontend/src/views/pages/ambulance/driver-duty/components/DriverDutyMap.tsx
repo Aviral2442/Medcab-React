@@ -23,7 +23,6 @@ import {
 import { InputPicker, Input } from "rsuite";
 import "rsuite/dist/rsuite.min.css";
 import "leaflet/dist/leaflet.css";
-import { formatDate } from "@/components/DateFormat";
 
 // You need to install: npm install react-leaflet-cluster
 // And add this CSS for clusters
@@ -127,7 +126,7 @@ const DriverDutyLocation = () => {
   }, [statusFilter]);
 
   // Debounced search
-  const debouncedSearch = React.useRef<NodeJS.Timeout>();
+  const debouncedSearch = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   React.useEffect(() => {
     if (debouncedSearch.current) {

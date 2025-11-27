@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
-import '@/global.css';
+import "@/global.css";
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import { TbEye, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEdit, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
@@ -50,6 +50,7 @@ const tableConfig: Record<
 type ExportDataWithButtonsProps = {
   tabKey: number;
   refreshFlag: number;
+  onAddNew?: () => void;
   filterParams?: Record<string, any>;
   onDataChanged?: () => void;
 };
@@ -57,13 +58,16 @@ type ExportDataWithButtonsProps = {
 const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
+  onAddNew,
   filterParams = {},
   onDataChanged,
 }: ExportDataWithButtonsProps) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isRemarkOpen, setIsRemarkOpen] = useState(false);
-  const [selectedPartnerId, setSelectedPartnerId] = useState<number | null>(null);
+  const [selectedPartnerId, setSelectedPartnerId] = useState<number | null>(
+    null
+  );
 
   const [pageSize] = useState(10);
   const [_total, setTotal] = useState(0);
@@ -125,7 +129,8 @@ const ExportDataWithButtons = ({
   };
 
   const handleRemark = (rowData: any) => {
-    const id = rowData?.partner_id ?? rowData?.id;
+    const id = rowData?.partner_id;
+    console.log("Selected Partner ID for Remark:", id);
     setSelectedPartnerId(id);
     setIsRemarkOpen(true);
   };
@@ -137,7 +142,15 @@ const ExportDataWithButtons = ({
 
   useEffect(() => {
     fetchData();
-  }, [tabKey, refreshFlag, currentPage, pageSize, dateFilter, statusFilter, dateRange]);
+  }, [
+    tabKey,
+    refreshFlag,
+    currentPage,
+    pageSize,
+    dateFilter,
+    statusFilter,
+    dateRange,
+  ]);
 
   const columnsWithActions = [
     {
@@ -160,15 +173,19 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-           <div className="d-flex flex-row gap-1">
-            <button className="eye-icon p-1"
+          <div className="d-flex flex-row gap-1">
+            <button
+              className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
               onClick={() => {
-                navigate(`/partner-detail/${rowData.selectedPartnerId}`);
+                navigate(`/edit-partner/${rowData.partner_id}`);
               }}
             >
-              <TbEye className="me-1" />
+              <TbEdit className="me-1" />
             </button>
-              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
+            <button
+              className="remark-icon"
+              onClick={() => handleRemark(rowData)}
+            >
               <TbReceipt className="me-1" />
             </button>
           </div>
@@ -183,16 +200,24 @@ const ExportDataWithButtons = ({
         title={tabKey === 1 ? "Manage Partners" : ""}
         className="mb-2 overflow-x-auto"
         headerActions={
-          <TableFilters
-            dateFilter={dateFilter}
-            statusFilter={statusFilter}
-            dateRange={dateRange}
-            onDateFilterChange={handleDateFilterChange}
-            onStatusFilterChange={handleStatusFilterChange}
-            onDateRangeChange={handleDateRangeChange}
-            statusOptions={StatusFilterOptions}
-            className="w-100"
-          />
+          <div className="d-flex gap-2 align-items-center">
+            <TableFilters
+              dateFilter={dateFilter}
+              statusFilter={statusFilter}
+              dateRange={dateRange}
+              onDateFilterChange={handleDateFilterChange}
+              onStatusFilterChange={handleStatusFilterChange}
+              onDateRangeChange={handleDateRangeChange}
+              statusOptions={StatusFilterOptions}
+              className="w-100"
+            />
+            <button
+              className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 text-nowrap"
+              onClick={onAddNew}
+            >
+              Add New <TbArrowRight className="fs-6" />
+            </button>
+          </div>
         }
       >
         {loading ? (
@@ -247,18 +272,22 @@ const ExportDataWithButtons = ({
               </thead>
             </DataTable>
 
-                        <TablePagination
+            <TablePagination
               // totalItems={total}
               start={currentPage + 1}
               // end={totalPages}
               // itemsName="items"
               showInfo={true}
-              previousPage={() => handlePageChange(Math.max(0, currentPage - 1))}
+              previousPage={() =>
+                handlePageChange(Math.max(0, currentPage - 1))
+              }
               canPreviousPage={currentPage > 0}
               pageCount={totalPages}
               pageIndex={currentPage}
               setPageIndex={handlePageChange}
-              nextPage={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+              nextPage={() =>
+                handlePageChange(Math.min(totalPages - 1, currentPage + 1))
+              }
               canNextPage={currentPage < totalPages - 1}
             />
           </div>
@@ -268,7 +297,7 @@ const ExportDataWithButtons = ({
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}
-        remarkCategoryType={REMARK_CATEGORY_TYPES.PARTNER} 
+        remarkCategoryType={REMARK_CATEGORY_TYPES.PARTNER}
         primaryKeyId={selectedPartnerId}
         onSuccess={handleRemarkSuccess}
       />
