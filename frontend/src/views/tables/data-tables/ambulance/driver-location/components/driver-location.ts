@@ -1,18 +1,15 @@
+import { formatDate } from "@/components/DateFormat";
 import axios from "axios";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
 type DriverInfoType = {
-    driver_id: number;
-    driver_profile_img: string;
+    dood_id: number;
     driver_name: string;
-    // driver_last_name: string;
     driver_mobile: string;
-    driver_wallet_amount: number;
-    // driver_city_id: number;
-    driver_created_by: number; // 0: Self, 1: Partner
-    driver_registration_step: number;
-    driver_duty_status: string;
-    driver_status: number;
+    v_vehicle_name: string;
+    vehicle_rc_number: string;
+    dood_time_unix: string;
+    dood_status: string;
     created_at: string;
 }
 
@@ -25,8 +22,8 @@ let driverRows: DriverInfoType[] = [];
 
 export const getDriverList = async () => {
     try {
-        const response = await axios.get(`${baseURL}/driver/get_drivers`);
-        driverRows = response.data.jsonData?.drivers || [];
+        const response = await axios.get(`${baseURL}/driver/driver_on_off_data`);
+        driverRows = response.data.jsonData?.driverOnOffData || [];
         return driverRows;
     } catch (error) {
         console.error("Error fetching drivers:", error);
@@ -35,34 +32,26 @@ export const getDriverList = async () => {
 }
 
 export const driverColumns = [
-    { data: 'driver_id' },
-    {
-        data: 'driver_profile_img',
-        render: (data: string) => {
-            if (data) {
-                return `<img src="${data}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />`;
-            }
-            return 'N/A';
-        }
+    { data: 'dood_id' },
+    { data: 'driver_name',
+        defaultContent: ''
     },
-    { data: 'driver_name' },
-    // { data: 'driver_last_name' },
     { data: 'driver_mobile' },
-    { 
-        data: 'driver_wallet_amount',
-        render: (data: number) => {
-            return `₹${data || 0}`;
+    { data: 'v_vehicle_name' },
+    { data: 'vehicle_rc_number' },
+    { data: 'dood_time_unix', 
+        render: (data: string) => {
+            return formatDate(data);
         }
-    },
-    // { data: 'driver_city_id' },
-    {
-        data: 'driver_created_by',
-        render: (data: number) => {
-            return data === 0 ? 'Self' : 'Partner';
+     },
+     {
+        data: 'created_at',
+        render: (data: string) => {
+            return formatDate(data);
         }
-    },
+     },
     {
-        data: 'driver_duty_status',
+        data: 'dood_status',
         render: (data: any) => {
             if (data == 'OFF') {
                 return `<span class="badge badge-label badge-soft-danger">OFF</span>`;
@@ -70,28 +59,7 @@ export const driverColumns = [
                 return `<span class="badge badge-label badge-soft-success">ON</span>`;
             }
         }
-    },
-    {
-        data: 'driver_status',
-        render: (data: number) => {
-            const statusMap: Record<number, { label: string; class: string }> = {
-                0: { label: 'New', class: 'info' },
-                1: { label: 'Active', class: 'success' },
-                2: { label: 'Inactive', class: 'warning' },
-                3: { label: 'Deleted', class: 'danger' },
-                4: { label: 'Verification', class: 'primary' },
-            };
-            const status = statusMap[data] || { label: 'Unknown', class: 'secondary' };
-            return `<span class="badge badge-label badge-soft-${status.class}">${status.label}</span>`;
-        }
-    },
-    {
-        data: 'created_at',
-        render: (data: string) => {
-            const date = new Date(data);
-            return date.toLocaleDateString();
-        }
-    },
+    }
 ];
 
 // Export table data structure
@@ -100,15 +68,12 @@ export const driverTableData: TableType<DriverInfoType> = {
         "S.No.",
         "ID",
         "Name",
-        // "Last Name",
         "Mobile",
-        "Wallet",
-        // "City ID",
-        "Created By",
-        "Profile",
-        "Duty Status",
-        "Status",
-        "Created At"
+        "V Name",
+        "VRC Number",
+        "Dood Time",
+        "Created At",
+        "Status"
     ],
     body: driverRows,
 };

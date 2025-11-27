@@ -4,17 +4,17 @@ import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-import '@/global.css';
+import "@/global.css";
 
 import { TbEye, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
-import { driverColumns } from "@/views/tables/data-tables/ambulance/driver/components/driver";
+import { driverColumns } from "@/views/tables/data-tables/ambulance/driver-location/components/driver-location";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark from "@/components/AddRemark";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -29,20 +29,18 @@ const tableConfig: Record<
   { endpoint: string; columns: any[]; headers: string[] }
 > = {
   1: {
-    endpoint: "/driver/get_drivers_list",
+    endpoint: "/driver/driver_on_off_data",
     columns: driverColumns,
     headers: [
       "S.No.",
       "ID",
-      "Profile",
       "Name",
       "Mobile",
-      "Wallet",
-      // "City ID",
-      "Created By",
-      "Duty Status",
+      "V Name",
+      "VRC Number",
+      "Dood Time",
+      "Created At",
       "Status",
-      "Date",
     ],
   },
 };
@@ -84,17 +82,14 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, columns, headers } = tableConfig[tabKey];
 
   const StatusFilterOptions = [
-    { label: "New", value: "new" },
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inActive" },
-    { label: "Delete", value: "delete" },
-    { label: "Verification", value: "verification" },
+    { label: "On", value: "ON" },
+    { label: "Off", value: "OFF" }
   ];
 
   const fetchData = async () => {
@@ -104,7 +99,7 @@ const ExportDataWithButtons = ({
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
       console.log("API Response:", res.data);
 
-      const drivers = res.data?.jsonData?.drivers || [];
+      const drivers = res.data?.jsonData?.driverOnOffData || [];
       setData(drivers);
 
       if (res.data.paginations) {
@@ -127,24 +122,14 @@ const ExportDataWithButtons = ({
   };
 
   const handleRemark = (rowData: any) => {
-    const id = rowData?.driver_id ?? rowData?.id;
-    console.log("Selected Driver ID for Remark:", id);
+    const id = rowData?.dood_id;
     setSelectedDriverId(id);
     setIsRemarkOpen(true);
   };
 
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedDriverId}`, {
-        remarkType: "DRIVER",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged?.();
-    } catch (error) {
-      console.error("Error saving remark:", error);
-    }
+  const handleRemarkSuccess = () => {
+    fetchData();
+    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -181,14 +166,18 @@ const ExportDataWithButtons = ({
         const root = createRoot(td);
         root.render(
           <div className="d-flex flex-row gap-1">
-            <button className="eye-icon p-1"
+            <button
+              className="eye-icon p-1"
               onClick={() => {
-                navigate(`/driver-detail/${rowData.driver_id}`);
+                navigate(`/driver-detail/${rowData.dood_id}`);
               }}
             >
               <TbEye className="me-1" />
             </button>
-              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
+            <button
+              className="remark-icon"
+              onClick={() => handleRemark(rowData)}
+            >
               <TbReceipt className="me-1" />
             </button>
           </div>
@@ -200,7 +189,7 @@ const ExportDataWithButtons = ({
   return (
     <>
       <ComponentCard
-        title={tabKey === 1 ? "Manage Drivers" : ""}
+        title={tabKey === 1 ? "Manage Drivers On/Off" : ""}
         className="mb-2 overflow-x-auto"
         headerActions={
           <TableFilters
@@ -262,7 +251,6 @@ const ExportDataWithButtons = ({
                   {headers.map((header, idx) => (
                     <th key={idx}>{header}</th>
                   ))}
-                  {/* <th>Actions</th> */}
                 </tr>
               </thead>
             </DataTable>
@@ -292,11 +280,12 @@ const ExportDataWithButtons = ({
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.DRIVER}
+        primaryKeyId={selectedDriverId}
+        onSuccess={handleRemarkSuccess}
       />
     </>
   );
 };
 
-// Export the component directly, not wrapped in another component
 export default ExportDataWithButtons;

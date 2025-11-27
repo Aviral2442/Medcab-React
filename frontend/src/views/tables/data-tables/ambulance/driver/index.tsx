@@ -4,9 +4,9 @@ import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-import '@/global.css';
+import "@/global.css";
 
-import { TbEye, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEye, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
@@ -52,6 +52,7 @@ const tableConfig: Record<
 type ExportDataWithButtonsProps = {
   tabKey: number;
   refreshFlag: number;
+  onAddNew?: () => void;
   filterParams?: Record<string, any>;
   onDataChanged?: () => void;
 };
@@ -59,6 +60,7 @@ type ExportDataWithButtonsProps = {
 const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
+  onAddNew,
   filterParams = {},
   onDataChanged,
 }: ExportDataWithButtonsProps) => {
@@ -173,14 +175,18 @@ const ExportDataWithButtons = ({
         const root = createRoot(td);
         root.render(
           <div className="d-flex flex-row gap-1">
-            <button className="eye-icon p-1"
+            <button
+              className="eye-icon p-1"
               onClick={() => {
                 navigate(`/driver-detail/${rowData.driver_id}`);
               }}
             >
               <TbEye className="me-1" />
             </button>
-              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
+            <button
+              className="remark-icon"
+              onClick={() => handleRemark(rowData)}
+            >
               <TbReceipt className="me-1" />
             </button>
           </div>
@@ -192,19 +198,31 @@ const ExportDataWithButtons = ({
   return (
     <>
       <ComponentCard
-        title={tabKey === 1 ? "Manage Drivers" : ""}
-        className="mb-2 overflow-x-auto"
+        title={
+          <div className="w-100">
+            {tabKey === 1 ? "Manage Drivers" : ""}
+          </div>
+        }
+        className="mb-2"
         headerActions={
-          <TableFilters
-            dateFilter={dateFilter}
-            statusFilter={statusFilter}
-            dateRange={dateRange}
-            onDateFilterChange={handleDateFilterChange}
-            onStatusFilterChange={handleStatusFilterChange}
-            onDateRangeChange={handleDateRangeChange}
-            statusOptions={StatusFilterOptions}
-            className="w-100"
-          />
+          <div className="d-flex gap-2 align-items-center">
+            <TableFilters
+              dateFilter={dateFilter}
+              statusFilter={statusFilter}
+              dateRange={dateRange}
+              onDateFilterChange={handleDateFilterChange}
+              onStatusFilterChange={handleStatusFilterChange}
+              onDateRangeChange={handleDateRangeChange}
+              statusOptions={StatusFilterOptions}
+              className="w-100"
+            />
+            <button
+              className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 text-nowrap"
+              onClick={onAddNew}
+            >
+              Add New <TbArrowRight className="fs-5" />
+            </button>
+          </div>
         }
       >
         {loading ? (

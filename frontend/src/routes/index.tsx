@@ -38,6 +38,7 @@ const DriverEmergency = lazy(() => import('@/views/pages/emergency/driver'))
 const ConsumerEmergency = lazy(() => import('@/views/pages/emergency/consumer'))
 const AmbulanceBooking = lazy(() => import('@/views/pages/ambulance/booking'))
 const DriverLocation = lazy(() => import('@/views/pages/ambulance/driver-duty'))
+const AddDriver = lazy(() => import('@/views/pages/ambulance/driver/components/AddDriver'))
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -138,6 +139,7 @@ const pagesRoutes: RouteObject[] = [
   { path: "/consumer-details/:id", element: <ConsumerDetails/> },
   { path: "/ambulance/partner", element: <PartnerList/> },
   { path: "/ambulance/driver", element: <DriverList/> },
+  { path: "/ambulance/adddriver", element: <AddDriver/> },
   { path: "/content-seo/blogs", element: <BlogList/> },
   { path: "/add-blog", element: <AddBlogs/> },
   { path: "/edit-blog/:id", element: <AddBlogs/> },
@@ -148,7 +150,7 @@ const pagesRoutes: RouteObject[] = [
   { path: "/emergency/driver", element: <DriverEmergency/> },
   { path: "/emergency/consumer", element: <ConsumerEmergency/> },
   { path: "/ambulance/booking", element: <AmbulanceBooking/> },
-  { path: "/ambulance/driver-location", element: <DriverLocation/> },
+  { path: "/ambulance/driver-duty", element: <DriverLocation/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 

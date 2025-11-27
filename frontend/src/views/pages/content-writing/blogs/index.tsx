@@ -14,7 +14,7 @@ const Page: React.FC = () => {
     // const triggerRefresh = () => setRefreshFlag((prev) => prev + 1);
 
     return (
-        <Container fluid className="p-2">
+        <Container fluid className="p-0">
             <ExportDataWithButtons
                 tabKey={1}
                 refreshFlag={refreshFlag}

@@ -58,7 +58,7 @@ export const getBlogListService = async (filters?: {
             }
         }
 
-                // Detect filters
+        // Detect filters
         const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
         const isStatusFilterApplied = !!filters?.status;
         const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
@@ -111,7 +111,7 @@ export const getBlogListService = async (filters?: {
         }
 
         return {
-            status: 200 ,
+            status: 200,
             message: "Blogs list fetched successfully",
             pagination: {
                 page,
@@ -316,6 +316,21 @@ export const getCityContentService = async (filters?: {
             dateColumn: "city_content.city_timestamp",
         });
 
+        let finalWhereSQL = whereSQL;
+
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
+
         const query = `
             SELECT 
                 city_content.city_id,
@@ -329,17 +344,26 @@ export const getCityContentService = async (filters?: {
             LIMIT ? OFFSET ?
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
+        let total;
+        if (noFiltersApplied) {
+            const [countAllRows]: any = await db.query(`SELECT COUNT(*) as total FROM city_content`);
+            const actualTotal = countAllRows[0]?.total || 0;
 
-
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM city_content ${whereSQL}`,
-            params
-        );
-
-        const total = countRows[0]?.total || 0;
+            if (actualTotal < 100) {
+                total = actualTotal;
+            } else {
+                total = 100;
+            }
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM city_content ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
 
         return {
             status: 200,
@@ -533,6 +557,21 @@ export const getCityContentFaqListService = async (filters?: {
             dateColumn: "city_faq.city_faq_timestamp",
         });
 
+        let finalWhereSQL = whereSQL;
+
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
+
         const query = `
         
         SELECT city_faq.*, city_content.city_name
@@ -544,15 +583,27 @@ export const getCityContentFaqListService = async (filters?: {
 
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM city_faq ${whereSQL}`,
-            params
-        );
+        let total;
+        if (noFiltersApplied) {
+            const [countAllRows]: any = await db.query(`SELECT COUNT(*) as total FROM city_faq`);
+            const actualTotal = countAllRows[0]?.total || 0;
 
-        const total = countRows[0]?.total || 0;
+            if (actualTotal < 100) {
+                total = actualTotal;
+            } else {
+                total = 100;
+            }
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM city_faq ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
+
 
         return {
             status: 200,
