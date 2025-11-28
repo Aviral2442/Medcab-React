@@ -23,6 +23,7 @@ import {
 import { InputPicker, Input } from "rsuite";
 import "rsuite/dist/rsuite.min.css";
 import "leaflet/dist/leaflet.css";
+import ExportDataWithButtons from "@/views/tables/data-tables/ambulance/driver-location/components/DriverDutyMapList";
 
 // You need to install: npm install react-leaflet-cluster
 // And add this CSS for clusters
@@ -59,9 +60,12 @@ interface DriverMapItem {
 }
 
 const DriverDutyLocation = () => {
+  // 1 = List, 2 = Map (default)
+  const [activeTab, setActiveTab] = React.useState<number>(2);
   const [driverMapData, setDriverMapData] = React.useState<DriverMapItem[]>([]);
   const [filteredData, setFilteredData] = React.useState<DriverMapItem[]>([]);
-  const [statusFilter, setStatusFilter] = React.useState("ON");
+  // Use null to mean "no filter / all" (rather than forcing ON)
+  const [statusFilter, setStatusFilter] = React.useState<string | null>("ON");
   const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -160,10 +164,12 @@ const DriverDutyLocation = () => {
     const pastDate = new Date(past);
     const now = new Date();
 
+    // Calculate years, months, days
     let years = now.getFullYear() - pastDate.getFullYear();
     let months = now.getMonth() - pastDate.getMonth();
     let days = now.getDate() - pastDate.getDate();
 
+    // Fix negative days
     if (days < 0) {
       months--;
       const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -176,6 +182,18 @@ const DriverDutyLocation = () => {
       months += 12;
     }
 
+    // Format time (12-hour format)
+    let hours = pastDate.getHours();
+    let minutes: number | string = pastDate.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+
+    const formattedTime = `${hours}:${minutes} ${ampm}`;
+
     // Build output dynamically
     const parts: string[] = [];
 
@@ -183,11 +201,15 @@ const DriverDutyLocation = () => {
     if (months > 0) parts.push(`${months}m`);
     if (days > 0) parts.push(`${days}d`);
 
+    // Always show time
+    parts.push(formattedTime);
+
     return parts.join(" ") + " ago";
   }
 
+  // Handler: accept null to clear filter; pass the value as-is
   const handleStatusFilterChange = (value: string | null) => {
-    setStatusFilter(value || "ON");
+    setStatusFilter(value);
   };
 
   // Memoized icons
@@ -233,111 +255,191 @@ const DriverDutyLocation = () => {
       <style>{clusterStyles}</style>
       <Container fluid className="p-0 mt-2">
         <Row>
-          <Col lg="12">
-            <Card>
-              <CardHeader className="d-flex justify-content-between align-items-center">
-                <div>
-                  <CardTitle as="h5" className="mb-1">
-                    Driver Duty Map
-                  </CardTitle>
-                  <p className="text-muted mb-0">
-                    View driver locations. Green = ON, Red = OFF
-                  </p>
-                </div>
-                <div className="d-flex gap-2 align-items-center flex-wrap z-1">
-                  <Input
-                    placeholder="Search driver/city/mobile..."
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    style={{ width: 220 }}
-                    size="sm"
-                  />
-
-                  <InputPicker
-                    data={statusFilterOptions}
-                    value={statusFilter}
-                    onChange={handleStatusFilterChange}
-                    placeholder="Status"
-                    style={{ width: 120 }}
-                    cleanable={false}
-                    size="sm"
-                    searchable={false}
-                    menuStyle={{ zIndex: 9999 }}
-                  />
-                  <label
-                    className="border py-1 px-3 rounded d-flex align-items-center gap-1"
-                    style={{ cursor: "pointer", fontSize: "0.875rem" }}
+          <Col>
+            <div className="">
+              <ul className="nav nav-tabs">
+                <li className="nav-item">
+                  <button
+                    type="button"
+                    className={`nav-link ${
+                      activeTab === 1 ? "active" : ""
+                    }`}
+                    onClick={() => setActiveTab(1)}
                   >
-                    <input
-                      type="checkbox"
-                      checked={useClustering}
-                      onChange={(e) => setUseClustering(e.target.checked)}
-                    />
-                    Cluster
-                  </label>
-                  <span className="border px-3 py-1 rounded">
-                    {filteredData.length} drivers
-                  </span>
-                  {loading && <Spinner animation="border" size="sm" />}
-                </div>
-              </CardHeader>
-              <CardBody>
-                {error && (
-                  <Alert
-                    variant="danger"
-                    dismissible
-                    onClose={() => setError(null)}
+                    List
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    type="button"
+                    className={`nav-link ${
+                      activeTab === 2 ? "active" : ""
+                    }`}
+                    onClick={() => setActiveTab(2)}
                   >
-                    {error}
-                  </Alert>
-                )}
+                    Map
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </Col>
+        </Row>
 
-                {loading && (
-                  <div className="text-center py-5">
-                    <Spinner animation="border" role="status">
-                      <span className="visually-hidden">
-                        Loading drivers...
-                      </span>
-                    </Spinner>
-                    <p className="text-muted mt-2">
-                      Loading {statusFilter === "ON" ? "active" : "inactive"}{" "}
-                      driver data...
+        {/* List tab: use the existing driver duty table */}
+        {activeTab === 1 && (
+          <Row>
+            <Col lg="12">
+              <ExportDataWithButtons
+                tabKey={1}
+                refreshFlag={0}
+                statusFilter={statusFilter}
+                onStatusFilterChange={(v) => {
+                  if (v !== statusFilter) setStatusFilter(v);
+                }}
+                filterParams={statusFilter ? { status: statusFilter } : {}}
+                onDataChanged={() => {}}
+              />
+            </Col>
+          </Row>
+        )}
+
+        {/* Map tab */}
+        {activeTab === 2 && (
+          <Row>
+            <Col lg="12">
+              <Card className="mt-2">
+                <CardHeader className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <CardTitle as="h5" className="mb-1">
+                      Driver Duty Map
+                    </CardTitle>
+                    <p className="text-muted mb-0">
+                      View driver locations. Green = ON, Red = OFF
                     </p>
                   </div>
-                )}
+                  <div className="d-flex gap-2 align-items-center flex-wrap z-1">
+                    <Input
+                      placeholder="Search driver/city/mobile..."
+                      value={searchQuery}
+                      onChange={setSearchQuery}
+                      style={{ width: 220 }}
+                      size="sm"
+                    />
 
-                {!loading && filteredData.length > 0 && (
-                  <MapContainer
-                    center={center}
-                    zoom={5}
-                    scrollWheelZoom={false}
-                    style={{ height: "460px" }}
-                  >
-                    <LayersControl position="topright">
-                      <LayersControl.BaseLayer checked name="Street">
-                        <TileLayer
-                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        />
-                      </LayersControl.BaseLayer>
+                    <InputPicker
+                      data={statusFilterOptions}
+                      value={statusFilter}
+                      onChange={handleStatusFilterChange}
+                      placeholder="Status"
+                      style={{ width: 120 }}
+                      cleanable={false}
+                      size="sm"
+                      searchable={false}
+                      menuStyle={{ zIndex: 9999 }}
+                    />
+                    <label
+                      className="border py-1 px-3 rounded d-flex align-items-center gap-1"
+                      style={{ cursor: "pointer", fontSize: "0.875rem" }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={useClustering}
+                        onChange={(e) => setUseClustering(e.target.checked)}
+                      />
+                      Cluster
+                    </label>
+                    <span className="border px-3 py-1 rounded">
+                      {filteredData.length} drivers
+                    </span>
+                    {loading && <Spinner animation="border" size="sm" />}
+                  </div>
+                </CardHeader>
+                <CardBody>
+                  {error && (
+                    <Alert
+                      variant="danger"
+                      dismissible
+                      onClose={() => setError(null)}
+                    >
+                      {error}
+                    </Alert>
+                  )}
 
-                      <LayersControl.BaseLayer name="CartoDB Dark">
-                        <TileLayer
-                          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-                        />
-                      </LayersControl.BaseLayer>
-                    </LayersControl>
+                  {loading && (
+                    <div className="text-center py-5">
+                      <Spinner animation="border" role="status">
+                        <span className="visually-hidden">
+                          Loading drivers...
+                        </span>
+                      </Spinner>
+                      <p className="text-muted mt-2">
+                        Loading {statusFilter === "ON" ? "active" : "inactive"}{" "}
+                        driver data...
+                      </p>
+                    </div>
+                  )}
 
-                    {useClustering ? (
-                      <MarkerClusterGroup
-                        chunkedLoading
-                        iconCreateFunction={createClusterCustomIcon}
-                        maxClusterRadius={50}
-                        spiderfyOnMaxZoom={true}
-                        showCoverageOnHover={false}
-                      >
-                        {filteredData.map((driver) => (
+                  {!loading && filteredData.length > 0 && (
+                    <MapContainer
+                      center={center}
+                      zoom={5}
+                      scrollWheelZoom={false}
+                      style={{ height: "460px" }}
+                    >
+                      <LayersControl position="topright">
+                        <LayersControl.BaseLayer checked name="Street">
+                          <TileLayer
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                          />
+                        </LayersControl.BaseLayer>
+
+                        <LayersControl.BaseLayer name="CartoDB Dark">
+                          <TileLayer
+                            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                            attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                          />
+                        </LayersControl.BaseLayer>
+                      </LayersControl>
+
+                      {useClustering ? (
+                        <MarkerClusterGroup
+                          chunkedLoading
+                          iconCreateFunction={createClusterCustomIcon}
+                          maxClusterRadius={50}
+                          spiderfyOnMaxZoom={true}
+                          showCoverageOnHover={false}
+                        >
+                          {filteredData.map((driver) => (
+                            <Marker
+                              key={driver.driver_live_location_d_id}
+                              position={[
+                                driver.driver_live_location_lat,
+                                driver.driver_live_location_long,
+                              ]}
+                              icon={getCustomIcon(driver.driver_duty_status)}
+                            >
+                              <Popup>
+                                {driver.driver_live_location_d_id}{" "}
+                                {driver.driver_name} ({driver.driver_mobile})
+                                {driver.city_name && (
+                                  <>
+                                    <br />
+                                    <strong>City:</strong> {driver.city_name}
+                                  </>
+                                )}
+                                <br />
+                                <strong>Last Updated:</strong>{" "}
+                                {LastUpdated(
+                                  driver.driver_live_location_updated_time
+                                )}{" "}
+                                <br />
+                              </Popup>
+                            </Marker>
+                          ))}
+                        </MarkerClusterGroup>
+                      ) : (
+                        filteredData.map((driver) => (
                           <Marker
                             key={driver.driver_live_location_d_id}
                             position={[
@@ -347,9 +449,7 @@ const DriverDutyLocation = () => {
                             icon={getCustomIcon(driver.driver_duty_status)}
                           >
                             <Popup>
-                              <strong>
-                                {driver.driver_live_location_d_id}
-                              </strong>{" "}
+                              {driver.driver_live_location_d_id}{" "}
                               {driver.driver_name} ({driver.driver_mobile})
                               {driver.city_name && (
                                 <>
@@ -365,61 +465,33 @@ const DriverDutyLocation = () => {
                               <br />
                             </Popup>
                           </Marker>
-                        ))}
-                      </MarkerClusterGroup>
-                    ) : (
-                      filteredData.map((driver) => (
-                        <Marker
-                          key={driver.driver_live_location_d_id}
-                          position={[
-                            driver.driver_live_location_lat,
-                            driver.driver_live_location_long,
-                          ]}
-                          icon={getCustomIcon(driver.driver_duty_status)}
-                        >
-                          <Popup>
-                            {driver.driver_live_location_d_id}
-                            {driver.driver_name} ({driver.driver_mobile})
-                            {driver.city_name && (
-                              <>
-                                <br />
-                                <strong>City:</strong> {driver.city_name}
-                              </>
-                            )}
-                            <br />
-                            <strong>Last Updated:</strong>{" "}
-                            {LastUpdated(
-                              driver.driver_live_location_updated_time
-                            )}{" "}
-                            <br />
-                          </Popup>
-                        </Marker>
-                      ))
-                    )}
-                  </MapContainer>
-                )}
+                        ))
+                      )}
+                    </MapContainer>
+                  )}
 
-                {!loading && filteredData.length === 0 && !error && (
-                  <div className="text-center py-5">
-                    <p className="text-muted">
-                      No drivers found matching your criteria.
-                    </p>
-                  </div>
-                )}
+                  {!loading && filteredData.length === 0 && !error && (
+                    <div className="text-center py-5">
+                      <p className="text-muted">
+                        No drivers found matching your criteria.
+                      </p>
+                    </div>
+                  )}
 
-                {/* Info about clustering */}
-                {filteredData.length > 500 && !useClustering && (
-                  <Alert variant="info" className="mt-2 mb-0">
-                    <small>
-                      💡 Tip: Enable clustering for better performance with{" "}
-                      {filteredData.length} markers.
-                    </small>
-                  </Alert>
-                )}
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
+                  {/* Info about clustering */}
+                  {filteredData.length > 500 && !useClustering && (
+                    <Alert variant="info" className="mt-2 mb-0">
+                      <small>
+                        💡 Tip: Enable clustering for better performance with{" "}
+                        {filteredData.length} markers.
+                      </small>
+                    </Alert>
+                  )}
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+        )}
       </Container>
     </div>
   );

@@ -97,7 +97,7 @@ export const updateDriverController = async (req: Request, res: Response, next: 
 export const driverDetailController = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const driverId = parseInt(req.params.id);
+        const driverId = parseInt(req.params.driverId);
 
         if (isNaN(driverId)) {
             return res.status(400).json({ message: 'Invalid driver ID' });
@@ -136,8 +136,13 @@ export const driverOnOffDataController = async (req: Request, res: Response, nex
 export const TotaldriverliveLocationController = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const filters = {
-            status: req.query.status as string || 'ON', // Default to ON
-        }
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 10,
+        };
 
         const result = await TotalDriverLiveLocationService(filters);
         res.status(200).json(result);

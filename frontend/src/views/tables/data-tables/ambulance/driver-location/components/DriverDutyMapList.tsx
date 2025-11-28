@@ -1,23 +1,24 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
-import "@/global.css";
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
+import "@/global.css";
 
-import { TbArrowRight, TbEdit, TbEye, TbReceipt } from "react-icons/tb";
+import { TbEye } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
-import { partnerColumns } from "@/views/tables/data-tables/ambulance/partner/components/partner";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
+import { formatDate } from "@/components/DateFormat";
+import _pdfMake from "pdfmake/build/pdfmake";
+import _pdfFonts from "pdfmake/build/vfs_fonts";
 
 // Register DataTable plugins
 DataTable.use(DT);
@@ -26,22 +27,18 @@ DT.Buttons.pdfMake(pdfmake);
 
 const tableConfig: Record<
   number,
-  { endpoint: string; columns: any[]; headers: string[] }
+  { endpoint: string; headers: string[] }
 > = {
   1: {
-    endpoint: "/partner/get_partners_list",
-    columns: partnerColumns,
+    endpoint: "/driver/driver_on_off_data",
     headers: [
       "S.No.",
       "ID",
-      "Img",
       "Name",
       "Mobile",
-      "Wallet",
-      "Reg_Step",
-      // "City",
-      "Date",
-      "Remark",
+      "V Name",
+      "VRC Number",
+      "Created At",
       "Status",
     ],
   },
@@ -50,24 +47,21 @@ const tableConfig: Record<
 type ExportDataWithButtonsProps = {
   tabKey: number;
   refreshFlag: number;
-  onAddNew?: () => void;
   filterParams?: Record<string, any>;
   onDataChanged?: () => void;
+  statusFilter?: string | null;
+  onStatusFilterChange?: (value: string | null) => void;
 };
 
 const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
-  onAddNew,
   filterParams = {},
-  onDataChanged,
+  statusFilter: externalStatusFilter = null,
+  onStatusFilterChange,
 }: ExportDataWithButtonsProps) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isRemarkOpen, setIsRemarkOpen] = useState(false);
-  const [selectedPartnerId, setSelectedPartnerId] = useState<number | null>(
-    null
-  );
 
   const [pageSize] = useState(10);
   const [_total, setTotal] = useState(0);
@@ -91,53 +85,64 @@ const ExportDataWithButtons = ({
     defaultDateFilter: "",
   });
 
-  const { endpoint, columns, headers } = tableConfig[tabKey];
+  // When parent provides external status filter, sync it into the table's hook state
+  useEffect(() => {
+    if (externalStatusFilter !== null && externalStatusFilter !== statusFilter) {
+      handleStatusFilterChange(externalStatusFilter);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalStatusFilter]);
+
+  // Whenever internal statusFilter changes, notify parent so Map can update
+  useEffect(() => {
+    if (onStatusFilterChange) {
+      onStatusFilterChange(statusFilter as string | null);
+    }
+  }, [statusFilter, onStatusFilterChange]);
+
+  const { endpoint, headers } = tableConfig[tabKey];
 
   const StatusFilterOptions = [
-    { label: "New", value: "new" },
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inActive" },
+    { label: "On", value: "ON" },
+    { label: "Off", value: "OFF" }
   ];
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const params = getFilterParams(pageSize, filterParams);
+      // Merge external filter params (like status from map) into getFilterParams
+      const mergedParams = { ...filterParams };
+      if (externalStatusFilter !== null && externalStatusFilter !== undefined) {
+        mergedParams.status = externalStatusFilter;
+      }
+      const params = getFilterParams(pageSize, mergedParams);
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
       console.log("API Response:", res.data);
 
-      const partners = res.data?.jsonData?.partners || [];
-      setData(partners);
-
+      // support both shapes (driverOnOffData for on/off, driver_Live_Location_Data for live location)
+      const drivers =
+        res.data?.jsonData?.driverOnOffData ||
+        res.data?.jsonData?.driver_Live_Location_Data ||
+        [];
+      setData(drivers);
+      
       if (res.data.paginations) {
         setTotal(res.data.paginations.total);
         setTotalPages(res.data.paginations.totalPages);
       } else {
-        setTotal(res.data?.total || partners.length);
+        setTotal(res.data?.total || drivers.length);
         setTotalPages(
-          res.data?.totalPages || Math.ceil(partners.length / pageSize)
+          res.data?.totalPages || Math.ceil(drivers.length / pageSize)
         );
       }
     } catch (error) {
-      console.error("Error fetching partner data:", error);
+      console.error("Error fetching driver data:", error);
       setData([]);
       setTotal(0);
       setTotalPages(0);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleRemark = (rowData: any) => {
-    const id = rowData?.partner_id;
-    console.log("Selected Partner ID for Remark:", id);
-    setSelectedPartnerId(id);
-    setIsRemarkOpen(true);
-  };
-
-  const handleRemarkSuccess = () => {
-    fetchData();
-    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -162,7 +167,47 @@ const ExportDataWithButtons = ({
         return currentPage * pageSize + meta.row + 1;
       },
     },
-    ...columns,
+    {
+        title: "ID",
+        data: "driver_id",
+    },
+    {
+        title: "Name",
+        data: "driver_name",
+        render: (data: string, _type: any, row: any) => {
+            return `${data} ${row.driver_last_name}`;
+        }
+    },
+    {
+        title: "Mobile",
+        data: "driver_mobile",
+    },
+    {
+        title: "V Name",
+        data: "v_vehicle_name",
+    },
+    {
+        title: "VRC Number",
+        data: "vehicle_rc_number",
+    },
+    {
+        title: "created_at",
+        data: "created_at",
+        render: (data: string) => {
+            return formatDate(data);
+        }
+    },
+    {
+        title: "duty_status",
+        data: "driver_duty_status",
+        render: (data: any) => {
+            if (data == 'OFF') {
+                return `<span class="badge badge-label badge-soft-danger">OFF</span>`;
+            } else {
+                return `<span class="badge badge-label badge-soft-success">ON</span>`;
+            }   
+        }
+    },
     {
       title: "Actions",
       data: null,
@@ -173,28 +218,14 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-          <div className="d-flex flex-row gap-1">
+          <div className="d-flex gap-1 align-content-center">
             <button
               className="eye-icon p-1"
               onClick={() => {
-                navigate(`/partner-detail/${rowData.partner_id}`);
+                navigate(`/ambulance/driver-duty/${rowData.driver_id}`);
               }}
             >
               <TbEye className="me-1" />
-            </button>
-            <button
-              className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
-              onClick={() => {
-                navigate(`/edit-partner/${rowData.partner_id}`);
-              }}
-            >
-              <TbEdit className="me-1" />
-            </button>
-            <button
-              className="remark-icon"
-              onClick={() => handleRemark(rowData)}
-            >
-              <TbReceipt className="me-1" />
             </button>
           </div>
         );
@@ -205,35 +236,42 @@ const ExportDataWithButtons = ({
   return (
     <>
       <ComponentCard
-        title={tabKey === 1 ? "Manage Partners" : ""}
+        title={
+          <div className="w-100">
+            {tabKey === 1 ? "Driver Duty Location" : " "}
+          </div>
+        }
         className="mb-2 overflow-x-auto"
         headerActions={
-          <div className="d-flex gap-2 align-items-center">
+          <div className="d-flex gap-2 align-content-center">
             <TableFilters
               dateFilter={dateFilter}
               statusFilter={statusFilter}
               dateRange={dateRange}
               onDateFilterChange={handleDateFilterChange}
-              onStatusFilterChange={handleStatusFilterChange}
+              onStatusFilterChange={(v) => {
+                handleStatusFilterChange(v);
+                if (onStatusFilterChange) onStatusFilterChange(v);
+              }}
               onDateRangeChange={handleDateRangeChange}
               statusOptions={StatusFilterOptions}
+              showDateRange={true}
+              showDateFilter={true}
+              showStatusFilter={true}
+              dateFilterPlaceholder="Quick filter"
+              dateRangePlaceholder="Custom range"
+              statusFilterPlaceholder="Status"
               className="w-100"
             />
-            <button
-              className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 text-nowrap"
-              onClick={onAddNew}
-            >
-              Add New <TbArrowRight className="fs-6" />
-            </button>
           </div>
         }
       >
         {loading ? (
           <div className="text-center py-4">Loading...</div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto ">
             <DataTable
-              key={`partner-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
+              key={`driver-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
               data={data}
               columns={columnsWithActions}
               options={{
@@ -275,7 +313,6 @@ const ExportDataWithButtons = ({
                   {headers.map((header, idx) => (
                     <th key={idx}>{header}</th>
                   ))}
-                  {/* <th>Actions</th> */}
                 </tr>
               </thead>
             </DataTable>
@@ -301,14 +338,6 @@ const ExportDataWithButtons = ({
           </div>
         )}
       </ComponentCard>
-
-      <AddRemark
-        isOpen={isRemarkOpen}
-        onClose={() => setIsRemarkOpen(false)}
-        remarkCategoryType={REMARK_CATEGORY_TYPES.PARTNER}
-        primaryKeyId={selectedPartnerId}
-        onSuccess={handleRemarkSuccess}
-      />
     </>
   );
 };

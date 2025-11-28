@@ -502,10 +502,9 @@ export const driverOnOffDataService = async (filters: {
         let effectiveLimit = limit;
         let effectiveOffset = offset;
 
-        // If NO FILTERS applied → force fixed 100-record window
         if (noFiltersApplied) {
-            effectiveLimit = limit;              // per page limit (e.g., 10)
-            effectiveOffset = (page - 1) * limit; // correct pagination
+            effectiveLimit = limit;              
+            effectiveOffset = (page - 1) * limit;
         }
 
         const query = `
@@ -594,10 +593,13 @@ export const TotalDriverLiveLocationService = async (filters: {
                 driver.driver_name,
                 driver.driver_mobile,
                 driver.driver_duty_status,
-                city.city_name
+                city.city_name,
+                vehicle.v_vehicle_name,
+                vehicle.vehicle_rc_number
             FROM driver_live_location
-            JOIN driver ON driver_live_location.driver_live_location_d_id = driver.driver_id
+            LEFT JOIN driver ON driver_live_location.driver_live_location_d_id = driver.driver_id
             LEFT JOIN city ON driver.driver_city_id = city.city_id
+            LEFT JOIN vehicle ON driver.driver_assigned_vehicle_id = vehicle.vehicle_id
             ${finalWhereSQL}
             ORDER BY driver_live_location.driver_live_location_id DESC
         `;

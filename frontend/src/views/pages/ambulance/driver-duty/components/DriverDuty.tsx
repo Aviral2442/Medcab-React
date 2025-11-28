@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import {
@@ -23,6 +23,7 @@ const DriverDuty = () => {
     driver_name: "",
     driver_mobile: "",
     driver_live_location_updated_time: "",
+    driver_duty_status: "OFF",
   });
   const [noLocationMessage, setNoLocationMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
@@ -46,6 +47,7 @@ const DriverDuty = () => {
           driver_name: fallbackDriver.driver_name || "",
           driver_mobile: fallbackDriver.driver_mobile || "",
           driver_live_location_updated_time: "",
+          driver_duty_status: fallbackDriver.driver_duty_status || "OFF",
         });
         setNoLocationMessage(msg || "Live location is not available for this driver.");
       } else {
@@ -66,10 +68,7 @@ const DriverDuty = () => {
   }, [id]);
 
   function LastUpdated(unixTime: string): string {
-    // Guard if unixTime missing
-    if (!unixTime) return "N/A";
     const past = parseInt(unixTime) * 1000;
-    if (isNaN(past)) return "N/A";
     const pastDate = new Date(past);
     const now = new Date();
 
@@ -91,6 +90,18 @@ const DriverDuty = () => {
       months += 12;
     }
 
+    // Format time (12-hour format)
+    let hours = pastDate.getHours();
+    let minutes: number | string = pastDate.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+
+    const formattedTime = `${hours}:${minutes} ${ampm}`;
+
     // Build output dynamically
     const parts: string[] = [];
 
@@ -98,7 +109,10 @@ const DriverDuty = () => {
     if (months > 0) parts.push(`${months}m`);
     if (days > 0) parts.push(`${days}d`);
 
-    return parts.length ? parts.join(" ") + " ago" : "Just now";
+    // Always show time
+    parts.push(formattedTime);
+
+    return parts.join(" ") + " ago";
   }
 
   const PopupWithMarker = () => {
@@ -107,11 +121,27 @@ const DriverDuty = () => {
       driverDutyData.driver_live_location_long || 0,
     ];
 
-    const customIcon = L.icon({
-      iconUrl:
-        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
-      iconSize: [15, 25],
-    });
+    // use memoized icons so we match the multi-driver map colors
+    const icons = useMemo(
+      () => ({
+        ON: L.icon({
+          iconUrl:
+            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+          iconSize: [15, 25],
+        }),
+        OFF: L.icon({
+          iconUrl:
+            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+          iconSize: [15, 25],
+        }),
+      }),
+      []
+    );
+
+    const getCustomIcon = (status: string | undefined) => {
+      const key = (status || "OFF").toUpperCase();
+      return (icons as any)[key] || icons.ON;
+    };
 
     return (
       <Card>
@@ -141,11 +171,14 @@ const DriverDuty = () => {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <Marker icon={customIcon} position={center}>
+              <Marker
+                icon={getCustomIcon(driverDutyData.driver_duty_status)}
+                position={center}
+              >
                 <Popup>
                   {driverDutyData.driver_name} ({driverDutyData.driver_mobile})
                   <br />
-                  <strong>Last Updated:</strong> {LastUpdated(driverDutyData.driver_live_location_updated_time)}
+                  {LastUpdated(driverDutyData.driver_live_location_updated_time)}
                 </Popup>
               </Marker>
             </MapContainer>
