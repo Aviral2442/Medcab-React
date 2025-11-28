@@ -9,7 +9,6 @@ import {
   Col,
   Container,
   Row,
-  Alert,
   Spinner,
 } from "react-bootstrap";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";

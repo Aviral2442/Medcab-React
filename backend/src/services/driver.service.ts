@@ -461,12 +461,29 @@ export const driverOnOffDataService = async (filters: {
         let finalWhereSQL = whereSQL;
 
         if (filters?.status) {
-            const statusConsitionMap: Record<string, string> = {
-                on: "driver.driver_duty_status = ON",   // Missing quotes around ON
-                off: "driver.driver_duty_status = OFF", // Missing quotes around OFF
-            };
+            const statusRaw = String(filters.status).trim();
+            const statusUpper = statusRaw.toUpperCase();
+            let condition: string | undefined = undefined;
 
-            const condition = statusConsitionMap[filters.status];
+            if (/^\d+$/.test(statusRaw)) {
+                const statusNum = parseInt(statusRaw, 10);
+                condition = `driver.driver_status = ${statusNum}`;
+            } else {
+                const statusMap: Record<string, number> = {
+                    NEW: 0,
+                    ACTIVE: 1,
+                    INACTIVE: 2,
+                    DELETE: 3,
+                    VERIFICATION: 4,
+                };
+
+                if (statusMap[statusUpper] !== undefined) {
+                    condition = `driver.driver_status = ${statusMap[statusUpper]}`;
+                } else if (statusUpper === "ON" || statusUpper === "OFF") {
+                    // Duty status
+                    condition = `driver.driver_duty_status = '${statusUpper}'`;
+                }
+            }
 
             if (condition) {
                 if (/where\s+/i.test(finalWhereSQL)) {
@@ -499,6 +516,8 @@ export const driverOnOffDataService = async (filters: {
                 driver.driver_last_name,
                 driver.driver_mobile,
                 driver.driver_duty_status,
+                driver.driver_wallet_amount,
+                driver.driver_status,
                 driver.created_at,
                 vehicle.v_vehicle_name,
                 vehicle.vehicle_rc_number

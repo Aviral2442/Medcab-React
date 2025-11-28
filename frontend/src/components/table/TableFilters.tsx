@@ -10,7 +10,7 @@ interface TableFiltersProps {
   onDateFilterChange: (value: string | null) => void;
   onStatusFilterChange: (value: string | null) => void;
   onDateRangeChange: (update: [Date | null, Date | null]) => void;
-  statusOptions: Array<{ label: string; value: string }>;
+  statusOptions: Array<{ label: any; value: any }>;
   showDateRange?: boolean;
   showDateFilter?: boolean;
   showStatusFilter?: boolean;

@@ -9,7 +9,9 @@ type DriverInfoType = {
     driver_mobile: string;
     v_vehicle_name: string;
     vehicle_rc_number: string;
+    driver_wallet_amount: number;
     driver_duty_status: string;
+    driver_status: string;
     created_at: string;
 }
 
@@ -33,7 +35,8 @@ export const getDriverList = async () => {
 
 export const driverColumns = [
     { data: 'driver_id' },
-    { data: 'driver_name',
+    {
+        data: 'driver_name',
         defaultContent: '',
         render: (data: string, _type: any, row: DriverInfoType) => {
             return `${data} ${row.driver_last_name}`;
@@ -42,12 +45,13 @@ export const driverColumns = [
     { data: 'driver_mobile' },
     { data: 'v_vehicle_name' },
     { data: 'vehicle_rc_number' },
-     {
+    { data: 'driver_wallet_amount' },
+    {
         data: 'created_at',
         render: (data: string) => {
             return formatDate(data);
         }
-     },
+    },
     {
         data: 'driver_duty_status',
         render: (data: any) => {
@@ -57,7 +61,21 @@ export const driverColumns = [
                 return `<span class="badge badge-label badge-soft-success">ON</span>`;
             }
         }
-    }
+    },
+    {
+        data: 'driver_status',
+        render: (data: number) => {
+            const statusMap: Record<number, { label: string; class: string }> = {
+                0: { label: 'New', class: 'info' },
+                1: { label: 'Active', class: 'success' },
+                2: { label: 'Inactive', class: 'warning' },
+                3: { label: 'Deleted', class: 'danger' },
+                4: { label: 'Verification', class: 'primary' },
+            };
+            const status = statusMap[data] || { label: 'Unknown', class: 'secondary' };
+            return `<span class="badge badge-label badge-soft-${status.class}">${status.label}</span>`;
+        }
+    },
 ];
 
 // Export table data structure
@@ -69,8 +87,10 @@ export const driverTableData: TableType<DriverInfoType> = {
         "Mobile",
         "V Name",
         "VRC Number",
+        "Wallet",
         "Created At",
-        "Status"
+        "Duty",
+        "Status",
     ],
     body: driverRows,
 };
