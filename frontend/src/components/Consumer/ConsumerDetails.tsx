@@ -1,5 +1,6 @@
 import React from "react";
 import { Card, Row, Col, Form } from "react-bootstrap";
+import { formatDate } from "@/components/DateFormat";
 
 interface ConsumerDetailsProps {
   data: any;
@@ -107,29 +108,6 @@ const consumerFields: FieldDef[] = [
   { label: "Wallet Amount", name: "consumer_wallet_amount", type: "number" },
 ];
 
-// const getStatusBadge = (status: any) => {
-//   const s = String(status ?? "unknown");
-//   const [variant, text] = statusMap[s] || ["secondary", s];
-//   return <Badge bg={variant}>{text}</Badge>;
-// };
-
-const formatDateShort = (value: any) => {
-  if (value === null || value === undefined || value === "") return "N/A";
-  const s = String(value);
-  try {
-    const date = /^\d+$/.test(s)
-      ? new Date(parseInt(s, 10) * 1000)
-      : new Date(s);
-    if (isNaN(date.getTime())) return s;
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${pad(date.getMonth() + 1)}/${pad(
-      date.getDate()
-    )}/${date.getFullYear()}`;
-  } catch {
-    return s;
-  }
-};
-
 const ConsumerDetails: React.FC<ConsumerDetailsProps> = ({ data }) => {
   return (
     <div>
@@ -146,7 +124,7 @@ const ConsumerDetails: React.FC<ConsumerDetailsProps> = ({ data }) => {
           <div>
             <span className="h4 fs-4 fw-semibold">Registered:</span>{" "}
             <strong className="fs-4 text-muted">
-              {formatDateShort(data?.consumer_registred_date)}
+              {formatDate(data?.consumer_registred_date)}
             </strong>
           </div>
         </Card.Body>
@@ -172,7 +150,7 @@ const ConsumerDetails: React.FC<ConsumerDetailsProps> = ({ data }) => {
                 ) : f.name === "consumer_registred_date" ? (
                   <Field
                     label={f.label}
-                    value={formatDateShort(data?.[f.name])}
+                    value={formatDate(data?.[f.name])}
                     type={f.type}
                   />
                 ) : (

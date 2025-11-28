@@ -44,6 +44,7 @@ const EditDriver = lazy(() => import('@/views/pages/ambulance/driver/components/
 const DriverDutyMap = lazy(() => import('@/views/pages/ambulance/driver-duty/components/DriverDutyMap'))
 const AddPartner = lazy(() => import('@/views/pages/ambulance/partner/components/AddPartner'));
 const EditPartner = lazy(() => import('@/views/pages/ambulance/partner/components/AddPartner'));
+const DriverDetails = lazy(() => import('@/components/Ambulance/DriverDetails'));
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -160,7 +161,8 @@ const pagesRoutes: RouteObject[] = [
   { path: "/ambulance/driver-duty-map", element: <DriverDutyMap/> },
   { path: "/edit-driver/:id", element: <EditDriver/> },
   { path: "/ambulance/partner/add-partner", element: <AddPartner/> },
-  { path: "/edit-partner/:id", element: <EditPartner/> }
+  { path: "/edit-partner/:id", element: <EditPartner/> },
+  { path: "/driver-detail/:id", element: <DriverDetails/> }
 ];
 
 const uiRoutes: RouteObject[] = [ 

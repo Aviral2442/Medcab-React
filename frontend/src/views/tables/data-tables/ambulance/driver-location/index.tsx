@@ -37,7 +37,6 @@ const tableConfig: Record<
       "Mobile",
       "V Name",
       "VRC Number",
-      "Dood Time",
       "Created At",
       "Status",
     ],
@@ -156,7 +155,7 @@ const ExportDataWithButtons = ({
             <button
               className="eye-icon p-1"
               onClick={() => {
-                navigate(`/ambulance/driver-duty/${rowData.dood_id}`);
+                navigate(`/ambulance/driver-duty/${rowData.driver_id}`);
               }}
             >
               <TbEye className="me-1" />

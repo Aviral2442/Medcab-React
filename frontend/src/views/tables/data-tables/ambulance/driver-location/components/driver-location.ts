@@ -3,13 +3,13 @@ import axios from "axios";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
 type DriverInfoType = {
-    dood_id: number;
+    driver_id: number;
     driver_name: string;
+    driver_last_name: string;
     driver_mobile: string;
     v_vehicle_name: string;
     vehicle_rc_number: string;
-    dood_time_unix: string;
-    dood_status: string;
+    driver_duty_status: string;
     created_at: string;
 }
 
@@ -32,18 +32,16 @@ export const getDriverList = async () => {
 }
 
 export const driverColumns = [
-    { data: 'dood_id' },
+    { data: 'driver_id' },
     { data: 'driver_name',
-        defaultContent: ''
+        defaultContent: '',
+        render: (data: string, _type: any, row: DriverInfoType) => {
+            return `${data} ${row.driver_last_name}`;
+        }
     },
     { data: 'driver_mobile' },
     { data: 'v_vehicle_name' },
     { data: 'vehicle_rc_number' },
-    { data: 'dood_time_unix', 
-        render: (data: string) => {
-            return formatDate(data);
-        }
-     },
      {
         data: 'created_at',
         render: (data: string) => {
@@ -51,7 +49,7 @@ export const driverColumns = [
         }
      },
     {
-        data: 'dood_status',
+        data: 'driver_duty_status',
         render: (data: any) => {
             if (data == 'OFF') {
                 return `<span class="badge badge-label badge-soft-danger">OFF</span>`;
@@ -71,7 +69,6 @@ export const driverTableData: TableType<DriverInfoType> = {
         "Mobile",
         "V Name",
         "VRC Number",
-        "Dood Time",
         "Created At",
         "Status"
     ],

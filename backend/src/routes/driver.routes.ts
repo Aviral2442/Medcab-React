@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from "multer";
-import { addDriverController, driverDetailController, TotaldriverOnOffMapLocationController, driverOnOffDataController, driverOnOffMapLocationController, fetchDriverController, getDriversController, updateDriverController } from '../controllers/driver.controller';
+import { addDriverController, driverDetailController, TotaldriverliveLocationController, driverOnOffDataController, driverLiveLocationController, fetchDriverController, getDriversController, updateDriverController } from '../controllers/driver.controller';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -39,7 +39,7 @@ router.get("/get_driver/:driverId", fetchDriverController);
 
 router.post('/driver_detail/:driverId', driverDetailController);
 router.get('/driver_on_off_data', driverOnOffDataController);
-router.get('/driver_on_off_map_location', TotaldriverOnOffMapLocationController);
-router.post('/driver_on_off_map_location/:driverOnOffId', driverOnOffMapLocationController);
+router.get('/driver_live_location', TotaldriverliveLocationController);
+router.post('/driver_live_location_on_map/:driverOnOffId', driverLiveLocationController);
 
 export default router;

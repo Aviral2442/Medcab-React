@@ -115,6 +115,6 @@ export const bookingColumns = [
 ];
 
 export const bookingTableData: TableType<AmbulanceBookingInfoType> = {
-    header: ["S.No.", 'ID', 'Type', 'Consumer', 'Category', 'Schedule', 'Pickup', 'Drop', ' Amount', 'Date', "Remark", 'Status'],
+    header: ["S.No.", 'ID', 'Type', 'Consumer', 'Category', 'Schedule', 'Pickup', 'Drop', ' Amount', 'Created', "Remark", 'Status'],
     body: bookingRows,
 };

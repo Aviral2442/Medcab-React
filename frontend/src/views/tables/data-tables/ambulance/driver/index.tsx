@@ -6,7 +6,7 @@ import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 import "@/global.css";
 
-import { TbArrowRight, TbEdit, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEdit, TbEye, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
@@ -175,6 +175,14 @@ const ExportDataWithButtons = ({
         const root = createRoot(td);
         root.render(
           <div className="d-flex flex-row gap-1">
+            <button
+              className="eye-icon"
+              onClick={() => {
+                navigate(`/driver-detail/${rowData.driver_id}`);
+              }}
+            >
+              <TbEye className="me-1" />
+            </button>
             <button
               className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
               onClick={() => {

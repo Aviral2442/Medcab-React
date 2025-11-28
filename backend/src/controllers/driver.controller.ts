@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { addDriverService, driverDetailService, driverOnOffDataService, driverOnOffMapLocationService, fetchDriverService, getDriverService, TotaldriverOnOffMapService, updateDriverService } from '../services/driver.service';
+import { addDriverService, driverDetailService, driverOnOffDataService, driverLiveLocationService, fetchDriverService, getDriverService, TotalDriverLiveLocationService, updateDriverService } from '../services/driver.service';
 
 // Get Drivers List
 export const getDriversController = async (req: Request, res: Response, next: NextFunction) => {
@@ -133,13 +133,13 @@ export const driverOnOffDataController = async (req: Request, res: Response, nex
 };
 
 //Get Total Driver On Off Map Location
-export const TotaldriverOnOffMapLocationController = async (req: Request, res: Response, next: NextFunction) => {
+export const TotaldriverliveLocationController = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const filters = {
             status: req.query.status as string || 'ON', // Default to ON
         }
 
-        const result = await TotaldriverOnOffMapService(filters);
+        const result = await TotalDriverLiveLocationService(filters);
         res.status(200).json(result);
     } catch (error) {
         next(error);
@@ -148,7 +148,7 @@ export const TotaldriverOnOffMapLocationController = async (req: Request, res: R
 
 
 // Get Driver On Off Map Location
-export const driverOnOffMapLocationController = async (req: Request, res: Response, next: NextFunction) => {
+export const driverLiveLocationController = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
         const driverOnOffId = parseInt(req.params.driverOnOffId);
@@ -157,7 +157,7 @@ export const driverOnOffMapLocationController = async (req: Request, res: Respon
             return res.status(400).json({ message: 'Invalid driver On Off ID' });
         }
 
-        const result = await driverOnOffMapLocationService(driverOnOffId);
+        const result = await driverLiveLocationService(driverOnOffId);
         res.status(200).json(result);
 
     } catch (error) {

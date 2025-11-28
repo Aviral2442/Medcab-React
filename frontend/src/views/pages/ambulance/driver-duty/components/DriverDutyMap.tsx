@@ -48,13 +48,13 @@ const clusterStyles = `
 `;
 
 interface DriverMapItem {
-  dood_id: number;
-  dood_lat: number;
-  dood_long: number;
+  driver_live_location_d_id: number;
+  driver_live_location_lat: number;
+  driver_live_location_long: number;
   driver_name: string;
   driver_mobile: string;
-  dood_time_unix: string;
-  dood_status: string;
+  driver_live_location_updated_time: string;
+  driver_duty_status: string;
   city_name?: string;
 }
 
@@ -85,21 +85,18 @@ const DriverDutyLocation = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for large data
 
-      const res = await axios.get(
-        `${baseURL}/driver/driver_on_off_map_location`,
-        {
-          params,
-          signal: controller.signal,
-          headers: {
-            "Accept-Encoding": "gzip, deflate, br",
-          },
-        }
-      );
+      const res = await axios.get(`${baseURL}/driver/driver_live_location`, {
+        params,
+        signal: controller.signal,
+        headers: {
+          "Accept-Encoding": "gzip, deflate, br",
+        },
+      });
 
       clearTimeout(timeoutId);
 
-      const data = res.data?.jsonData?.driverOnOffMapData || [];
-      // console.log(data);
+      const data = res.data?.jsonData?.driver_Live_Location_Data || [];
+      console.log(data);
 
       console.log(`✅ Loaded ${data.length} drivers`);
 
@@ -126,7 +123,9 @@ const DriverDutyLocation = () => {
   }, [statusFilter]);
 
   // Debounced search
-  const debouncedSearch = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedSearch = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   React.useEffect(() => {
     if (debouncedSearch.current) {
@@ -142,7 +141,7 @@ const DriverDutyLocation = () => {
           return (
             driver.city_name?.toLowerCase().includes(searchLower) ||
             driver.driver_name?.toLowerCase().includes(searchLower) ||
-            driver.driver_mobile?.includes(searchQuery)
+            driver.driver_live_location_d_id.toString().includes(searchLower)
           );
         });
         setFilteredData(filtered);
@@ -161,12 +160,10 @@ const DriverDutyLocation = () => {
     const pastDate = new Date(past);
     const now = new Date();
 
-    // Calculate years, months, days
     let years = now.getFullYear() - pastDate.getFullYear();
     let months = now.getMonth() - pastDate.getMonth();
     let days = now.getDate() - pastDate.getDate();
 
-    // Fix negative days
     if (days < 0) {
       months--;
       const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -342,12 +339,17 @@ const DriverDutyLocation = () => {
                       >
                         {filteredData.map((driver) => (
                           <Marker
-                            key={driver.dood_id}
-                            position={[driver.dood_lat, driver.dood_long]}
-                            icon={getCustomIcon(driver.dood_status)}
+                            key={driver.driver_live_location_d_id}
+                            position={[
+                              driver.driver_live_location_lat,
+                              driver.driver_live_location_long,
+                            ]}
+                            icon={getCustomIcon(driver.driver_duty_status)}
                           >
                             <Popup>
-                              <strong>{driver.dood_id}</strong>{" "}
+                              <strong>
+                                {driver.driver_live_location_d_id}
+                              </strong>{" "}
                               {driver.driver_name} ({driver.driver_mobile})
                               {driver.city_name && (
                                 <>
@@ -357,7 +359,10 @@ const DriverDutyLocation = () => {
                               )}
                               <br />
                               <strong>Last Updated:</strong>{" "}
-                              {LastUpdated(driver.dood_time_unix)} <br />
+                              {LastUpdated(
+                                driver.driver_live_location_updated_time
+                              )}{" "}
+                              <br />
                             </Popup>
                           </Marker>
                         ))}
@@ -365,12 +370,15 @@ const DriverDutyLocation = () => {
                     ) : (
                       filteredData.map((driver) => (
                         <Marker
-                          key={driver.dood_id}
-                          position={[driver.dood_lat, driver.dood_long]}
-                          icon={getCustomIcon(driver.dood_status)}
+                          key={driver.driver_live_location_d_id}
+                          position={[
+                            driver.driver_live_location_lat,
+                            driver.driver_live_location_long,
+                          ]}
+                          icon={getCustomIcon(driver.driver_duty_status)}
                         >
                           <Popup>
-                            {driver.dood_id}
+                            {driver.driver_live_location_d_id}
                             {driver.driver_name} ({driver.driver_mobile})
                             {driver.city_name && (
                               <>
@@ -380,7 +388,10 @@ const DriverDutyLocation = () => {
                             )}
                             <br />
                             <strong>Last Updated:</strong>{" "}
-                            {LastUpdated(driver.dood_time_unix)} <br />
+                            {LastUpdated(
+                              driver.driver_live_location_updated_time
+                            )}{" "}
+                            <br />
                           </Popup>
                         </Marker>
                       ))
