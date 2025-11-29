@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Card, Row, Col, Image, Spinner, Alert } from "react-bootstrap";
+import React from "react";
+import { Card, Row, Col, Image, Alert } from "react-bootstrap";
 import DateConversion from "../../DateConversion";
 import "@/global.css";
 
@@ -34,7 +34,6 @@ type PartnerDetail = {
   partner_acc_dtl_status?: number | string | null;
 };
 
-const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 const basePath = (import.meta as any).env?.base_Path ?? "";
 
 type FieldConfig = {
