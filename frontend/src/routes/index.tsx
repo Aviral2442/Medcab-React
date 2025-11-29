@@ -46,6 +46,7 @@ const AddPartner = lazy(() => import('@/views/pages/ambulance/partner/components
 const EditPartner = lazy(() => import('@/views/pages/ambulance/partner/components/AddPartner'));
 const DriverDetails = lazy(() => import('@/views/pages/ambulance/driver/DriverDetailed'));
 const PartnerDetails = lazy(() => import('@/views/pages/ambulance/partner/PartnerDetailed'));
+const VehicalList = lazy(() => import('@/views/pages/ambulance/vehicle'));
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -164,7 +165,8 @@ const pagesRoutes: RouteObject[] = [
   { path: "/ambulance/partner/add-partner", element: <AddPartner/> },
   { path: "/edit-partner/:id", element: <EditPartner/> },
   { path: "/driver-detail/:id", element: <DriverDetails/> },
-  { path: "/partner-detail/:id", element: <PartnerDetails/> }
+  { path: "/partner-detail/:id", element: <PartnerDetails/> },
+  { path: "/ambulance/vehicle", element: <VehicalList/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 

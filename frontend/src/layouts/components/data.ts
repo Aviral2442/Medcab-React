@@ -91,6 +91,7 @@ export const menuItems: MenuItemType[] = [
       { key: 'driver-list', label: 'Driver', url: '/ambulance/driver' },
       { key: 'driver-duty', label: 'ON/OFF Duty', url: '/ambulance/driver-duty' },
       { key: 'partner-list', label: 'Partner', url: '/ambulance/partner' },
+      { key: 'vehical-list', label: 'Vehicle', url: '/ambulance/vehicle' },
       { key: 'booking-list', label: 'Booking', url: '/ambulance/booking' },
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
     ],

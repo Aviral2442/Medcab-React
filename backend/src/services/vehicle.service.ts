@@ -53,8 +53,45 @@ export const getVehicleListService = async (filters?: {
 
         const { whereSQL, params } = buildFilters({
             ...filters,
-            dateColumn: "vehicle.created_at",
+            dateColumn: "vehical.created_at",
         });
+
+        let finalWhereSQL = whereSQL;
+
+        if (filters?.status) {
+            const statusConditionMap: Record<string, string> = {
+                unverified: "vehicle.vehicle_status = 0",
+                verified: "vehicle.vehicle_status = 1",
+                inactive: "vehicle.vehicle_status = 2",
+                deleted: "vehicle.vehicle_status = 3",
+                verification: "vehicle.vehicle_status = 4",
+            };
+
+            const condition = statusConditionMap[filters.status];
+
+            if (condition) {
+                if (/where\s+/i.test(finalWhereSQL)) {
+                    finalWhereSQL += ` AND ${condition}`;
+                } else {
+                    finalWhereSQL = `WHERE ${condition}`;
+                }
+            }
+        }
+
+
+        // Detect filters
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
 
         const query = `
             SELECT 
@@ -68,22 +105,35 @@ export const getVehicleListService = async (filters?: {
                 vehicle.vehicle_exp_date,
                 vehicle.vehicle_verify_date,
                 vehicle.verify_type,
-                vehicle.created_at
+                vehicle.created_at,
+                vehicle.vehicle_status
             FROM vehicle
-            ${whereSQL}
+            ${finalWhereSQL}
             ORDER BY vehicle.vehicle_id DESC
             LIMIT ? OFFSET ?
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM vehicle ${whereSQL}`,
-            params
-        );
+        let total;
 
-        const total = countRows[0]?.total || 0;
+        if (noFiltersApplied) {
+            const [countAllRows]: any = await db.query(`SELECT COUNT(*) as total FROM vehicle`);
+            const actualTotal = countAllRows[0]?.total || 0;
+
+            if (actualTotal < 100) {
+                total = actualTotal;
+            } else {
+                total = 100;
+            }
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM vehicle ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
 
         return {
             status: 200,
@@ -194,7 +244,7 @@ export const addVehicleService = async (data: VehicleData) => {
         return { status: 200, message: "Vehicle added successfully", vehicleId };
     } catch (error) {
         console.log(error);
-        
+
         throw new ApiError(500, "Failed to add vehicle");
     }
 };
@@ -212,7 +262,7 @@ export const fetchVehicleService = async (vehicleId: number) => {
 
         const rows = await db.query(query, [vehicleId]);
 
-        return { status: 200, message: "Vehicle fetched successfully", jsonData: { vehicle_data : rows[0]} };
+        return { status: 200, message: "Vehicle fetched successfully", jsonData: { vehicle_data: rows[0] } };
     } catch (error) {
         throw new ApiError(500, "Failed to fetch vehicle");
     }
