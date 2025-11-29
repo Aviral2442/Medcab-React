@@ -176,6 +176,12 @@ const TransactionList: React.FC<TransactionListProps> = ({
 
   const tableData = data ? (Array.isArray(data) ? data : [data]) : [];
 
+  // Calculate safe pagination values
+  const totalPages = pagination?.totalPages || 0;
+  const pageIndex = currentPage || 0;
+  const canPrev = pageIndex > 0;
+  const canNext = pageIndex < totalPages - 1;
+
   return (
     <ComponentCard
       title="Transaction Orders List"
@@ -201,53 +207,59 @@ const TransactionList: React.FC<TransactionListProps> = ({
           <Spinner animation="border" variant="primary" size="sm" />
           <span className="ms-2">Loading transactions...</span>
         </div>
-      ) : tableData.length === 0 ? (
-        <div className="text-center py-4 text-muted">No transactions found</div>
       ) : (
-        <div className="table-responsive">
-          <DataTable
-            data={tableData}
-            columns={columns}
-            options={{
-              responsive: true,
-              paging: false,
-              searching: true,
-              ordering: true,
-              info: false,
-              layout: { topStart: "buttons" },
-              buttons: [
-                { extend: "copy", className: "btn btn-sm btn-secondary" },
-                { extend: "csv", className: "btn btn-sm btn-secondary" },
-                { extend: "excel", className: "btn btn-sm btn-secondary" },
-                { extend: "pdf", className: "btn btn-sm btn-secondary" },
-              ],
-            }}
-            className="table table-striped align-middle mb-0 nowrap w-100"
-            ref={tableRef}
-          >
-            <thead className="thead-sm text-uppercase fs-xxs">
-              <tr>
-                {columns.map((col, idx) => (
-                  <th key={idx}>{col.title}</th>
-                ))}
-              </tr>
-            </thead>
-          </DataTable>
+        <>
+          {tableData.length === 0 ? (
+            <div className="text-center py-4 text-muted">No transactions found</div>
+          ) : (
+            <div className="table-responsive">
+              <DataTable
+                data={tableData}
+                columns={columns}
+                options={{
+                  responsive: true,
+                  paging: false,
+                  searching: true,
+                  ordering: true,
+                  info: false,
+                  layout: { topStart: "buttons" },
+                  buttons: [
+                    { extend: "copy", className: "btn btn-sm btn-secondary" },
+                    { extend: "csv", className: "btn btn-sm btn-secondary" },
+                    { extend: "excel", className: "btn btn-sm btn-secondary" },
+                    { extend: "pdf", className: "btn btn-sm btn-secondary" },
+                  ],
+                }}
+                className="table table-striped align-middle mb-0 nowrap w-100"
+                ref={tableRef}
+              >
+                <thead className="thead-sm text-uppercase fs-xxs">
+                  <tr>
+                    {columns.map((col, idx) => (
+                      <th key={idx}>{col.title}</th>
+                    ))}
+                  </tr>
+                </thead>
+              </DataTable>
+            </div>
+          )}
 
-          <TablePagination
-            start={currentPage + 1}
-            showInfo={true}
-            previousPage={() => onPageChange(Math.max(0, currentPage - 1))}
-            canPreviousPage={currentPage > 0}
-            pageCount={pagination.totalPages}
-            pageIndex={currentPage}
-            setPageIndex={onPageChange}
-            nextPage={() =>
-              onPageChange(Math.min(pagination.totalPages - 1, currentPage + 1))
-            }
-            canNextPage={currentPage < pagination.totalPages - 1}
-          />
-        </div>
+          {totalPages > 0 && (
+            <div className="mt-3">
+              <TablePagination
+                start={pageIndex + 1}
+                showInfo={true}
+                previousPage={() => onPageChange(Math.max(0, pageIndex - 1))}
+                canPreviousPage={canPrev}
+                pageCount={totalPages}
+                pageIndex={pageIndex}
+                setPageIndex={onPageChange}
+                nextPage={() => onPageChange(Math.min(totalPages - 1, pageIndex + 1))}
+                canNextPage={canNext}
+              />
+            </div>
+          )}
+        </>
       )}
     </ComponentCard>
   );
