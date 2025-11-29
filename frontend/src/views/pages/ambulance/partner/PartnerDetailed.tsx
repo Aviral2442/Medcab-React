@@ -4,6 +4,15 @@ import { useParams } from "react-router-dom";
 import { Container, Spinner, Nav } from "react-bootstrap";
 import PartnerDetails from "@/components/Ambulance/partner/PartnerDetails";
 import ManpowerList from "@/components/Ambulance/partner/ManpowerList";
+import TransactionList from "@/components/Ambulance/partner/TransactionList";
+import { useTableFilters } from "@/hooks/useTableFilters";
+
+interface PaginationData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 const PartnerDetailed: React.FC = () => {
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
@@ -11,10 +20,30 @@ const PartnerDetailed: React.FC = () => {
 
   const [partnerData, setPartnerData] = React.useState<any>(null);
   const [transactions, setTransactions] = React.useState<any[] | null>(null);
+  const [pagination, setPagination] = React.useState<PaginationData>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
   const [manpower, setManpower] = React.useState<any[] | null>(null);
 
   const [loading, setLoading] = React.useState<boolean>(true);
+  const [transactionsLoading, setTransactionsLoading] = React.useState<boolean>(false);
   const [activeTab, setActiveTab] = React.useState<number>(1);
+
+  // Use the custom hook for transaction filters
+  const {
+    dateFilter,
+    dateRange,
+    currentPage,
+    handleDateFilterChange,
+    handleDateRangeChange,
+    handlePageChange,
+    getFilterParams,
+  } = useTableFilters({
+    defaultDateFilter: "",
+  });
 
   const tabs = [
     { eventKey: 1, title: "Partner" },
@@ -31,11 +60,6 @@ const PartnerDetailed: React.FC = () => {
       );
       const partnerAccountDetail = resp.data?.jsonData?.partnerAccountDetail;
       const partnerBasicDetail = resp.data?.jsonData?.partnerBasicDetail;
-      console.log("Fetched partner basic detail:", partnerBasicDetail);
-      console.log(
-        "Fetched partner account detail:",
-        partnerAccountDetail
-      );
 
       const partner = {
         ...partnerBasicDetail[0],
@@ -51,20 +75,37 @@ const PartnerDetailed: React.FC = () => {
     }
   };
 
-  const fetchPartnerTransactions = async () => {
+  const fetchPartnerTransactions = async (page: number = 1) => {
     if (!id) return;
     try {
-      setLoading(true);
+      setTransactionsLoading(true);
+
+      const filterParams = getFilterParams(10);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "10",
+        partner_id: id,
+        ...(filterParams.date && { date: filterParams.date }),
+        ...(filterParams.fromDate && { fromDate: filterParams.fromDate }),
+        ...(filterParams.toDate && { toDate: filterParams.toDate }),
+      });
+
       const resp = await axios.get(
-        `${baseURL}/partner/get_partner_transactions_list`
+        `${baseURL}/partner/get_partner_transactions_list?${params.toString()}`
       );
-      // Expecting resp.data.jsonData.partnerTransactions
+
       setTransactions(resp.data?.jsonData?.partnerTransactions || []);
+      setPagination(resp.data?.pagination || {
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
+      });
     } catch (err) {
       console.error("Error fetching partner transactions:", err);
       setTransactions([]);
     } finally {
-      setLoading(false);
+      setTransactionsLoading(false);
     }
   };
 
@@ -91,7 +132,7 @@ const PartnerDetailed: React.FC = () => {
   React.useEffect(() => {
     switch (activeTab) {
       case 2:
-        if (!transactions) fetchPartnerTransactions();
+        fetchPartnerTransactions(currentPage + 1);
         break;
       case 3:
         if (!manpower) fetchPartnerManpower();
@@ -99,10 +140,14 @@ const PartnerDetailed: React.FC = () => {
       default:
         break;
     }
-  }, [activeTab, id]);
+  }, [activeTab, id, currentPage, dateFilter, dateRange]);
+
+  const handleTransactionPageChange = (newPage: number) => {
+    handlePageChange(newPage);
+  };
 
   const renderTabContent = (tabKey: number) => {
-    if (loading) {
+    if (loading && tabKey !== 2) {
       return (
         <div className="text-center p-5">
           <Spinner animation="border" variant="primary" />
@@ -115,15 +160,18 @@ const PartnerDetailed: React.FC = () => {
       case 1:
         return <PartnerDetails data={partnerData} />;
       case 2:
-        return transactions && transactions.length ? (
-          <div>
-            <h6>Transactions ({transactions.length})</h6>
-            <pre style={{ whiteSpace: "pre-wrap" }}>
-              {JSON.stringify(transactions, null, 2)}
-            </pre>
-          </div>
-        ) : (
-          <div className="text-muted">No Transactions Found</div>
+        return (
+          <TransactionList
+            data={transactions}
+            loading={transactionsLoading}
+            pagination={pagination}
+            currentPage={currentPage}
+            dateFilter={dateFilter}
+            dateRange={dateRange}
+            onDateFilterChange={handleDateFilterChange}
+            onDateRangeChange={handleDateRangeChange}
+            onPageChange={handleTransactionPageChange}
+          />
         );
       case 3:
         return manpower && manpower.length ? (

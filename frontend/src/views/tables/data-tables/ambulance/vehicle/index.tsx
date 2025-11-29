@@ -6,7 +6,7 @@ import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import { TbArrowRight, TbEdit, TbEye, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEdit, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
@@ -102,13 +102,13 @@ const ExportDataWithButtons = ({
       console.log("Fetched Vehicle Data:", vehicles);
       setData(vehicles);
 
-      if (res.data.paginations) {
-        setTotal(res.data.paginations.total);
-        setTotalPages(res.data.paginations.totalPages);
+      if (res.data?.paginations) {
+        setTotal(res.data?.paginations?.total);
+        setTotalPages(res.data?.paginations?.totalPages);
       } else {
-        setTotal(res.data?.total || vehicles.length);
+        setTotal(res.data?.total);
         setTotalPages(
-          res.data?.totalPages || Math.ceil(vehicles.length / pageSize)
+          res.data?.pagination?.totalPages || Math.ceil(vehicles.length / pageSize)
         );
       }
     } catch (error) {
@@ -168,18 +168,8 @@ const ExportDataWithButtons = ({
         root.render(
           <div className="d-flex flex-row gap-1">
             <button
-              className="eye-icon p-1"
-              onClick={() => {
-                // navigate to vehicle detail page (fixed route and id property)
-                navigate(`/ambulance/vehicle/${rowData.vehicle_id}`);
-              }}
-            >
-              <TbEye className="me-1" />
-            </button>
-            <button
               className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
               onClick={() => {
-                // navigate to vehicle edit page (fixed route and id property)
                 navigate(`/ambulance/vehicle/edit/${rowData.vehicle_id}`);
               }}
             >

@@ -53,7 +53,7 @@ export const getVehicleListService = async (filters?: {
 
         const { whereSQL, params } = buildFilters({
             ...filters,
-            dateColumn: "vehical.created_at",
+            dateColumn: "vehicle.created_at",
         });
 
         let finalWhereSQL = whereSQL;
@@ -97,7 +97,9 @@ export const getVehicleListService = async (filters?: {
             SELECT 
                 vehicle.vehicle_id,
                 vehicle.vehicle_added_type,
-                vehicle.vehicle_added_by,
+                driver.driver_name,
+                driver.driver_last_name,
+                driver.driver_mobile,
                 vehicle.v_vehicle_name,
                 vehicle.v_vehicle_name_id,
                 vehicle.vehicle_category_type,
@@ -108,6 +110,7 @@ export const getVehicleListService = async (filters?: {
                 vehicle.created_at,
                 vehicle.vehicle_status
             FROM vehicle
+            LEFT JOIN driver ON vehicle.vehicle_added_by = driver.driver_id
             ${finalWhereSQL}
             ORDER BY vehicle.vehicle_id DESC
             LIMIT ? OFFSET ?

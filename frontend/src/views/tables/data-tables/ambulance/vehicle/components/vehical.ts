@@ -4,8 +4,10 @@ const baseURL = (import.meta as any).env?.VITE_PATH ?? '';
 
 type VehicleInfoType = {
     vehicle_id: number;
-    vehicle_added_by: string;
     vehicle_added_type: string; 
+    driver_name: string;
+    driver_last_name: string;
+    driver_mobile: string;
     v_vehicle_name: string;
     vehicle_name_id: number;
     vehicle_category_type: string; 
@@ -39,19 +41,38 @@ export const getVehicleList = async () => {
 
 export const vehicleColumns = [
     { data: 'vehicle_id' },
-    { data: 'vehicle_added_by' },
-    { data: 'vehicle_added_type' },
+    {
+        data: 'driver_name',
+        defaultContent: '',
+        render: (_data: any, _type: any, row: any) => {
+            const name = row['driver_name'] || '';
+            const lastName = row['driver_last_name'] || '';
+            const mobile = row['driver_mobile'] || '';
+            if(name === '' && lastName === '' && mobile === '') {
+                return '';
+            }
+            return `${name} ${lastName} (${mobile})`;
+        }
+    },
+    { data: 'vehicle_added_type',
+        render: (data: string) => {
+            if (data === '0') return 'Self';
+            else if (data === '1') return 'Partner';  
+        }
+     },
     { data: 'v_vehicle_name' },
     { data: 'vehicle_category_type' },
     { 
         data: 'vehicle_exp_date',
         render: (data: string) => {
+            if (data === '') return '';
             return formatDate(data);
         }
     },
     {
         data: 'vehicle_verify_date',
         render: (data: string) => {
+            if (data === '') return '';
             return formatDate(data);
         }
     },
