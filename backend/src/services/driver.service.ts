@@ -411,12 +411,13 @@ export const driverDetailService = async (driverId: number) => {
         const [rows]: any = await db.query(
             `
             SELECT 
-            driver.*, vehicle.v_vehicle_name, vehicle.vehicle_rc_number, vehicle.vehicle_category_type, city.city_name,
+            driver.*, driver_details.*, vehicle.v_vehicle_name, vehicle.vehicle_rc_number, vehicle.vehicle_category_type, city.city_name,
             partner.partner_f_name, partner.partner_l_name, partner.partner_mobile
             FROM driver 
             LEFT JOIN vehicle ON driver.driver_assigned_vehicle_id = vehicle.vehicle_id
             LEFT JOIN city ON driver.driver_city_id = city.city_id
             LEFT JOIN partner ON driver.driver_created_by > 0 AND driver.driver_created_partner_id = partner.partner_id
+            LEFT JOIN driver_details ON driver.driver_id = driver_details.driver_details_driver_id
             WHERE driver.driver_id = ?
             `, [driverId]
         );

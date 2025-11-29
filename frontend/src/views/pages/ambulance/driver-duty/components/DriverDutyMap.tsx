@@ -145,7 +145,7 @@ const DriverDutyLocation = () => {
           return (
             driver.city_name?.toLowerCase().includes(searchLower) ||
             driver.driver_name?.toLowerCase().includes(searchLower) ||
-            driver.driver_live_location_d_id.toString().includes(searchLower)
+            driver.driver_mobile?.toLowerCase().includes(searchLower)
           );
         });
         setFilteredData(filtered);

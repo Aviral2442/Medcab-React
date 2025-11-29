@@ -44,8 +44,8 @@ const EditDriver = lazy(() => import('@/views/pages/ambulance/driver/components/
 const DriverDutyMap = lazy(() => import('@/views/pages/ambulance/driver-duty/components/DriverDutyMap'))
 const AddPartner = lazy(() => import('@/views/pages/ambulance/partner/components/AddPartner'));
 const EditPartner = lazy(() => import('@/views/pages/ambulance/partner/components/AddPartner'));
-const DriverDetails = lazy(() => import('@/components/Ambulance/DriverDetails'));
-const PartnerDetails = lazy(() => import('@/components/Ambulance/PartnerDetails'));
+const DriverDetails = lazy(() => import('@/views/pages/ambulance/driver/DriverDetailed'));
+const PartnerDetails = lazy(() => import('@/views/pages/ambulance/partner/PartnerDetailed'));
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));

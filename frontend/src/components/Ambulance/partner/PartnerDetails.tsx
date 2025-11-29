@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, Row, Col, Image, Spinner, Alert } from "react-bootstrap";
-import axios from "axios";
-import { useParams } from "react-router-dom";
-import DateConversion from "../DateConversion";
+import DateConversion from "../../DateConversion";
 import "@/global.css";
 
 type PartnerDetail = {
@@ -145,69 +143,8 @@ const getFieldGroups = (): Record<
   };
 };
 
-const PartnerDetails: React.FC = () => {
-  const { id } = useParams<{ id?: string }>();
-  const [data, setData] = useState<PartnerDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchPartner = async () => {
-      if (!id) {
-        setError("Partner ID missing");
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        const resp = await axios.post(`${baseURL}/partner/get_partner_details/${id}`);
-        const partnerAccountDetail = resp.data?.jsonData?.partnerAccountDetail;
-        const partnerBasicDetail = resp.data?.jsonData?.partnerBasicDetail;
-
-        // normalize inputs (they might be an array or an object)
-        const basic =
-          Array.isArray(partnerBasicDetail) && partnerBasicDetail.length > 0
-            ? partnerBasicDetail[0]
-            : partnerBasicDetail || null;
-        const account =
-          Array.isArray(partnerAccountDetail) && partnerAccountDetail.length > 0
-            ? partnerAccountDetail[0]
-            : partnerAccountDetail || null;
-
-        // merge both into a single dictionary (account fields override basic if same keys)
-        const merged = { ...(basic || {}), ...(account || {}) };
-
-        // keep the original code expectation of `partner` being falsy when not found,
-        // otherwise an array with the merged object at index 0
-        const partner = Object.keys(merged).length ? [merged] : null;
-
-        console.log("Fetched Partner Data:", partner ? partner[0] : null);
-        if (!partner) {
-          setError("Partner not found");
-        } else setData(partner[0]);
-      } catch (err: any) {
-        console.error(err);
-        setError(err?.message || "Failed to fetch partner");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPartner();
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="d-flex justify-content-center p-4">
-        <Spinner animation="border" role="status" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return <Alert variant="danger">{error}</Alert>;
-  }
-
+// Add prop type and accept data
+const PartnerDetails: React.FC<{ data: PartnerDetail | null }> = ({ data }) => {
   if (!data) {
     return <Alert variant="warning">No partner data available</Alert>;
   }

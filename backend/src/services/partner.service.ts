@@ -362,13 +362,14 @@ export const getManpowerPartnerServices = async (filters?: {
                 partner_man_power_wallet,
                 partner_man_power_profile_img,
                 partner_man_power_created_by,
-                partner_man_power_city_id,
+                city.city_name,
                 partner_man_power_registration_step,
                 partner_man_power_referral,
                 mp_referral_referral_by,
                 partner_man_power_status,
                 created_at
             FROM partner_man_power
+            LEFT JOIN city ON partner_man_power.partner_man_power_city_id = city.city_id
             ${finalWhereSQL}
             ORDER BY partner_man_power_id DESC
             LIMIT ? OFFSET ?;

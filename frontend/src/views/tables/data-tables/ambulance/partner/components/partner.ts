@@ -11,7 +11,6 @@ type PartnerInfoType = {
     partner_mobile: string;
     partner_wallet: Number;
     partner_registration_step: string;
-    // partner_city_id: number;
     partner_created_by: string;
     partner_status: number;
 }
@@ -48,7 +47,7 @@ export const partnerColumns = [
     // { data: 'partner_l_name' },
     { data: 'partner_mobile' },
     { 
-        data: 'partner_wallet_amount',
+        data: 'partner_wallet',
         render: (data: number) => {
             return `₹${data || 0}`;
         }

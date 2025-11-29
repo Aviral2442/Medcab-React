@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Card, Row, Col, Image, Spinner, Alert } from "react-bootstrap";
-import axios from "axios";
-import { useParams } from "react-router-dom";
+import React from "react";
+import { Card, Row, Col, Image, Spinner, Alert, Button} from "react-bootstrap";
 import DateConversion from "../DateConversion";
 import "@/global.css";
 
@@ -36,15 +34,25 @@ type DriverDetail = {
   driver_verify_by?: string | null;
   join_bonus_status?: number | string | null;
   join_bonus_time?: number | string | null;
+  driver_details_aadhar_front_img?: string | null;
+  driver_details_aadhar_back_img?: string | null;
+  driver_details_dl_front_img?: string | null;
+  driver_details_dl_back_image?: string | null;
+  driver_details_pan_card_front_img?: string | null;
+  driver_details_police_verification_image?: string | null;
+  driver_details_aadhar_number?: string | null;
+  driver_details_dl_number?: string | null;
+  driver_details_dl_exp_date?: number | string | null;
+  driver_details_pan_card_number?: string | null;
+  driver_details_police_verification_date?: number | string | null;
 };
 
-const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 const basePath = (import.meta as any).env?.base_Path ?? "";
 
 type FieldConfig = {
   name: keyof DriverDetail;
   label: string;
-  type?: "text" | "date" | "datetime" | "currency";
+  type?: "text" | "date" | "datetime" | "currency" | "image";
 };
 
 const formatValue = (val: any, type?: FieldConfig["type"]) => {
@@ -69,11 +77,11 @@ const formatValue = (val: any, type?: FieldConfig["type"]) => {
   return String(val);
 };
 
-const Field: React.FC<{ label: string; value?: any; type?: FieldConfig["type"] }> = ({
-  label,
-  value,
-  type = "text",
-}) => {
+const Field: React.FC<{
+  label: string;
+  value?: any;
+  type?: FieldConfig["type"];
+}> = ({ label, value, type = "text" }) => {
   return (
     <div className="mb-2">
       <div className="text-muted mb-1 fs-6">{label}</div>
@@ -84,11 +92,11 @@ const Field: React.FC<{ label: string; value?: any; type?: FieldConfig["type"] }
   );
 };
 
-const Section: React.FC<{ title: string; children: React.ReactNode; titleColor?: string }> = ({
-  title,
-  children,
-  titleColor = "primary",
-}) => (
+const Section: React.FC<{
+  title: string;
+  children: React.ReactNode;
+  titleColor?: string;
+}> = ({ title, children, titleColor = "primary" }) => (
   <div>
     <h6 className={`text-${titleColor} mb-3`}>{title}</h6>
     {children}
@@ -97,14 +105,13 @@ const Section: React.FC<{ title: string; children: React.ReactNode; titleColor?:
 
 const getFieldGroups = (): Record<
   string,
-  { title: string; fields: FieldConfig[]; cols?: number } // optional grid column sizes
+  { title: string; fields: FieldConfig[]; cols?: number }
 > => {
   return {
     basicInfo: {
       title: "Basic Information",
       cols: 3,
       fields: [
-        { name: "driver_id", label: "Driver ID" },
         { name: "driver_name", label: "First Name" },
         { name: "driver_last_name", label: "Last Name" },
         { name: "driver_mobile", label: "Mobile" },
@@ -112,16 +119,6 @@ const getFieldGroups = (): Record<
         { name: "driver_dob", label: "Date of Birth", type: "date" },
         { name: "driver_gender", label: "Gender" },
         { name: "city_name", label: "City Name" },
-      ],
-    },
-    vehicleInfo: {
-      title: "Vehicle Information",
-      cols: 3,
-      fields: [
-        { name: "driver_assigned_vehicle_id", label: "Assigned Vehicle ID" },
-        { name: "v_vehicle_name", label: "Vehicle Name" },
-        { name: "vehicle_rc_number", label: "Vehicle RC Number" },
-        { name: "vehicle_category_type", label: "Vehicle Category" },
       ],
     },
     partnerInfo: {
@@ -152,49 +149,65 @@ const getFieldGroups = (): Record<
       fields: [
         { name: "driver_total_ride_till_today", label: "Total Rides" },
         { name: "driver_rating", label: "Rating" },
-        { name: "driver_last_booking_notified_time", label: "Last Booking Notified Time", type: "datetime" },
+        {
+          name: "driver_last_booking_notified_time",
+          label: "Last Booking Notified Time",
+          type: "datetime",
+        },
         { name: "driver_verify_date", label: "Verify Date", type: "date" },
         { name: "driver_verify_by", label: "Verify By" },
         { name: "join_bonus_status", label: "Join Bonus Status" },
         { name: "join_bonus_time", label: "Join Bonus Time", type: "datetime" },
       ],
     },
+    Documents: {
+      title: "Documents & Images",
+      cols: 3,
+      fields: [
+        { name: "driver_profile_img", label: "Profile Image", type: "image" },
+        {
+          name: "driver_details_aadhar_front_img",
+          label: "Aadhar Front Image",
+          type: "image",
+        },
+        { name: "driver_details_aadhar_back_img", label: "Aadhar Back Image", type: "image" },
+        { name: "driver_details_dl_front_img", label: "DL Front Image" , type: "image" },
+        { name: "driver_details_dl_back_image", label: "DL Back Image" , type: "image" },
+        {
+          name: "driver_details_pan_card_front_img",
+          label: "PAN Card Front Image",
+          type: "image"
+        },
+        {
+          name: "driver_details_police_verification_image",
+          label: "Police Verification Image",
+          type: "image"
+        },
+        { name: "driver_details_aadhar_number", label: "Aadhar Number" },
+        { name: "driver_details_dl_number", label: "DL Number" },
+        {
+          name: "driver_details_dl_exp_date",
+          label: "DL Expiry Date",
+          type: "date",
+        },
+        { name: "driver_details_pan_card_number", label: "PAN Card Number" },
+        {
+          name: "driver_details_police_verification_date",
+          label: "Police Verification Date",
+          type: "date",
+        },
+      ],
+    },
   };
 };
 
-const DriverDetails: React.FC = () => {
-  const { id } = useParams<{ id?: string }>();
-  const [data, setData] = useState<DriverDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+type Props = {
+  data?: DriverDetail | null;
+  loading?: boolean;
+  error?: string | null;
+};
 
-  useEffect(() => {
-    const fetchDriver = async () => {
-      if (!id) {
-        setError("Driver ID missing");
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        // keep using axios.post as in your project
-        const resp = await axios.post(`${baseURL}/driver/driver_detail/${id}`);
-        const driver = resp.data?.jsonData?.driver;
-        console.log("Fetched driver data:", driver);
-        if (!driver) {
-          setError("Driver not found");
-        } else setData(driver);
-      } catch (err: any) {
-        console.error(err);
-        setError(err?.message || "Failed to fetch driver");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDriver();
-  }, [id]);
-
+const DriverDetails: React.FC<Props> = ({ data, loading = false, error = null }) => {
   if (loading) {
     return (
       <div className="d-flex justify-content-center p-4">
@@ -215,26 +228,8 @@ const DriverDetails: React.FC = () => {
 
   return (
     <div>
-      <Card className="mb-4 mt-2 detailPage-header">
-        <Card.Body className="py-3 d-flex justify-content-center align-items-center gap-3 flex-wrap">
-          <div>
-            <span className="h5 fw-semibold">Driver ID:</span>{" "}
-            <strong className="fs-5 text-muted">{data.driver_id ?? "N/A"}</strong>
-          </div>
-          <div>
-            <span className="h5 fw-semibold">Name:</span>{" "}
-            <strong className="fs-5 text-muted">
-              {`${data.driver_name ?? ""} ${data.driver_last_name ?? ""}`.trim() || "N/A"}
-            </strong>
-          </div>
-          <div>
-            <span className="h5 fw-semibold">Mobile:</span>{" "}
-            <strong className="fs-5 text-muted">{data.driver_mobile ?? "N/A"}</strong>
-          </div>
-        </Card.Body>
-      </Card>
-
-      <Card className="mb-4">
+      {/* Driver */}
+      <Card className="mb-4 mt-2">
         <Card.Body>
           <Row className="g-3">
             <Col lg={3} md={4}>
@@ -266,21 +261,6 @@ const DriverDetails: React.FC = () => {
               </Row>
             </Col>
           </Row>
-        </Card.Body>
-      </Card>
-
-      {/* Vehicle Info */}
-      <Card className="mb-4">
-        <Card.Body>
-          <Section title={fieldGroups.vehicleInfo.title}>
-            <Row>
-              {fieldGroups.vehicleInfo.fields.map((f) => (
-                <Col lg={3} md={6} key={String(f.name)}>
-                  <Field label={f.label} value={data[f.name]} type={f.type} />
-                </Col>
-              ))}
-            </Row>
-          </Section>
         </Card.Body>
       </Card>
 
@@ -326,7 +306,64 @@ const DriverDetails: React.FC = () => {
                   </Col>
                 ))}
               </Row>
-              </div>
+            </div>
+          </Section>
+        </Card.Body>
+      </Card>
+
+      {/* Documents & Images */}
+      <Card className="mb-4">
+        <Card.Body>
+          <Section title={fieldGroups.Documents.title}>
+            <div>
+              <Row>
+                {fieldGroups.Documents.fields.map((f) => (
+                  <Col lg={3} md={6} key={String(f.name)}>
+                    {f.type === "image" ? (
+                      <div className="mb-3">
+                        <div className="text-muted mb-1 fs-6">{f.label}</div>
+                        {data[f.name] ? (
+                          <Image
+                            src={`${basePath}/${data[f.name]}`}
+                            alt={f.label}
+                            thumbnail
+                            style={{ maxWidth: "100%", maxHeight: 200 }}
+                          />
+                        ) : (
+                          <div
+                            className="border rounded d-flex align-items-center justify-content-center"
+                            style={{ height: 200 }}
+                          >
+                            <div className="text-muted">No Image</div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <Field label={f.label} value={data[f.name]} type={f.type} />
+                    )}
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          </Section>
+        </Card.Body>
+      </Card>
+
+      <Card className="mb-4">
+        <Card.Body>
+          <Section title="">
+            <Button variant="" className="me-2 mb-2 bg-light text-dark">
+              Cancel
+            </Button>
+            <Button variant="secondary" className="me-2 mb-2">
+              OTP Match
+            </Button>
+            <Button variant="success" className="me-2 mb-2">
+              Complete
+            </Button>
+            <Button variant="info" className="me-2 mb-2">
+              Assign
+            </Button>
           </Section>
         </Card.Body>
       </Card>
