@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Nav, Spinner, Alert, Card, Table } from "react-bootstrap";
+import { Container, Nav, Spinner} from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import DriverDetails from "@/components/Ambulance/driver/DriverDetails";
