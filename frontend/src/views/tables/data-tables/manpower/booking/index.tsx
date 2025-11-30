@@ -1,17 +1,11 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
-// import {
-//   Dropdown,
-//   DropdownMenu,
-//   DropdownItem,
-//   DropdownToggle,
-// } from "react-bootstrap";
 import '@/global.css';
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-import AddRemark from "@/components/AddRemark";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 
 import { TbEye, TbReceipt } from "react-icons/tb";
 
@@ -45,6 +39,7 @@ const tableConfig: Record<
       "Price",
       "payment",
       "date",
+      "Remark",
       "status",
     ],
   },
@@ -93,7 +88,7 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, columns, headers } = tableConfig[tabKey];
@@ -144,25 +139,14 @@ const ExportDataWithButtons = ({
   };
 
   const handleRemark = (rowData: any) => {
-    const id =
-      rowData?.manpower_order_id ?? rowData?.mpo_order_id ?? rowData?.id;
-    console.log("Selected Booking ID for Remark:", id);
+    const id = rowData?.manpower_order_id ?? rowData?.mpo_order_id ?? rowData?.id;
     setSelectedBookingId(id);
     setIsRemarkOpen(true);
   };
 
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedBookingId}`, {
-        remarkType: "BOOKING",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged();
-    } catch (error) {
-      console.error("Error saving remark:", error);
-    }
+  const handleRemarkSuccess = () => {
+    fetchData();
+    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -303,7 +287,9 @@ const ExportDataWithButtons = ({
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.MANPOWER_ORDER}
+        primaryKeyId={selectedBookingId}
+        onSuccess={handleRemarkSuccess}
       />
     </>
   );

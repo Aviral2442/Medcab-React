@@ -37,7 +37,19 @@ const AmbulanceList = lazy(() => import('@/views/pages/ambulance/category'))
 const DriverEmergency = lazy(() => import('@/views/pages/emergency/driver'))
 const ConsumerEmergency = lazy(() => import('@/views/pages/emergency/consumer'))
 const AmbulanceBooking = lazy(() => import('@/views/pages/ambulance/booking'))
-const DriverLocation = lazy(() => import('@/views/pages/ambulance/driver-duty'))
+const DriverDuty = lazy(() => import('@/views/pages/ambulance/driver-duty'))
+const DriverDutyDetails = lazy(() => import('@/views/pages/ambulance/driver-duty/components/DriverDuty'))
+const AddDriver = lazy(() => import('@/views/pages/ambulance/driver/components/AddDriver'))
+const EditDriver = lazy(() => import('@/views/pages/ambulance/driver/components/AddDriver'))
+const DriverDutyMap = lazy(() => import('@/views/pages/ambulance/driver-duty/components/DriverDutyMap'))
+const AddPartner = lazy(() => import('@/views/pages/ambulance/partner/components/AddPartner'));
+const EditPartner = lazy(() => import('@/views/pages/ambulance/partner/components/AddPartner'));
+const DriverDetails = lazy(() => import('@/views/pages/ambulance/driver/DriverDetailed'));
+const PartnerDetails = lazy(() => import('@/views/pages/ambulance/partner/PartnerDetailed'));
+const VehicalList = lazy(() => import('@/views/pages/ambulance/vehicle'));
+const AddVehicle = lazy(() => import('@/views/pages/ambulance/vehicle/components/AddVehicle'));
+const EditVehicle = lazy(() => import('@/views/pages/ambulance/vehicle/components/AddVehicle'));
+const DriverTransactionDetails = lazy(() => import('@/views/pages/ambulance/driver/'));
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -129,26 +141,41 @@ const pagesRoutes: RouteObject[] = [
   { path: "/pages/pricing", element: <Pricing /> },
   { path: "/pages/terms-conditions", element: <TermsConditions /> },
   { path: "/pages/timeline", element: <Timeline /> },
+
+  //manpower
   { path: "/manpower-category", element: <ManpowerCategory /> },
   { path: "/manpower-bookings", element: <Booking/> },
   { path: "/booking-details/:id", element: <BookingDetails/> },
   { path: "/manpower-vendors", element: <VendorList/>},
+
   { path: "/consumer-list", element: <ConsumerList/>},
   { path: "/vendor-details/:id", element: <VendorDetails/>},
   { path: "/consumer-details/:id", element: <ConsumerDetails/> },
   { path: "/ambulance/partner", element: <PartnerList/> },
   { path: "/ambulance/driver", element: <DriverList/> },
+  { path: "/ambulance/add-driver", element: <AddDriver/> },
   { path: "/content-seo/blogs", element: <BlogList/> },
   { path: "/add-blog", element: <AddBlogs/> },
   { path: "/edit-blog/:id", element: <AddBlogs/> },
   { path: "/city/:section", element: <CityList/> },
-  { path: "/add-city", element: <AddCity/> },
-  { path: "/edit-city/:id", element: <EditCity/> },
+  { path: "/city/:section/add-city", element: <AddCity/> },
+  { path: "/city/:section/edit-city/:id", element: <EditCity/> },
   { path: "/ambulance/category", element: <AmbulanceList/> },
   { path: "/emergency/driver", element: <DriverEmergency/> },
   { path: "/emergency/consumer", element: <ConsumerEmergency/> },
   { path: "/ambulance/booking", element: <AmbulanceBooking/> },
-  { path: "/ambulance/driver-location", element: <DriverLocation/> },
+  { path: "/ambulance/driver-duty", element: <DriverDuty/> },
+  { path: "/ambulance/driver-duty/:id", element: <DriverDutyDetails/> },
+  { path: "/ambulance/driver-duty-map", element: <DriverDutyMap/> },
+  { path: "/edit-driver/:id", element: <EditDriver/> },
+  { path: "/ambulance/partner/add-partner", element: <AddPartner/> },
+  { path: "/edit-partner/:id", element: <EditPartner/> },
+  { path: "/driver-detail/:id", element: <DriverDetails/> },
+  { path: "/partner-detail/:id", element: <PartnerDetails/> },
+  { path: "/ambulance/vehicle", element: <VehicalList/> },
+  { path: "/ambulance/vehicle/add-vehicle", element: <AddVehicle/> },
+  { path: "/ambulance/vehicle/edit/:id", element: <EditVehicle/> },
+  { path: "/driver-transaction-details/:id", element: <DriverTransactionDetails/> }
 ];
 
 const uiRoutes: RouteObject[] = [ 

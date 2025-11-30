@@ -898,14 +898,14 @@ export const editCityContentPathologyController = async (req: Request, res: Resp
 
 // PATHOLOGY CONTROLLER TO UPDATE CITY CONTENT STATUS
 export const updateCityContentPathologyStatusController = async (req: Request, res: Response, next: NextFunction) => {
-
     try {
         const cityId = parseInt(req.params.id);
         const status = req.body.city_pathology_status;
 
+        console.log("Pathology Status Update - Received:", { cityId, status, body: req.body });
+
         const result = await updateCityContentPathologyStatusService(cityId, status);
         res.status(200).json(result);
-
     } catch (error) {
         next(error);
     }

@@ -4,9 +4,9 @@ import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-import '@/global.css';
+import "@/global.css";
 
-import { TbEye, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEdit, TbEye, TbReceipt } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
@@ -14,7 +14,7 @@ import { driverColumns } from "@/views/tables/data-tables/ambulance/driver/compo
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark from "@/components/AddRemark";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -40,9 +40,11 @@ const tableConfig: Record<
       "Wallet",
       // "City ID",
       "Created By",
+      "Partner",
       "Duty Status",
-      "Status",
       "Date",
+      "Remark",
+      "Status",
     ],
   },
 };
@@ -50,6 +52,7 @@ const tableConfig: Record<
 type ExportDataWithButtonsProps = {
   tabKey: number;
   refreshFlag: number;
+  onAddNew?: () => void;
   filterParams?: Record<string, any>;
   onDataChanged?: () => void;
 };
@@ -57,6 +60,7 @@ type ExportDataWithButtonsProps = {
 const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
+  onAddNew,
   filterParams = {},
   onDataChanged,
 }: ExportDataWithButtonsProps) => {
@@ -84,7 +88,7 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, columns, headers } = tableConfig[tabKey];
@@ -127,24 +131,14 @@ const ExportDataWithButtons = ({
   };
 
   const handleRemark = (rowData: any) => {
-    const id = rowData?.driver_id ?? rowData?.id;
-    console.log("Selected Driver ID for Remark:", id);
+    const id = rowData?.driver_id;
     setSelectedDriverId(id);
     setIsRemarkOpen(true);
   };
 
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedDriverId}`, {
-        remarkType: "DRIVER",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged?.();
-    } catch (error) {
-      console.error("Error saving remark:", error);
-    }
+  const handleRemarkSuccess = () => {
+    fetchData();
+    onDataChanged?.();
   };
 
   useEffect(() => {
@@ -181,14 +175,26 @@ const ExportDataWithButtons = ({
         const root = createRoot(td);
         root.render(
           <div className="d-flex flex-row gap-1">
-            <button className="eye-icon p-1"
+            <button
+              className="eye-icon"
               onClick={() => {
                 navigate(`/driver-detail/${rowData.driver_id}`);
               }}
             >
               <TbEye className="me-1" />
             </button>
-              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
+            <button
+              className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+              onClick={() => {
+                navigate(`/edit-driver/${rowData.driver_id}`);
+              }}
+            >
+              <TbEdit className="me-1" />
+            </button>
+            <button
+              className="remark-icon"
+              onClick={() => handleRemark(rowData)}
+            >
               <TbReceipt className="me-1" />
             </button>
           </div>
@@ -200,19 +206,29 @@ const ExportDataWithButtons = ({
   return (
     <>
       <ComponentCard
-        title={tabKey === 1 ? "Manage Drivers" : ""}
-        className="mb-2 overflow-x-auto"
+        title={
+          <div className="w-100">{tabKey === 1 ? "Manage Drivers" : ""}</div>
+        }
+        className="mb-2"
         headerActions={
-          <TableFilters
-            dateFilter={dateFilter}
-            statusFilter={statusFilter}
-            dateRange={dateRange}
-            onDateFilterChange={handleDateFilterChange}
-            onStatusFilterChange={handleStatusFilterChange}
-            onDateRangeChange={handleDateRangeChange}
-            statusOptions={StatusFilterOptions}
-            className="w-100"
-          />
+          <div className="d-flex gap-2 align-items-center">
+            <TableFilters
+              dateFilter={dateFilter}
+              statusFilter={statusFilter}
+              dateRange={dateRange}
+              onDateFilterChange={handleDateFilterChange}
+              onStatusFilterChange={handleStatusFilterChange}
+              onDateRangeChange={handleDateRangeChange}
+              statusOptions={StatusFilterOptions}
+              className="w-100"
+            />
+            <button
+              className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 text-nowrap"
+              onClick={onAddNew}
+            >
+              Add New <TbArrowRight className="fs-5" />
+            </button>
+          </div>
         }
       >
         {loading ? (
@@ -268,10 +284,7 @@ const ExportDataWithButtons = ({
             </DataTable>
 
             <TablePagination
-              // totalItems={total}
               start={currentPage + 1}
-              // end={totalPages}
-              // itemsName="items"
               showInfo={true}
               previousPage={() =>
                 handlePageChange(Math.max(0, currentPage - 1))
@@ -292,7 +305,9 @@ const ExportDataWithButtons = ({
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.DRIVER}
+        primaryKeyId={selectedDriverId}
+        onSuccess={handleRemarkSuccess}
       />
     </>
   );

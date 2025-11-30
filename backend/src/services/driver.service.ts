@@ -50,17 +50,17 @@ export const getDriverService = async (filters: {
         const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
-        const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'created_at' });
+        const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'driver.created_at' });
 
         let finalWhereSQL = whereSQL;
 
         if (filters?.status) {
             const statusConsitionMap: Record<string, string> = {
-                new: "driver_status = 0",
-                active: "driver_status = 1",
-                inActive: "driver_status = 2",
-                delete: "driver_status = 3",
-                verification: "driver_status = 4",
+                new: "driver.driver_status = 0",
+                active: "driver.driver_status = 1",
+                inActive: "driver.driver_status = 2",
+                delete: "driver.driver_status = 3",
+                verification: "driver.driver_status = 4",
             };
 
             const condition = statusConsitionMap[filters.status];
@@ -74,41 +74,65 @@ export const getDriverService = async (filters: {
             }
         }
 
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
+
         const query = `
 
             SELECT 
-                driver_id,
-                driver_name,
-                driver_last_name,
-                driver_mobile,
-                driver_wallet_amount,
-                driver_city_id,
-                driver_created_by, /* 0 for Self 1 for Partner */
-                driver_profile_img,
-                driver_registration_step,
-                driver_duty_status,
-                driver_status,
-                driver_duty_status,
-                created_at
+                driver.driver_id,
+                driver.driver_name,
+                driver.driver_last_name,
+                driver.driver_mobile,
+                driver.driver_wallet_amount,
+                driver.driver_city_id,
+                driver.driver_created_by, /* 0 for Self 1 for Partner */
+                driver.driver_profile_img,
+                driver.driver_registration_step,
+                driver.driver_duty_status,
+                driver.driver_status,
+                driver.driver_duty_status,
+                partner.partner_f_name AS created_partner_name,
+                partner.partner_mobile AS created_partner_mobile,
+                driver.created_at,
+                (
+                    SELECT remark_text
+                    FROM remark_data
+                    WHERE remark_driver_id = driver.driver_id
+                    ORDER BY remark_id DESC
+                    LIMIT 1
+                ) AS remark_text
             FROM driver
+            LEFT JOIN partner ON driver.driver_created_by = 1 AND driver.driver_created_partner_id = partner.partner_id
             ${finalWhereSQL}
-            ORDER BY driver_id DESC
+            ORDER BY driver.driver_id DESC
             LIMIT ? OFFSET ?;
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        const [countRows]: any = await db.query(
-            `
-            SELECT COUNT(*) as total
-            FROM driver
-            ${finalWhereSQL}
-            `, params
-        );
+        let total;
 
-        const totalData = countRows[0]?.total || 0;
-        const totalPages = Math.ceil(totalData / limit);
+        if (noFiltersApplied) {
+            total = 100;
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM driver ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
 
         return {
             status: 200,
@@ -116,8 +140,8 @@ export const getDriverService = async (filters: {
             paginations: {
                 page,
                 limit,
-                total: totalData,
-                totalPages
+                total,
+                totalPages: Math.ceil(total / limit)
             },
             jsonData: {
                 drivers: rows
@@ -244,7 +268,7 @@ export const addDriverService = async (data: DriverData) => {
 
     } catch (error) {
         console.log(error);
-        
+
         throw new ApiError(500, "Failed to add driver");
     }
 };
@@ -387,12 +411,13 @@ export const driverDetailService = async (driverId: number) => {
         const [rows]: any = await db.query(
             `
             SELECT 
-            driver.*, vehicle.v_vehicle_name, vehicle.vehicle_rc_number, vehicle.vehicle_category_type, city.city_name,
+            driver.*, driver_details.*, vehicle.v_vehicle_name, vehicle.vehicle_rc_number, vehicle.vehicle_category_type, city.city_name,
             partner.partner_f_name, partner.partner_l_name, partner.partner_mobile
             FROM driver 
             LEFT JOIN vehicle ON driver.driver_assigned_vehicle_id = vehicle.vehicle_id
             LEFT JOIN city ON driver.driver_city_id = city.city_id
             LEFT JOIN partner ON driver.driver_created_by > 0 AND driver.driver_created_partner_id = partner.partner_id
+            LEFT JOIN driver_details ON driver.driver_id = driver_details.driver_details_driver_id
             WHERE driver.driver_id = ?
             `, [driverId]
         );
@@ -432,17 +457,34 @@ export const driverOnOffDataService = async (filters: {
         const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
-        const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'driver_on_off_data.dood_time_unix' });
+        const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'driver.created_at' });
 
         let finalWhereSQL = whereSQL;
 
         if (filters?.status) {
-            const statusConsitionMap: Record<string, string> = {
-                on: "driver_on_off_data.dood_status = ON",
-                off: "driver_on_off_data.dood_status = OFF",
-            };
+            const statusRaw = String(filters.status).trim();
+            const statusUpper = statusRaw.toUpperCase();
+            let condition: string | undefined = undefined;
 
-            const condition = statusConsitionMap[filters.status];
+            if (/^\d+$/.test(statusRaw)) {
+                const statusNum = parseInt(statusRaw, 10);
+                condition = `driver.driver_status = ${statusNum}`;
+            } else {
+                const statusMap: Record<string, number> = {
+                    NEW: 0,
+                    ACTIVE: 1,
+                    INACTIVE: 2,
+                    DELETE: 3,
+                    VERIFICATION: 4,
+                };
+
+                if (statusMap[statusUpper] !== undefined) {
+                    condition = `driver.driver_status = ${statusMap[statusUpper]}`;
+                } else if (statusUpper === "ON" || statusUpper === "OFF") {
+                    // Duty status
+                    condition = `driver.driver_duty_status = '${statusUpper}'`;
+                }
+            }
 
             if (condition) {
                 if (/where\s+/i.test(finalWhereSQL)) {
@@ -453,35 +495,55 @@ export const driverOnOffDataService = async (filters: {
             }
         }
 
+        // Detect filters
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              
+            effectiveOffset = (page - 1) * limit;
+        }
+
         const query = `
 
-            SELECT 
-                driver_on_off_data.*,
+            SELECT
+                driver.driver_id,
                 driver.driver_name,
+                driver.driver_last_name,
                 driver.driver_mobile,
+                driver.driver_duty_status,
+                driver.driver_wallet_amount,
+                driver.driver_status,
+                driver.created_at,
                 vehicle.v_vehicle_name,
                 vehicle.vehicle_rc_number
-            FROM driver_on_off_data
-            LEFT JOIN driver ON driver_on_off_data.dood_by_did = driver.driver_id
-            LEFT JOIN vehicle ON driver_on_off_data.dood_vehicle_id = vehicle.vehicle_id
+            FROM driver
+            LEFT JOIN vehicle ON driver.driver_assigned_vehicle_id = vehicle.vehicle_id
             ${finalWhereSQL}
-            ORDER BY driver_on_off_data.dood_id DESC
+            ORDER BY driver.driver_id DESC
             LIMIT ? OFFSET ?;
+
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        const [countRows]: any = await db.query(
-            `
-            SELECT COUNT(*) as total
-            FROM driver_on_off_data
-            ${finalWhereSQL}
-            `, params
-        );
 
-        const totalData = countRows[0]?.total || 0;
-        const totalPages = Math.ceil(totalData / limit);
+        let total;
+
+        if (noFiltersApplied) {
+            total = 100;
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM driver ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
 
         return {
             status: 200,
@@ -489,8 +551,8 @@ export const driverOnOffDataService = async (filters: {
             paginations: {
                 page,
                 limit,
-                total: totalData,
-                totalPages
+                total,
+                totalPages: Math.ceil(total / limit)
             },
             jsonData: {
                 driverOnOffData: rows
@@ -504,30 +566,120 @@ export const driverOnOffDataService = async (filters: {
 
 };
 
-// Get Driver On Off Map Location
-export const driverOnOffMapLocationService = async (driverOnOffId: number) => {
+// Get Total Driver Live Location on Map
+export const TotalDriverLiveLocationService = async (filters: {
+    status?: string;
+}) => {
     try {
+        let finalWhereSQL = '';
+        const params: any[] = [];
 
-        const [rows]: any = await db.query(
-            `SELECT driver_on_off_data.dood_by_did, driver_on_off_data.dood_lat, driver_on_off_data.dood_long, driver_on_off_data.dood_status, driver_on_off_data.dood_time_unix, driver.driver_name, driver.driver_mobile
-            FROM driver_on_off_data
-            JOIN driver ON driver_on_off_data.dood_by_did = driver.driver_id
-            WHERE dood_id = ?`, [driverOnOffId]
-        );
+        // Status filter - FIXED to use proper SQL syntax
+        if (filters?.status) {
+            const statusConditionMap: Record<string, string> = {
+                ON: "driver.driver_duty_status = 'ON'",
+                OFF: "driver.driver_duty_status = 'OFF'",
+            };
 
-        if (rows.length === 0) {
-            throw new ApiError(404, 'Driver On Off Map Location not found');
+            const condition = statusConditionMap[filters.status];
+            if (condition) {
+                finalWhereSQL = `WHERE ${condition}`;
+            }
         }
 
+        // Query with city_name included - NO LIMIT
+        const query = `
+            SELECT
+                driver_live_location.*,
+                driver.driver_name,
+                driver.driver_mobile,
+                driver.driver_duty_status,
+                city.city_name,
+                vehicle.v_vehicle_name,
+                vehicle.vehicle_rc_number
+            FROM driver_live_location
+            LEFT JOIN driver ON driver_live_location.driver_live_location_d_id = driver.driver_id
+            LEFT JOIN city ON driver.driver_city_id = city.city_id
+            LEFT JOIN vehicle ON driver.driver_assigned_vehicle_id = vehicle.vehicle_id
+            ${finalWhereSQL}
+            ORDER BY driver_live_location.driver_live_location_id DESC
+        `;
+
+        const [rows]: any = await db.query(query, params);
+
+        return {
+            status: 200,
+            message: 'Driver Live Location Data Fetch Successful',
+            jsonData: {
+                driver_Live_Location_Data: rows
+            }
+        };
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, 'Failed to retrieve driver live location data service');
+    }
+};
+
+// Get Driver On Off Map Location
+export const driverLiveLocationService = async (driverOnOffId: number) => {
+    try {
+        if (!driverOnOffId || isNaN(driverOnOffId)) {
+            throw new ApiError(400, 'Invalid driver location ID');
+        }
+
+        const [rows]: any = await db.query(
+            `SELECT
+                driver_live_location.*,
+                driver.driver_name,
+                driver.driver_mobile,
+                driver.driver_duty_status
+            FROM driver
+            LEFT JOIN driver_live_location 
+                ON driver.driver_id = driver_live_location.driver_live_location_d_id
+            WHERE driver.driver_id = ?`,
+            [driverOnOffId]
+        );
+
+        if (!rows || rows.length === 0) {
+            throw new ApiError(404, 'Driver not found');
+        }
+
+        const row = rows[0];  // <--- Make your life easy
+
+        // 🔥 FIXED: Check row instead of rows
+        const noLocation =
+            row.driver_live_location_id === null ||
+            row.driver_live_location_lat === null ||
+            row.driver_live_location_long === null;
+
+        if (noLocation) {
+            return {
+                status: 200,
+                message: 'Driver live location not available',
+                jsonData: {
+                    driverOnOffMapLocation: null,
+                    driver: {
+                        driver_id: row.driver_id,
+                        driver_name: row.driver_name,
+                        driver_mobile: row.driver_mobile,
+                        driver_duty_status: row.driver_duty_status
+                    }
+                }
+            };
+        }
+
+        // If location exists
         return {
             status: 200,
             message: 'Driver On Off Map Location Fetch Successful',
             jsonData: {
-                driverOnOffMapLocation: rows[0]
+                driverOnOffMapLocation: row
             }
         };
 
     } catch (error) {
-        throw new ApiError(500, 'Failed to retrieve driver on off map location service');
+        console.error('driverLiveLocationService error:', error);
+        if (error instanceof ApiError) throw error;
+        throw new ApiError(500, 'Failed to retrieve driver live location');
     }
-}
+};

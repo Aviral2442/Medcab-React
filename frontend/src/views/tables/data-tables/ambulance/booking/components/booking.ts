@@ -1,4 +1,5 @@
 import axios from "axios";
+import { formatDate } from "@/components/DateFormat";
 const baseURL = (import.meta as any).env?.VITE_IMAGE_PATH ?? "";
 
 let bookingRows: any[] = [];
@@ -24,7 +25,7 @@ type AmbulanceBookingInfoType = {
     booking_type: string
     booking_con_name: string
     booking_con_mobile: string
-    booking_category: string
+    booking_view_category_name: string
     booking_schedule_time: string
     booking_pickup: string
     booking_drop: string
@@ -55,17 +56,12 @@ export const bookingColumns = [
     },
     {
         data: 'booking_id',
-        defaultContent: '-'
-    },
-    {
-        data: 'booking_source',
-        defaultContent: '-'
+        defaultContent: '-'  // Make sure this is a string
     },
     {
         data: 'booking_type',
-        defaultContent: '',
+        defaultContent: '-',  // Change from '' or 0 to '-' or '0'
         render: (data: any) => {
-            // Map booking_type if needed (e.g., 0=Regular, 1=Rental, 2=Bulk)
             const typeMap: Record<number, string> = { 0: "Regular", 1: "Rental", 2: "Bulk" };
             return typeMap[data] || data;
         }
@@ -73,21 +69,20 @@ export const bookingColumns = [
     {
         data: 'booking_con_name',
         defaultContent: '-',
+        render: (_data: any, _type: any, row: any) => {
+            const name = row['booking_con_name'] || '-';
+            const mobile = row['booking_con_mobile'] || '-';
+            return `${name} <br/> (${mobile})`;
+        }
     },
     {
-        data: 'booking_con_mobile',
-        defaultContent: '-',
-    },
-    {
-        data: 'booking_category',
+        data: 'booking_view_category_name',
         defaultContent: '-',
     },
     {
         data: 'booking_schedule_time',
         defaultContent: '-',
-        render: (data: any) => {
-            return data.toLocaleString();
-        },
+        render: (data: any) => formatDate(data),
     },
     {
         data: 'booking_pickup',
@@ -99,18 +94,19 @@ export const bookingColumns = [
     },
     {
         data: 'booking_total_amount',
-        defaultContent: '-',
+        defaultContent: '-',  // Change from 0 to '-' or '0'
     },
     {
         data: 'created_at',
         defaultContent: '-',
-        render: (data: any) => {
-            return data.toLocaleString();
-        },
+        render: (data: any) => formatDate(data),
     },
+    { data: 'remark_text',
+        defaultContent: ' ',
+     },
     {
         data: 'booking_status',
-        defaultContent: 0,
+        defaultContent: '0',  // Changed from 0 to '0'
         render: (data: number) => {
             const [variant, text] = statusMap[data] || ["secondary", "Unknown"];
             return `<span class="badge badge-label badge-soft-${variant}">${text}</span>`;
@@ -119,6 +115,6 @@ export const bookingColumns = [
 ];
 
 export const bookingTableData: TableType<AmbulanceBookingInfoType> = {
-    header: ["S.No.", 'ID', 'Source', 'Type', 'Consumer', 'Mobile', 'Category', 'Schedule', 'Pickup', 'Drop', ' Amount', 'Date', 'Status'],
+    header: ["S.No.", 'ID', 'Type', 'Consumer', 'Category', 'Schedule', 'Pickup', 'Drop', ' Amount', 'Created', "Remark", 'Status'],
     body: bookingRows,
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 interface UseTableFiltersProps {
@@ -68,35 +68,6 @@ export const useTableFilters = ({
       newParams.set("page", (pageValue + 1).toString());
     }
 
-    // Remove setting filter params in URL
-    // const dateValue = updates.date !== undefined ? updates.date : dateFilter;
-    // if (dateValue) {
-    //   newParams.set("date", dateValue);
-    // }
-
-    // const statusValue =
-    //   updates.status !== undefined ? updates.status : statusFilter;
-    // if (statusValue) {
-    //   newParams.set("status", statusValue);
-    // }
-
-    // const fromDateValue =
-    //   updates.fromDate !== undefined
-    //     ? updates.fromDate
-    //     : startDate
-    //     ? startDate.toISOString().split("T")[0]
-    //     : null;
-    // const toDateValue =
-    //   updates.toDate !== undefined
-    //     ? updates.toDate
-    //     : endDate
-    //     ? endDate.toISOString().split("T")[0]
-    //     : null;
-
-    // if (fromDateValue && toDateValue) {
-    //   newParams.set("fromDate", fromDateValue);
-    //   newParams.set("toDate", toDateValue);
-    // }
 
     setSearchParams(newParams);
   };

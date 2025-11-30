@@ -4,20 +4,20 @@ import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-import '@/global.css';
+import "@/global.css";
 
-import { TbEye, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEdit, TbEye } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
-import { driverColumns } from "@/views/tables/data-tables/ambulance/driver/components/driver";
+import { driverColumns } from "@/views/tables/data-tables/ambulance/driver-location/components/driver-location";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AddRemark from "@/components/AddRemark";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
+import { FaRegCheckCircle, FaRegTimesCircle } from "react-icons/fa";
 
 // Register DataTable plugins
 DataTable.use(DT);
@@ -29,20 +29,19 @@ const tableConfig: Record<
   { endpoint: string; columns: any[]; headers: string[] }
 > = {
   1: {
-    endpoint: "/driver/get_drivers_list",
+    endpoint: "/driver/driver_on_off_data",
     columns: driverColumns,
     headers: [
       "S.No.",
       "ID",
-      "Profile",
       "Name",
       "Mobile",
+      "V Name",
+      "VRC Number",
       "Wallet",
-      // "City ID",
-      "Created By",
-      "Duty Status",
+      "Created At",
+      "Duty",
       "Status",
-      "Date",
     ],
   },
 };
@@ -50,6 +49,7 @@ const tableConfig: Record<
 type ExportDataWithButtonsProps = {
   tabKey: number;
   refreshFlag: number;
+  onMap?: () => void;
   filterParams?: Record<string, any>;
   onDataChanged?: () => void;
 };
@@ -57,13 +57,11 @@ type ExportDataWithButtonsProps = {
 const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
+  onMap = () => {},
   filterParams = {},
-  onDataChanged,
 }: ExportDataWithButtonsProps) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isRemarkOpen, setIsRemarkOpen] = useState(false);
-  const [selectedDriverId, setSelectedDriverId] = useState<number | null>(null);
 
   const [pageSize] = useState(10);
   const [_total, setTotal] = useState(0);
@@ -71,6 +69,26 @@ const ExportDataWithButtons = ({
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   const navigate = useNavigate();
+
+  const toggleStatus = async (blogId: number, currentStatus: number) => {
+    try {
+      const newStatus = currentStatus === 1 ? 0 : 1;
+      await axios.patch(
+        `${baseURL}/content_writer/update_blog_status/${blogId}`,
+        {
+          status: newStatus,
+        }
+      );
+
+      setData((prevData) =>
+        prevData.map((blog) =>
+          blog.blogs_id === blogId ? { ...blog, blogs_status: newStatus } : blog
+        )
+      );
+    } catch (error) {
+      console.error("Error updating blog status:", error);
+    }
+  };
 
   // Use the custom hook for filters
   const {
@@ -84,17 +102,19 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, columns, headers } = tableConfig[tabKey];
 
   const StatusFilterOptions = [
-    { label: "New", value: "new" },
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inActive" },
-    { label: "Delete", value: "delete" },
-    { label: "Verification", value: "verification" },
+    { label: "On", value: "ON" },
+    { label: "Off", value: "OFF" },
+    { label: "New", value: 0 },
+    { label: "Active", value: 1 },
+    { label: "Inactive", value: 2 },
+    { label: "Deleted", value: 3 },
+    { label: "Verification", value: 4 },
   ];
 
   const fetchData = async () => {
@@ -104,7 +124,7 @@ const ExportDataWithButtons = ({
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
       console.log("API Response:", res.data);
 
-      const drivers = res.data?.jsonData?.drivers || [];
+      const drivers = res.data?.jsonData?.driverOnOffData || [];
       setData(drivers);
 
       if (res.data.paginations) {
@@ -123,27 +143,6 @@ const ExportDataWithButtons = ({
       setTotalPages(0);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleRemark = (rowData: any) => {
-    const id = rowData?.driver_id ?? rowData?.id;
-    console.log("Selected Driver ID for Remark:", id);
-    setSelectedDriverId(id);
-    setIsRemarkOpen(true);
-  };
-
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedDriverId}`, {
-        remarkType: "DRIVER",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged?.();
-    } catch (error) {
-      console.error("Error saving remark:", error);
     }
   };
 
@@ -180,16 +179,43 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-          <div className="d-flex flex-row gap-1">
-            <button className="eye-icon p-1"
+          <div className="d-flex gap-1 align-content-center">
+            <button
+              className="eye-icon p-1"
               onClick={() => {
-                navigate(`/driver-detail/${rowData.driver_id}`);
+                navigate(`/ambulance/driver-duty/${rowData.driver_id}`);
               }}
             >
               <TbEye className="me-1" />
             </button>
-              <button className="remark-icon" onClick={() => handleRemark(rowData)}>
-              <TbReceipt className="me-1" />
+            <button
+              className="p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+              onClick={() => {
+                toggleStatus(rowData.blogs_id, rowData.blogs_status);
+              }}
+              title={
+                rowData.blogs_status === 1
+                  ? "Click to deactivate"
+                  : "Click to activate"
+              }
+              style={{
+                backgroundColor:
+                  rowData.blogs_status === 1 ? "#d9534f" : "#3a833a",
+              }}
+            >
+              {rowData.blogs_status === 1 ? (
+                <FaRegTimesCircle className="me-1" />
+              ) : (
+                <FaRegCheckCircle className="me-1" />
+              )}
+            </button>
+            <button
+              className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+              onClick={() => {
+                navigate(`/edit-blog/${rowData.blogs_id}`);
+              }}
+            >
+              <TbEdit className="me-1" />
             </button>
           </div>
         );
@@ -200,19 +226,31 @@ const ExportDataWithButtons = ({
   return (
     <>
       <ComponentCard
-        title={tabKey === 1 ? "Manage Drivers" : ""}
+        title={
+          <div className="w-100">
+            {tabKey === 1 ? "Driver Duty Location" : " "}
+          </div>
+        }
         className="mb-2 overflow-x-auto"
         headerActions={
-          <TableFilters
-            dateFilter={dateFilter}
-            statusFilter={statusFilter}
-            dateRange={dateRange}
-            onDateFilterChange={handleDateFilterChange}
-            onStatusFilterChange={handleStatusFilterChange}
-            onDateRangeChange={handleDateRangeChange}
-            statusOptions={StatusFilterOptions}
-            className="w-100"
-          />
+          <div className="d-flex gap-2 align-content-center">
+            <TableFilters
+              dateFilter={dateFilter}
+              statusFilter={statusFilter}
+              dateRange={dateRange}
+              onDateFilterChange={handleDateFilterChange}
+              onStatusFilterChange={handleStatusFilterChange}
+              onDateRangeChange={handleDateRangeChange}
+              statusOptions={StatusFilterOptions}
+              className="w-100"
+            />
+            <button
+              className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
+              onClick={onMap}
+            >
+              Map <TbArrowRight className="fs-5" />
+            </button>
+          </div>
         }
       >
         {loading ? (
@@ -262,7 +300,6 @@ const ExportDataWithButtons = ({
                   {headers.map((header, idx) => (
                     <th key={idx}>{header}</th>
                   ))}
-                  {/* <th>Actions</th> */}
                 </tr>
               </thead>
             </DataTable>
@@ -288,15 +325,8 @@ const ExportDataWithButtons = ({
           </div>
         )}
       </ComponentCard>
-
-      <AddRemark
-        isOpen={isRemarkOpen}
-        onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
-      />
     </>
   );
 };
 
-// Export the component directly, not wrapped in another component
 export default ExportDataWithButtons;

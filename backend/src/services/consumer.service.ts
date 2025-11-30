@@ -1,8 +1,6 @@
 import { db } from '../config/db';
 import { ApiError } from '../utils/api-error';
 import { buildFilters } from '../utils/filters';
-import path from 'path';
-import fs from 'fs';
 
 // ✅ GET CONSUMER LIST WITH FILTERS + PAGINATION (Fully Fixed)
 export const getConsumerList = async (filters?: {
@@ -63,22 +61,29 @@ export const getConsumerList = async (filters?: {
 
         // ⚡ Data query
         const query = `
-            SELECT 
+            SELECT
                 consumer.consumer_id,
                 consumer.consumer_name,
                 consumer.consumer_mobile_no,
                 consumer.consumer_email_id,
                 consumer.consumer_wallet_amount,
                 consumer.consumer_my_referal_code,
-                referrer.consumer_name AS referer_name,
+                ref.consumer_name AS referer_name,
                 consumer.consumer_status,
-                consumer.consumer_registred_date
+                consumer.consumer_registred_date,
+                (
+                    SELECT remark_text 
+                    FROM remark_data 
+                    WHERE remark_consumer_id = consumer.consumer_id 
+                    ORDER BY remark_id DESC 
+                    LIMIT 1
+                ) AS remark_text
             FROM consumer
-            LEFT JOIN consumer as referrer ON consumer.consumer_refered_by = referrer.consumer_id
+            LEFT JOIN consumer AS ref 
+                ON consumer.consumer_refered_by = ref.consumer_id
             ${finalWhereSQL}
-            GROUP BY consumer.consumer_id
             ORDER BY consumer.consumer_id DESC
-            LIMIT ? OFFSET ?
+            LIMIT ? OFFSET ?;
             `;
 
         const queryParams = [...params, effectiveLimit, effectiveOffset];

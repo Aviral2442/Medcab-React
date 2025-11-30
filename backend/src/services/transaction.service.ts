@@ -30,8 +30,9 @@ export const getConsumerTransactionList = async () => {
 export const getVendorTransactionList = async () => {
     try {
         const query = `
-            SELECT vendor_transection.*
+            SELECT vendor_transection.*, vendor.vendor_name, vendor.vendor_mobile
             FROM vendor_transection 
+            LEFT JOIN vendor ON vendor_transection.vendor_transection_by = vendor.vendor_id
             ORDER BY vendor_transection.vendor_transection_id DESC        
         `;
 

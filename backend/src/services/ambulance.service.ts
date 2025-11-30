@@ -297,7 +297,6 @@ export const getAmbulanceCategoryListService = async (filters?: {
         const query = `
             SELECT 
                 ambulance_category.ambulance_category_id,
-                ambulance_category.ambulance_category_type,
                 ambulance_category.ambulance_category_service_type,
                 ambulance_category.ambulance_category_name,
                 ambulance_category.ambulance_category_icon,
@@ -1166,6 +1165,20 @@ export const getAmbulanceBookingListService = async (filters?: {
             }
         }
 
+        // Detect filters
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
+
         const query = `
             SELECT 
                 booking_view.booking_id,
@@ -1173,28 +1186,40 @@ export const getAmbulanceBookingListService = async (filters?: {
                 booking_view.booking_type,
                 booking_view.booking_con_name,
                 booking_view.booking_con_mobile,
-                booking_view.booking_category,
+                booking_view.booking_view_category_name,
                 booking_view.booking_schedule_time,
                 booking_view.booking_pickup,
                 booking_view.booking_drop,
                 booking_view.booking_status,
                 booking_view.booking_total_amount,
-                booking_view.created_at
+                booking_view.created_at,
+                (
+                    SELECT remark_text 
+                    FROM remark_data 
+                    WHERE remark_booking_id = booking_view.booking_id 
+                    ORDER BY remark_id DESC 
+                    LIMIT 1
+                ) AS remark_text
             FROM booking_view
             ${finalWhereSQL}
             ORDER BY booking_view.booking_id DESC
             LIMIT ? OFFSET ?
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
-            params
-        );
+        let total;
 
-        const total = countRows[0]?.total || 0;
+        if (noFiltersApplied) {
+            total = 100;
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
 
         return {
             status: 200,
@@ -1261,6 +1286,22 @@ export const getRegularAmbulanceBookingListService = async (filters?: {
             }
         }
 
+
+        // Detect filters
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
+
+
         const query = `
             SELECT 
                 booking_view.booking_id,
@@ -1281,15 +1322,27 @@ export const getRegularAmbulanceBookingListService = async (filters?: {
             LIMIT ? OFFSET ?
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
-            params
-        );
+        let total;
 
-        const total = countRows[0]?.total || 0;
+        if (noFiltersApplied) {
+            const [countAllRows]: any = await db.query(`SELECT COUNT(*) as total FROM booking_view`);
+            const actualTotal = countAllRows[0]?.total || 0;
+
+            if (actualTotal < 100) {
+                total = actualTotal;
+            } else {
+                total = 100;
+            }
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
 
         return {
             status: 200,
@@ -1355,6 +1408,21 @@ export const getRentalAmbulanceBookingListService = async (filters?: {
             }
         }
 
+        // Detect filters
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
+
+
         const query = `
             SELECT 
                 booking_view.booking_id,
@@ -1375,16 +1443,27 @@ export const getRentalAmbulanceBookingListService = async (filters?: {
             LIMIT ? OFFSET ?
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...params, effectiveLimit, effectiveOffset];
         const [rows]: any = await db.query(query, queryParams);
 
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
-            params
-        );
+        let total;
 
-        const total = countRows[0]?.total || 0;
+        if (noFiltersApplied) {
+            const [countAllRows]: any = await db.query(`SELECT COUNT(*) as total FROM booking_view`);
+            const actualTotal = countAllRows[0]?.total || 0;
 
+            if (actualTotal < 100) {
+                total = actualTotal;
+            } else {
+                total = 100;
+            }
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
         return {
             status: 200,
             message: "Rental Ambulance booking list fetched successfully",
@@ -1449,6 +1528,20 @@ export const getBulkAmbulanceBookingListService = async (filters?: {
             }
         }
 
+        // Detect filters
+        const isDateFilterApplied = !!filters?.date || !!filters?.fromDate || !!filters?.toDate;
+        const isStatusFilterApplied = !!filters?.status;
+        const noFiltersApplied = !isDateFilterApplied && !isStatusFilterApplied;
+
+        let effectiveLimit = limit;
+        let effectiveOffset = offset;
+
+        // If NO FILTERS applied → force fixed 100-record window
+        if (noFiltersApplied) {
+            effectiveLimit = limit;              // per page limit (e.g., 10)
+            effectiveOffset = (page - 1) * limit; // correct pagination
+        }
+
         const query = `
             SELECT 
                 booking_view.booking_id,
@@ -1472,12 +1565,24 @@ export const getBulkAmbulanceBookingListService = async (filters?: {
         const queryParams = [...params, limit, offset];
         const [rows]: any = await db.query(query, queryParams);
 
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
-            params
-        );
+        let total;
 
-        const total = countRows[0]?.total || 0;
+        if (noFiltersApplied) {
+            const [countAllRows]: any = await db.query(`SELECT COUNT(*) as total FROM booking_view`);
+            const actualTotal = countAllRows[0]?.total || 0;
+
+            if (actualTotal < 100) {
+                total = actualTotal;
+            } else {
+                total = 100;
+            }
+        } else {
+            const [countRows]: any = await db.query(
+                `SELECT COUNT(*) as total FROM booking_view ${finalWhereSQL}`,
+                params
+            );
+            total = countRows[0]?.total || 0;
+        }
 
         return {
             status: 200,

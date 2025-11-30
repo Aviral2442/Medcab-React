@@ -1,18 +1,17 @@
+import { formatDate } from "@/components/DateFormat";
 import axios from "axios";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
 type DriverInfoType = {
     driver_id: number;
-    driver_profile_img: string;
     driver_name: string;
-    // driver_last_name: string;
+    driver_last_name: string;
     driver_mobile: string;
+    v_vehicle_name: string;
+    vehicle_rc_number: string;
     driver_wallet_amount: number;
-    // driver_city_id: number;
-    driver_created_by: number; // 0: Self, 1: Partner
-    driver_registration_step: number;
     driver_duty_status: string;
-    driver_status: number;
+    driver_status: string;
     created_at: string;
 }
 
@@ -25,8 +24,8 @@ let driverRows: DriverInfoType[] = [];
 
 export const getDriverList = async () => {
     try {
-        const response = await axios.get(`${baseURL}/driver/get_drivers`);
-        driverRows = response.data.jsonData?.drivers || [];
+        const response = await axios.get(`${baseURL}/driver/driver_on_off_data`);
+        driverRows = response.data.jsonData?.driverOnOffData || [];
         return driverRows;
     } catch (error) {
         console.error("Error fetching drivers:", error);
@@ -37,28 +36,20 @@ export const getDriverList = async () => {
 export const driverColumns = [
     { data: 'driver_id' },
     {
-        data: 'driver_profile_img',
-        render: (data: string) => {
-            if (data) {
-                return `<img src="${data}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />`;
-            }
-            return 'N/A';
+        data: 'driver_name',
+        defaultContent: '',
+        render: (data: string, _type: any, row: DriverInfoType) => {
+            return `${data} ${row.driver_last_name}`;
         }
     },
-    { data: 'driver_name' },
-    // { data: 'driver_last_name' },
     { data: 'driver_mobile' },
-    { 
-        data: 'driver_wallet_amount',
-        render: (data: number) => {
-            return `₹${data || 0}`;
-        }
-    },
-    // { data: 'driver_city_id' },
+    { data: 'v_vehicle_name' },
+    { data: 'vehicle_rc_number' },
+    { data: 'driver_wallet_amount' },
     {
-        data: 'driver_created_by',
-        render: (data: number) => {
-            return data === 0 ? 'Self' : 'Partner';
+        data: 'created_at',
+        render: (data: string) => {
+            return formatDate(data);
         }
     },
     {
@@ -85,13 +76,6 @@ export const driverColumns = [
             return `<span class="badge badge-label badge-soft-${status.class}">${status.label}</span>`;
         }
     },
-    {
-        data: 'created_at',
-        render: (data: string) => {
-            const date = new Date(data);
-            return date.toLocaleDateString();
-        }
-    },
 ];
 
 // Export table data structure
@@ -100,15 +84,13 @@ export const driverTableData: TableType<DriverInfoType> = {
         "S.No.",
         "ID",
         "Name",
-        // "Last Name",
         "Mobile",
+        "V Name",
+        "VRC Number",
         "Wallet",
-        // "City ID",
-        "Created By",
-        "Profile",
-        "Duty Status",
+        "Created At",
+        "Duty",
         "Status",
-        "Created At"
     ],
     body: driverRows,
 };

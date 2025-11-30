@@ -3,11 +3,13 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import VendorDetails from "@/components/Vendor/VendorDetails";
 import { Container, Nav, Spinner } from "react-bootstrap";
+import TransactionList from "@/components/Vendor/TransactionList";
 
 const vendorDetails = () => {
   const { id } = useParams();
   const [loading, setLoading] = React.useState(true);
   const [VendorData, setVendorData] = React.useState<any>(null);
+  const [transactions, setTransactions] = React.useState<any[]>([]);
   const [activeTab, setActiveTab] = React.useState(1);
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
@@ -32,9 +34,30 @@ const vendorDetails = () => {
     }
   };
 
+  const fetchTransactionsList = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `${baseURL}/transaction/vendor_transaction_list`
+      );
+      console.log("Transactions List:", res.data);
+      setTransactions(res.data?.jsonData?.transactions || []);
+    } catch (error) {
+      console.error("Error fetching transactions list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  console.log("activeTab:", activeTab);
+
+  // fetch data on active tab change
   React.useEffect(() => {
-    fetchVendorDetails();
-  }, [id]);
+    if (activeTab === 1) fetchVendorDetails();
+    else if (activeTab === 2) {
+      fetchTransactionsList();
+    }
+  }, [activeTab]);
 
   const handleFieldUpdate = async (field: string, value: string) => {
     try {
@@ -70,7 +93,13 @@ const vendorDetails = () => {
           </div>
         );
       case 2:
-        return <div>Transaction List Content</div>;
+        return transactions ? (
+          <TransactionList data={transactions} />
+        ) : (
+          <div className="text-center p-5">
+            <p className="text-muted">No Transactions Data Found</p>
+          </div>
+        );
       case 3:
         return <div>PickUp City Vendor List Content</div>;
       case 4:
@@ -92,25 +121,23 @@ const vendorDetails = () => {
       ) : (
         <div className="m-3 ms-0">
           <Nav variant="tabs" className="mb-3">
-            {tabs.map(tab => (
+            {tabs.map((tab) => (
               <Nav.Item key={tab.eventKey}>
                 <Nav.Link
                   active={activeTab === tab.eventKey}
                   onClick={() => setActiveTab(tab.eventKey)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                 >
                   {tab.title}
                 </Nav.Link>
               </Nav.Item>
             ))}
           </Nav>
-          <div className="tab-content">
-            {renderTabContent()}
-          </div>
+          <div className="tab-content">{renderTabContent()}</div>
         </div>
       )}
     </Container>
-  )
+  );
 };
 
 export default vendorDetails;

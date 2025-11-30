@@ -51,7 +51,14 @@ export const getVendorList = async (filters?: {
         vendor.vendor_status,
         vendor.vendor_created_at,
         city.city_name,
-        manpower_category.mp_cat_name
+        manpower_category.mp_cat_name,
+                        (
+                    SELECT remark_text 
+                    FROM remark_data 
+                    WHERE remark_manpower_vendor_id = vendor.vendor_id 
+                    ORDER BY remark_id DESC 
+                    LIMIT 1
+                ) AS remark_text
       FROM vendor
       LEFT JOIN vendor_address 
         ON vendor.vendor_address_details_id = vendor_address.vendor_address_id
@@ -61,6 +68,7 @@ export const getVendorList = async (filters?: {
         ON vendor.vendor_category_details_id = vendor_manpower_mapper.vmm_id
       LEFT JOIN manpower_category 
         ON vendor_manpower_mapper.vmm_category_id = manpower_category.mp_cat_id
+      
       ${finalWhereSQL}
       ORDER BY vendor.vendor_created_at DESC
       LIMIT ? OFFSET ?

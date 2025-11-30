@@ -6,7 +6,7 @@ import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 
-import { TbArrowRight, TbEdit, TbEye, TbReceipt } from "react-icons/tb";
+import { TbArrowRight, TbEye, TbReceipt } from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
 import axios from "axios";
@@ -17,9 +17,8 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import _pdfMake from "pdfmake/build/pdfmake";
 import { bookingColumns } from "./components/booking";
-import { FaRegCheckCircle, FaRegTimesCircle } from "react-icons/fa";
 import { createRoot } from "react-dom/client";
-import AddRemark from "@/components/AddRemark";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -31,16 +30,15 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Source",
       "Type",
       "Consumer",
-      "Mobile",
       "Category",
       "Schedule",
       "Pickup",
       "Drop",
       "Amount",
-      "Date",
+      "Created",
+      "Remark",
       "Status",
     ],
   },
@@ -49,16 +47,15 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Source",
       "Type",
       "Consumer",
-      "Mobile",
       "Category",
       "Schedule",
       "Pickup",
       "Drop",
       "Amount",
-      "Date",
+      "Created",
+      "Remark",
       "Status",
     ],
   },
@@ -67,16 +64,15 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Source",
       "Type",
       "Consumer",
-      "Mobile",
       "Category",
       "Schedule",
       "Pickup",
       "Drop",
       "Amount",
-      "Date",
+      "Created",
+      "Remark",
       "Status",
     ],
   },
@@ -85,16 +81,15 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Source",
       "Type",
       "Consumer",
-      "Mobile",
       "Category",
       "Schedule",
       "Pickup",
       "Drop",
       "Amount",
-      "Date",
+      "Created",
+      "Remark",
       "Status",
     ],
   },
@@ -113,7 +108,8 @@ const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
   onAddNew,
-  onEditRow,
+  // onEditRow,
+  onDataChanged,
   filterParams = {},
 }: ExportDataWithButtonsProps) => {
   const navigate = useNavigate();
@@ -142,7 +138,7 @@ const ExportDataWithButtons = ({
     handlePageChange,
     getFilterParams,
   } = useTableFilters({
-    defaultDateFilter: "today",
+    defaultDateFilter: "",
   });
 
   const { endpoint, headers } = tableConfig[tabKey];
@@ -183,6 +179,7 @@ const ExportDataWithButtons = ({
         bookings_id =
           res.data?.jsonData?.bulk_ambulance_booking_list?.booking_id || [];
       }
+      console.log("Bookings IDs:", bookings_id);
 
       // Ensure data is an array and has proper structure
       const validData = Array.isArray(dataArray) ? dataArray : [];
@@ -218,35 +215,14 @@ const ExportDataWithButtons = ({
   ]);
 
   const handleRemark = (rowData: any) => {
-    // console.log("Table-------- Data:", rowData);
     const id = rowData?.booking_id;
-    // console.log("Selected Consumer ID for Remark:", id);
     setSelectedConsumerId(id);
     setIsRemarkOpen(true);
   };
 
-  const handleSaveRemark = async (remark: string) => {
-    try {
-      await axios.post(`${baseURL}/add_remarks/${selectedConsumerId}`, {
-        remarkType: "CONSUMER",
-        remarks: remark,
-      });
-      console.log("Remark saved successfully");
-      fetchData();
-      onDataChanged?.();
-    } catch (error) {
-      console.error("Error saving remark:", error);
-    }
-  };
-
-  const formatDate = (timestamp: number) => {
-    if (!timestamp) return "N/A";
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  const handleRemarkSuccess = () => {
+    fetchData();
+    onDataChanged?.();
   };
 
   const columnsWithActions = [
@@ -399,7 +375,9 @@ const ExportDataWithButtons = ({
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}
-        onSave={handleSaveRemark}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.AMBULANCE_BOOKING}
+        primaryKeyId={selectedConsumerId}
+        onSuccess={handleRemarkSuccess}
       />
     </>
   );

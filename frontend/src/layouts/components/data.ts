@@ -2,22 +2,14 @@ import { type MenuItemType } from '@/types/layout'
 import { type IconType } from 'react-icons'
 import { TbLogout2, TbUserCircle } from 'react-icons/tb'
 import {
-  LuAlignLeft,
-  // LuAlignLeft,
   LuAmbulance,
-  // LuAmpersands,
   LuAxis3D,
   LuBed,
   LuCircleGauge,
-  // LuClipboardType,
   LuFileType,
-  // LuMoonStar,
-  // LuNotebookText,
   LuSettings,
-  // LuSquareMenu,
   LuTableOfContents,
   LuUser,
-  // LuUserRound,
   LuUserRoundPlus,
   LuVideo,
 } from 'react-icons/lu'
@@ -46,34 +38,6 @@ export const userDropdownItems: UserDropdownItemType[] = [
     icon: TbUserCircle,
     url: '/pages/profile',
   },
-  // {
-  //   label: 'Notifications',
-  //   icon: TbBellRinging,
-  //   url: '#',
-  // },
-  // {
-  //   label: 'Balance: $985.25',
-  //   icon: TbCreditCard,
-  //   url: '#',
-  // },
-  // {
-  //   label: 'Account Settings',
-  //   icon: TbSettings2,
-  //   url: '#',
-  // },
-  // {
-  //   label: 'Support Center',
-  //   icon: TbHeadset,
-  //   url: '#',
-  // },
-  // {
-  //   isDivider: true,
-  // },
-  // {
-  //   label: 'Lock Screen',
-  //   icon: TbLock,
-  //   url: '/auth-1/lock-screen',
-  // },
   {
     label: 'Log Out',
     icon: TbLogout2,
@@ -125,8 +89,9 @@ export const menuItems: MenuItemType[] = [
     children: [
       { key: 'category-list', label: 'Category', url: '/ambulance/category' },
       { key: 'driver-list', label: 'Driver', url: '/ambulance/driver' },
-      { key: 'driver-duty', label: 'Driver Duty', url: '/ambulance/driver-duty' },
+      { key: 'driver-duty', label: 'ON/OFF Duty', url: '/ambulance/driver-duty' },
       { key: 'partner-list', label: 'Partner', url: '/ambulance/partner' },
+      { key: 'vehical-list', label: 'Vehicle', url: '/ambulance/vehicle' },
       { key: 'booking-list', label: 'Booking', url: '/ambulance/booking' },
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
     ],

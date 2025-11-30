@@ -13,3 +13,4 @@ export const authorWebsite: string = 'IME.com'
 export const authorContact: string = ''
 
 export const basePath = (import.meta as any).env?.VITE_PATH ?? "";
+export const baseURL = (import.meta as any).env?.base_Path ?? "";

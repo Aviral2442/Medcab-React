@@ -20,7 +20,7 @@ interface AddCityFAQProps {
 }
 
 interface FAQItem {
-  city_faq_id: number;
+  city_id: number;
   city_faq_que: string;
   city_faq_ans: string;
   city_faq_status: string;
@@ -31,10 +31,11 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
   data,
   onCancel,
   onDataChanged,
+  sectionId,
 }) => {
   const [faqList, setFaqList] = React.useState<FAQItem[]>([
     {
-      city_faq_id: 0,
+      city_id: 0,
       city_faq_que: "",
       city_faq_ans: "",
       city_faq_status: "1",
@@ -47,17 +48,30 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
 
   React.useEffect(() => {
     if (mode === "edit" && data) {
-      setSelectedCityId(data.city_faq_id || 0);
-      setFaqList([
-        {
-          city_faq_id: data.city_faq_id || 0,
-          city_faq_que: data.city_faq_que || "",
-          city_faq_ans: data.city_faq_ans || "",
-          city_faq_status: String(data.city_faq_status ?? "1"),
-        },
-      ]);
+      // Handle pathology section differently
+      if (sectionId === 4) {
+        setSelectedCityId(data.city_pathology_id || 0);
+        setFaqList([
+          {
+            city_id: data.city_pathology_id || 0,
+            city_faq_que: data.city_pathology_faq_que || "",
+            city_faq_ans: data.city_pathology_faq_ans || "",
+            city_faq_status: String(data.city_pathology_faq_status ?? "1"),
+          },
+        ]);
+      } else {
+        setSelectedCityId(data.city_id || 0);
+        setFaqList([
+          {
+            city_id: data.city_id || 0,
+            city_faq_que: data.city_faq_que || "",
+            city_faq_ans: data.city_faq_ans || "",
+            city_faq_status: String(data.city_faq_status ?? "1"),
+          },
+        ]);
+      }
     }
-  }, [mode, data]);
+  }, [mode, data, sectionId]);
 
   const handleChange = (index: number, key: keyof FAQItem, value: string) => {
     setFaqList((prev) => {
@@ -75,7 +89,7 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
     setFaqList((prev) =>
       prev.map((faq) => ({
         ...faq,
-        city_faq_id: parsedCityId,
+        city_id: parsedCityId,
       }))
     );
   };
@@ -84,7 +98,7 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
     setFaqList((prev) => [
       ...prev,
       {
-        city_faq_id: selectedCityId,
+        city_id: selectedCityId,
         city_faq_que: "",
         city_faq_ans: "",
         city_faq_status: "1",
@@ -98,34 +112,85 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
     }
   };
 
+  // Get the correct API endpoint based on sectionId - Updated to match backend routes
+  const getApiEndpoints = () => {
+    const endpoints: Record<number, { add: string; edit: string }> = {
+      1: {
+        add: "/content_writer/add_city_content_faq",
+        edit: "/content_writer/edit_city_content_faq",
+      },
+      2: {
+        add: "/content_writer/add_city_manpower_content_faq",
+        edit: "/content_writer/edit_city_manpower_content_faq",
+      },
+      3: {
+        add: "/content_writer/add_city_video_consult_content_faq",
+        edit: "/content_writer/edit_city_video_consult_content_faq",
+      },
+      4: {
+        add: "/content_writer/add_city_pathology_content_faq",
+        edit: "/content_writer/edit_city_pathology_content_faq",
+      },
+    };
+    return endpoints[sectionId] || endpoints[1];
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const endpoints = getApiEndpoints();
+
       if (mode === "edit" && data) {
-        const payload = {
-          city_faq_id: data.city_faq_id,
-          city_faq_que: faqList[0].city_faq_que,
-          city_faq_ans: faqList[0].city_faq_ans,
-          city_faq_status: parseInt(faqList[0].city_faq_status),
-        };
-        await axios.put(
-          `${baseURL}/content_writer/edit_city_content_faq/${data.city_faq_id}`,
-          payload
-        );
+        // Handle pathology section differently
+        if (sectionId === 4) {
+          const payload = {
+            city_pathology_id: selectedCityId,
+            city_pathology_faq_que: faqList[0].city_faq_que,
+            city_pathology_faq_ans: faqList[0].city_faq_ans,
+          };
+          await axios.put(
+            `${baseURL}${endpoints.edit}/${data.city_pathology_faq_id}`,
+            payload
+          );
+        } else {
+          const payload = {
+            city_id: selectedCityId,
+            city_faq_que: faqList[0].city_faq_que,
+            city_faq_ans: faqList[0].city_faq_ans,
+          };
+          await axios.put(
+            `${baseURL}${endpoints.edit}/${data.city_faq_id}`,
+            payload
+          );
+        }
         onDataChanged();
         onCancel();
       } else {
-        const payload = faqList.map((faq) => ({
-          city_faq_id: faq.city_faq_id,
-          city_faq_que: faq.city_faq_que,
-          city_faq_ans: faq.city_faq_ans,
-          city_faq_status: parseInt(faq.city_faq_status),
-        }));
-        await Promise.all(
-          payload.map((faq) =>
-            axios.post(`${baseURL}/content_writer/add_city_content_faq`, faq)
-          )
-        );
+        // Handle add mode
+        if (sectionId === 4) {
+          // Pathology section uses different field names
+          const payload = faqList.map((faq) => ({
+            city_pathology_id: faq.city_id,
+            city_pathology_faq_que: faq.city_faq_que,
+            city_pathology_faq_ans: faq.city_faq_ans,
+          }));
+          await Promise.all(
+            payload.map((faq) =>
+              axios.post(`${baseURL}${endpoints.add}`, faq)
+            )
+          );
+        } else {
+          const payload = faqList.map((faq) => ({
+            city_id: faq.city_id,
+            city_faq_que: faq.city_faq_que,
+            city_faq_ans: faq.city_faq_ans,
+          }));
+          await Promise.all(
+            payload.map((faq) =>
+              axios.post(`${baseURL}${endpoints.add}`, faq)
+            )
+          );
+        }
         onDataChanged();
         onCancel();
         console.log("City FAQs added successfully");
@@ -139,13 +204,33 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
     }
   };
 
+  // Fetch city content based on sectionId
   const fetchCityContent = async () => {
     try {
-      const res = await axios.get(
-        `${baseURL}/content_writer/get_city_content`
-      );
+      const endpointMap: Record<number, string> = {
+        1: "/content_writer/get_city_content",
+        2: "/content_writer/get_manpower_city_content",
+        3: "/content_writer/get_video_consult_city_content",
+        4: "/content_writer/get_pathology_city_content",
+      };
+
+      const endpoint = endpointMap[sectionId] || endpointMap[1];
+      const res = await axios.get(`${baseURL}${endpoint}`);
       console.log("City Content in faq fetched:", res.data);
-      setCityData(res.data?.jsonData?.city_content_list || []);
+
+      // Map response based on sectionId
+      let cityList: any[] = [];
+      if (sectionId === 1) {
+        cityList = res.data?.jsonData?.city_content_list || [];
+      } else if (sectionId === 2) {
+        cityList = res.data?.jsonData?.city_manpower_content_list || [];
+      } else if (sectionId === 3) {
+        cityList = res.data?.jsonData?.city_video_consultancy_content_list || [];
+      } else if (sectionId === 4) {
+        cityList = res.data?.jsonData?.pathology_city_content_list || [];
+      }
+
+      setCityData(cityList);
     } catch (err) {
       console.error("Error fetching City Content:", err);
       return [];
@@ -154,7 +239,7 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
 
   useEffect(() => {
     fetchCityContent();
-  }, []);
+  }, [sectionId]);
 
   return (
     <ComponentCard
@@ -177,12 +262,15 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
                 value={selectedCityId}
                 onChange={(e) => handleCityChange(e.target.value)}
                 required
-                disabled={mode === "edit"}  
+                disabled={mode === "edit"}
               >
                 <option value="">Select City</option>
                 {cityData.map((city) => (
-                  <option key={city.city_id} value={city.city_id}>
-                    {city.city_name}
+                  <option
+                    key={city.city_id || city.city_pathology_id}
+                    value={city.city_id || city.city_pathology_id}
+                  >
+                    {city.city_name || city.city_pathology_name}
                   </option>
                 ))}
               </FormControl>
@@ -200,7 +288,9 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
                   controlId={`city_faq_que_${index}`}
                   className="mb-0"
                 >
-                  <FormLabel className="fs-6 fw-semibold">Question {index + 1}</FormLabel>
+                  <FormLabel className="fs-6 fw-semibold">
+                    Question {index + 1}
+                  </FormLabel>
                   <div className="d-flex gap-2 align-items-center">
                     <FormControl
                       type="text"
@@ -217,7 +307,7 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
                         className="p-2 rounded text-danger d-flex justify-content-center align-items-center border-0 bg-light"
                         onClick={() => handleRemove(index)}
                         title="Remove FAQ"
-                        style={{ minWidth: '38px', height: '38px' }}
+                        style={{ minWidth: "38px", height: "38px" }}
                       >
                         <LuTrash size={18} />
                       </button>
@@ -232,7 +322,9 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
                   controlId={`city_faq_ans_${index}`}
                   className="mb-0"
                 >
-                  <FormLabel className="fs-6 fw-semibold">Answer {index + 1}</FormLabel>
+                  <FormLabel className="fs-6 fw-semibold">
+                    Answer {index + 1}
+                  </FormLabel>
                   <FormControl
                     as="textarea"
                     rows={2}
@@ -245,8 +337,6 @@ const AddCityFAQ: React.FC<AddCityFAQProps> = ({
                   />
                 </Form.Group>
               </Col>
-
-              {/* Remove Button */}
             </Row>
             {index < faqList.length - 1 && <hr className="my-3" />}
           </React.Fragment>

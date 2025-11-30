@@ -1,9 +1,14 @@
 import { useRoutes } from "react-router";
 import { routes } from "@/routes";
-// import { useZoom } from "@/components/zoom";
+import { useEffect } from "react";
+import { setupTokenExpiryCheck } from "@/utils/auth";
 
 const App = () => {
-  // useZoom(90); // Call hook directly
+  useEffect(() => {
+    const intervalId = setupTokenExpiryCheck(60000*5); // Check every 5 minutes
+    return () => clearInterval(intervalId);
+  }, []);
+
   return useRoutes(routes);
 };
 
