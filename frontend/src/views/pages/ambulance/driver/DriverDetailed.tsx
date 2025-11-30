@@ -2,10 +2,17 @@ import React, { useEffect, useState } from "react";
 import { Container, Nav, Spinner, Alert, Card, Table } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import DriverDetails from "@/components/Ambulance/DriverDetails";
-import DateConversion from "@/components/DateConversion";
+import DriverDetails from "@/components/Ambulance/driver/DriverDetails";
+import TransactionList from "@/components/Ambulance/driver/TransactionList";
 
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+
+interface PaginationData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 const DriverDetailed: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
@@ -20,6 +27,13 @@ const DriverDetailed: React.FC = () => {
   const [transLoading, setTransLoading] = useState<boolean>(false);
   const [transactions, setTransactions] = useState<any[] | null>(null);
   const [transError, setTransError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [pagination, setPagination] = useState<PaginationData>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
 
   // Fetch driver detail
   const fetchDriver = async () => {
@@ -44,77 +58,48 @@ const DriverDetailed: React.FC = () => {
     }
   };
 
-  // Fetch transactions (attempt common list of urls used across project)
-  const fetchTransactions = async () => {
-    if (!id) return;
-    // don't re-fetch if already loaded
-    if (transactions !== null) return;
+  // Fetch transactions with pagination
+  const fetchTransactions = async (page: number = 1) => {
+    try {
+      setTransLoading(true);
+      setTransError(null);
+      if (!id) return;
 
-    setTransLoading(true);
-    setTransError(null);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "10",
+      });
 
-    const candidateUrls = [
-      `${baseURL}/transaction/driver_trans_data/${id}`,
-      `${baseURL}/transaction/driverTransData/${id}`,
-      `${baseURL}/transaction/get_driver_transaction/${id}`,
-      `${baseURL}/transaction/driver_transactions/${id}`,
-    ];
+      const resp = await axios.get(
+        `${baseURL}/transaction/driver_transaction_list?${params.toString()}`
+      );
+      console.log("Transaction Response:", resp.data);
 
-    let found = false;
-    let lastErr: any = null;
-    for (const url of candidateUrls) {
-      try {
-        const resp = await axios.get(url);
-        // common shapes: resp.data.jsonData.driverTransactions or resp.data.jsonData (array)
-        const rows = resp.data?.jsonData?.driverTransactions ?? resp.data?.jsonData?.driverTransactionsList ?? resp.data?.jsonData;
-        if (rows && Array.isArray(rows)) {
-          setTransactions(rows);
-          found = true;
-          break;
-        }
-        if (Array.isArray(resp.data?.jsonData)) {
-          setTransactions(resp.data.jsonData);
-          found = true;
-          break;
-        }
-      } catch (err) {
-        lastErr = err;
-        // try next endpoint in list
+      const transactionsData = resp.data?.jsonData?.driverTransactions;
+      setTransactions(transactionsData || []);
+
+      if (resp.data?.paginations) {
+        setPagination({
+          page: resp.data.paginations.page,
+          limit: resp.data.paginations.limit,
+          total: resp.data.paginations.total,
+          totalPages: resp.data.paginations.totalPages,
+        });
       }
+    } catch (err: any) {
+      console.error("Failed to fetch transactions:", err);
+      setTransError(err?.message || "Failed to fetch transactions");
+      setTransactions(null);
+    } finally {
+      setTransLoading(false);
     }
-
-    if (!found) {
-      console.error("Failed to fetch driver transactions:", lastErr);
-      setTransError("Unable to fetch transactions. Check endpoint availability.");
-      setTransactions([]);
-    }
-    setTransLoading(false);
   };
 
-  // Build a union of keys across all transaction rows to render table headers
-  const buildTransactionHeaders = (rows: any[]) => {
-    const headersSet = new Set<string>();
-    rows.forEach((r) => {
-      Object.keys(r || {}).forEach((k) => headersSet.add(k));
-    });
-    return Array.from(headersSet);
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    fetchTransactions(newPage + 1);
   };
 
-  const renderTransactionCell = (row: any, key: string) => {
-    const value = row[key];
-    if (value === null || value === undefined || value === "") return "N/A";
-    const lc = key.toLowerCase();
-    if (lc.includes("date") || lc.includes("time") || lc.includes("created_at")) {
-      try {
-        const date = /^\d+$/.test(String(value)) ? new Date(parseInt(String(value)) * 1000) : new Date(value);
-        if (!isNaN(date.getTime())) return DateConversion(date.toISOString());
-      } catch {}
-      return String(value);
-    }
-    return String(value);
-  };
-
-  // Trigger fetches based on tab change
   useEffect(() => {
     if (activeTab === 1 && !driverData && !loading) {
       fetchDriver();
@@ -129,7 +114,7 @@ const DriverDetailed: React.FC = () => {
 
   useEffect(() => {
     if (activeTab === 2 && transactions === null && !transLoading) {
-      fetchTransactions();
+      fetchTransactions(currentPage + 1);
     }
   }, [activeTab, id]);
 
@@ -170,42 +155,14 @@ const DriverDetailed: React.FC = () => {
 
             {activeTab === 2 && (
               <div>
-                <Card className="mb-4">
-                  <Card.Body>
-                    <h6 className="mb-3">Driver Transactions</h6>
-
-                    {transLoading ? (
-                      <div className="text-center py-3">
-                        <Spinner animation="border" />
-                      </div>
-                    ) : transError ? (
-                      <Alert variant="danger">{transError}</Alert>
-                    ) : !transactions || transactions.length === 0 ? (
-                      <Alert variant="warning">No transactions found</Alert>
-                    ) : (
-                      <div className="overflow-auto">
-                        <Table bordered hover size="sm" responsive>
-                          <thead className="table-dark">
-                            <tr>
-                              {buildTransactionHeaders(transactions).map((h) => (
-                                <th key={h}>{h}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {transactions.map((row, idx) => (
-                              <tr key={idx}>
-                                {buildTransactionHeaders(transactions).map((h) => (
-                                  <td key={`${idx}-${h}`}>{renderTransactionCell(row, h)}</td>
-                                ))}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </Table>
-                      </div>
-                    )}
-                  </Card.Body>
-                </Card>
+                <TransactionList
+                  data={transactions}
+                  loading={transLoading}
+                  error={transError}
+                  pagination={pagination}
+                  currentPage={currentPage}
+                  onPageChange={handlePageChange}
+                />
               </div>
             )}
           </div>

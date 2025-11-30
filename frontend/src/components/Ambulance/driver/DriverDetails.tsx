@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Row, Col, Image, Spinner, Alert, Button} from "react-bootstrap";
-import DateConversion from "../DateConversion";
+import DateConversion from "../../DateConversion";
 import "@/global.css";
 
 type DriverDetail = {
