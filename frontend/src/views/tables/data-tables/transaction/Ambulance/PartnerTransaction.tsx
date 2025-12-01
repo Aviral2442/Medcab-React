@@ -5,20 +5,18 @@ import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-
-import { TbArrowRight, TbEye, TbReceipt } from "react-icons/tb";
+import { TbEye} from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
+import { createRoot } from "react-dom/client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
-import _pdfFonts from "pdfmake/build/vfs_fonts";
 import _pdfMake from "pdfmake/build/pdfmake";
-import { bookingColumns } from "./components/booking";
-import { createRoot } from "react-dom/client";
-import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
+import _pdfFonts from "pdfmake/build/vfs_fonts";
+import { formatDate } from "@/components/DateFormat";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -26,71 +24,20 @@ DT.Buttons.pdfMake(pdfmake);
 
 const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
   1: {
-    endpoint: "/ambulance/get_ambulance_booking_list",
+    endpoint: "/partner/get_partner_transactions_list",
     headers: [
-      "S.No.",
-      "ID",
-      "Type",
-      "Consumer",
-      "Category",
-      "Schedule",
-      "Pickup",
-      "Drop",
-      "Amount",
-      "Created",
-      "Remark",
-      "Status",
-    ],
-  },
-  2: {
-    endpoint: "/ambulance/get_regular_ambulance_booking_list",
-    headers: [
-      "S.No.",
-      "ID",
-      "Type",
-      "Consumer",
-      "Category",
-      "Schedule",
-      "Pickup",
-      "Drop",
-      "Amount",
-      "Created",
-      "Remark",
-      "Status",
-    ],
-  },
-  3: {
-    endpoint: "/ambulance/get_rental_ambulance_booking_list",
-    headers: [
-      "S.No.",
-      "ID",
-      "Type",
-      "Consumer",
-      "Category",
-      "Schedule",
-      "Pickup",
-      "Drop",
-      "Amount",
-      "Created",
-      "Remark",
-      "Status",
-    ],
-  },
-  4: {
-    endpoint: "/ambulance/get_bulk_ambulance_booking_list",
-    headers: [
-      "S.No.",
-      "ID",
-      "Type",
-      "Consumer",
-      "Category",
-      "Schedule",
-      "Pickup",
-      "Drop",
-      "Amount",
-      "Created",
-      "Remark",
-      "Status",
+    "S.No.",
+    "ID",
+    "Transaction By",
+    "Amount",
+    "Pay ID",
+    "Type",
+    "Prev Amt",
+    "New Amt",
+    "Note",
+    "Time",
+    "Created At",
+    "Status",
     ],
   },
 };
@@ -98,28 +45,19 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
 type ExportDataWithButtonsProps = {
   tabKey: number;
   refreshFlag: number;
-  onAddNew: () => void;
-  onEditRow?: (rowData: any) => void;
-  onDataChanged?: () => void;
   filterParams?: Record<string, any>;
+  _onDataChanged?: () => void;
 };
 
 const ExportDataWithButtons = ({
   tabKey,
   refreshFlag,
-  onAddNew,
-  // onEditRow,
-  onDataChanged,
   filterParams = {},
 }: ExportDataWithButtonsProps) => {
   const navigate = useNavigate();
   const [tableData, setTableData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const tableRef = useRef<any>(null);
-  const [selectedConsumerId, setSelectedConsumerId] = useState<number | null>(
-    null
-  );
-  const [isRemarkOpen, setIsRemarkOpen] = useState(false);
 
   const [pageSize] = useState(10);
   const [_total, setTotal] = useState(0);
@@ -143,14 +81,10 @@ const ExportDataWithButtons = ({
 
   const { endpoint, headers } = tableConfig[tabKey];
 
-  // Updated status options to match backend statuses
   const statusFilterOptions = [
-    { label: "Enquery", value: "enquery" },
-    { label: "Confirm Booking", value: "confirmBooking" },
-    { label: "Driver Assign", value: "driverAssign" },
-    { label: "Invoice", value: "invoice" },
-    { label: "Complete", value: "complete" },
-    { label: "Cancel", value: "cancel" },
+    { label: "Default", value: "0" },
+    { label: "Pending Withdrawal", value: "1" },
+    { label: "Refunded", value: "2" },
   ];
 
   const fetchData = async () => {
@@ -160,40 +94,18 @@ const ExportDataWithButtons = ({
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
       console.log("API Response:", res.data);
 
-      let dataArray: any[] = [];
-      let bookings_id: any[] = [];
+      const transactions = res.data?.jsonData?.partnerTransactions || [];
+      setTableData(transactions);
 
-      if (tabKey === 1) {
-        dataArray = res.data?.jsonData?.booking_list || [];
-        bookings_id = res.data?.jsonData?.booking_list?.booking_id || [];
-      } else if (tabKey === 2) {
-        dataArray = res.data?.jsonData?.regular_ambulance_booking_list || [];
-        bookings_id =
-          res.data?.jsonData?.regular_ambulance_booking_list?.booking_id || [];
-      } else if (tabKey === 3) {
-        dataArray = res.data?.jsonData?.rental_ambulance_booking_list || [];
-        bookings_id =
-          res.data?.jsonData?.rental_ambulance_booking_list?.booking_id || [];
-      } else if (tabKey === 4) {
-        dataArray = res.data?.jsonData?.bulk_ambulance_booking_list || [];
-        bookings_id =
-          res.data?.jsonData?.bulk_ambulance_booking_list?.booking_id || [];
-      }
-      console.log("Bookings IDs:", bookings_id);
-
-      // Ensure data is an array and has proper structure
-      const validData = Array.isArray(dataArray) ? dataArray : [];
-      setTableData(validData);
-
-      if (res.data.pagination) {
-        setTotal(res.data.pagination.total);
-        setTotalPages(res.data.pagination.totalPages);
+      if (res.data.paginations) {
+        setTotal(res.data.paginations.total);
+        setTotalPages(res.data.paginations.totalPages);
       } else {
-        setTotal(validData.length);
-        setTotalPages(Math.ceil(validData.length / pageSize));
+        setTotal(transactions.length);
+        setTotalPages(Math.ceil(transactions.length / pageSize));
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching transaction data:", error);
       setTableData([]);
       setTotal(0);
       setTotalPages(0);
@@ -214,19 +126,128 @@ const ExportDataWithButtons = ({
     dateRange,
   ]);
 
-  const handleRemark = (rowData: any) => {
-    const id = rowData?.booking_id;
-    setSelectedConsumerId(id);
-    setIsRemarkOpen(true);
+  const formatValue = (val: any): string => {
+    if (val === null || val === undefined || val === "") return "";
+    const num = parseFloat(val);
+    if (isNaN(num)) return String(val);
+    const fixed = num.toFixed(2);
+    const [intPart, decPart] = fixed.split(".");
+    const formatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return `${formatted}.${decPart}`;
   };
 
-  const handleRemarkSuccess = () => {
-    fetchData();
-    onDataChanged?.();
+  const getTransactionStatus = (status: number | string): string => {
+    const statusNum = Number(status);
+    switch (statusNum) {
+      case 0:
+        return '<span class="badge badge-label badge-soft-secondary">Default</span>';
+      case 1:
+        return '<span class="badge badge-label badge-soft-warning">Pending Withdrawal</span>';
+      case 2:
+        return '<span class="badge badge-label badge-soft-success">Refunded</span>';
+      default:
+        return `<span class="badge badge-label badge-soft-secondary">${
+          status || "N/A"
+        }</span>`;
+    }
   };
 
-  const columnsWithActions = [
-    ...bookingColumns,
+  const getTransactionType = (type: number | string): string => {
+    const typeNum = Number(type);
+    switch (typeNum) {
+      case 1:
+        return "Add in Wallet";
+      case 2:
+        return "Transfer to Bank";
+      case 3:
+        return "Fetch from Driver";
+      default:
+        return `${type || "N/A"}`;
+    }
+  };
+
+  const columns = [
+    {
+      title: "S.No.",
+      data: null,
+      orderable: false,
+      searchable: false,
+      render: (_data: any, _type: any, _row: any, meta: any) =>
+        currentPage * pageSize + meta.row + 1,
+    },
+    {
+      title: "ID",
+      data: "partner_transection_id",
+      render: (data: any) => (data ? data : "N/A"),
+    },
+    {
+      title: "Transaction By",
+      data: "partner_f_name",
+      render: (_data: any, _type: any, row: any) => {
+        const first = row?.partner_f_name;
+        const last = row?.partner_l_name;
+        const mobile = row?.partner_mobile;
+        const name = [first, last].filter(Boolean).join(" ");
+        const parts: string[] = [];
+        if (name) parts.push(`<strong>${name}</strong>`);
+        if (mobile) parts.push(`<small class="text-muted">${mobile}</small>`);
+        return parts.length ? parts.join("<br/>") : "N/A";
+      },
+    },
+    {
+      title: "Amount",
+      data: "partner_transection_amount",
+      render: (data: any) =>
+        data !== null && data !== undefined && data !== ""
+          ? `₹ ${formatValue(data)}`
+          : "-",
+    },
+    {
+      title: "Pay ID",
+      data: "partner_transection_pay_id",
+      render: (data: any) => (data ? data : "-"),
+    },
+    {
+      title: "Type",
+      data: "partner_transection_type",
+      render: (data: any) => getTransactionType(data),
+    },
+    {
+      title: "Prev Amt",
+      data: "partner_transection_wallet_previous_amount",
+      render: (data: any) =>
+        data !== null && data !== undefined && data !== ""
+          ? `₹ ${formatValue(data)}`
+          : "-",
+    },
+    {
+      title: "New Amt",
+      data: "partner_transection_wallet_new_amount",
+      render: (data: any) =>
+        data !== null && data !== undefined && data !== ""
+          ? `₹ ${formatValue(data)}`
+          : "-",
+    },
+    {
+      title: "Note",
+      data: "partner_transection_note",
+      render: (data: any) => (data ? data : "-"),
+    },
+    {
+      title: "Time",
+      data: "partner_transection_time_unix",
+      render: (data: any) => (data ? formatDate(data) : "-"),
+    },
+    {
+      title: "Created At",
+      data: "created_at",
+      render: (data: any) => (data ? formatDate(data) : "-"),
+    },
+    {
+      title: "Status",
+      data: "partner_transection_status",
+      render: (data: any) => getTransactionStatus(data),
+    },
     {
       title: "Actions",
       data: null,
@@ -241,16 +262,10 @@ const ExportDataWithButtons = ({
             <button
               className="eye-icon"
               onClick={() => {
-                navigate(`/ambulance/booking-details/${rowData.consumer_id}`);
+                navigate(`/partner-details/${rowData.partner_transection_by}`);
               }}
             >
               <TbEye className="me-1" />
-            </button>
-            <button
-              className="remark-icon"
-              onClick={() => handleRemark(rowData)}
-            >
-              <TbReceipt className="me-1" />
             </button>
           </div>
         );
@@ -262,16 +277,8 @@ const ExportDataWithButtons = ({
     <>
       <ComponentCard
         title={
-          <div className="w-100">
-            {tabKey === 1
-              ? "All Ambulance Bookings"
-              : tabKey === 2
-              ? "Regular Ambulance Bookings"
-              : tabKey === 3
-              ? "Rental Ambulance Bookings"
-              : tabKey === 4
-              ? "Bulk Ambulance Bookings"
-              : ""}
+          <div className="w-100 ">
+            {tabKey === 1 ? "Partner Transaction List" : ""}
           </div>
         }
         className="mb-2"
@@ -285,21 +292,7 @@ const ExportDataWithButtons = ({
               onStatusFilterChange={handleStatusFilterChange}
               onDateRangeChange={handleDateRangeChange}
               statusOptions={statusFilterOptions}
-              showDateRange={true}
-              showDateFilter={true}
-              showStatusFilter={true}
-              dateFilterPlaceholder="Quick filter"
-              dateRangePlaceholder="Custom date range"
-              statusFilterPlaceholder="Status"
             />
-            {tabKey === 1 && (
-              <button
-                className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
-                onClick={onAddNew}
-              >
-                Add New <TbArrowRight className="fs-5" />
-              </button>
-            )}
           </div>
         }
       >
@@ -309,9 +302,9 @@ const ExportDataWithButtons = ({
           <div className="overflow-x-auto">
             <DataTable
               ref={tableRef}
-              key={`ambulance-booking-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
+              key={`transaction-table-${tabKey}-${dateFilter}-${statusFilter}-${dateRange}-${currentPage}`}
               data={tableData}
-              columns={columnsWithActions}
+              columns={columns}
               options={{
                 responsive: true,
                 destroy: true,
@@ -351,6 +344,7 @@ const ExportDataWithButtons = ({
                   {headers.map((header, idx) => (
                     <th key={idx}>{header}</th>
                   ))}
+                  <th>Actions</th>
                 </tr>
               </thead>
             </DataTable>
@@ -373,14 +367,6 @@ const ExportDataWithButtons = ({
           </div>
         )}
       </ComponentCard>
-
-      <AddRemark
-        isOpen={isRemarkOpen}
-        onClose={() => setIsRemarkOpen(false)}
-        remarkCategoryType={REMARK_CATEGORY_TYPES.AMBULANCE_BOOKING}
-        primaryKeyId={selectedConsumerId}
-        onSuccess={handleRemarkSuccess}
-      />
     </>
   );
 };

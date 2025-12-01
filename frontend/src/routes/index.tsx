@@ -51,6 +51,11 @@ const AddVehicle = lazy(() => import('@/views/pages/ambulance/vehicle/components
 const EditVehicle = lazy(() => import('@/views/pages/ambulance/vehicle/components/AddVehicle'));
 const DriverTransactionDetails = lazy(() => import('@/views/pages/ambulance/driver/'));
 
+//transaction Pages
+const ConsumerTransactionList = lazy(() => import('@/views/pages/transaction/Consumer'));
+const DriverTransactionList = lazy(() => import('@/views/pages/transaction/ambulance/Driver'));
+const PartnerTransactionList = lazy(() => import('@/views/pages/transaction/ambulance/Partner'));
+
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
 const AuthSignUp = lazy(() => import("@/views/auth/sign-up"));
@@ -175,7 +180,12 @@ const pagesRoutes: RouteObject[] = [
   { path: "/ambulance/vehicle", element: <VehicalList/> },
   { path: "/ambulance/vehicle/add-vehicle", element: <AddVehicle/> },
   { path: "/ambulance/vehicle/edit/:id", element: <EditVehicle/> },
-  { path: "/driver-transaction-details/:id", element: <DriverTransactionDetails/> }
+  { path: "/driver-transaction-details/:id", element: <DriverTransactionDetails/> },
+
+  //transaction pages
+  { path: "/transaction/consumer", element: <ConsumerTransactionList/> },
+  { path: "/transaction/driver", element: <DriverTransactionList/> },
+  { path: "/transaction/partner", element: <PartnerTransactionList/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 

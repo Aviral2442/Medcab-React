@@ -429,7 +429,6 @@ const DriverDutyLocation = () => {
                                   </>
                                 )}
                                 <br />
-                                <strong>Last Updated:</strong>{" "}
                                 {LastUpdated(
                                   driver.driver_live_location_updated_time
                                 )}{" "}
@@ -458,7 +457,6 @@ const DriverDutyLocation = () => {
                                 </>
                               )}
                               <br />
-                              <strong>Last Updated:</strong>{" "}
                               {LastUpdated(
                                 driver.driver_live_location_updated_time
                               )}{" "}

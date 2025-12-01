@@ -7,13 +7,6 @@ import TransactionList from "@/components/Ambulance/driver/TransactionList";
 
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
-interface PaginationData {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
-
 const DriverDetailed: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
   const [activeTab, setActiveTab] = useState<number>(1);
@@ -27,13 +20,6 @@ const DriverDetailed: React.FC = () => {
   const [transLoading, setTransLoading] = useState<boolean>(false);
   const [transactions, setTransactions] = useState<any[] | null>(null);
   const [transError, setTransError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState<number>(0);
-  const [pagination, setPagination] = useState<PaginationData>({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
 
   // Fetch driver detail
   const fetchDriver = async () => {
@@ -59,33 +45,19 @@ const DriverDetailed: React.FC = () => {
   };
 
   // Fetch transactions with pagination
-  const fetchTransactions = async (page: number = 1) => {
+  const fetchTransactions = async () => {
     try {
       setTransLoading(true);
       setTransError(null);
       if (!id) return;
 
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: "10",
-      });
-
       const resp = await axios.get(
-        `${baseURL}/transaction/driver_transaction_list?${params.toString()}`
+        `${baseURL}/transaction/driver_transaction_data/${id}`
       );
       console.log("Transaction Response:", resp.data);
 
       const transactionsData = resp.data?.jsonData?.driverTransactions;
       setTransactions(transactionsData || []);
-
-      if (resp.data?.paginations) {
-        setPagination({
-          page: resp.data.paginations.page,
-          limit: resp.data.paginations.limit,
-          total: resp.data.paginations.total,
-          totalPages: resp.data.paginations.totalPages,
-        });
-      }
     } catch (err: any) {
       console.error("Failed to fetch transactions:", err);
       setTransError(err?.message || "Failed to fetch transactions");
@@ -93,11 +65,6 @@ const DriverDetailed: React.FC = () => {
     } finally {
       setTransLoading(false);
     }
-  };
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-    fetchTransactions(newPage + 1);
   };
 
   useEffect(() => {
@@ -114,7 +81,7 @@ const DriverDetailed: React.FC = () => {
 
   useEffect(() => {
     if (activeTab === 2 && transactions === null && !transLoading) {
-      fetchTransactions(currentPage + 1);
+      fetchTransactions();
     }
   }, [activeTab, id]);
 
@@ -159,9 +126,6 @@ const DriverDetailed: React.FC = () => {
                   data={transactions}
                   loading={transLoading}
                   error={transError}
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  onPageChange={handlePageChange}
                 />
               </div>
             )}

@@ -1,10 +1,7 @@
 import React from "react";
 import { Container } from "react-bootstrap";
 import ExportDataWithButtons from "@/views/tables/data-tables/ambulance/booking/";
-import BookingList from "./components/BookingList";
-import BulkBooking from "./components/BulkBooking";
-import RentalBooking from "./components/RentalBooking";
-import RegularBooking from "./components/RegularBooking";
+import BookingList from "./components/AddBooking";
 
 const Page: React.FC = () => {
     const [activeTab, setActiveTab] = React.useState(1);
@@ -41,33 +38,6 @@ const Page: React.FC = () => {
                 case 1:
                     return (
                         <BookingList
-                            mode={formMode}
-                            data={editData}
-                            onCancel={() => setShowForm(false)}
-                            onDataChanged={triggerRefresh}
-                        />
-                    );
-                case 2:
-                    return (
-                        <RegularBooking
-                            mode={formMode}
-                            data={editData}
-                            onCancel={() => setShowForm(false)}
-                            onDataChanged={triggerRefresh}
-                        />
-                    );
-                case 3:
-                    return (
-                        <RentalBooking
-                            mode={formMode}
-                            data={editData}
-                            onCancel={() => setShowForm(false)}
-                            onDataChanged={triggerRefresh}
-                        />
-                    );
-                case 4:
-                    return (
-                        <BulkBooking
                             mode={formMode}
                             data={editData}
                             onCancel={() => setShowForm(false)}
