@@ -7,8 +7,11 @@ import { buildFilters } from "../utils/filters";
 export const getConsumerTransactionList = async () => {
     try {
         const query = `
-            SELECT consumer_transection.*
+            SELECT consumer_transection.*,
+            consumer.consumer_name, 
+            consumer.consumer_mobile_no
             FROM consumer_transection 
+            LEFT JOIN consumer ON consumer_transection.consumer_transection_done_by = consumer.consumer_id
             ORDER BY consumer_transection.consumer_transection_id DESC        
         `;
 

@@ -6,7 +6,7 @@ import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
 import "@/global.css";
 
-import { TbArrowRight, TbEdit, TbEye } from "react-icons/tb";
+import { TbArrowRight } from "react-icons/tb";
 
 import jszip from "jszip";
 import pdfmake from "pdfmake";
@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
-import { FaRegCheckCircle, FaRegTimesCircle } from "react-icons/fa";
+import { FaMapMarkerAlt } from "react-icons/fa";
 
 // Register DataTable plugins
 DataTable.use(DT);
@@ -69,26 +69,6 @@ const ExportDataWithButtons = ({
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   const navigate = useNavigate();
-
-  const toggleStatus = async (blogId: number, currentStatus: number) => {
-    try {
-      const newStatus = currentStatus === 1 ? 0 : 1;
-      await axios.patch(
-        `${baseURL}/content_writer/update_blog_status/${blogId}`,
-        {
-          status: newStatus,
-        }
-      );
-
-      setData((prevData) =>
-        prevData.map((blog) =>
-          blog.blogs_id === blogId ? { ...blog, blogs_status: newStatus } : blog
-        )
-      );
-    } catch (error) {
-      console.error("Error updating blog status:", error);
-    }
-  };
 
   // Use the custom hook for filters
   const {
@@ -186,36 +166,7 @@ const ExportDataWithButtons = ({
                 navigate(`/ambulance/driver-duty/${rowData.driver_id}`);
               }}
             >
-              <TbEye className="me-1" />
-            </button>
-            <button
-              className="p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
-              onClick={() => {
-                toggleStatus(rowData.blogs_id, rowData.blogs_status);
-              }}
-              title={
-                rowData.blogs_status === 1
-                  ? "Click to deactivate"
-                  : "Click to activate"
-              }
-              style={{
-                backgroundColor:
-                  rowData.blogs_status === 1 ? "#d9534f" : "#3a833a",
-              }}
-            >
-              {rowData.blogs_status === 1 ? (
-                <FaRegTimesCircle className="me-1" />
-              ) : (
-                <FaRegCheckCircle className="me-1" />
-              )}
-            </button>
-            <button
-              className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
-              onClick={() => {
-                navigate(`/edit-blog/${rowData.blogs_id}`);
-              }}
-            >
-              <TbEdit className="me-1" />
+              <FaMapMarkerAlt className="me-1" />
             </button>
           </div>
         );

@@ -19,23 +19,27 @@ const Invoice = lazy(() => import("@/views/pages/invoice"));
 const Pricing = lazy(() => import("@/views/pages/pricing"));
 const TermsConditions = lazy(() => import("@/views/pages/terms-conditions"));
 const Timeline = lazy(() => import("@/views/pages/timeline"));
-const ManpowerCategory = lazy(() => import("@/views/pages/manpower/category"));
-const Booking = lazy(() => import("@/views/pages/manpower/booking"));
-const BookingDetails = lazy(() => import("@/views/pages/manpower/booking/bookingDetails"));
-const VendorList = lazy(() => import('@/views/pages/manpower/vendorlist'))
 const ConsumerList = lazy(() => import('@/views/pages/consumer'))
-const VendorDetails = lazy(() => import('@/views/pages/manpower/vendorlist/vendorDetails'))
 const ConsumerDetails = lazy(() => import('@/views/pages/consumer/consumerDetails'))
-const PartnerList = lazy(() => import('@/views/pages/ambulance/partner'))
-const DriverList = lazy(() => import('@/views/pages/ambulance/driver'))
 const BlogList = lazy(() => import('@/views/pages/content-writing/blogs'))
 const AddBlogs = lazy(() => import('@/views/pages/content-writing/blogs/components/AddBlogs'))
 const CityList = lazy(() => import('@/views/pages/content-writing/city'))
 const AddCity = lazy(() => import('@/views/pages/content-writing/city/components/AddCity'))
 const EditCity = lazy(() => import('@/views/pages/content-writing/city/components/AddCity'))
-const AmbulanceList = lazy(() => import('@/views/pages/ambulance/category'))
 const DriverEmergency = lazy(() => import('@/views/pages/emergency/driver'))
 const ConsumerEmergency = lazy(() => import('@/views/pages/emergency/consumer'))
+
+//manpower
+const ManpowerCategory = lazy(() => import("@/views/pages/manpower/category"));
+const Booking = lazy(() => import("@/views/pages/manpower/booking"));
+const BookingDetails = lazy(() => import("@/views/pages/manpower/booking/bookingDetails"));
+const VendorList = lazy(() => import('@/views/pages/manpower/vendorlist'))
+const VendorDetails = lazy(() => import('@/views/pages/manpower/vendorlist/vendorDetails'))
+
+//amblulance Pages
+const AmbulanceList = lazy(() => import('@/views/pages/ambulance/category'))
+const PartnerList = lazy(() => import('@/views/pages/ambulance/partner'))
+const DriverList = lazy(() => import('@/views/pages/ambulance/driver'))
 const AmbulanceBooking = lazy(() => import('@/views/pages/ambulance/booking'))
 const DriverDuty = lazy(() => import('@/views/pages/ambulance/driver-duty'))
 const DriverDutyDetails = lazy(() => import('@/views/pages/ambulance/driver-duty/components/DriverDuty'))
@@ -50,6 +54,14 @@ const VehicalList = lazy(() => import('@/views/pages/ambulance/vehicle'));
 const AddVehicle = lazy(() => import('@/views/pages/ambulance/vehicle/components/AddVehicle'));
 const EditVehicle = lazy(() => import('@/views/pages/ambulance/vehicle/components/AddVehicle'));
 const DriverTransactionDetails = lazy(() => import('@/views/pages/ambulance/driver/'));
+const AmbulanceBookingDetails = lazy(() => import('@/views/pages/ambulance/booking/BookingDetails'));
+
+
+//transaction Pages
+const ConsumerTransactionList = lazy(() => import('@/views/pages/transaction/Consumer'));
+const DriverTransactionList = lazy(() => import('@/views/pages/transaction/ambulance/Driver'));
+const PartnerTransactionList = lazy(() => import('@/views/pages/transaction/ambulance/Partner'));
+const VendorTransactionList = lazy(() => import('@/views/pages/transaction/manpower/Vendor'));
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -145,37 +157,47 @@ const pagesRoutes: RouteObject[] = [
   //manpower
   { path: "/manpower-category", element: <ManpowerCategory /> },
   { path: "/manpower-bookings", element: <Booking/> },
-  { path: "/booking-details/:id", element: <BookingDetails/> },
+  { path: "/manpower/booking/details/:id", element: <BookingDetails/> },
   { path: "/manpower-vendors", element: <VendorList/>},
 
   { path: "/consumer-list", element: <ConsumerList/>},
   { path: "/vendor-details/:id", element: <VendorDetails/>},
   { path: "/consumer-details/:id", element: <ConsumerDetails/> },
-  { path: "/ambulance/partner", element: <PartnerList/> },
-  { path: "/ambulance/driver", element: <DriverList/> },
-  { path: "/ambulance/add-driver", element: <AddDriver/> },
   { path: "/content-seo/blogs", element: <BlogList/> },
   { path: "/add-blog", element: <AddBlogs/> },
   { path: "/edit-blog/:id", element: <AddBlogs/> },
   { path: "/city/:section", element: <CityList/> },
   { path: "/city/:section/add-city", element: <AddCity/> },
   { path: "/city/:section/edit-city/:id", element: <EditCity/> },
-  { path: "/ambulance/category", element: <AmbulanceList/> },
   { path: "/emergency/driver", element: <DriverEmergency/> },
   { path: "/emergency/consumer", element: <ConsumerEmergency/> },
+  
+  //ambulance Pages
+  { path: "/ambulance/partner", element: <PartnerList/> },
+  { path: "/ambulance/driver", element: <DriverList/> },
+  { path: "/ambulance/add-driver", element: <AddDriver/> },
+  { path: "/ambulance/category", element: <AmbulanceList/> },
   { path: "/ambulance/booking", element: <AmbulanceBooking/> },
   { path: "/ambulance/driver-duty", element: <DriverDuty/> },
   { path: "/ambulance/driver-duty/:id", element: <DriverDutyDetails/> },
   { path: "/ambulance/driver-duty-map", element: <DriverDutyMap/> },
-  { path: "/edit-driver/:id", element: <EditDriver/> },
   { path: "/ambulance/partner/add-partner", element: <AddPartner/> },
-  { path: "/edit-partner/:id", element: <EditPartner/> },
-  { path: "/driver-detail/:id", element: <DriverDetails/> },
-  { path: "/partner-detail/:id", element: <PartnerDetails/> },
   { path: "/ambulance/vehicle", element: <VehicalList/> },
   { path: "/ambulance/vehicle/add-vehicle", element: <AddVehicle/> },
   { path: "/ambulance/vehicle/edit/:id", element: <EditVehicle/> },
-  { path: "/driver-transaction-details/:id", element: <DriverTransactionDetails/> }
+  { path: "/ambulance/booking/details/:id", element: <AmbulanceBookingDetails/> },
+  { path: "/edit-driver/:id", element: <EditDriver/> },
+  { path: "/edit-partner/:id", element: <EditPartner/> },
+  { path: "/driver-detail/:id", element: <DriverDetails/> },
+  { path: "/partner-detail/:id", element: <PartnerDetails/> },
+  { path: "/driver-transaction-details/:id", element: <DriverTransactionDetails/> },
+
+
+  //transaction pages
+  { path: "/transaction/consumer", element: <ConsumerTransactionList/> },
+  { path: "/transaction/driver", element: <DriverTransactionList/> },
+  { path: "/transaction/partner", element: <PartnerTransactionList/> },
+  { path: "/transaction/vendor", element: <VendorTransactionList/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 

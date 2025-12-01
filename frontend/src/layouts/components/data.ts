@@ -7,6 +7,7 @@ import {
   LuBed,
   LuCircleGauge,
   LuFileType,
+  LuMonitorSmartphone,
   LuSettings,
   LuTableOfContents,
   LuUser,
@@ -58,12 +59,12 @@ export const menuItems: MenuItemType[] = [
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
     ],
   },
-  
+
   { key: 'consumer-list', label: 'Consumer', icon: LuUser, url: '/consumer-list' },
   // { key: 'ton-ai', label: 'Ton AI', icon: LuSparkles, url: '/ton-ai', badge: { text: 'Hot', variant: 'primary' } },
   // { key: 'calendar', label: 'Calendar', icon: LuCalendar, url: '/calendar' },
   // { key: 'directory', label: 'Directory', icon: LuBookUser, url: '/directory' },
-  
+
   // { key: 'manpower', label: 'Manpower', icon: LuBookUser, url: '/manpower' },
 
 
@@ -135,34 +136,58 @@ export const menuItems: MenuItemType[] = [
     icon: LuTableOfContents,
     children: [
       { key: 'blogs', label: 'Blogs', url: '/content-seo/blogs' },
-      { 
-        key: 'ambulance', 
-        label: 'Ambulance', 
+      {
+        key: 'ambulance',
+        label: 'Ambulance',
         children: [
           { key: 'city-ambulance', label: 'City Content', url: '/city/ambulance' },
         ]
       },
-      { 
-        key: 'manpower', 
-        label: 'Manpower', 
+      {
+        key: 'manpower',
+        label: 'Manpower',
         children: [
           { key: 'city-manpower', label: 'City Content', url: '/city/manpower' }
         ]
       },
-      { 
-        key: 'pathology', 
-        label: 'Pathology', 
+      {
+        key: 'pathology',
+        label: 'Pathology',
         children: [
           { key: 'city-pathology', label: 'City Content', url: '/city/pathology' }
         ]
       },
-      { 
-        key: 'video-consultation', 
-        label: 'Video Consultation', 
+      {
+        key: 'video-consultation',
+        label: 'Video Consultation',
         children: [
           { key: 'city-video', label: 'City Content', url: '/city/video-consultation' }
         ]
       },
+    ],
+  },
+  {
+    key: 'page-transactions',
+    label: 'Transactions',
+    icon: LuMonitorSmartphone,
+    children: [
+      {key: 'consumer-transactions', label: 'Consumer', url: '/transaction/consumer' },
+      {
+        key: 'ambulance',
+        label: 'Ambulance',
+        children: [
+          { key: 'transaction-driver', label: 'Driver', url: '/transaction/driver' },
+          { key: 'transaction-partner', label: 'Partner', url: '/transaction/partner' },
+        ]
+      },
+      {
+        key: 'manpower',
+        label: 'Manpower',
+        children: [
+          { key: 'transaction-vendor', label: 'Vendor', url: '/transaction/vendor' },
+        ]
+      },
+      
     ],
   },
   {

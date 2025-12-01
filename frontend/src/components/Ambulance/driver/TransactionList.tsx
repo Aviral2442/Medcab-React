@@ -9,31 +9,17 @@ import jszip from "jszip";
 import pdfmake from "pdfmake";
 import "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
-import TablePagination from "@/components/table/TablePagination";
 import { Spinner } from "react-bootstrap";
-import { createRoot } from "react-dom/client";
-import { TbEye } from "react-icons/tb";
-import { useNavigate } from "react-router-dom";
 
 // Register plugins
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
 DT.Buttons.pdfMake(pdfmake);
 
-interface PaginationData {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
-
 interface TransactionListProps {
   data: any[] | null;
   loading?: boolean;
   error?: string | null;
-  pagination?: PaginationData;
-  currentPage?: number;
-  onPageChange?: (page: number) => void;
   onViewTransaction?: (transaction: any) => void;
 }
 
@@ -41,25 +27,43 @@ const TransactionList: React.FC<TransactionListProps> = ({
   data,
   loading = false,
   error = null,
-  pagination = { page: 1, limit: 10, total: 0, totalPages: 0 },
-  currentPage = 0,
-  onPageChange,
 }) => {
   const tableRef = useRef<any>(null);
-  const navigate = useNavigate();
 
+  // Clean up DataTable instance when component unmounts or data changes
   useEffect(() => {
-    if (tableRef.current) {
-      const api = tableRef.current.dt();
-      if (api) {
-        api.clear();
-        if (data && Array.isArray(data)) {
-          api.rows.add(data);
+    return () => {
+      if (tableRef.current) {
+        try {
+          const api = tableRef.current.dt();
+          if (api) {
+            api.destroy();
+            tableRef.current = null;
+          }
+        } catch (e) {
+          // Silently handle cleanup errors
         }
-        api.draw();
+      }
+    };
+  }, []);
+
+  // Update table data when data prop changes
+  useEffect(() => {
+    if (tableRef.current && !loading) {
+      try {
+        const api = tableRef.current.dt();
+        if (api) {
+          api.clear();
+          if (data && Array.isArray(data)) {
+            api.rows.add(data);
+          }
+          api.draw();
+        }
+      } catch (e) {
+        console.error("Error updating table:", e);
       }
     }
-  }, [data]);
+  }, [data, loading]);
 
   const formatValue = (val: any): string => {
     if (val === null || val === undefined || val === "") return "";
@@ -81,9 +85,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
       case 2:
         return '<span class="badge badge-label badge-soft-success">Refunded</span>';
       default:
-        return `<span class="badge badge-label badge-soft-secondary">${
-          status || "N/A"
-        }</span>`;
+        return `<span class="badge badge-label badge-soft-secondary">${status || "N/A"}</span>`;
     }
   };
 
@@ -97,9 +99,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
       case 2:
         return '<span class="badge badge-label badge-soft-danger">Withdrawal</span>';
       default:
-        return `<span class="badge badge-label badge-soft-secondary">${
-          status || "N/A"
-        }</span>`;
+        return `<span class="badge badge-label badge-soft-secondary">${status || "N/A"}</span>`;
     }
   };
 
@@ -151,12 +151,11 @@ const TransactionList: React.FC<TransactionListProps> = ({
     "Note",
     "Amount",
     "Type",
-    "Status",
-    "Wallet Status",
     "Prev Amt",
     "New Amt",
-    "Time",
-    "Actions",
+    "Date",
+    "Wallet Status",
+    "Status",
   ];
 
   const columns = [
@@ -165,8 +164,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
       data: null,
       orderable: false,
       searchable: false,
-      render: (_data: any, _type: any, _row: any, meta: any) =>
-        currentPage * pagination.limit + meta.row + 1,
+      render: (_data: any, _type: any, _row: any, meta: any) => meta.row + 1,
     },
     {
       title: "ID",
@@ -175,13 +173,13 @@ const TransactionList: React.FC<TransactionListProps> = ({
     },
     {
       title: "Transaction By",
-      data: "trans_by_name",
+      data: "driver_name",
       render: (_data: any, _type: any, row: any) => {
-        const name = row?.trans_by_name;
-        const mobile = row?.trans_by_mobile;
+        const name = row?.driver_name;
+        const mobile = row?.driver_mobile;
         const parts: string[] = [];
         if (name) parts.push(`<strong>${name}</strong>`);
-        if (mobile) parts.push(`<small class="text-muted">${mobile}</small>`);
+        if (mobile) parts.push(`${mobile}`);
         return parts.length ? parts.join("<br/>") : "N/A";
       },
     },
@@ -239,33 +237,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
       data: "driver_transection_status",
       render: (data: any) => getTransactionStatus(data),
     },
-    {
-      title: "Actions",
-      data: null,
-      orderable: false,
-      searchable: false,
-      render: () => "",
-      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
-        td.innerHTML = "";
-        const root = createRoot(td);
-        root.render(
-          <div className="d-flex flex-row gap-1">
-            <button
-              className="eye-icon"
-              onClick={() => {
-                navigate(`/driver-transaction-details/${rowData.consumer_id}`);
-              }}
-            >
-              <TbEye className="me-1" />
-            </button>
-          </div>
-        );
-      },
-    },
   ];
 
   const tableData = data ? (Array.isArray(data) ? data : [data]) : [];
-  const totalPages = pagination?.totalPages || 0;
 
   if (error) {
     return (
@@ -275,93 +249,82 @@ const TransactionList: React.FC<TransactionListProps> = ({
     );
   }
 
-  return (
-    <ComponentCard title="Driver Transactions" className="mb-2">
-      {loading ? (
+  if (loading) {
+    return (
+      <ComponentCard title="Driver Transactions">
         <div className="text-center p-4">
           <Spinner animation="border" variant="primary" />
           <p className="mt-2">Loading transactions...</p>
         </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <DataTable
-            ref={tableRef}
-            key={`driver-transaction-table-${currentPage}`}
-            data={tableData}
-            columns={columns}
-            options={{
-              responsive: true,
-              destroy: true,
-              paging: false,
-              searching: true,
-              info: false,
-              ordering: true,
-              layout: {
-                topStart: "buttons",
-              },
-              buttons: [
-                {
-                  extend: "copyHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "Copy",
-                  exportOptions: {
-                    columns: ":not(:last-child)",
-                  },
-                },
-                {
-                  extend: "excelHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "Excel",
-                  exportOptions: {
-                    columns: ":not(:last-child)",
-                  },
-                },
-                {
-                  extend: "csvHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "CSV",
-                  exportOptions: {
-                    columns: ":not(:last-child)",
-                  },
-                },
-                {
-                  extend: "pdfHtml5",
-                  className: "btn btn-sm btn-primary",
-                  text: "PDF",
-                  exportOptions: {
-                    columns: ":not(:last-child)",
-                  },
-                },
-              ],
-            }}
-            className="table table-striped dt-responsive align-middle mb-0"
-          >
-            <thead className="thead-sm text-capitalize fs-xxs">
-              <tr>
-                {headers.map((header, idx) => (
-                  <th key={idx}>{header}</th>
-                ))}
-              </tr>
-            </thead>
-          </DataTable>
+      </ComponentCard>
+    );
+  }
 
-          {onPageChange && totalPages > 0 && (
-            <TablePagination
-              start={currentPage + 1}
-              showInfo={true}
-              previousPage={() => onPageChange(Math.max(0, currentPage - 1))}
-              canPreviousPage={currentPage > 0}
-              pageCount={totalPages}
-              pageIndex={currentPage}
-              setPageIndex={onPageChange}
-              nextPage={() =>
-                onPageChange(Math.min(totalPages - 1, currentPage + 1))
-              }
-              canNextPage={currentPage < totalPages - 1}
-            />
-          )}
-        </div>
-      )}
+  return (
+    <ComponentCard title="Driver Transactions" className="mb-2">
+      <div className="overflow-x-auto">
+        <DataTable
+          ref={tableRef}
+          key={`driver-transaction-table-${tableData.length}`}
+          data={tableData}
+          columns={columns}
+          options={{
+            responsive: true,
+            destroy: true,
+            paging: false,
+            searching: true,
+            info: false,
+            ordering: true,
+            autoWidth: false,
+            layout: {
+              topStart: "buttons",
+            },
+            buttons: [
+              {
+                extend: "copyHtml5",
+                className: "btn btn-sm btn-primary",
+                text: "Copy",
+                exportOptions: {
+                  columns: ":not(:last-child)",
+                },
+              },
+              {
+                extend: "excelHtml5",
+                className: "btn btn-sm btn-primary",
+                text: "Excel",
+                exportOptions: {
+                  columns: ":not(:last-child)",
+                },
+              },
+              {
+                extend: "csvHtml5",
+                className: "btn btn-sm btn-primary",
+                text: "CSV",
+                exportOptions: {
+                  columns: ":not(:last-child)",
+                },
+              },
+              {
+                extend: "pdfHtml5",
+                className: "btn btn-sm btn-primary",
+                text: "PDF",
+                exportOptions: {
+                  columns: ":not(:last-child)",
+                },
+              },
+            ],
+          }}
+          className="table table-striped dt-responsive align-middle mb-0"
+        >
+          <thead className="thead-sm text-capitalize fs-xxs">
+            <tr>
+              {headers.map((header, idx) => (
+                <th key={idx}>{header}</th>
+              ))}
+            </tr>
+          </thead>
+        </DataTable>
+      </div>
     </ComponentCard>
   );
 };
