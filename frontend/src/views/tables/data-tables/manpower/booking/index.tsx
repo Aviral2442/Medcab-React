@@ -132,7 +132,7 @@ const ExportDataWithButtons = ({
     const id =
       rowData?.manpower_order_id ?? rowData?.mpo_order_id ?? rowData?.id;
     if (id !== undefined && id !== null) {
-      navigate(`/booking-details/${id}`);
+      navigate(`/manpower/booking/details/${id}`);
     } else {
       console.warn("No id found for row", rowData);
     }
