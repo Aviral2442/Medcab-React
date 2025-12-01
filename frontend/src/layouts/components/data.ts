@@ -174,12 +174,20 @@ export const menuItems: MenuItemType[] = [
       {key: 'consumer-transactions', label: 'Consumer', url: '/transaction/consumer' },
       {
         key: 'ambulance',
-        label: 'ambulance',
+        label: 'Ambulance',
         children: [
           { key: 'transaction-driver', label: 'Driver', url: '/transaction/driver' },
           { key: 'transaction-partner', label: 'Partner', url: '/transaction/partner' },
         ]
       },
+      {
+        key: 'manpower',
+        label: 'Manpower',
+        children: [
+          { key: 'transaction-vendor', label: 'Vendor', url: '/transaction/vendor' },
+        ]
+      },
+      
     ],
   },
   {

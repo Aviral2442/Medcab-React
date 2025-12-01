@@ -24,7 +24,7 @@ DT.Buttons.pdfMake(pdfmake);
 
 const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
   1: {
-    endpoint: "/transaction/consumer_transaction_list",
+    endpoint: "/transaction/vendor_transaction_list",
     headers: [
     "S.No.",
     "ID",
@@ -153,19 +153,41 @@ const ExportDataWithButtons = ({
     }
   };
 
+  const getTransactionByType = (type: number | string): string => {
+    const typeNum = Number(type);
+    switch (typeNum) {
+        case 1:
+            return "add-in wallet(A)";
+        case 2:
+            return "cancelation charge(W)";
+        case 3:
+            return " Cash Collect(W)";
+        case 4:
+            return "online booking payment(A)";
+        case 5: 
+            return "for transfer to bank account (W)";
+        case 6:
+            return "fetched by Partner (W)";
+        case 7: 
+            return "Incentive from Company(A)";
+        case 8:
+            return "Debit agains Accept Booking Charge (W)";
+        case 9:
+            return "Refund agains Accept Booking Cancel (A)";
+        default:
+            return `${type || "N/A"}`;
+    }
+  };
+
   const getTransactionType = (type: number | string): string => {
     const typeNum = Number(type);
     switch (typeNum) {
       case 0:
-        return "Credit";
+        return "Direct Driver";
       case 1:
-        return "Debit";
+        return "Partner";
       case 2:
-        return "Withdraw Request";
-      case 3:
-        return "Withdraw Transferred to Bank";
-      case 4:
-        return "Cancelled Request";
+        return "Company";
       default:
         return `${type || "N/A"}`;
     }
@@ -182,15 +204,15 @@ const ExportDataWithButtons = ({
     },
     {
       title: "ID",
-      data: "consumer_transection_id",
+      data: "vendor_transection_id",
       render: (data: any) => (data ? data : "N/A"),
     },
     {
       title: "Transaction By",
-      data: "consumer_name",
+      data: "vendor_name",
       render: (_data: any, _type: any, row: any) => {
-        const name = row?.consumer_name;
-        const mobile = row?.consumer_mobile_no;
+        const name = row?.vendor_name;
+        const mobile = row?.vendor_mobile;
         const parts: string[] = [];
         if (name) parts.push(`<strong>${name}</strong>`);
         if (mobile) parts.push(`<small class="text-muted">${mobile}</small>`);
@@ -198,8 +220,13 @@ const ExportDataWithButtons = ({
       },
     },
     {
+        title: "By Type",
+        data: "vendor_transection_by_type",
+        render: (data: any) => getTransactionByType(data),
+    },
+    {
       title: "Amount",
-      data: "consumer_transection_amount",
+      data: "vendor_transection_amount",
       render: (data: any) =>
         data !== null && data !== undefined && data !== ""
           ? `₹ ${formatValue(data)}`
@@ -207,17 +234,17 @@ const ExportDataWithButtons = ({
     },
     {
       title: "Pay ID",
-      data: "consumer_transection_payment_id",
+      data: "vendor_transection_pay_id",
       render: (data: any) => (data ? data : "-"),
     },
     {
       title: "Type",
-      data: "consumer_transection_type_cr_db",
+      data: "vendor_transection_type",
       render: (data: any) => getTransactionType(data),
     },
     {
       title: "Prev Amt",
-      data: "consumer_transection_previous_amount",
+      data: "vendor_transection_wallet_previous_amount",
       render: (data: any) =>
         data !== null && data !== undefined && data !== ""
           ? `₹ ${formatValue(data)}`
@@ -225,7 +252,7 @@ const ExportDataWithButtons = ({
     },
     {
       title: "New Amt",
-      data: "consumer_transection_new_amount",
+      data: "vendor_transection_wallet_new_amount",
       render: (data: any) =>
         data !== null && data !== undefined && data !== ""
           ? `₹ ${formatValue(data)}`
@@ -233,22 +260,38 @@ const ExportDataWithButtons = ({
     },
     {
       title: "Note",
-      data: "consumer_transection_note",
+      data: "vendor_transection_note",
       render: (data: any) => (data ? data : "-"),
     },
     {
       title: "Time",
-      data: "consumer_transection_time",
+      data: "vendor_transection_time_unix",
       render: (data: any) => (data ? formatDate(data) : "-"),
     },
     {
       title: "Created At",
-      data: "created_at",
+      data: "vendor_created_at",
       render: (data: any) => (data ? formatDate(data) : "-"),
     },
     {
+        title: "Wallet Status",
+        data: "vendor_transection_by_partner_wallet_status",
+        render: (data: any) => {
+            switch (data) {
+                case 0:
+                    return '<span class="badge badge-label badge-soft-secondary">Online</span>';
+                case 1:
+                    return '<span class="badge badge-label badge-soft-success">Partner Wallet</span>';
+                case 2:
+                    return '<span class="badge badge-label badge-soft-danger">Withdrawal</span>';
+                default:
+                    return `<span class="badge badge-label badge-soft-secondary">${data || "N/A"}</span>`;
+            }
+        }
+    },
+    {
       title: "Status",
-      data: "consumer_transection_status",
+      data: "vendor_transection_status",
       render: (data: any) => getTransactionStatus(data),
     },
     {

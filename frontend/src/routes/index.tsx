@@ -55,6 +55,7 @@ const DriverTransactionDetails = lazy(() => import('@/views/pages/ambulance/driv
 const ConsumerTransactionList = lazy(() => import('@/views/pages/transaction/Consumer'));
 const DriverTransactionList = lazy(() => import('@/views/pages/transaction/ambulance/Driver'));
 const PartnerTransactionList = lazy(() => import('@/views/pages/transaction/ambulance/Partner'));
+const VendorTransactionList = lazy(() => import('@/views/pages/transaction/manpower/Vendor'));
 
 // Auth
 const AuthSignIn = lazy(() => import("@/views/auth/sign-in"));
@@ -186,6 +187,7 @@ const pagesRoutes: RouteObject[] = [
   { path: "/transaction/consumer", element: <ConsumerTransactionList/> },
   { path: "/transaction/driver", element: <DriverTransactionList/> },
   { path: "/transaction/partner", element: <PartnerTransactionList/> },
+  { path: "/transaction/vendor", element: <VendorTransactionList/> },
 ];
 
 const uiRoutes: RouteObject[] = [ 
