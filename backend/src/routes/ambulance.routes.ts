@@ -41,5 +41,6 @@ router.get('/get_regular_ambulance_booking_list', getRegularAmbulanceBookingList
 router.get('/get_rental_ambulance_booking_list', getRentalAmbulanceBookingListController);
 router.get('/get_bulk_ambulance_booking_list', getBulkAmbulanceBookingListController);
 router.get('/ambulance_booking_detail/:id', ambulanceBookingDetailController);
+router.post('/create_ambulance_booking', ambulanceBookingDetailController);
 
 export default router;

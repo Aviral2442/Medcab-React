@@ -1630,3 +1630,134 @@ export const ambulanceBookingDetailService = async (bookingId: number) => {
         throw new ApiError(500, "Get Ambulance Booking Detail Error On Fetching");
     }
 }
+
+interface AmbulanceBookingData {
+    booking_source: string;
+    booking_type: number;
+    booking_type_for_rental: number;
+    booking_bulk_master_key: string;
+    booking_no_of_bulk: number;
+    booking_bulk_total: number;
+    booking_by_cid: number;
+    booking_view_otp: string;
+    booking_view_status_otp: number;
+    booking_con_name: string;
+    booking_con_mobile: string;
+    booking_category: number;
+    booking_schedule_time: string;
+    booking_pickup: string;
+    booking_drop: string;
+    booking_pickup_city: string;
+    booking_drop_city: string;
+    booking_pick_lat: string;
+    booking_pick_long: string;
+    booking_drop_lat: string;
+    booking_drop_long: string;
+    booking_amount: string;
+    booking_adv_amount: string;
+    booking_payment_type: string;
+    booking_payment_method: string;
+    booking_status: number;
+    booking_distance: string;
+    booking_duration: string;
+    booking_duration_in_sec: string;
+    booking_total_amount: string;
+    booking_payment_status: number;
+    booking_polyline: string;
+    booking_acpt_driver_id: number;
+    booking_acpt_vehicle_id: number;
+    booking_acpt_time: string;
+    booking_ap_polilyne: string;
+    booking_ap_duration: string;
+    booking_a_t_p_duration_in_sec: string;
+    booking_ap_distance: string;
+    booking_view_category_name: string;
+    booking_view_category_icon: string;
+    booking_view_base_rate: string;
+    booking_view_km_till: string;
+    booking_view_per_km_rate: string;
+    booking_view_per_ext_km_rate: string;
+    booking_view_per_ext_min_rate: string;
+    booking_view_km_rate: string;
+    booking_view_total_fare: string;
+    booking_view_service_charge_rate: string;
+    booking_view_service_charge_rate_discount: string;
+    // booking_view_includes: string;
+    // booking_view_pickup_time: string;
+    // booking_view_arrival_time: string;
+    // booking_view_dropped_time: string;
+    // booking_view_rating_status: number;
+    // booking_view_rating_c_to_d_status: number;
+    // booking_radius: string;
+    // created_at: string;
+    // created_at_unix: number;
+    // updated_at: string;
+    booking_user_id: number;
+    // bookingStatus: string;
+    booking_generate_source: string; // -- IVR, app, web , whatsapp, live chat , direct call 
+    // bv_virtual_number_status: number;
+    // bv_virtual_number: string;
+    // bv_cloud_con_crid: string;
+    // bv_cloud_con_crid_c_to_d: string;
+    // bv_shoot_time: string;
+}
+
+export const createAmbulanceBookingService = async (data: AmbulanceBookingData) => {
+    try {
+
+        const insertData = {
+            booking_source: data.booking_source,
+            booking_type: data.booking_type,
+            booking_type_for_rental: data.booking_type_for_rental,
+            booking_bulk_master_key: data.booking_bulk_master_key,
+            booking_no_of_bulk: data.booking_no_of_bulk,
+            booking_bulk_total: data.booking_bulk_total,
+            booking_by_cid: data.booking_by_cid,
+            booking_view_otp: data.booking_view_otp,
+            booking_view_status_otp: data.booking_view_status_otp,
+            booking_con_name: data.booking_con_name,
+            booking_con_mobile: data.booking_con_mobile,
+            booking_category: data.booking_category,
+            booking_schedule_time: data.booking_schedule_time,
+            booking_pickup: data.booking_pickup,
+            booking_drop: data.booking_drop,
+            booking_pickup_city: data.booking_pickup_city,
+            booking_drop_city: data.booking_drop_city,
+            booking_pick_lat: data.booking_pick_lat,
+            booking_pick_long: data.booking_pick_long,
+            booking_drop_lat: data.booking_drop_lat,
+            booking_drop_long: data.booking_drop_long,
+            booking_amount: data.booking_amount,
+            booking_adv_amount: data.booking_adv_amount,
+            booking_payment_type: data.booking_payment_type,
+            booking_payment_method: data.booking_payment_method,
+            booking_status: data.booking_status,
+            booking_distance: data.booking_distance,
+            booking_duration: data.booking_duration,
+            booking_duration_in_sec: data.booking_duration_in_sec,
+            booking_total_amount: data.booking_total_amount,
+            booking_payment_status: data.booking_payment_status,
+            booking_polyline: data.booking_polyline,
+            booking_acpt_driver_id: data.booking_acpt_driver_id,
+            booking_acpt_vehicle_id: data.booking_acpt_vehicle_id,
+            booking_acpt_time: data.booking_acpt_time,
+            booking_ap_polilyne: data.booking_ap_polilyne,
+            booking_ap_duration: data.booking_ap_duration,
+            booking_a_t_p_duration_in_sec: data.booking_a_t_p_duration_in_sec,
+            booking_ap_distance: data.booking_ap_distance,
+            created_at: new Date(),
+            created_at_unix: currentUnixTime(),
+            updated_at: new Date(),
+            bookingStatus: 0,
+            booking_user_id: data.booking_user_id || 0,
+            booking_radius: 0,
+            booking_generate_source: data.booking_generate_source,
+            booking_view_dropped_time: "",
+            booking_view_arrival_time: "",
+            booking_view_includes: "", // category list from another table 
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Create Ambulance Booking Error On Inserting");
+    }
+};
