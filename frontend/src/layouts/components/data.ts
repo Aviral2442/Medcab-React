@@ -92,7 +92,7 @@ export const menuItems: MenuItemType[] = [
       { key: 'partner-list', label: 'Partner', url: '/ambulance/partner' },
       { key: 'driver-list', label: 'Driver', url: '/ambulance/driver' },
       { key: 'vehical-list', label: 'Vehicle', url: '/ambulance/vehicle' },
-      { key: 'driver-duty', label: 'ON/OFF Duty', url: '/ambulance/driver-duty' },
+      { key: 'driver-duty', label: 'Driver Duty', url: '/ambulance/driver-duty' },
       { key: 'booking-list', label: 'Booking', url: '/ambulance/booking' },
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
     ],

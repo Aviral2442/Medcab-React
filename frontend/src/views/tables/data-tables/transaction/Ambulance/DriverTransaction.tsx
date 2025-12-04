@@ -316,7 +316,7 @@ const ExportDataWithButtons = ({
             <button
               className="eye-icon"
               onClick={() => {
-                navigate(`/driver-transaction-details/${rowData.driver_id}`);
+                navigate(`/driver-detail/${rowData.driver_id}`);
               }}
             >
               <TbEye className="me-1" />
