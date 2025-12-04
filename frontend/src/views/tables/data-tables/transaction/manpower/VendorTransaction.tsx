@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, type JSX } from "react";
 import ComponentCard from "@/components/ComponentCard";
 import "@/global.css";
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-import { TbEye} from "react-icons/tb";
+import { TbEye } from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
 import { createRoot } from "react-dom/client";
@@ -17,6 +17,8 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
+import { FaBuilding, FaCar } from "react-icons/fa";
+import { FaPeoplePulling } from "react-icons/fa6";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -26,18 +28,18 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
   1: {
     endpoint: "/transaction/vendor_transaction_list",
     headers: [
-    "S.No.",
-    "ID",
-    "Transaction By",
-    "Amount",
-    "Pay ID",
-    "Type",
-    "Prev Amt",
-    "New Amt",
-    "Note",
-    "Time",
-    "Created At",
-    "Status",
+      "S.No.",
+      "ID",
+      "Transaction By",
+      "Amount",
+      "Pay ID",
+      "Type",
+      "Prev Amt",
+      "New Amt",
+      "Note",
+      "Time",
+      "Created At",
+      "Status",
     ],
   },
 };
@@ -153,43 +155,43 @@ const ExportDataWithButtons = ({
     }
   };
 
-  const getTransactionByType = (type: number | string): string => {
-    const typeNum = Number(type);
-    switch (typeNum) {
-        case 1:
-            return "add-in wallet(A)";
-        case 2:
-            return "cancelation charge(W)";
-        case 3:
-            return " Cash Collect(W)";
-        case 4:
-            return "online booking payment(A)";
-        case 5: 
-            return "for transfer to bank account (W)";
-        case 6:
-            return "fetched by Partner (W)";
-        case 7: 
-            return "Incentive from Company(A)";
-        case 8:
-            return "Debit agains Accept Booking Charge (W)";
-        case 9:
-            return "Refund agains Accept Booking Cancel (A)";
-        default:
-            return `${type || "N/A"}`;
-    }
-  };
-
   const getTransactionType = (type: number | string): string => {
     const typeNum = Number(type);
     switch (typeNum) {
-      case 0:
-        return "Direct Driver";
       case 1:
-        return "Partner";
+        return "add-in wallet(A)";
       case 2:
-        return "Company";
+        return "cancelation charge(W)";
+      case 3:
+        return " Cash Collect(W)";
+      case 4:
+        return "online booking payment(A)";
+      case 5:
+        return "for transfer to bank account (W)";
+      case 6:
+        return "fetched by Partner (W)";
+      case 7:
+        return "Incentive from Company(A)";
+      case 8:
+        return "Debit agains Accept Booking Charge (W)";
+      case 9:
+        return "Refund agains Accept Booking Cancel (A)";
       default:
         return `${type || "N/A"}`;
+    }
+  };
+
+  const getTransactionByType = (type: number | string): JSX.Element => {
+    const typeNum = Number(type);
+    switch (typeNum) {
+      case 0:
+        return <FaCar title="Direct Driver" />;
+      case 1:
+        return <FaPeoplePulling title="Partner" />;
+      case 2:
+        return <FaBuilding title="Company" />;
+      default:
+        return <span>{type || "N/A"}</span>;
     }
   };
 
@@ -208,34 +210,46 @@ const ExportDataWithButtons = ({
       render: (data: any) => (data ? data : "N/A"),
     },
     {
-      title: "Transaction By",
+      title: "Name",
       data: "vendor_name",
       render: (_data: any, _type: any, row: any) => {
         const name = row?.vendor_name;
-        const mobile = row?.vendor_mobile;
         const parts: string[] = [];
-        if (name) parts.push(`<strong>${name}</strong>`);
-        if (mobile) parts.push(`<small class="text-muted">${mobile}</small>`);
-        return parts.length ? parts.join("<br/>") : "N/A";
+        if (name) parts.push(`${name}`);
+        return parts.length ? parts : "N/A";
       },
     },
     {
-        title: "By Type",
-        data: "vendor_transection_by_type",
-        render: (data: any) => getTransactionByType(data),
+      title: "Mobile",
+      data: "vendor_mobile",
+      render: (data: any) => (data ? data : "N/A"),
+    },
+    {
+      title: "By Type",
+      data: "vendor_transection_by_type",
+      render: () => "",
+      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
+        td.innerHTML = "";
+        const root = createRoot(td);
+        root.render(
+          <div className="d-flex align-items-center">
+            {getTransactionByType(rowData.vendor_transection_by_type)}
+          </div>
+        );
+      },
+    },
+    {
+      title: "Pay ID",
+      data: "vendor_transection_pay_id",
+      render: (data: any) => (data ? data : " "),
     },
     {
       title: "Amount",
       data: "vendor_transection_amount",
       render: (data: any) =>
         data !== null && data !== undefined && data !== ""
-          ? `₹ ${formatValue(data)}`
-          : "-",
-    },
-    {
-      title: "Pay ID",
-      data: "vendor_transection_pay_id",
-      render: (data: any) => (data ? data : "-"),
+          ? `₹${formatValue(data)}`
+          : "",
     },
     {
       title: "Type",
@@ -247,7 +261,7 @@ const ExportDataWithButtons = ({
       data: "vendor_transection_wallet_previous_amount",
       render: (data: any) =>
         data !== null && data !== undefined && data !== ""
-          ? `₹ ${formatValue(data)}`
+          ? `₹${formatValue(data)}`
           : "-",
     },
     {
@@ -255,7 +269,7 @@ const ExportDataWithButtons = ({
       data: "vendor_transection_wallet_new_amount",
       render: (data: any) =>
         data !== null && data !== undefined && data !== ""
-          ? `₹ ${formatValue(data)}`
+          ? `₹${formatValue(data)}`
           : "-",
     },
     {
@@ -269,25 +283,27 @@ const ExportDataWithButtons = ({
       render: (data: any) => (data ? formatDate(data) : "-"),
     },
     {
-      title: "Created At",
+      title: "Date",
       data: "vendor_created_at",
       render: (data: any) => (data ? formatDate(data) : "-"),
     },
     {
-        title: "Wallet Status",
-        data: "vendor_transection_by_partner_wallet_status",
-        render: (data: any) => {
-            switch (data) {
-                case 0:
-                    return '<span class="badge badge-label badge-soft-secondary">Online</span>';
-                case 1:
-                    return '<span class="badge badge-label badge-soft-success">Partner Wallet</span>';
-                case 2:
-                    return '<span class="badge badge-label badge-soft-danger">Withdrawal</span>';
-                default:
-                    return `<span class="badge badge-label badge-soft-secondary">${data || "N/A"}</span>`;
-            }
+      title: "Wallet",
+      data: "vendor_transection_by_partner_wallet_status",
+      render: (data: any) => {
+        switch (data) {
+          case "0":
+            return '<span class="badge badge-label badge-soft-secondary">Online</span>';
+          case "1":
+            return '<span class="badge badge-label badge-soft-success">Partner Wallet</span>';
+          case "2":
+            return '<span class="badge badge-label badge-soft-danger">Withdrawal</span>';
+          default:
+            return `<span class="badge badge-label badge-soft-secondary">${
+              data || "N/A"
+            }</span>`;
         }
+      },
     },
     {
       title: "Status",
@@ -309,7 +325,9 @@ const ExportDataWithButtons = ({
               className="eye-icon"
               onClick={() => {
                 // Fix: Navigate to consumer details instead of partner details
-                navigate(`/consumer-details/${rowData.consumer_transection_consumer_id}`);
+                navigate(
+                  `/consumer-details/${rowData.consumer_transection_consumer_id}`
+                );
               }}
             >
               <TbEye className="me-1" />
@@ -329,7 +347,7 @@ const ExportDataWithButtons = ({
             {tabKey === 1 ? "Consumer Transaction List" : ""}
           </div>
         }
-        className="mb-2"
+        className="mb-2 overflow-x-scroll"
         headerActions={
           <div className="d-flex gap-2 align-items-center">
             <TableFilters

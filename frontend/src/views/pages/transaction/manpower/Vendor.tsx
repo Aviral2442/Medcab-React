@@ -1,5 +1,5 @@
 import {Container } from "react-bootstrap";
-import ExportDataWithButtons from "@/views/tables/data-tables/transaction/ConsumerTransaction";
+import ExportDataWithButtons from "@/views/tables/data-tables/transaction/manpower/VendorTransaction";
 import "rsuite/dist/rsuite.min.css";
 
 const Page = () => {

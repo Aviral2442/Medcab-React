@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, type JSX } from "react";
 import ComponentCard from "@/components/ComponentCard";
 import "@/global.css";
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-import { TbEye} from "react-icons/tb";
+import { TbEye } from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
 import { createRoot } from "react-dom/client";
@@ -17,6 +17,8 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
+import { FaPeopleCarryBox, FaPeoplePulling } from "react-icons/fa6";
+import { FaBuilding, FaCar } from "react-icons/fa";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -26,18 +28,18 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
   1: {
     endpoint: "/transaction/driver_transaction_list",
     headers: [
-    "S.No.",
-    "ID",
-    "Transaction By",
-    "By Type",
-    "Note",
-    "Amount",
-    "Type",
-    "Status",
-    "Wallet Status",
-    "Prev Amt",
-    "New Amt",
-    "Time",
+      "S.No.",
+      "ID",
+      "Transaction By",
+      "By Type",
+      "Note",
+      "Amount",
+      "Type",
+      "Status",
+      "Wallet Status",
+      "Prev Amt",
+      "New Amt",
+      "Time",
     ],
   },
 };
@@ -192,19 +194,19 @@ const ExportDataWithButtons = ({
     }
   };
 
-  const getTransactionByType = (type: number | string): string => {
+  const getTransactionByType = (type: number | string): JSX.Element => {
     const typeNum = Number(type);
     switch (typeNum) {
       case 0:
-        return "Direct Driver";
+        return <FaCar title="Direct Driver" />;
       case 1:
-        return "By Partner";
+        return <FaPeoplePulling title="By Partner" />;
       case 2:
-        return "By Company";
+        return <FaBuilding title="By Company" />;
       case 3:
-        return "Tip From Consumer";
+        return <FaPeopleCarryBox title="Tip From Consumer" />;
       default:
-        return `${type || "N/A"}`;
+        return <span>{type || "N/A"}</span>;
     }
   };
 
@@ -223,21 +225,33 @@ const ExportDataWithButtons = ({
       render: (data: any) => (data ? data : "N/A"),
     },
     {
-      title: "Transaction By",
+      title: "Name",
       data: "trans_by_name",
       render: (_data: any, _type: any, row: any) => {
         const name = row?.trans_by_name;
-        const mobile = row?.trans_by_mobile;
         const parts: string[] = [];
-        if (name) parts.push(`<strong>${name}</strong>`);
-        if (mobile) parts.push(`<small class="text-muted">${mobile}</small>`);
-        return parts.length ? parts.join("<br/>") : "N/A";
+        if (name) parts.push(`${name}`);
+        return parts.length ? parts : "N/A";
       },
+    },
+    {
+      title: "Mobile",
+      data: "trans_by_mobile",
+      render: (data: any) => (data ? data : "N/A"),
     },
     {
       title: "By Type",
       data: "driver_transection_by_type",
-      render: (data: any) => getTransactionByType(data),
+      render: () => "", // Return empty string, we'll render in createdCell
+      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
+        td.innerHTML = "";
+        const root = createRoot(td);
+        root.render(
+          <div className="d-flex align-items-center">
+            {getTransactionByType(rowData.driver_transection_by_type)}
+          </div>
+        );
+      },
     },
     {
       title: "Note",

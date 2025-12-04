@@ -28,7 +28,8 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
     "S.No.",
     "ID",
-    "Transaction By",
+    "Name",
+    "Mobile",
     "Amount",
     "Pay ID",
     "Type",
@@ -186,13 +187,21 @@ const ExportDataWithButtons = ({
       render: (_data: any, _type: any, row: any) => {
         const first = row?.partner_f_name;
         const last = row?.partner_l_name;
-        const mobile = row?.partner_mobile;
         const name = [first, last].filter(Boolean).join(" ");
         const parts: string[] = [];
-        if (name) parts.push(`<strong>${name}</strong>`);
-        if (mobile) parts.push(`<small class="text-muted">${mobile}</small>`);
-        return parts.length ? parts.join("<br/>") : "N/A";
+        if (name) parts.push(`${name}`);
+        return parts.length ? parts: "N/A";
       },
+    },
+    {
+      title: "Mobile",
+      data: "partner_mobile",
+      render: (data: any) => (data ? data : "N/A"),
+    },
+    {
+      title: "Pay ID",
+      data: "partner_transection_pay_id",
+      render: (data: any) => (data ? data : "-"),
     },
     {
       title: "Amount",
@@ -201,11 +210,6 @@ const ExportDataWithButtons = ({
         data !== null && data !== undefined && data !== ""
           ? `₹ ${formatValue(data)}`
           : "-",
-    },
-    {
-      title: "Pay ID",
-      data: "partner_transection_pay_id",
-      render: (data: any) => (data ? data : "-"),
     },
     {
       title: "Type",
