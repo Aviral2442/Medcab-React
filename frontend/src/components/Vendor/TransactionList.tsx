@@ -10,8 +10,6 @@ import pdfmake from "pdfmake";
 import "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
 import { Spinner } from "react-bootstrap";
-import { createRoot } from "react-dom/client";
-import { TbEye } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import '@/global.css'
 
@@ -155,17 +153,16 @@ const TransactionList: React.FC<TransactionListProps> = ({
   const headers = [
     "S.No.",
     "ID",
+    "By",
     "Vendor",
-    "By Type",
     "Note",
-    "Amount",
     "Type",
+    "Amount",
     "Prev Amt",
     "New Amt",
     "Date",
-    "Wallet Status",
+    // "Wallet",
     "Status",
-    "Actions",
   ];
 
   const columns = [
@@ -182,23 +179,35 @@ const TransactionList: React.FC<TransactionListProps> = ({
       render: (data: any) => (data ? data : "N/A"),
     },
     {
-      title: "Vendor Info",
+      title: "By",
+      data: "vendor_transection_by_type",
+      render: (data: any) => getTransactionByType(data),
+    },
+    {
+      title: "Name",
       data: "vendor_name",
       render: (_data: any, _type: any, row: any) => {
         const name = row.vendor_name ? row.vendor_name : "N/A";
-        const mobile = row.vendor_mobile ? row.vendor_mobile : "N/A";
-        return `<div><strong>${name}</strong><br/><small class="text-muted">${mobile}</small></div>`;
+        return `<div><strong>${name}</strong>`;
       },
     },
     {
-      title: "By Type",
-      data: "vendor_transection_by_type",
-      render: (data: any) => getTransactionByType(data),
+      title: "Mobile",
+      data: "vendor_mobile",
+      render: (_data: any, _type: any, row: any) => {
+        const mobile = row.vendor_mobile ? row.vendor_mobile : "N/A";
+        return `<div>${mobile}</div>`;
+      }
     },
     {
       title: "Note",
       data: "vendor_transection_note",
       render: (data: any) => (data ? data : "-"),
+    },
+    {
+      title: "Type",
+      data: "vendor_transection_type",
+      render: (data: any) => getTransactionType(data),
     },
     {
       title: "Amount",
@@ -207,11 +216,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
         data !== null && data !== undefined && data !== ""
           ? `₹${formatValue(data)}`
           : "",
-    },
-    {
-      title: "Type",
-      data: "vendor_transection_type",
-      render: (data: any) => getTransactionType(data),
     },
     {
       title: "Prev Amt",
@@ -234,40 +238,16 @@ const TransactionList: React.FC<TransactionListProps> = ({
       data: "vendor_transection_time_unix",
       render: (data: any) => (data ? formatDate(data) : "-"),
     },
-    {
-      title: "Wallet Status",
-      data: "vendor_transection_by_partner_wallet_status",
-      render: (data: any) => getWalletStatus(data),
-    },
+    // {
+    //   title: "Wallet",
+    //   data: "vendor_transection_by_partner_wallet_status",
+    //   render: (data: any) => getWalletStatus(data),
+    // },
     {
       title: "Status",
       data: "vendor_transection_status",
       render: (data: any) => getTransactionStatus(data),
-    },
-    {
-      title: "Actions",
-      data: null,
-      orderable: false,
-      searchable: false,
-      render: () => "",
-      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
-        if (!td) return;
-        td.innerHTML = "";
-        const root = createRoot(td);
-        root.render(
-          <div className="d-flex flex-row gap-1">
-            <button
-              className="eye-icon"
-              onClick={() => {
-                navigate(`/vendor-transaction-details/${rowData.consumer_id}`);
-              }}
-            >
-              <TbEye className="me-1" />
-            </button>
-          </div>
-        );
-      },
-    },
+    }
   ];
 
   const tableData = data ? (Array.isArray(data) ? data : [data]) : [];

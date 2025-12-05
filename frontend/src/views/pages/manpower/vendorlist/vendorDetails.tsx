@@ -38,26 +38,23 @@ const vendorDetails = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `${baseURL}/transaction/vendor_transaction_list`
+        `${baseURL}/transaction/vendor_transaction_data/${id}`
       );
       console.log("Transactions List:", res.data);
-      setTransactions(res.data?.jsonData?.transactions || []);
+      setTransactions(res.data?.jsonData?.vendorTransactions || []);
     } catch (error) {
       console.error("Error fetching transactions list:", error);
     } finally {
       setLoading(false);
     }
   };
-
-  console.log("activeTab:", activeTab);
-
   // fetch data on active tab change
   React.useEffect(() => {
     if (activeTab === 1) fetchVendorDetails();
     else if (activeTab === 2) {
       fetchTransactionsList();
     }
-  }, [activeTab]);
+  }, [activeTab, id]);
 
   const handleFieldUpdate = async (field: string, value: string) => {
     try {
