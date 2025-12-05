@@ -174,7 +174,7 @@ const ExportDataWithButtons = ({
     const typeNum = Number(type);
     switch (typeNum) {
       case 1:
-        return "Add in Wallet (A)";
+        return "Add in Wallet (A)";  //credit
       case 2:
         return "Cancellation Charge (W)";
       case 3:
@@ -225,22 +225,7 @@ const ExportDataWithButtons = ({
       render: (data: any) => (data ? data : "N/A"),
     },
     {
-      title: "Name",
-      data: "trans_by_name",
-      render: (_data: any, _type: any, row: any) => {
-        const name = row?.trans_by_name;
-        const parts: string[] = [];
-        if (name) parts.push(`${name}`);
-        return parts.length ? parts : "N/A";
-      },
-    },
-    {
-      title: "Mobile",
-      data: "trans_by_mobile",
-      render: (data: any) => (data ? data : "N/A"),
-    },
-    {
-      title: "By Type",
+      title: "By",
       data: "driver_transection_by_type",
       render: () => "", // Return empty string, we'll render in createdCell
       createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
@@ -254,9 +239,36 @@ const ExportDataWithButtons = ({
       },
     },
     {
+      title: "Name",
+      data: "trans_by_name",
+      render: (_data: any, _type: any, row: any) => {
+        const name = row?.trans_by_name;
+        const url = `/driver-detail/${row.driver_transection_by}`;
+        return name
+          ? `<a href="${url}" class="text-decoration-none text-primary">${name}</a>`
+          : "N/A";
+      },
+    },
+    {
+      title: "Mobile",
+      data: "trans_by_mobile",
+      render: (data: any, _type: any, row: any) => {
+        const mobile = data;
+        const url = `/driver-detail/${row.driver_transection_by}`;
+        return mobile
+          ? `<a href="${url}" class="text-decoration-none text-primary">${mobile}</a>`
+          : "N/A";
+      }
+    },
+    {
       title: "Note",
       data: "driver_transection_note",
       render: (data: any) => (data ? data : "-"),
+    },
+    {
+      title: "Type",
+      data: "driver_transection_type",
+      render: (data: any) => getTransactionType(data),
     },
     {
       title: "Amount",
@@ -265,11 +277,6 @@ const ExportDataWithButtons = ({
         data !== null && data !== undefined && data !== ""
           ? `₹ ${formatValue(data)}`
           : "",
-    },
-    {
-      title: "Type",
-      data: "driver_transection_type",
-      render: (data: any) => getTransactionType(data),
     },
     {
       title: "Prev Amt",
@@ -288,12 +295,7 @@ const ExportDataWithButtons = ({
           : "-",
     },
     {
-      title: "Date",
-      data: "driver_transection_time_unix",
-      render: (data: any) => (data ? formatDate(data) : "-"),
-    },
-    {
-      title: "Wallet Status",
+      title: "Wallet",
       data: "driver_transection_by_partner_wallet_status",
       render: (data: any) => getWalletStatus(data),
     },
@@ -303,27 +305,9 @@ const ExportDataWithButtons = ({
       render: (data: any) => getTransactionStatus(data),
     },
     {
-      title: "Actions",
-      data: null,
-      orderable: false,
-      searchable: false,
-      render: () => "",
-      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
-        td.innerHTML = "";
-        const root = createRoot(td);
-        root.render(
-          <div className="d-flex flex-row gap-1">
-            <button
-              className="eye-icon"
-              onClick={() => {
-                navigate(`/driver-detail/${rowData.driver_id}`);
-              }}
-            >
-              <TbEye className="me-1" />
-            </button>
-          </div>
-        );
-      },
+      title: "Date",
+      data: "driver_transection_time_unix",
+      render: (data: any) => (data ? formatDate(data) : "-"),
     },
   ];
 

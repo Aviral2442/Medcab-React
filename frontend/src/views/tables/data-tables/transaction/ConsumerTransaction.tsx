@@ -28,15 +28,14 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Transaction By",
+      "Name",
+      "Mobile",
       "Amount",
       "Pay ID",
-      "Type",
       "Prev Amt",
       "New Amt",
       "Note",
       "Time",
-      "Created At",
       "Status",
     ],
   },
@@ -172,15 +171,22 @@ const ExportDataWithButtons = ({
       data: "consumer_name",
       render: (_data: any, _type: any, row: any) => {
         const name = row?.consumer_name;
-        const parts: string[] = [];
-        if (name) parts.push(`${name}`);
-        return parts.length ? parts : "N/A";
+        const url = `/consumer-details/${row.consumer_transection_done_by}`;
+        return name
+          ? `<a href="${url}" class="text-decoration-none text-primary">${name}</a>`
+          : "N/A";
       },
     },
     {
       title: "Mobile",
       data: "consumer_mobile_no",
-      render: (data: any) => (data ? data : "N/A"),
+      render: (data: any, _type: any, row: any) => {
+        const mobile = data;
+        const url = `/consumer-details/${row.consumer_transection_done_by}`;
+        return mobile
+          ? `<a href="${url}" class="text-decoration-none text-primary">${mobile}</a>`
+          : "N/A";
+      }
     },
     {
       title: "Amount",
@@ -239,45 +245,14 @@ const ExportDataWithButtons = ({
       render: (data: any) => (data ? data : "-"),
     },
     {
-      title: "Time",
-      data: "consumer_transection_time",
-      render: (data: any) => (data ? formatDate(data) : "-"),
-    },
-    {
-      title: "Created At",
-      data: "created_at",
-      render: (data: any) => (data ? formatDate(data) : "-"),
-    },
-    {
       title: "Status",
       data: "consumer_transection_status",
       render: (data: any) => getTransactionStatus(data),
     },
     {
-      title: "Actions",
-      data: null,
-      orderable: false,
-      searchable: false,
-      render: () => "",
-      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
-        td.innerHTML = "";
-        const root = createRoot(td);
-        root.render(
-          <div className="d-flex flex-row gap-1">
-            <button
-              className="eye-icon"
-              onClick={() => {
-                // Fix: Navigate to consumer details instead of partner details
-                navigate(
-                  `/consumer-details/${rowData.consumer_transection_consumer_id}`
-                );
-              }}
-            >
-              <TbEye className="me-1" />
-            </button>
-          </div>
-        );
-      },
+      title: "Time",
+      data: "consumer_transection_time",
+      render: (data: any) => (data ? formatDate(data) : "-"),
     },
   ];
 
@@ -353,7 +328,6 @@ const ExportDataWithButtons = ({
                   {headers.map((header, idx) => (
                     <th key={idx}>{header}</th>
                   ))}
-                  <th>Actions</th>
                 </tr>
               </thead>
             </DataTable>

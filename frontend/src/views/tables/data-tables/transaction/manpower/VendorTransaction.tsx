@@ -159,11 +159,11 @@ const ExportDataWithButtons = ({
     const typeNum = Number(type);
     switch (typeNum) {
       case 1:
-        return "add-in wallet(A)";
+        return "add-in wallet(A)"; //credit
       case 2:
         return "cancelation charge(W)";
       case 3:
-        return " Cash Collect(W)";
+        return "Cash Collect(W)";
       case 4:
         return "online booking payment(A)";
       case 5:
@@ -173,7 +173,7 @@ const ExportDataWithButtons = ({
       case 7:
         return "Incentive from Company(A)";
       case 8:
-        return "Debit agains Accept Booking Charge (W)";
+        return "Debit agains Accept Booking Charge (W)"; //debit
       case 9:
         return "Refund agains Accept Booking Cancel (A)";
       default:
@@ -210,22 +210,7 @@ const ExportDataWithButtons = ({
       render: (data: any) => (data ? data : "N/A"),
     },
     {
-      title: "Name",
-      data: "vendor_name",
-      render: (_data: any, _type: any, row: any) => {
-        const name = row?.vendor_name;
-        const parts: string[] = [];
-        if (name) parts.push(`${name}`);
-        return parts.length ? parts : "N/A";
-      },
-    },
-    {
-      title: "Mobile",
-      data: "vendor_mobile",
-      render: (data: any) => (data ? data : "N/A"),
-    },
-    {
-      title: "By Type",
+      title: "By",
       data: "vendor_transection_by_type",
       render: () => "",
       createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
@@ -239,9 +224,36 @@ const ExportDataWithButtons = ({
       },
     },
     {
+      title: "Name",
+      data: "vendor_name",
+      render: (_data: any, _type: any, row: any) => {
+        const name = row?.vendor_name;
+        const url = `/vendor-details/${row.vendor_transection_by}`;
+        return name
+          ? `<a href="${url}" class="text-decoration-none text-primary">${name}</a>`
+          : "N/A";
+      },
+    },
+    {
+      title: "Mobile",
+      data: "vendor_mobile",
+      render: (data: any, _type: any, row: any) => {
+        const mobile = data;
+        const url = `/vendor-details/${row.vendor_transection_by}`;
+        return mobile
+          ? `<a href="${url}" class="text-decoration-none text-primary">${mobile}</a>`
+          : "N/A";
+      }
+    },
+    {
       title: "Pay ID",
       data: "vendor_transection_pay_id",
       render: (data: any) => (data ? data : " "),
+    },
+    {
+      title: "Type",
+      data: "vendor_transection_type",
+      render: (data: any) => getTransactionType(data),
     },
     {
       title: "Amount",
@@ -250,11 +262,6 @@ const ExportDataWithButtons = ({
         data !== null && data !== undefined && data !== ""
           ? `₹${formatValue(data)}`
           : "",
-    },
-    {
-      title: "Type",
-      data: "vendor_transection_type",
-      render: (data: any) => getTransactionType(data),
     },
     {
       title: "Prev Amt",
@@ -278,16 +285,6 @@ const ExportDataWithButtons = ({
       render: (data: any) => (data ? data : "-"),
     },
     {
-      title: "Time",
-      data: "vendor_transection_time_unix",
-      render: (data: any) => (data ? formatDate(data) : "-"),
-    },
-    {
-      title: "Date",
-      data: "vendor_created_at",
-      render: (data: any) => (data ? formatDate(data) : "-"),
-    },
-    {
       title: "Wallet",
       data: "vendor_transection_by_partner_wallet_status",
       render: (data: any) => {
@@ -302,40 +299,19 @@ const ExportDataWithButtons = ({
             return `<span class="badge badge-label badge-soft-secondary">${
               data || "N/A"
             }</span>`;
-        }
+          }
+        },
       },
-    },
-    {
-      title: "Status",
-      data: "vendor_transection_status",
-      render: (data: any) => getTransactionStatus(data),
-    },
-    {
-      title: "Actions",
-      data: null,
-      orderable: false,
-      searchable: false,
-      render: () => "",
-      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
-        td.innerHTML = "";
-        const root = createRoot(td);
-        root.render(
-          <div className="d-flex flex-row gap-1">
-            <button
-              className="eye-icon"
-              onClick={() => {
-                // Fix: Navigate to consumer details instead of partner details
-                navigate(
-                  `/consumer-details/${rowData.consumer_transection_consumer_id}`
-                );
-              }}
-            >
-              <TbEye className="me-1" />
-            </button>
-          </div>
-        );
+      {
+        title: "Status",
+        data: "vendor_transection_status",
+        render: (data: any) => getTransactionStatus(data),
       },
-    },
+      {
+        title: "Time",
+        data: "vendor_transection_time_unix",
+        render: (data: any) => (data ? formatDate(data) : "-"),
+      },
   ];
 
   return (
