@@ -116,7 +116,7 @@ const Field: React.FC<FieldProps> = ({
 
     // Number formatting (for amounts)
     if (type === "number" && !isNaN(Number(val))) {
-      return `₹${Number(val || 0).toFixed(2)}`;
+      return `${Number(val || ' ')}`;
     }
 
     return valStr;
