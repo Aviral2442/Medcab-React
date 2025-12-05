@@ -1,5 +1,6 @@
 import axios from "axios";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+import { formatDate } from "@/components/DateFormat";
 
 type ConsumerInfoType = {
     consumer_id: number
@@ -46,8 +47,7 @@ export const consumerColumns = [
     {
         data: 'consumer_registred_date',
         render: (data: string) => {
-            const date = new Date(parseInt(data) * 1000);
-            return date.toLocaleDateString();
+            return formatDate(data) || ' ';
         }
     },
     { data: 'remark_text' },

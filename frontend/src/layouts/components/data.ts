@@ -89,10 +89,10 @@ export const menuItems: MenuItemType[] = [
     icon: LuAmbulance,
     children: [
       { key: 'category-list', label: 'Category', url: '/ambulance/category' },
-      { key: 'driver-list', label: 'Driver', url: '/ambulance/driver' },
-      { key: 'driver-duty', label: 'ON/OFF Duty', url: '/ambulance/driver-duty' },
       { key: 'partner-list', label: 'Partner', url: '/ambulance/partner' },
+      { key: 'driver-list', label: 'Driver', url: '/ambulance/driver' },
       { key: 'vehical-list', label: 'Vehicle', url: '/ambulance/vehicle' },
+      { key: 'driver-duty', label: 'Driver Duty', url: '/ambulance/driver-duty' },
       { key: 'booking-list', label: 'Booking', url: '/ambulance/booking' },
       // { key: 'manpower', label: 'Manpower', url: '/manpower' },
     ],

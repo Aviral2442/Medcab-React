@@ -5,12 +5,9 @@ import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
 import "datatables.net-buttons/js/buttons.html5";
-import { TbEye} from "react-icons/tb";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
-import { createRoot } from "react-dom/client";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import TablePagination from "@/components/table/TablePagination";
 import TableFilters from "@/components/table/TableFilters";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -26,18 +23,18 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
   1: {
     endpoint: "/partner/get_partner_transactions_list",
     headers: [
-    "S.No.",
-    "ID",
-    "Transaction By",
-    "Amount",
-    "Pay ID",
-    "Type",
-    "Prev Amt",
-    "New Amt",
-    "Note",
-    "Time",
-    "Created At",
-    "Status",
+      "S.No.",
+      "ID",
+      "Name",
+      "Mobile",
+      "Pay ID",
+      "Type",
+      "Amount",
+      "Prev Amt",
+      "New Amt",
+      "Note",
+      "Time",
+      "Status",
     ],
   },
 };
@@ -54,7 +51,6 @@ const ExportDataWithButtons = ({
   refreshFlag,
   filterParams = {},
 }: ExportDataWithButtonsProps) => {
-  const navigate = useNavigate();
   const [tableData, setTableData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const tableRef = useRef<any>(null);
@@ -156,9 +152,9 @@ const ExportDataWithButtons = ({
     const typeNum = Number(type);
     switch (typeNum) {
       case 1:
-        return "Add in Wallet";
+        return "Add in Wallet"; //credit
       case 2:
-        return "Transfer to Bank";
+        return "Transfer to Bank"; //debit
       case 3:
         return "Fetch from Driver";
       default:
@@ -181,26 +177,28 @@ const ExportDataWithButtons = ({
       render: (data: any) => (data ? data : "N/A"),
     },
     {
-      title: "Transaction By",
+      title: "Name",
       data: "partner_f_name",
       render: (_data: any, _type: any, row: any) => {
         const first = row?.partner_f_name;
         const last = row?.partner_l_name;
-        const mobile = row?.partner_mobile;
-        const name = [first, last].filter(Boolean).join(" ");
-        const parts: string[] = [];
-        if (name) parts.push(`<strong>${name}</strong>`);
-        if (mobile) parts.push(`<small class="text-muted">${mobile}</small>`);
-        return parts.length ? parts.join("<br/>") : "N/A";
+        const url = `/partner-detail/${row.partner_transection_by}`;
+        const fullName = [first, last].filter(Boolean).join(" ");
+        return fullName
+          ? `<a href="${url}" class="text-decoration-none text-primary">${fullName}</a>`
+          : "N/A";
       },
     },
     {
-      title: "Amount",
-      data: "partner_transection_amount",
-      render: (data: any) =>
-        data !== null && data !== undefined && data !== ""
-          ? `₹ ${formatValue(data)}`
-          : "-",
+      title: "Mobile",
+      data: "partner_mobile",
+      render: (data: any, _type: any, row: any) => {
+        const mobile = data;
+        const url = `/partner-detail/${row.partner_transection_by}`;
+        return mobile
+          ? `<a href="${url}" class="text-decoration-none text-primary">${mobile}</a>`
+          : "N/A";
+      }
     },
     {
       title: "Pay ID",
@@ -211,6 +209,14 @@ const ExportDataWithButtons = ({
       title: "Type",
       data: "partner_transection_type",
       render: (data: any) => getTransactionType(data),
+    },
+    {
+      title: "Amount",
+      data: "partner_transection_amount",
+      render: (data: any) =>
+        data !== null && data !== undefined && data !== ""
+          ? `₹ ${formatValue(data)}`
+          : "-",
     },
     {
       title: "Prev Amt",
@@ -234,42 +240,14 @@ const ExportDataWithButtons = ({
       render: (data: any) => (data ? data : "-"),
     },
     {
-      title: "Time",
-      data: "partner_transection_time_unix",
-      render: (data: any) => (data ? formatDate(data) : "-"),
-    },
-    {
-      title: "Created At",
-      data: "created_at",
-      render: (data: any) => (data ? formatDate(data) : "-"),
-    },
-    {
       title: "Status",
       data: "partner_transection_status",
       render: (data: any) => getTransactionStatus(data),
     },
     {
-      title: "Actions",
-      data: null,
-      orderable: false,
-      searchable: false,
-      render: () => "",
-      createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
-        td.innerHTML = "";
-        const root = createRoot(td);
-        root.render(
-          <div className="d-flex flex-row gap-1">
-            <button
-              className="eye-icon"
-              onClick={() => {
-                navigate(`/partner-details/${rowData.partner_transection_by}`);
-              }}
-            >
-              <TbEye className="me-1" />
-            </button>
-          </div>
-        );
-      },
+      title: "Time",
+      data: "partner_transection_time_unix",
+      render: (data: any) => (data ? formatDate(data) : "-"),
     },
   ];
 
@@ -319,21 +297,33 @@ const ExportDataWithButtons = ({
                     extend: "copyHtml5",
                     className: "btn btn-sm btn-primary",
                     text: "Copy",
+                    exportOptions: {
+                      columns: ":not(:last-child)",
+                    },
                   },
                   {
                     extend: "excelHtml5",
                     className: "btn btn-sm btn-primary",
                     text: "Excel",
+                    exportOptions: {
+                      columns: ":not(:last-child)",
+                    },
                   },
                   {
                     extend: "csvHtml5",
                     className: "btn btn-sm btn-primary",
                     text: "CSV",
+                    exportOptions: {
+                      columns: ":not(:last-child)",
+                    },
                   },
                   {
                     extend: "pdfHtml5",
                     className: "btn btn-sm btn-primary",
                     text: "PDF",
+                    exportOptions: {
+                      columns: ":not(:last-child)",
+                    },
                   },
                 ],
               }}
@@ -344,7 +334,6 @@ const ExportDataWithButtons = ({
                   {headers.map((header, idx) => (
                     <th key={idx}>{header}</th>
                   ))}
-                  <th>Actions</th>
                 </tr>
               </thead>
             </DataTable>
