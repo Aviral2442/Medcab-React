@@ -10,7 +10,6 @@ import pdfmake from "pdfmake";
 import "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
 import { Spinner } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
 import '@/global.css'
 
 // Register plugins
@@ -33,7 +32,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
   currentPage = 0,
 }) => {
   const tableRef = useRef<any>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Cleanup function to properly destroy DataTable
@@ -87,22 +85,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
         return '<span class="badge badge-label badge-soft-warning">Pending Withdrawal</span>';
       case 2:
         return '<span class="badge badge-label badge-soft-success">Refunded</span>';
-      default:
-        return `<span class="badge badge-label badge-soft-secondary">${
-          status || "N/A"
-        }</span>`;
-    }
-  };
-
-  const getWalletStatus = (status: number | string): string => {
-    const statusNum = Number(status);
-    switch (statusNum) {
-      case 0:
-        return '<span class="badge badge-label badge-soft-info">Online</span>';
-      case 1:
-        return '<span class="badge badge-label badge-soft-primary">From Partner Wallet</span>';
-      case 2:
-        return '<span class="badge badge-label badge-soft-danger">Withdrawal</span>';
       default:
         return `<span class="badge badge-label badge-soft-secondary">${
           status || "N/A"
