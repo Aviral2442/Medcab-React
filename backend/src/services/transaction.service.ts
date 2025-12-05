@@ -2,6 +2,7 @@ import { db } from "../config/db";
 import { ApiError } from "../utils/api-error";
 import { RowDataPacket, FieldPacket } from "mysql2";
 import { buildFilters } from "../utils/filters";
+import { stat } from "fs";
 
 // Get Consumer Transaction List
 export const getConsumerTransactionList = async () => {
@@ -57,6 +58,15 @@ export const getVendorTransactionList = async () => {
 export const vendorTransDataService = async (vendorId: number) => {
 
     try {
+
+        const checkVendorExist = `
+            SELECT vendor_transection FROM vendor WHERE vendor_transection_by = ?;
+        `;
+
+        if(!checkVendorExist){
+            throw new ApiError(404, "Vendor not found");
+        }
+
         const [rows]: any = await db.query(
             `
             SELECT vendor_transection.*, vendor.vendor_name, vendor.vendor_mobile
@@ -75,7 +85,11 @@ export const vendorTransDataService = async (vendorId: number) => {
         }
 
         return {
-            transactions: rows,
+            status: 200,
+            message: "Vendor Transaction Data Fetch Successful",
+            jsonData: {
+                vendorTransactions: rows
+            }
         };
     } catch (error) {
         throw new ApiError(500, "Failed to fetch vendor transaction data");

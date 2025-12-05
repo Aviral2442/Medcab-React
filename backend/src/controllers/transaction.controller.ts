@@ -41,6 +41,9 @@ export const vendorTransDataController = async (req: Request, res: Response, nex
         }
 
         const result = await vendorTransDataService(vendorId);
+
+        console.log(result, vendorId);
+
         res.status(200).json(result);
     } catch (error) {
         next(error);
