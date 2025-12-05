@@ -115,7 +115,8 @@ export const vendorDetailService = async (vendorId: number) => {
         vendor_professional_details.*,
         vendor_address.vendor_address_full,
         ambulance_category.ambulance_category_name,
-        manpower_category.mp_cat_name
+        manpower_category.mp_cat_name,
+        work_location_city.city_name as work_location_city_name
       FROM vendor
       LEFT JOIN vendor_address ON vendor.vendor_address_details_id = vendor_address.vendor_address_id
       LEFT JOIN city ON vendor_address.vendor_address_city_id = city.city_id
@@ -124,6 +125,8 @@ export const vendorDetailService = async (vendorId: number) => {
       LEFT JOIN vendor_account_details ON vendor.vendor_account_details_id = vendor_account_details.vad_id
       LEFT JOIN vendor_professional_details ON vendor.vendor_professional_details_id = vendor_professional_details.vpd_id
       LEFT JOIN ambulance_category ON vendor.vendor_category_details_id = ambulance_category.ambulance_category_id
+      LEFT JOIN vendor_work_location ON vendor.vendor_prefer_location_id = vendor_work_location.vwlp_id
+      LEFT JOIN city AS work_location_city ON vendor_work_location.vwlp_city_id = work_location_city.city_id
       WHERE vendor.vendor_id = ?
     `;
 
