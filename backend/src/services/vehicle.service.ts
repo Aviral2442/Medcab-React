@@ -108,9 +108,11 @@ export const getVehicleListService = async (filters?: {
                 vehicle.vehicle_verify_date,
                 vehicle.verify_type,
                 vehicle.created_at,
-                vehicle.vehicle_status
+                vehicle.vehicle_status,
+                ambulance_category_vehicle.ambulance_category_vehicle_name
             FROM vehicle
             LEFT JOIN driver ON vehicle.vehicle_added_by = driver.driver_id
+            LEFT JOIN ambulance_category_vehicle ON vehicle.vehicle_category_type = ambulance_category_vehicle.ambulance_category_vehicle_cat_type
             ${finalWhereSQL}
             ORDER BY vehicle.vehicle_id DESC
             LIMIT ? OFFSET ?
