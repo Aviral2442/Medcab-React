@@ -96,8 +96,6 @@ const ExportDataWithButtons = ({
     { label: "Pending Approval", value: "pendingApproval" },
     { label: "Assigned", value: "assign" },
     { label: "Free", value: "free" },
-    { label: "On Duty", value: "onDuty" },
-    { label: "OFF Duty", value: "offDuty" },
   ];
 
   const fetchData = async () => {

@@ -1,5 +1,6 @@
 import axios from "axios";
-const baseURL = (import.meta as any).env?.VITE_PATH ?? "";  
+const baseURL = (import.meta as any).env?.VITE_PATH ?? ""; 
+import { formatDate } from "@/components/DateFormat";
 
 type VendorInfoType = {
     vendor_id: number
@@ -56,8 +57,7 @@ export const vendorColumns = [
     {
         data: 'vendor_created_at',
         render: (data: string) => {
-            const date = new Date(parseInt(data) * 1000);
-            return date.toLocaleDateString();
+            return formatDate(data) || ' ';
         }
     },
     { data: 'remark_text' },

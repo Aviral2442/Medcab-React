@@ -274,6 +274,11 @@ const vendorStatusOptions = [
   { value: "7", label: "Off Duty" },
 ];
 
+const vendortypeOptions = [
+  { value: "0", label: "Manpower Vendor" },
+  { value: "1", label: "Manpower Partner Vendor" },
+];
+
 // Field configuration for vendor - expanded with your full list
 const vendorFieldGroups: Record<string, FieldDef[]> = {
   images: [
@@ -288,10 +293,16 @@ const vendorFieldGroups: Record<string, FieldDef[]> = {
     { label: "Certificate", name: "vpd_certificate", type: "image", editable: true },
   ],
   main: [
-    { label: "Vendor ID", name: "vendor_id", type: "number", editable: false },
     { label: "Vendor Name", name: "vendor_name", type: "text", editable: true },
     { label: "Vendor Mobile", name: "vendor_mobile", type: "tel", editable: true },
     { label: "Vendor Email", name: "vendor_email", type: "email", editable: true },
+    {
+      label: "Gender",
+      name: "vendor_gender",
+      type: "select",
+      editable: true,
+      options: genderOptions,
+    },
     {
       label: "Vendor Status",
       name: "vendor_status",
@@ -299,7 +310,7 @@ const vendorFieldGroups: Record<string, FieldDef[]> = {
       editable: true,
       options: vendorStatusOptions,
     },
-    { label: "Vendor Type", name: "vendor_type", type: "text", editable: true },
+    { label: "Vendor Type", name: "vendor_type", type: "select", editable: true, options: vendortypeOptions },
     { label: "Vendor Rating", name: "vendor_rating", type: "number", editable: false },
     { label: "Vendor Wallet", name: "vendor_wallet", type: "number", editable: false },
     {
@@ -321,40 +332,8 @@ const vendorFieldGroups: Record<string, FieldDef[]> = {
       editable: false,
     },
     { label: "Vendor DOB", name: "vendor_dob", type: "date", editable: true },
-  ],
-  ids_and_refs: [
-    { label: "Vendor Aadhar No", name: "vendor_aadhar_no", type: "text", editable: true },
-    { label: "Pancard No", name: "vendor_pancard_no", type: "text", editable: true },
-    { label: "Vendor Ref Code", name: "vendor_ref_code", type: "text", editable: true },
-    { label: "Vendor Own Ref Code", name: "vendor_own_ref_code", type: "text", editable: true },
-  ],
-  relations_and_meta: [
     { label: "City", name: "city_name", type: "text", editable: true },
     { label: "Category Name", name: "mp_cat_name", type: "text", editable: true },
-    {
-      label: "Vendor Category Details ID",
-      name: "vendor_category_details_id",
-      type: "number",
-      editable: true,
-    },
-    {
-      label: "Vendor Account Details ID",
-      name: "vendor_account_details_id",
-      type: "number",
-      editable: true,
-    },
-    {
-      label: "Vendor Address Details ID",
-      name: "vendor_address_details_id",
-      type: "number",
-      editable: true,
-    },
-    {
-      label: "Vendor Professional Details ID",
-      name: "vendor_professional_details_id",
-      type: "number",
-      editable: true,
-    },
     {
       label: "Prefer Location ID",
       name: "vendor_prefer_location_id",
@@ -362,6 +341,12 @@ const vendorFieldGroups: Record<string, FieldDef[]> = {
       editable: true,
     },
     { label: "MP Partner ID", name: "vendor_mp_partner_id", type: "number", editable: true },
+  ],
+  ids_and_refs: [
+    { label: "Vendor Aadhar No", name: "vendor_aadhar_no", type: "text", editable: true },
+    { label: "Pancard No", name: "vendor_pancard_no", type: "text", editable: true },
+    { label: "Vendor Ref Code", name: "vendor_ref_code", type: "text", editable: true },
+    { label: "Vendor Own Ref Code", name: "vendor_own_ref_code", type: "text", editable: true },
   ],
   status_and_tokens: [
     { label: "OTP Verification Status", name: "v_otp_verification_status", type: "number", editable: true },
@@ -372,30 +357,6 @@ const vendorFieldGroups: Record<string, FieldDef[]> = {
       type: "datetime-local",
       editable: true,
     },
-    { label: "FCM Token", name: "vendor_fcm_token", type: "text", editable: true },
-    { label: "Auth Key", name: "vendor_auth_key", type: "text", editable: true },
-    { label: "Wallet", name: "vendor_wallet", type: "number", editable: true },
-  ],
-  gender_and_misc: [
-    {
-      label: "Gender",
-      name: "vendor_gender",
-      type: "select",
-      editable: true,
-      options: genderOptions,
-    },
-    // {
-    //   label: "A/c Details ID",
-    //   name: "vendor_account_details_id",
-    //   type: "number",
-    //   editable: true,
-    // },
-    // {
-    //   label: "Professional Details ID",
-    //   name: "vendor_professional_details_id",
-    //   type: "number",
-    //   editable: true,
-    // },
   ],
   account_details: [
     { label: "Holder Name", name: "vad_account_holder", type: "text", editable: true },
@@ -539,61 +500,11 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
 
       <Card className="mb-4">
         <Card.Body>
-          <Section title="Relations & Meta">
-            <div>
-              <Row>
-                {vendorFieldGroups.relations_and_meta.map((f) => (
-                  <Col lg={2} md={4} key={f.name}>
-                    <Field
-                      label={f.label}
-                      value={data?.[f.name]}
-                      fieldName={f.name}
-                      type={f.type}
-                      rows={f.rows}
-                      options={f.options}
-                      editable={!!(editable && f.editable !== false)}
-                      onEdit={(value) => handleFieldUpdate(f.name, value)}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            </div>
-          </Section>
-        </Card.Body>
-      </Card>
-
-      <Card className="mb-4">
-        <Card.Body>
           <Section title="Status & Tokens">
             <div>
               <Row>
                 {vendorFieldGroups.status_and_tokens.map((f) => (
                   <Col lg={2} md={4} key={f.name}>
-                    <Field
-                      label={f.label}
-                      value={data?.[f.name]}
-                      fieldName={f.name}
-                      type={f.type}
-                      rows={f.rows}
-                      options={f.options}
-                      editable={!!(editable && f.editable !== false)}
-                      onEdit={(value) => handleFieldUpdate(f.name, value)}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            </div>
-          </Section>
-        </Card.Body>
-      </Card>
-
-      <Card className="mb-4">
-        <Card.Body>
-          <Section title="Gender & Misc">
-            <div>
-              <Row>
-                {vendorFieldGroups.gender_and_misc.map((f) => (
-                  <Col lg={4} md={6} key={f.name}>
                     <Field
                       label={f.label}
                       value={data?.[f.name]}
