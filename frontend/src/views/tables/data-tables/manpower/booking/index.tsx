@@ -37,7 +37,6 @@ const tableConfig: Record<
       "mobile",
       "address",
       "Price",
-      "payment",
       "date",
       "Remark",
       "status",

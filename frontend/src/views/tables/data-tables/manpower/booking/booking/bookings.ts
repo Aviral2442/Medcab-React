@@ -1,5 +1,6 @@
 import axios from "axios";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+import { formatDate } from "@/components/DateFormat";
 // const basePath = import.meta.env.VITE_PATH;
 
 let bookRows: any[] = [];
@@ -37,12 +38,9 @@ export const bookingColumns = [
   { data: 'consumer_mobile_no' },
   { data: 'ua_address' },
   { data: 'mpo_final_price' },
-  { data: 'mpo_payment_mode' },
   { data: 'mpo_order_date',
     render: (data: string) => {
-      const date = new Date(parseInt(data) * 1000);
-      const time = date.getHours() + ':' + date.getMinutes() ;
-      return date.toLocaleDateString() + ' ' + time;
+      return formatDate(data);
     }
    },
    { data: 'remark_text'},
@@ -66,6 +64,6 @@ export const bookingColumns = [
 
 
 export const categoryTableData: TableType<BookingInfoType> = {
-  header: ["S.No.","order id", "name", "mobile_no", "address", "Price", "payment_mode","order_date", "Remark", "status"],
+  header: ["S.No.","order id", "name", "mobile_no", "address", "Price","order_date", "Remark", "status"],
   body: bookRows,
 }

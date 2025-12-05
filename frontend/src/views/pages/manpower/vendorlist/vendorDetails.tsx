@@ -16,9 +16,9 @@ const vendorDetails = () => {
   const tabs = [
     { eventKey: 1, title: "Vendor Details" },
     { eventKey: 2, title: "Transaction List" },
-    { eventKey: 3, title: "PickUp City Vendor List" },
-    { eventKey: 4, title: "Reject List" },
-    { eventKey: 5, title: "Accept List" },
+    // { eventKey: 3, title: "PickUp City Vendor List" },
+    // { eventKey: 4, title: "Reject List" },
+    // { eventKey: 5, title: "Accept List" },
   ];
 
   const fetchVendorDetails = async () => {

@@ -340,7 +340,7 @@ const vendorFieldGroups: Record<string, FieldDef[]> = {
       type: "number",
       editable: true,
     },
-    { label: "MP Partner", name: "partner_full_name", type: "text", editable: true },
+    { label: "Manpower Partner", name: "partner_full_name", type: "text", editable: true },
   ],
   ids_and_refs: [
     { label: "Aadhar No", name: "vendor_aadhar_no", type: "text", editable: true },

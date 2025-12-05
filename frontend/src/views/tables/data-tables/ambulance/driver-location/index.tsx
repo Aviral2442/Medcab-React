@@ -36,7 +36,7 @@ const tableConfig: Record<
       "ID",
       "Name",
       "Mobile",
-      "V Name",
+      "Vehicle",
       "VRC Number",
       "Wallet",
       "Created At",
