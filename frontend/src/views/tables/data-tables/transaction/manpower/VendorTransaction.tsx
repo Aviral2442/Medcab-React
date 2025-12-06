@@ -17,7 +17,6 @@ import _pdfFonts from "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
 import { FaBuilding, FaCar } from "react-icons/fa";
 import { FaPeoplePulling } from "react-icons/fa6";
-import { format } from "path";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -29,16 +28,18 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Transaction By",
-      "Amount",
+      "By",
+      "Name",
+      "Mobile",
       "Pay ID",
       "Type",
+      "Amount",
       "Prev Amt",
       "New Amt",
       "Note",
-      "Time",
-      "Created At",
+      "Wallet",
       "Status",
+      "Time",
     ],
   },
 };
@@ -420,7 +421,6 @@ const ExportDataWithButtons = ({
                   {headers.map((header, idx) => (
                     <th key={idx}>{header}</th>
                   ))}
-                  <th>Actions</th>
                 </tr>
               </thead>
             </DataTable>
