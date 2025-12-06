@@ -15,8 +15,8 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
-import { FaBuilding, FaCar } from "react-icons/fa";
-import { FaPeoplePulling } from "react-icons/fa6";
+import { FaBuilding, FaUser } from "react-icons/fa";
+import { FaUserGroup } from "react-icons/fa6";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -184,9 +184,9 @@ const ExportDataWithButtons = ({
     const typeNum = Number(type);
     switch (typeNum) {
       case 0:
-        return <FaCar title="Direct Driver" />;
+        return <FaUser title="Direct Driver" />;
       case 1:
-        return <FaPeoplePulling title="Partner" />;
+        return <FaUserGroup title="Partner" />;
       case 2:
         return <FaBuilding title="Company" />;
       default:
