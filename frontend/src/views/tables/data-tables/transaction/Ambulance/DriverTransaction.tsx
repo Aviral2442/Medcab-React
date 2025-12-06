@@ -171,21 +171,21 @@ const ExportDataWithButtons = ({
     const typeNum = Number(type);
     switch (typeNum) {
       case 1:
-        return "Add in Wallet (A)";  //credit
+        return "Add in Wallet (A)"; //credit
       case 2:
-        return "Cancellation Charge (W)";
+        return "Cancellation Charge (W)"; //red
       case 3:
-        return "Cash Collect (W)";
+        return "Cash Collect (W)"; //green
       case 4:
-        return "Online Booking Payment (A)";
+        return "Online Booking Payment (A)"; //credit
       case 5:
-        return "Transfer to Bank (W)";
+        return "Transfer to Bank (W)"; //gray
       case 6:
-        return "Fetched by Partner (W)";
+        return "Fetched by Partner (W)"; //gray
       case 7:
-        return "Incentive from Company (A)";
+        return "Incentive from Company (A)"; //green
       case 15:
-        return "Tip from Consumer";
+        return "Tip from Consumer"; //green
       default:
         return `${type || "N/A"}`;
     }
@@ -241,9 +241,7 @@ const ExportDataWithButtons = ({
       render: (_data: any, _type: any, row: any) => {
         const name = row?.trans_by_name;
         const url = `/driver-detail/${row.driver_transection_by}`;
-        return name
-          ? `<a href="${url}">${name}</a>`
-          : "N/A";
+        return name ? `<a href="${url}">${name}</a>` : "N/A";
       },
     },
     {
@@ -252,10 +250,8 @@ const ExportDataWithButtons = ({
       render: (data: any, _type: any, row: any) => {
         const mobile = data;
         const url = `/driver-detail/${row.driver_transection_by}`;
-        return mobile
-          ? `<a href="${url}">${mobile}</a>`
-          : "N/A";
-      }
+        return mobile ? `<a href="${url}">${mobile}</a>` : "N/A";
+      },
     },
     {
       title: "Note",
@@ -270,10 +266,44 @@ const ExportDataWithButtons = ({
     {
       title: "Amount",
       data: "driver_transection_amount",
-      render: (data: any) =>
-        data !== null && data !== undefined && data !== ""
-          ? `₹ ${formatValue(data)}`
-          : "",
+      render: (data: any, _type: any, row: any) => {
+        switch (row.driver_transection_type) {
+          case "1":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`;
+          case "2":
+            return `<span class="badge badge-soft-danger">₹ -${formatValue(
+              data
+            )}</span>`;
+          case "3":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`;
+          case "4":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`;
+          case "5":
+            return `<span class="badge badge-soft-primary">₹ -${formatValue(
+              data
+            )}</span>`;
+          case "6":
+            return `<span class="badge badge-soft-primary">₹ -${formatValue(
+              data
+            )}</span>`;
+          case "7":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`;
+          case "15":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`;
+          default:
+            return `₹${formatValue(data)}`;
+        }
+      },
     },
     {
       title: "Prev Amt",

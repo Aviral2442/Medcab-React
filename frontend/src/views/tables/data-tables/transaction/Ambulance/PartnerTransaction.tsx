@@ -156,7 +156,7 @@ const ExportDataWithButtons = ({
       case 2:
         return "Transfer to Bank"; //debit
       case 3:
-        return "Fetch from Driver";
+        return "Fetch from Driver"; //gray
       default:
         return `${type || "N/A"}`;
     }
@@ -213,10 +213,24 @@ const ExportDataWithButtons = ({
     {
       title: "Amount",
       data: "partner_transection_amount",
-      render: (data: any) =>
-        data !== null && data !== undefined && data !== ""
-          ? `₹ ${formatValue(data)}`
-          : "-",
+        render: (data: any, _type: any, row: any) => {
+        switch (row.partner_transection_type) {
+          case "1":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`
+          case "2":
+            return `<span class="badge badge-soft-danger">₹ -${formatValue(
+              data
+            )}</span>`;
+            case "3":
+            return `<span class="badge badge-soft-primary">₹ ${formatValue(
+              data
+            )}</span>`;
+          default:
+            return `₹${formatValue(data)}`;
+        }
+      },
     },
     {
       title: "Prev Amt",

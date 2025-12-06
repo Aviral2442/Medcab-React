@@ -17,6 +17,7 @@ import _pdfFonts from "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
 import { FaBuilding, FaCar } from "react-icons/fa";
 import { FaPeoplePulling } from "react-icons/fa6";
+import { format } from "path";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -158,21 +159,21 @@ const ExportDataWithButtons = ({
       case 1:
         return "add-in wallet(A)"; //credit
       case 2:
-        return "cancelation charge(W)";
+        return "cancelation charge(W)"; //red
       case 3:
-        return "Cash Collect(W)";
+        return "Cash Collect(W)"; //credit
       case 4:
-        return "online booking payment(A)";
+        return "online booking payment(A)"; //credit
       case 5:
-        return "for transfer to bank account (W)";
+        return "for transfer to bank account (W)"; //gray
       case 6:
-        return "fetched by Partner (W)";
+        return "fetched by Partner (W)";  //gray
       case 7:
-        return "Incentive from Company(A)";
+        return "Incentive from Company(A)"; //credit
       case 8:
-        return "Debit agains Accept Booking Charge (W)"; //debit
+        return "Debit agains Accept Booking Charge (W)"; //red
       case 9:
-        return "Refund agains Accept Booking Cancel (A)";
+        return "Refund agains Accept Booking Cancel (A)"; //credit
       default:
         return `${type || "N/A"}`;
     }
@@ -226,9 +227,7 @@ const ExportDataWithButtons = ({
       render: (_data: any, _type: any, row: any) => {
         const name = row?.vendor_name;
         const url = `/vendor-details/${row.vendor_transection_by}`;
-        return name
-          ? `<a href="${url}">${name}</a>`
-          : "N/A";
+        return name ? `<a href="${url}">${name}</a>` : "N/A";
       },
     },
     {
@@ -237,10 +236,8 @@ const ExportDataWithButtons = ({
       render: (data: any, _type: any, row: any) => {
         const mobile = data;
         const url = `/vendor-details/${row.vendor_transection_by}`;
-        return mobile
-          ? `<a href="${url}">${mobile}</a>`
-          : "N/A";
-      }
+        return mobile ? `<a href="${url}">${mobile}</a>` : "N/A";
+      },
     },
     {
       title: "Pay ID",
@@ -255,10 +252,50 @@ const ExportDataWithButtons = ({
     {
       title: "Amount",
       data: "vendor_transection_amount",
-      render: (data: any) =>
-        data !== null && data !== undefined && data !== ""
-          ? `₹${formatValue(data)}`
-          : "",
+      render: (data: any, _type: any, row: any) => {
+        switch (row.vendor_transection_type) {
+          case "1":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`;
+          case "2":
+            return `<span class="badge badge-soft-danger">₹ ${formatValue(
+              data
+            )}</span>`;
+            case "3":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`;
+          case "4":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`;
+          case "5":
+            return `<span class="badge badge-soft-secondary">₹ -${formatValue(
+              data
+            )}</span>`;
+          case "6":
+            return `<span class="badge badge-soft-secondary">₹ -${formatValue(
+              data
+            )}</span>`;
+          case "7":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`;
+          case "8":
+            return `<span class="badge badge-soft-danger">₹ ${formatValue(
+              data
+            )}</span>`;
+          case "9":
+            return `<span class="badge badge-soft-success">₹ ${formatValue(
+              data
+            )}</span>`;
+          default:
+            return `₹${formatValue(data)}`;
+
+          
+        }
+      },
     },
     {
       title: "Prev Amt",
@@ -296,19 +333,19 @@ const ExportDataWithButtons = ({
             return `<span class="badge badge-label badge-soft-secondary">${
               data || "N/A"
             }</span>`;
-          }
-        },
+        }
       },
-      {
-        title: "Status",
-        data: "vendor_transection_status",
-        render: (data: any) => getTransactionStatus(data),
-      },
-      {
-        title: "Time",
-        data: "vendor_transection_time_unix",
-        render: (data: any) => (data ? formatDate(data) : "-"),
-      },
+    },
+    {
+      title: "Status",
+      data: "vendor_transection_status",
+      render: (data: any) => getTransactionStatus(data),
+    },
+    {
+      title: "Time",
+      data: "vendor_transection_time_unix",
+      render: (data: any) => (data ? formatDate(data) : "-"),
+    },
   ];
 
   return (
