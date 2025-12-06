@@ -184,9 +184,7 @@ const ExportDataWithButtons = ({
         const last = row?.partner_l_name;
         const url = `/partner-detail/${row.partner_transection_by}`;
         const fullName = [first, last].filter(Boolean).join(" ");
-        return fullName
-          ? `<a href="${url}">${fullName}</a>`
-          : "N/A";
+        return fullName ? `<a href="${url}">${fullName}</a>` : "N/A";
       },
     },
     {
@@ -195,10 +193,8 @@ const ExportDataWithButtons = ({
       render: (data: any, _type: any, row: any) => {
         const mobile = data;
         const url = `/partner-detail/${row.partner_transection_by}`;
-        return mobile
-          ? `<a href="${url}">${mobile}</a>`
-          : "N/A";
-      }
+        return mobile ? `<a href="${url}">${mobile}</a>` : "N/A";
+      },
     },
     {
       title: "Pay ID",
@@ -211,19 +207,27 @@ const ExportDataWithButtons = ({
       render: (data: any) => getTransactionType(data),
     },
     {
+      title: "Prev Amt",
+      data: "partner_transection_wallet_previous_amount",
+      render: (data: any) =>
+        data !== null && data !== undefined && data !== ""
+          ? `₹ ${formatValue(data)}`
+          : "-",
+    },
+    {
       title: "Amount",
       data: "partner_transection_amount",
-        render: (data: any, _type: any, row: any) => {
+      render: (data: any, _type: any, row: any) => {
         switch (row.partner_transection_type) {
           case "1":
             return `<span class="badge badge-soft-success">₹ ${formatValue(
               data
-            )}</span>`
+            )}</span>`;
           case "2":
             return `<span class="badge badge-soft-danger">₹ -${formatValue(
               data
             )}</span>`;
-            case "3":
+          case "3":
             return `<span class="badge badge-soft-primary">₹ ${formatValue(
               data
             )}</span>`;
@@ -232,14 +236,7 @@ const ExportDataWithButtons = ({
         }
       },
     },
-    {
-      title: "Prev Amt",
-      data: "partner_transection_wallet_previous_amount",
-      render: (data: any) =>
-        data !== null && data !== undefined && data !== ""
-          ? `₹ ${formatValue(data)}`
-          : "-",
-    },
+
     {
       title: "New Amt",
       data: "partner_transection_wallet_new_amount",

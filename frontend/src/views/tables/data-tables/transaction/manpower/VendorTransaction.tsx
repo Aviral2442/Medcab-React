@@ -15,9 +15,8 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
-import { FaBuilding, FaCar } from "react-icons/fa";
-import { FaPeoplePulling } from "react-icons/fa6";
-import { format } from "path";
+import { FaBuilding, FaUser } from "react-icons/fa";
+import { FaUserGroup } from "react-icons/fa6";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -29,16 +28,18 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
     headers: [
       "S.No.",
       "ID",
-      "Transaction By",
-      "Amount",
+      "By",
+      "Name",
+      "Mobile",
       "Pay ID",
       "Type",
+      "Amount",
       "Prev Amt",
       "New Amt",
       "Note",
-      "Time",
-      "Created At",
+      "Wallet",
       "Status",
+      "Time",
     ],
   },
 };
@@ -183,9 +184,9 @@ const ExportDataWithButtons = ({
     const typeNum = Number(type);
     switch (typeNum) {
       case 0:
-        return <FaCar title="Direct Driver" />;
+        return <FaUser title="Direct Driver" />;
       case 1:
-        return <FaPeoplePulling title="Partner" />;
+        return <FaUserGroup title="Partner" />;
       case 2:
         return <FaBuilding title="Company" />;
       default:
@@ -249,6 +250,14 @@ const ExportDataWithButtons = ({
       data: "vendor_transection_type",
       render: (data: any) => getTransactionType(data),
     },
+        {
+      title: "Prev Amt",
+      data: "vendor_transection_wallet_previous_amount",
+      render: (data: any) =>
+        data !== null && data !== undefined && data !== ""
+          ? `₹${formatValue(data)}`
+          : "-",
+    },
     {
       title: "Amount",
       data: "vendor_transection_amount",
@@ -297,14 +306,7 @@ const ExportDataWithButtons = ({
         }
       },
     },
-    {
-      title: "Prev Amt",
-      data: "vendor_transection_wallet_previous_amount",
-      render: (data: any) =>
-        data !== null && data !== undefined && data !== ""
-          ? `₹${formatValue(data)}`
-          : "-",
-    },
+
     {
       title: "New Amt",
       data: "vendor_transection_wallet_new_amount",
@@ -354,7 +356,7 @@ const ExportDataWithButtons = ({
         title={
           <div className="w-100 ">
             {/* Fix: Changed title to Consumer Transaction List */}
-            {tabKey === 1 ? "Consumer Transaction List" : ""}
+            {tabKey === 1 ? "Vendor Transaction List" : ""}
           </div>
         }
         className="mb-2 overflow-x-scroll"
@@ -420,7 +422,6 @@ const ExportDataWithButtons = ({
                   {headers.map((header, idx) => (
                     <th key={idx}>{header}</th>
                   ))}
-                  <th>Actions</th>
                 </tr>
               </thead>
             </DataTable>
