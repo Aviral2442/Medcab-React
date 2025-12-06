@@ -340,7 +340,7 @@ export const getCityContentService = async (filters?: {
                 city_content.city_timestamp
             FROM city_content
             ${whereSQL}
-            ORDER BY city_content.city_id DESC
+            ORDER BY city_content.city_id ASC
             LIMIT ? OFFSET ?
         `;
 
