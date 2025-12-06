@@ -114,6 +114,10 @@
   color: #73879C !important;
 }
 
+.table tbody tr td a{
+  color: inherit !important;
+}
+
 .table tbody tr td div button{
   font-size: 0.7rem !important;
   font-weight: 800 !important;
