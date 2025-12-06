@@ -1610,13 +1610,23 @@ export const ambulanceBookingDetailService = async (bookingId: number) => {
     try {
 
         const [rows]: any = await db.query(
-            `SELECT * FROM booking_view WHERE booking_id = ?`,
+            `SELECT
+            booking_view.*,
+            driver.driver_name,
+            driver.driver_last_name,
+            driver.driver_mobile,
+            vehicle.v_vehicle_name,
+            vehicle.vehicle_rc_number
+            FROM booking_view
+            LEFT JOIN driver ON booking_view.booking_acpt_driver_id > 0 AND booking_view.booking_acpt_driver_id = driver.driver_id
+            LEFT JOIN vehicle ON booking_view.booking_acpt_vehicle_id > 0 AND booking_view.booking_acpt_vehicle_id = vehicle.vehicle_id
+            WHERE booking_view.booking_id = ?`,
             [bookingId]
         );
-
         if (!rows || rows.length === 0) {
             throw new ApiError(404, "Ambulance booking not found");
         }
+        console.log(rows[0]);
 
         return {
             status: 200,

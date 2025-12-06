@@ -262,10 +262,10 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
       title: "Location Information",
       fields: [
         { label: "Pickup Location", name: "booking_pickup", type: "textarea" as const, rows: 2, cols: 6 },
+        { label: "Drop Location", name: "booking_drop", type: "textarea" as const, rows: 2, cols: 6 },
         { label: "Pickup City", name: "booking_pickup_city", cols: 3 },
         { label: "Pickup Latitude", name: "booking_pick_lat", type: "number" as const, editable: false, cols: 3 },
         { label: "Pickup Longitude", name: "booking_pick_long", type: "number" as const, editable: false, cols: 3 },
-        { label: "Drop Location", name: "booking_drop", type: "textarea" as const, rows: 2, cols: 6 },
         { label: "Drop City", name: "booking_drop_city", cols: 3 },
         { label: "Drop Latitude", name: "booking_drop_lat", type: "number" as const, editable: false, cols: 3 },
         { label: "Drop Longitude", name: "booking_drop_long", type: "number" as const, editable: false, cols: 3 },
