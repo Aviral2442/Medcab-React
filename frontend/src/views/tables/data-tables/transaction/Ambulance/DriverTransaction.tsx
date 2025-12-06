@@ -15,8 +15,8 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
-import { FaPeopleCarryBox, FaPeoplePulling, FaUserGroup } from "react-icons/fa6";
-import { FaBuilding, FaCar, FaUser } from "react-icons/fa";
+import { FaPeopleCarryBox, FaUserGroup } from "react-icons/fa6";
+import { FaBuilding, FaUser } from "react-icons/fa";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
