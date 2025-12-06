@@ -15,8 +15,8 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
-import { FaPeopleCarryBox, FaPeoplePulling } from "react-icons/fa6";
-import { FaBuilding, FaCar } from "react-icons/fa";
+import { FaPeopleCarryBox, FaPeoplePulling, FaUserGroup } from "react-icons/fa6";
+import { FaBuilding, FaCar, FaUser } from "react-icons/fa";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -195,9 +195,9 @@ const ExportDataWithButtons = ({
     const typeNum = Number(type);
     switch (typeNum) {
       case 0:
-        return <FaCar title="Direct Driver" />;
+        return <FaUser title="Direct Driver" />;
       case 1:
-        return <FaPeoplePulling title="By Partner" />;
+        return <FaUserGroup title="By Partner" />;
       case 2:
         return <FaBuilding title="By Company" />;
       case 3:
@@ -263,6 +263,14 @@ const ExportDataWithButtons = ({
       data: "driver_transection_type",
       render: (data: any) => getTransactionType(data),
     },
+        {
+      title: "Prev Amt",
+      data: "driver_transection_wallet_previous_amount",
+      render: (data: any) =>
+        data !== null && data !== undefined && data !== ""
+          ? `₹ ${formatValue(data)}`
+          : "-",
+    },
     {
       title: "Amount",
       data: "driver_transection_amount",
@@ -305,14 +313,7 @@ const ExportDataWithButtons = ({
         }
       },
     },
-    {
-      title: "Prev Amt",
-      data: "driver_transection_wallet_previous_amount",
-      render: (data: any) =>
-        data !== null && data !== undefined && data !== ""
-          ? `₹ ${formatValue(data)}`
-          : "-",
-    },
+
     {
       title: "New Amt",
       data: "driver_transection_wallet_new_amount",

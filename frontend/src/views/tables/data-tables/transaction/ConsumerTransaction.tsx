@@ -191,6 +191,14 @@ const ExportDataWithButtons = ({
       data: "consumer_transection_payment_id",
       render: (data: any) => (data ? data : "-"),
     },
+        {
+      title: "Prev Amt",
+      data: "consumer_transection_previous_amount",
+      render: (data: any) =>
+        data !== null && data !== undefined && data !== ""
+          ? `₹${formatValue(data)}`
+          : "-",
+    },
     {
       title: "Amount",
       data: "consumer_transection_amount",
@@ -221,14 +229,7 @@ const ExportDataWithButtons = ({
         }
       },
     },
-    {
-      title: "Prev Amt",
-      data: "consumer_transection_previous_amount",
-      render: (data: any) =>
-        data !== null && data !== undefined && data !== ""
-          ? `₹${formatValue(data)}`
-          : "-",
-    },
+
     {
       title: "New Amt",
       data: "consumer_transection_new_amount",

@@ -250,6 +250,14 @@ const ExportDataWithButtons = ({
       data: "vendor_transection_type",
       render: (data: any) => getTransactionType(data),
     },
+        {
+      title: "Prev Amt",
+      data: "vendor_transection_wallet_previous_amount",
+      render: (data: any) =>
+        data !== null && data !== undefined && data !== ""
+          ? `₹${formatValue(data)}`
+          : "-",
+    },
     {
       title: "Amount",
       data: "vendor_transection_amount",
@@ -298,14 +306,7 @@ const ExportDataWithButtons = ({
         }
       },
     },
-    {
-      title: "Prev Amt",
-      data: "vendor_transection_wallet_previous_amount",
-      render: (data: any) =>
-        data !== null && data !== undefined && data !== ""
-          ? `₹${formatValue(data)}`
-          : "-",
-    },
+
     {
       title: "New Amt",
       data: "vendor_transection_wallet_new_amount",
@@ -355,7 +356,7 @@ const ExportDataWithButtons = ({
         title={
           <div className="w-100 ">
             {/* Fix: Changed title to Consumer Transaction List */}
-            {tabKey === 1 ? "Consumer Transaction List" : ""}
+            {tabKey === 1 ? "Vendor Transaction List" : ""}
           </div>
         }
         className="mb-2 overflow-x-scroll"
