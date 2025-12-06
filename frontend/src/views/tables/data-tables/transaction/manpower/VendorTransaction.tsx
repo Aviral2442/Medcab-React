@@ -227,7 +227,7 @@ const ExportDataWithButtons = ({
         const name = row?.vendor_name;
         const url = `/vendor-details/${row.vendor_transection_by}`;
         return name
-          ? `<a href="${url}" class="text-decoration-none text-primary">${name}</a>`
+          ? `<a href="${url}">${name}</a>`
           : "N/A";
       },
     },
@@ -238,7 +238,7 @@ const ExportDataWithButtons = ({
         const mobile = data;
         const url = `/vendor-details/${row.vendor_transection_by}`;
         return mobile
-          ? `<a href="${url}" class="text-decoration-none text-primary">${mobile}</a>`
+          ? `<a href="${url}">${mobile}</a>`
           : "N/A";
       }
     },

@@ -15,6 +15,8 @@ import _pdfMake from "pdfmake/build/pdfmake";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
 
+
+
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
 DT.Buttons.pdfMake(pdfmake);
@@ -27,8 +29,8 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
       "ID",
       "Name",
       "Mobile",
-      "Amount",
       "Pay ID",
+      "Amount",
       "Prev Amt",
       "New Amt",
       "Note",
@@ -169,7 +171,7 @@ const ExportDataWithButtons = ({
         const name = row?.consumer_name;
         const url = `/consumer-details/${row.consumer_transection_done_by}`;
         return name
-          ? `<a href="${url}" class="text-decoration-none text-primary">${name}</a>`
+          ? `<a href="${url}">${name}</a>`
           : "N/A";
       },
     },
@@ -180,9 +182,14 @@ const ExportDataWithButtons = ({
         const mobile = data;
         const url = `/consumer-details/${row.consumer_transection_done_by}`;
         return mobile
-          ? `<a href="${url}" class="text-decoration-none text-primary">${mobile}</a>`
+          ? `<a href="${url}">${mobile}</a>`
           : "N/A";
       }
+    },
+    {
+      title: "Pay ID",
+      data: "consumer_transection_payment_id",
+      render: (data: any) => (data ? data : "-"),
     },
     {
       title: "Amount",
@@ -213,11 +220,6 @@ const ExportDataWithButtons = ({
             return `₹ ${formatValue(data)}`;
         }
       },
-    },
-    {
-      title: "Pay ID",
-      data: "consumer_transection_payment_id",
-      render: (data: any) => (data ? data : "-"),
     },
     {
       title: "Prev Amt",

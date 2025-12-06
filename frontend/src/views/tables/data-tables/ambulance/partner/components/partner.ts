@@ -35,25 +35,33 @@ export const getPartnerList = async () => {
 
 export const partnerColumns = [
     { data: 'partner_id' },
-    { data: 'partner_profile_img',
+    {
+        data: 'partner_profile_img',
         render: (data: string) => {
             if (data) {
                 return `<img src="${basePath}/${data}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />`;
             }
             return 'N/A';
-        } 
+        }
     },
     { data: 'partner_f_name' },
     // { data: 'partner_l_name' },
     { data: 'partner_mobile' },
-    { 
+    {
         data: 'partner_wallet',
         render: (data: number) => {
             return `₹${data || 0}`;
         }
     },
     // { data: 'partner_city_id' },
-    { data: 'partner_registration_step' },
+    {
+        data: 'partner_registration_step',
+        render: (data: string) => {
+            if (data === '0') return 'New';
+            else if (data === '1') return 'Active';
+            else return '';
+        }
+    },
     {
         data: 'created_at',
         render: (data: string) => {

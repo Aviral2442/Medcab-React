@@ -185,7 +185,7 @@ const ExportDataWithButtons = ({
         const url = `/partner-detail/${row.partner_transection_by}`;
         const fullName = [first, last].filter(Boolean).join(" ");
         return fullName
-          ? `<a href="${url}" class="text-decoration-none text-primary">${fullName}</a>`
+          ? `<a href="${url}">${fullName}</a>`
           : "N/A";
       },
     },
@@ -196,7 +196,7 @@ const ExportDataWithButtons = ({
         const mobile = data;
         const url = `/partner-detail/${row.partner_transection_by}`;
         return mobile
-          ? `<a href="${url}" class="text-decoration-none text-primary">${mobile}</a>`
+          ? `<a href="${url}">${mobile}</a>`
           : "N/A";
       }
     },

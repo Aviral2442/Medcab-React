@@ -17,7 +17,9 @@ const cityValidationSchema = Yup.object().shape({
   city_meta_desc: Yup.string().required("Meta Description is required"),
   city_body_desc: Yup.string().required("Body Description is required"),
   city_why_choose_us: Yup.string().required("Why Choose Us is required"),
-  why_choose_meta_desc: Yup.string().required("Why Choose Meta Description is required"),
+  why_choose_meta_desc: Yup.string().required(
+    "Why Choose Meta Description is required"
+  ),
   city_block1_heading: Yup.string().required("Block 1 Heading is required"),
   city_block1_body: Yup.string().required("Block 1 Body is required"),
   city_block2_heading: Yup.string().required("Block 2 Heading is required"),
@@ -29,8 +31,12 @@ const cityValidationSchema = Yup.object().shape({
   city_force_keyword: Yup.string().required("Force Keyword is required"),
   city_faq_heading: Yup.string().required("FAQ Heading is required"),
   city_faq_desc: Yup.string().required("FAQ Description is required"),
-  city_emergency_heading: Yup.string().required("Emergency Heading is required"),
-  city_emergency_desc: Yup.string().required("Emergency Description is required"),
+  city_emergency_heading: Yup.string().required(
+    "Emergency Heading is required"
+  ),
+  city_emergency_desc: Yup.string().required(
+    "Emergency Description is required"
+  ),
 });
 
 const pathologyCityValidationSchema = Yup.object().shape({
@@ -38,24 +44,48 @@ const pathologyCityValidationSchema = Yup.object().shape({
   city_pathology_title_sku: Yup.string().required("Sku is required"),
   city_pathology_title: Yup.string().required("Title is required"),
   city_pathology_heading: Yup.string().required("Heading is required"),
-  city_pathology_body_desc: Yup.string().required("Body Description is required"),
-  city_pathology_why_choose_us: Yup.string().required("Why Choose Us is required"),
-  city_pathology_block1_heading: Yup.string().required("Block 1 Heading is required"),
+  city_pathology_body_desc: Yup.string().required(
+    "Body Description is required"
+  ),
+  city_pathology_why_choose_us: Yup.string().required(
+    "Why Choose Us is required"
+  ),
+  city_pathology_block1_heading: Yup.string().required(
+    "Block 1 Heading is required"
+  ),
   city_pathology_block1_body: Yup.string().required("Block 1 Body is required"),
-  city_pathology_block2_heading: Yup.string().required("Block 2 Heading is required"),
+  city_pathology_block2_heading: Yup.string().required(
+    "Block 2 Heading is required"
+  ),
   city_pathology_block2_body: Yup.string().required("Block 2 Body is required"),
-  city_pathology_block3_heading: Yup.string().required("Block 3 Heading is required"),
+  city_pathology_block3_heading: Yup.string().required(
+    "Block 3 Heading is required"
+  ),
   city_pathology_block3_body: Yup.string().required("Block 3 Body is required"),
-  city_pathology_thumbnail_alt: Yup.string().required("Thumbnail Alt Text is required"),
-  city_pathology_thumbnail_title: Yup.string().required("Thumbnail Title is required"),
+  city_pathology_thumbnail_alt: Yup.string().required(
+    "Thumbnail Alt Text is required"
+  ),
+  city_pathology_thumbnail_title: Yup.string().required(
+    "Thumbnail Title is required"
+  ),
   city_pathology_meta_title: Yup.string().required("Meta Title is required"),
-  city_pathology_meta_desc: Yup.string().required("Meta Description is required"),
-  city_pathology_meta_keyword: Yup.string().required("Meta Keywords is required"),
-  city_pathology_force_keyword: Yup.string().required("Force Keyword is required"),
+  city_pathology_meta_desc: Yup.string().required(
+    "Meta Description is required"
+  ),
+  city_pathology_meta_keyword: Yup.string().required(
+    "Meta Keywords is required"
+  ),
+  city_pathology_force_keyword: Yup.string().required(
+    "Force Keyword is required"
+  ),
   city_pathology_faq_heading: Yup.string().required("FAQ Heading is required"),
   city_pathology_faq_desc: Yup.string().required("FAQ Description is required"),
-  city_pathology_emergency_heading: Yup.string().required("Emergency Heading is required"),
-  city_pathology_emergency_desc: Yup.string().required("Emergency Description is required"),
+  city_pathology_emergency_heading: Yup.string().required(
+    "Emergency Heading is required"
+  ),
+  city_pathology_emergency_desc: Yup.string().required(
+    "Emergency Description is required"
+  ),
 });
 
 interface AddCityProps {
@@ -68,10 +98,10 @@ interface AddCityProps {
 
 // Map section names to their IDs
 const sectionMap: Record<string, number> = {
-  'ambulance': 1,
-  'manpower': 2,
-  'video-consultation': 3,
-  'pathology': 4,
+  ambulance: 1,
+  manpower: 2,
+  "video-consultation": 3,
+  pathology: 4,
 };
 
 const AddCity: React.FC<AddCityProps> = ({
@@ -83,13 +113,13 @@ const AddCity: React.FC<AddCityProps> = ({
 }) => {
   const navigate = useNavigate();
   const { id, section } = useParams();
-  
+
   // Determine sectionId from props or URL params
   const sectionId = propSectionId ?? (section ? sectionMap[section] || 1 : 1);
-  
+
   const isEditMode = mode === "edit" || Boolean(id);
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
-  
+
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -182,22 +212,28 @@ const AddCity: React.FC<AddCityProps> = ({
           city_pathology_body_desc: data.city_pathology_body_desc || "",
           city_pathology_why_choose_us: data.city_pathology_why_choose_us || "",
           why_choose_meta_desc: data.why_choose_meta_desc || "",
-          city_pathology_block1_heading: data.city_pathology_block1_heading || "",
+          city_pathology_block1_heading:
+            data.city_pathology_block1_heading || "",
           city_pathology_block1_body: data.city_pathology_block1_body || "",
-          city_pathology_block2_heading: data.city_pathology_block2_heading || "",
+          city_pathology_block2_heading:
+            data.city_pathology_block2_heading || "",
           city_pathology_block2_body: data.city_pathology_block2_body || "",
-          city_pathology_block3_heading: data.city_pathology_block3_heading || "",
+          city_pathology_block3_heading:
+            data.city_pathology_block3_heading || "",
           city_pathology_block3_body: data.city_pathology_block3_body || "",
           city_pathology_thumbnail_alt: data.city_pathology_thumbnail_alt || "",
-          city_pathology_thumbnail_title: data.city_pathology_thumbnail_title || "",
+          city_pathology_thumbnail_title:
+            data.city_pathology_thumbnail_title || "",
           city_pathology_meta_title: data.city_pathology_meta_title || "",
           city_pathology_meta_desc: data.city_pathology_meta_desc || "",
           city_pathology_meta_keyword: data.city_pathology_meta_keyword || "",
           city_pathology_force_keyword: data.city_pathology_force_keyword || "",
           city_pathology_faq_heading: data.city_pathology_faq_heading || "",
           city_pathology_faq_desc: data.city_pathology_faq_desc || "",
-          city_pathology_emergency_heading: data.city_pathology_emergency_heading || "",
-          city_pathology_emergency_desc: data.city_pathology_emergency_desc || "",
+          city_pathology_emergency_heading:
+            data.city_pathology_emergency_heading || "",
+          city_pathology_emergency_desc:
+            data.city_pathology_emergency_desc || "",
         });
         if (data.city_pathology_thumbnail) {
           setPreviewImage(`${baseURL}/${data.city_pathology_thumbnail}`);
@@ -259,13 +295,16 @@ const AddCity: React.FC<AddCityProps> = ({
 
       const response = await axios.get(`${baseURL}${endpoint}`);
       console.log("Full response:", response.data);
-      
+
       if (sectionId === 4) {
         // Handle pathology section
         const city = response.data?.jsonData?.city_pathology_content;
-        
+
         if (!city) {
-          console.error("Pathology city content not found. Available keys:", Object.keys(response.data?.jsonData || {}));
+          console.error(
+            "Pathology city content not found. Available keys:",
+            Object.keys(response.data?.jsonData || {})
+          );
           throw new Error("Pathology city content not found in response");
         }
 
@@ -278,22 +317,28 @@ const AddCity: React.FC<AddCityProps> = ({
           city_pathology_body_desc: city.city_pathology_body_desc || "",
           city_pathology_why_choose_us: city.city_pathology_why_choose_us || "",
           why_choose_meta_desc: city.why_choose_meta_desc || "",
-          city_pathology_block1_heading: city.city_pathology_block1_heading || "",
+          city_pathology_block1_heading:
+            city.city_pathology_block1_heading || "",
           city_pathology_block1_body: city.city_pathology_block1_body || "",
-          city_pathology_block2_heading: city.city_pathology_block2_heading || "",
+          city_pathology_block2_heading:
+            city.city_pathology_block2_heading || "",
           city_pathology_block2_body: city.city_pathology_block2_body || "",
-          city_pathology_block3_heading: city.city_pathology_block3_heading || "",
+          city_pathology_block3_heading:
+            city.city_pathology_block3_heading || "",
           city_pathology_block3_body: city.city_pathology_block3_body || "",
           city_pathology_thumbnail_alt: city.city_pathology_thumbnail_alt || "",
-          city_pathology_thumbnail_title: city.city_pathology_thumbnail_title || "",
+          city_pathology_thumbnail_title:
+            city.city_pathology_thumbnail_title || "",
           city_pathology_meta_title: city.city_pathology_meta_title || "",
           city_pathology_meta_desc: city.city_pathology_meta_desc || "",
           city_pathology_meta_keyword: city.city_pathology_meta_keyword || "",
           city_pathology_force_keyword: city.city_pathology_force_keyword || "",
           city_pathology_faq_heading: city.city_pathology_faq_heading || "",
           city_pathology_faq_desc: city.city_pathology_faq_desc || "",
-          city_pathology_emergency_heading: city.city_pathology_emergency_heading || "",
-          city_pathology_emergency_desc: city.city_pathology_emergency_desc || "",
+          city_pathology_emergency_heading:
+            city.city_pathology_emergency_heading || "",
+          city_pathology_emergency_desc:
+            city.city_pathology_emergency_desc || "",
         });
 
         if (city.city_pathology_thumbnail) {
@@ -302,7 +347,7 @@ const AddCity: React.FC<AddCityProps> = ({
       } else {
         let city;
         const jsonData = response.data?.jsonData;
-        
+
         if (sectionId === 1) {
           city = jsonData?.city_content;
         } else if (sectionId === 2) {
@@ -312,7 +357,10 @@ const AddCity: React.FC<AddCityProps> = ({
         }
 
         if (!city) {
-          console.error("City content not found. Available keys:", Object.keys(jsonData || {}));
+          console.error(
+            "City content not found. Available keys:",
+            Object.keys(jsonData || {})
+          );
           console.error("Full jsonData:", jsonData);
           throw new Error("City content not found in response");
         }
@@ -350,7 +398,11 @@ const AddCity: React.FC<AddCityProps> = ({
       }
     } catch (err: any) {
       console.error("Error fetching city details:", err);
-      setError(err.response?.data?.message || err.message || "Failed to fetch city details");
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to fetch city details"
+      );
     } finally {
       setLoading(false);
     }
@@ -378,18 +430,23 @@ const AddCity: React.FC<AddCityProps> = ({
 
     try {
       const formData = new FormData();
-      
+
       // Get thumbnail field name based on section
-      const thumbnailField = sectionId === 4 ? 'city_pathology_thumbnail' : 'city_thumbnail';
+      const thumbnailField =
+        sectionId === 4 ? "city_pathology_thumbnail" : "city_thumbnail";
 
       // Add thumbnail if present
       if (values[thumbnailField]) {
-        formData.append('city_thumbnail', values[thumbnailField]);
+        formData.append("city_thumbnail", values[thumbnailField]);
       }
 
       // Add all other fields
-      Object.keys(values).forEach(key => {
-        if (key !== thumbnailField && values[key] !== null && values[key] !== undefined) {
+      Object.keys(values).forEach((key) => {
+        if (
+          key !== thumbnailField &&
+          values[key] !== null &&
+          values[key] !== undefined
+        ) {
           formData.append(key, values[key]);
         }
       });
@@ -497,14 +554,14 @@ const AddCity: React.FC<AddCityProps> = ({
   // Helper function to get field name based on section
   const getFieldName = (baseName: string) => {
     // Special case for why_choose_meta_desc - same field name for all sections
-    if (baseName === 'why_choose_meta_desc') {
-      return 'why_choose_meta_desc';
+    if (baseName === "why_choose_meta_desc") {
+      return "why_choose_meta_desc";
     }
-    
+
     if (sectionId === 4) {
       // For pathology section, convert city_ prefix to city_pathology_
-      if (baseName.startsWith('city_')) {
-        return baseName.replace('city_', 'city_pathology_');
+      if (baseName.startsWith("city_")) {
+        return baseName.replace("city_", "city_pathology_");
       }
       return `city_pathology_${baseName}`;
     }
@@ -524,8 +581,14 @@ const AddCity: React.FC<AddCityProps> = ({
         )}
 
         <Formik
-          initialValues={sectionId === 4 ? pathologyInitialValues : initialValues}
-          validationSchema={sectionId === 4 ? pathologyCityValidationSchema : cityValidationSchema}
+          initialValues={
+            sectionId === 4 ? pathologyInitialValues : initialValues
+          }
+          validationSchema={
+            sectionId === 4
+              ? pathologyCityValidationSchema
+              : cityValidationSchema
+          }
           onSubmit={handleSubmit}
           enableReinitialize
         >
@@ -570,19 +633,23 @@ const AddCity: React.FC<AddCityProps> = ({
                           <Col md={12}>
                             <Form.Group>
                               <Form.Label className="fs-6 fw-semibold">
-                                City Title <span className="text-danger">*</span>
+                                City Title{" "}
+                                <span className="text-danger">*</span>
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                name={getFieldName('city_title')}
-                                value={getFieldValue('city_title')}
+                                name={getFieldName("city_title")}
+                                value={getFieldValue("city_title")}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                isInvalid={getFieldTouched('city_title') && !!getFieldError('city_title')}
+                                isInvalid={
+                                  getFieldTouched("city_title") &&
+                                  !!getFieldError("city_title")
+                                }
                                 placeholder="Enter city title"
                               />
                               <Form.Control.Feedback type="invalid">
-                                {getFieldError('city_title')}
+                                {getFieldError("city_title")}
                               </Form.Control.Feedback>
                             </Form.Group>
                           </Col>
@@ -593,21 +660,27 @@ const AddCity: React.FC<AddCityProps> = ({
                                 City Name <span className="text-danger">*</span>
                               </Form.Label>
                               <Form.Select
-                                name={getFieldName('city_name')}
-                                value={getFieldValue('city_name')}
+                                name={getFieldName("city_name")}
+                                value={getFieldValue("city_name")}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                isInvalid={getFieldTouched('city_name') && !!getFieldError('city_name')}
+                                isInvalid={
+                                  getFieldTouched("city_name") &&
+                                  !!getFieldError("city_name")
+                                }
                               >
                                 <option value="">Select City</option>
                                 {cityData.map((city: any) => (
-                                  <option key={city.city_id} value={city.city_name}>
+                                  <option
+                                    key={city.city_id}
+                                    value={city.city_name}
+                                  >
                                     {city.city_name}
                                   </option>
                                 ))}
                               </Form.Select>
                               <Form.Control.Feedback type="invalid">
-                                {getFieldError('city_name')}
+                                {getFieldError("city_name")}
                               </Form.Control.Feedback>
                             </Form.Group>
                           </Col>
@@ -615,19 +688,23 @@ const AddCity: React.FC<AddCityProps> = ({
                           <Col md={6}>
                             <Form.Group>
                               <Form.Label className="fs-6 fw-semibold">
-                                City Title SKU <span className="text-danger">*</span>
+                                City Title SKU{" "}
+                                <span className="text-danger">*</span>
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                name={getFieldName('city_title_sku')}
-                                value={getFieldValue('city_title_sku')}
+                                name={getFieldName("city_title_sku")}
+                                value={getFieldValue("city_title_sku")}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                isInvalid={getFieldTouched('city_title_sku') && !!getFieldError('city_title_sku')}
+                                isInvalid={
+                                  getFieldTouched("city_title_sku") &&
+                                  !!getFieldError("city_title_sku")
+                                }
                                 placeholder="Enter city title SKU/slug"
                               />
                               <Form.Control.Feedback type="invalid">
-                                {getFieldError('city_title_sku')}
+                                {getFieldError("city_title_sku")}
                               </Form.Control.Feedback>
                             </Form.Group>
                           </Col>
@@ -635,19 +712,23 @@ const AddCity: React.FC<AddCityProps> = ({
                           <Col md={6}>
                             <Form.Group>
                               <Form.Label className="fs-6 fw-semibold">
-                                Thumbnail Alt Text <span className="text-danger">*</span>
+                                Thumbnail Alt Text{" "}
+                                <span className="text-danger">*</span>
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                name={getFieldName('city_thumbnail_alt')}
-                                value={getFieldValue('city_thumbnail_alt')}
+                                name={getFieldName("city_thumbnail_alt")}
+                                value={getFieldValue("city_thumbnail_alt")}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                isInvalid={getFieldTouched('city_thumbnail_alt') && !!getFieldError('city_thumbnail_alt')}
+                                isInvalid={
+                                  getFieldTouched("city_thumbnail_alt") &&
+                                  !!getFieldError("city_thumbnail_alt")
+                                }
                                 placeholder="Enter thumbnail alt text"
                               />
                               <Form.Control.Feedback type="invalid">
-                                {getFieldError('city_thumbnail_alt')}
+                                {getFieldError("city_thumbnail_alt")}
                               </Form.Control.Feedback>
                             </Form.Group>
                           </Col>
@@ -655,19 +736,23 @@ const AddCity: React.FC<AddCityProps> = ({
                           <Col md={6}>
                             <Form.Group>
                               <Form.Label className="fs-6 fw-semibold">
-                                Thumbnail Title <span className="text-danger">*</span>
+                                Thumbnail Title{" "}
+                                <span className="text-danger">*</span>
                               </Form.Label>
                               <Form.Control
                                 type="text"
-                                name={getFieldName('city_thumbnail_title')}
-                                value={getFieldValue('city_thumbnail_title')}
+                                name={getFieldName("city_thumbnail_title")}
+                                value={getFieldValue("city_thumbnail_title")}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                isInvalid={getFieldTouched('city_thumbnail_title') && !!getFieldError('city_thumbnail_title')}
+                                isInvalid={
+                                  getFieldTouched("city_thumbnail_title") &&
+                                  !!getFieldError("city_thumbnail_title")
+                                }
                                 placeholder="Enter thumbnail title"
                               />
                               <Form.Control.Feedback type="invalid">
-                                {getFieldError('city_thumbnail_title')}
+                                {getFieldError("city_thumbnail_title")}
                               </Form.Control.Feedback>
                             </Form.Group>
                           </Col>
@@ -678,13 +763,21 @@ const AddCity: React.FC<AddCityProps> = ({
                                 <Form.Group>
                                   <Form.Label className="fs-6 fw-semibold">
                                     City Thumbnail{" "}
-                                    {!isEditMode && <span className="text-danger">*</span>}
+                                    {!isEditMode && (
+                                      <span className="text-danger">*</span>
+                                    )}
                                   </Form.Label>
                                   <Form.Control
                                     type="file"
                                     accept="image/*"
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                      handleImageChange(e, setFieldValue, getFieldName('city_thumbnail'))
+                                    onChange={(
+                                      e: React.ChangeEvent<HTMLInputElement>
+                                    ) =>
+                                      handleImageChange(
+                                        e,
+                                        setFieldValue,
+                                        getFieldName("city_thumbnail")
+                                      )
                                     }
                                     onBlur={handleBlur}
                                   />
@@ -718,437 +811,495 @@ const AddCity: React.FC<AddCityProps> = ({
                     </Card>
                   </Col>
 
-                {/* Content Blocks */}
-                <Col lg={12}>
-                  <Card className="border">
-                    <Card.Header className="bg-light">
-                      <h6 className="mb-0">Main Body Content</h6>
-                    </Card.Header>
-                    <Card.Body>
-                      <Row className="g-3">
-                        <Col md={6}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              City Heading{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name={getFieldName('city_heading')}
-                              value={getFieldValue('city_heading')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_heading') && !!getFieldError('city_heading')}
-                              placeholder="Enter city heading"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_heading')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
+                  {/* Content Blocks */}
+                  <Col lg={12}>
+                    <Card className="border">
+                      <Card.Header className="bg-light">
+                        <h6 className="mb-0">Main Body Content</h6>
+                      </Card.Header>
+                      <Card.Body>
+                        <Row className="g-3">
+                          <Col md={6}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                City Heading{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                name={getFieldName("city_heading")}
+                                value={getFieldValue("city_heading")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_heading") &&
+                                  !!getFieldError("city_heading")
+                                }
+                                placeholder="Enter city heading"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_heading")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Body Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <SnowEditor
-                              value={getFieldValue('city_body_desc')}
-                              onChange={(value: string) =>
-                                setFieldValue(getFieldName('city_body_desc'), value)
-                              }
-                            />
-                            {getFieldTouched('city_body_desc') && getFieldError('city_body_desc') && (
-                              <div className="text-danger small mt-1">
-                                {getFieldError('city_body_desc')}
-                              </div>
-                            )}
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Section 1 Heading{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name={getFieldName('city_block1_heading')}
-                              value={getFieldValue('city_block1_heading')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_block1_heading') && !!getFieldError('city_block1_heading')}
-                              placeholder="Enter block 1 heading"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_block1_heading')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Section 1 Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name={getFieldName('city_block1_body')}
-                              value={getFieldValue('city_block1_body')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_block1_body') && !!getFieldError('city_block1_body')}
-                              placeholder="Enter Section 1 description"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_block1_body')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Section 2 Heading{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name={getFieldName('city_block2_heading')}
-                              value={getFieldValue('city_block2_heading')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_block2_heading') && !!getFieldError('city_block2_heading')}
-                              placeholder="Enter block 2 heading"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_block2_heading')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Section 2 Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              as="textarea"
-                              rows={3}
-                              name={getFieldName('city_block2_body')}
-                              value={getFieldValue('city_block2_body')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_block2_body') && !!getFieldError('city_block2_body')}
-                              placeholder="Enter block 2 description"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_block2_body')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Section 3 Heading{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name={getFieldName('city_block3_heading')}
-                              value={getFieldValue('city_block3_heading')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_block3_heading') && !!getFieldError('city_block3_heading')}
-                              placeholder="Enter block 3 heading"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_block3_heading')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
-
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Section 3 Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Body Description{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
                               <SnowEditor
-                                value={getFieldValue('city_block3_body')}
+                                value={getFieldValue("city_body_desc")}
                                 onChange={(value: string) =>
-                                  setFieldValue(getFieldName('city_block3_body'), value)
+                                  setFieldValue(
+                                    getFieldName("city_body_desc"),
+                                    value
+                                  )
                                 }
                               />
-                            {getFieldTouched('city_block3_body') && getFieldError('city_block3_body') && (
-                              <div className="text-danger small mt-1">
-                                {getFieldError('city_block3_body')}
-                              </div>
-                            )}
-                          </Form.Group>
-                        </Col>
+                              {getFieldTouched("city_body_desc") &&
+                                getFieldError("city_body_desc") && (
+                                  <div className="text-danger small mt-1">
+                                    {getFieldError("city_body_desc")}
+                                  </div>
+                                )}
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Why Choose Us{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name={getFieldName('city_why_choose_us')}
-                              value={getFieldValue('city_why_choose_us')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_why_choose_us') && !!getFieldError('city_why_choose_us')}
-                              placeholder="Enter why choose us heading"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_why_choose_us')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Section 1 Heading{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                name={getFieldName("city_block1_heading")}
+                                value={getFieldValue("city_block1_heading")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_block1_heading") &&
+                                  !!getFieldError("city_block1_heading")
+                                }
+                                placeholder="Enter block 1 heading"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_block1_heading")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Why Choose Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <SnowEditor
-                              value={getFieldValue('why_choose_meta_desc')}
-                              onChange={(value: string) =>
-                                setFieldValue('why_choose_meta_desc', value)
-                              }
-                            />
-                            {getFieldTouched('why_choose_meta_desc') && getFieldError('why_choose_meta_desc') && (
-                              <div className="text-danger small mt-1">
-                                {getFieldError('why_choose_meta_desc')}
-                              </div>
-                            )}
-                          </Form.Group>
-                        </Col>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Section 1 Description{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                as="textarea"
+                                rows={3}
+                                name={getFieldName("city_block1_body")}
+                                value={getFieldValue("city_block1_body")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_block1_body") &&
+                                  !!getFieldError("city_block1_body")
+                                }
+                                placeholder="Enter block 1 description"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_block1_body")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Emergency Heading{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name={getFieldName('city_emergency_heading')}
-                              value={getFieldValue('city_emergency_heading')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_emergency_heading') && !!getFieldError('city_emergency_heading')}
-                              placeholder="Enter emergency heading"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_emergency_heading')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Section 2 Heading{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                name={getFieldName("city_block2_heading")}
+                                value={getFieldValue("city_block2_heading")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_block2_heading") &&
+                                  !!getFieldError("city_block2_heading")
+                                }
+                                placeholder="Enter block 2 heading"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_block2_heading")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Emergency Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <SnowEditor
-                              value={getFieldValue('city_emergency_desc')}
-                              onChange={(value: string) =>
-                                setFieldValue(getFieldName('city_emergency_desc'), value)
-                              }
-                            />
-                            {getFieldTouched('city_emergency_desc') && getFieldError('city_emergency_desc') && (
-                              <div className="text-danger small mt-1">
-                                {getFieldError('city_emergency_desc')}
-                              </div>
-                            )}
-                          </Form.Group>
-                        </Col>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Section 2 Description{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                as="textarea"
+                                rows={3}
+                                name={getFieldName("city_block2_body")}
+                                value={getFieldValue("city_block2_body")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_block2_body") &&
+                                  !!getFieldError("city_block2_body")
+                                }
+                                placeholder="Enter block 2 description"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_block2_body")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              FAQ Heading <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name={getFieldName('city_faq_heading')}
-                              value={getFieldValue('city_faq_heading')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_faq_heading') && !!getFieldError('city_faq_heading')}
-                              placeholder="Enter FAQ heading"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_faq_heading')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Section 3 Heading{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                name={getFieldName("city_block3_heading")}
+                                value={getFieldValue("city_block3_heading")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_block3_heading") &&
+                                  !!getFieldError("city_block3_heading")
+                                }
+                                placeholder="Enter block 3 heading"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_block3_heading")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              FAQ Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              as="textarea"
-                              rows={3}
-                              name={getFieldName('city_faq_desc')}
-                              value={getFieldValue('city_faq_desc')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_faq_desc') && !!getFieldError('city_faq_desc')}
-                              placeholder="Enter FAQ description"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_faq_desc')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
-                      </Row>
-                    </Card.Body>
-                  </Card>
-                </Col>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Section 3 Description{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <SnowEditor
+                                value={getFieldValue("city_block3_body")}
+                                onChange={(value: string) =>
+                                  setFieldValue(
+                                    getFieldName("city_block3_body"),
+                                    value
+                                  )
+                                }
+                              />
+                              {getFieldTouched("city_block3_body") &&
+                                getFieldError("city_block3_body") && (
+                                  <div className="text-danger small mt-1">
+                                    {getFieldError("city_block3_body")}
+                                  </div>
+                                )}
+                            </Form.Group>
+                          </Col>
 
-                {/* SEO Information */}
-                <Col lg={12}>
-                  <Card className="border">
-                    <Card.Header className="bg-light">
-                      <h6 className="mb-0">SEO Information</h6>
-                    </Card.Header>
-                    <Card.Body>
-                      <Row className="g-3">
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Meta Title <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              type="text"
-                              name={getFieldName('city_meta_title')}
-                              value={getFieldValue('city_meta_title')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_meta_title') && !!getFieldError('city_meta_title')}
-                              placeholder="Enter meta title"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_meta_title')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Why Choose Us{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                name={getFieldName("city_why_choose_us")}
+                                value={getFieldValue("city_why_choose_us")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_why_choose_us") &&
+                                  !!getFieldError("city_why_choose_us")
+                                }
+                                placeholder="Enter why choose us heading"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_why_choose_us")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={6}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Meta Keywords{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              as="textarea"
-                              rows={3}
-                              name={getFieldName('city_meta_keyword')}
-                              value={getFieldValue('city_meta_keyword')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_meta_keyword') && !!getFieldError('city_meta_keyword')}
-                              placeholder="Enter meta keywords"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_meta_keyword')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Why Choose Description{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <SnowEditor
+                                value={getFieldValue("why_choose_meta_desc")}
+                                onChange={(value: string) =>
+                                  setFieldValue("why_choose_meta_desc", value)
+                                }
+                              />
+                              {getFieldTouched("why_choose_meta_desc") &&
+                                getFieldError("why_choose_meta_desc") && (
+                                  <div className="text-danger small mt-1">
+                                    {getFieldError("why_choose_meta_desc")}
+                                  </div>
+                                )}
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={6}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Force Keywords{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              as="textarea"
-                              rows={3}
-                              name={getFieldName('city_force_keyword')}
-                              value={getFieldValue('city_force_keyword')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_force_keyword') && !!getFieldError('city_force_keyword')}
-                              placeholder="Enter force keywords"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_force_keyword')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Emergency Heading{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                name={getFieldName("city_emergency_heading")}
+                                value={getFieldValue("city_emergency_heading")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_emergency_heading") &&
+                                  !!getFieldError("city_emergency_heading")
+                                }
+                                placeholder="Enter emergency heading"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_emergency_heading")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={12}>
-                          <Form.Group>
-                            <Form.Label className="fs-6 fw-semibold">
-                              Meta Description{" "}
-                              <span className="text-danger">*</span>
-                            </Form.Label>
-                            <Form.Control
-                              as="textarea"
-                              rows={10}
-                              name={getFieldName('city_meta_desc')}
-                              value={getFieldValue('city_meta_desc')}
-                              onChange={handleChange}
-                              onBlur={handleBlur}
-                              isInvalid={getFieldTouched('city_meta_desc') && !!getFieldError('city_meta_desc')}
-                              placeholder="Enter meta description"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {getFieldError('city_meta_desc')}
-                            </Form.Control.Feedback>
-                          </Form.Group>
-                        </Col>
-                      </Row>
-                    </Card.Body>
-                  </Card>
-                </Col>
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Emergency Description{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <SnowEditor
+                                value={getFieldValue("city_emergency_desc")}
+                                onChange={(value: string) =>
+                                  setFieldValue(
+                                    getFieldName("city_emergency_desc"),
+                                    value
+                                  )
+                                }
+                              />
+                              {getFieldTouched("city_emergency_desc") &&
+                                getFieldError("city_emergency_desc") && (
+                                  <div className="text-danger small mt-1">
+                                    {getFieldError("city_emergency_desc")}
+                                  </div>
+                                )}
+                            </Form.Group>
+                          </Col>
 
-                {/* Action Buttons */}
-                <Col lg={12}>
-                  <div className="d-flex gap-2 justify-content-end">
-                    <button
-                      type="button"
-                      className="px-3 rounded text-black"
-                      onClick={handleCancel}
-                      disabled={submitting}
-                    >
-                      Cancel
-                    </button>
-                    <Button
-                      variant="primary"
-                      type="submit"
-                      disabled={submitting}
-                    >
-                      {submitting
-                        ? isEditMode
-                          ? "Updating..."
-                          : "Saving..."
-                        : isEditMode
-                        ? "Update City"
-                        : "Save City"}
-                    </Button>
-                  </div>
-                </Col>
-              </Row>
-            </Form>
-          );
-        }}
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                FAQ Heading{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                name={getFieldName("city_faq_heading")}
+                                value={getFieldValue("city_faq_heading")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_faq_heading") &&
+                                  !!getFieldError("city_faq_heading")
+                                }
+                                placeholder="Enter FAQ heading"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_faq_heading")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
+
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                FAQ Description{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                as="textarea"
+                                rows={3}
+                                name={getFieldName("city_faq_desc")}
+                                value={getFieldValue("city_faq_desc")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_faq_desc") &&
+                                  !!getFieldError("city_faq_desc")
+                                }
+                                placeholder="Enter FAQ description"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_faq_desc")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+
+                  {/* SEO Information */}
+                  <Col lg={12}>
+                    <Card className="border">
+                      <Card.Header className="bg-light">
+                        <h6 className="mb-0">SEO Information</h6>
+                      </Card.Header>
+                      <Card.Body>
+                        <Row className="g-3">
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Meta Title{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                type="text"
+                                name={getFieldName("city_meta_title")}
+                                value={getFieldValue("city_meta_title")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_meta_title") &&
+                                  !!getFieldError("city_meta_title")
+                                }
+                                placeholder="Enter meta title"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_meta_title")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
+
+                          <Col md={6}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Meta Keywords{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                as="textarea"
+                                rows={3}
+                                name={getFieldName("city_meta_keyword")}
+                                value={getFieldValue("city_meta_keyword")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_meta_keyword") &&
+                                  !!getFieldError("city_meta_keyword")
+                                }
+                                placeholder="Enter meta keywords"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_meta_keyword")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
+
+                          <Col md={6}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Force Keywords{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                as="textarea"
+                                rows={3}
+                                name={getFieldName("city_force_keyword")}
+                                value={getFieldValue("city_force_keyword")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_force_keyword") &&
+                                  !!getFieldError("city_force_keyword")
+                                }
+                                placeholder="Enter force keywords"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_force_keyword")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
+
+                          <Col md={12}>
+                            <Form.Group>
+                              <Form.Label className="fs-6 fw-semibold">
+                                Meta Description{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
+                              <Form.Control
+                                as="textarea"
+                                rows={5}
+                                name={getFieldName("city_meta_desc")}
+                                value={getFieldValue("city_meta_desc")}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                isInvalid={
+                                  getFieldTouched("city_meta_desc") &&
+                                  !!getFieldError("city_meta_desc")
+                                }
+                                placeholder="Enter meta description"
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {getFieldError("city_meta_desc")}
+                              </Form.Control.Feedback>
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+
+                  {/* Action Buttons */}
+                  <Col lg={12}>
+                    <div className="d-flex gap-2 justify-content-end">
+                      <button
+                        type="button"
+                        className="px-3 rounded text-black"
+                        onClick={handleCancel}
+                        disabled={submitting}
+                      >
+                        Cancel
+                      </button>
+                      <Button
+                        variant="primary"
+                        type="submit"
+                        disabled={submitting}
+                      >
+                        {submitting
+                          ? isEditMode
+                            ? "Updating..."
+                            : "Saving..."
+                          : isEditMode
+                          ? "Update City"
+                          : "Save City"}
+                      </Button>
+                    </div>
+                  </Col>
+                </Row>
+              </Form>
+            );
+          }}
         </Formik>
       </ComponentCard>
     </div>
@@ -1156,7 +1307,6 @@ const AddCity: React.FC<AddCityProps> = ({
 };
 
 export default AddCity;
-
 
 /*
 

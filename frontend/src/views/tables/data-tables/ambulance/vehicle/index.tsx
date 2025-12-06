@@ -31,8 +31,19 @@ const tableConfig: Record<
   1: {
     endpoint: "/vehicle/get_vehicle_list",
     columns: vehicleColumns,
-    headers: ["S.No.", 'ID', 'Added By', 'Added Type', 'Name', 'Category', 'Exp Date', 'Verify Date', 'Verify Type', 'Created At', 'Status'],
-
+    headers: [
+      "S.No.",
+      "ID",
+      "Added By",
+      "Added Type",
+      "Name",
+      "Category",
+      // "Verify Type",
+      "Verify Date",
+      "Exp Date",
+      "Created At",
+      "Status",
+    ],
   },
 };
 
@@ -98,7 +109,8 @@ const ExportDataWithButtons = ({
       console.log("API Response:", res.data);
 
       // Accept either 'vehicle_list' or 'vehicles'
-      const vehicles = res.data?.jsonData?.vehicle_list || res.data?.jsonData?.vehicles || [];
+      const vehicles =
+        res.data?.jsonData?.vehicle_list || res.data?.jsonData?.vehicles || [];
       console.log("Fetched Vehicle Data:", vehicles);
       setData(vehicles);
 
@@ -108,7 +120,8 @@ const ExportDataWithButtons = ({
       } else {
         setTotal(res.data?.total);
         setTotalPages(
-          res.data?.pagination?.totalPages || Math.ceil(vehicles.length / pageSize)
+          res.data?.pagination?.totalPages ||
+            Math.ceil(vehicles.length / pageSize)
         );
       }
     } catch (error) {

@@ -61,14 +61,8 @@ export const vehicleColumns = [
         }
      },
     { data: 'v_vehicle_name' },
-    { data: 'vehicle_category_type' },
-    { 
-        data: 'vehicle_exp_date',
-        render: (data: string) => {
-            if (data === '') return '';
-            return formatDate(data);
-        }
-    },
+    { data: 'ambulance_category_vehicle_name' },
+    // { data: 'verify_type' },
     {
         data: 'vehicle_verify_date',
         render: (data: string) => {
@@ -76,7 +70,13 @@ export const vehicleColumns = [
             return formatDate(data);
         }
     },
-    { data: 'verify_type' },
+    { 
+        data: 'vehicle_exp_date',
+        render: (data: string) => {
+            if (data === '') return '';
+            return formatDate(data);
+        }
+    },
     {
         data: 'created_at',
         render: (data: string) => {
@@ -106,6 +106,6 @@ export const vehicleColumns = [
 
 
 export const vehicleTableData: TableType<VehicleInfoType> = {
-    header: ['ID', 'Added By', 'Added Type', 'Name', 'Category', 'Exp Date', 'Verify Date', 'Verify Type', 'Created At', 'Status'],
+    header: ['ID', 'Added By', 'Added Type', 'Name', 'Category', 'Verify Date','Exp Date', 'Created At', 'Status'],
     body: vehicleRows,
 };
