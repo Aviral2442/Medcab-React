@@ -4,6 +4,7 @@ import { TbPencil, TbCheck, TbX, TbEye } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import "@/global.css";
 import DateConversion from "@/components/DateConversion";
+import { formatDate } from "@/components/DateFormat";
 
 interface AmbulanceBookingDetailsFormProps {
   data: any;
@@ -70,7 +71,7 @@ const Field: React.FC<FieldProps> = ({
   const navigate = useNavigate();
 
   const formatDisplayValue = (val: string | number | boolean) => {
-    if (val === null || val === undefined) return "N/A";
+    if (val === null || val === undefined) return " ";
 
     if (type === "boolean") {
       return val ? "Yes" : "No";
@@ -85,20 +86,36 @@ const Field: React.FC<FieldProps> = ({
 
     if (type === "date" || type === "datetime-local") {
       try {
-        const date = /^\d+$/.test(valStr)
-          ? new Date(parseInt(valStr) * 1000)
-          : new Date(valStr);
-        if (isNaN(date.getTime())) return valStr;
-
-        const pad = (n: number) => String(n).padStart(2, "0");
-        if (type === "date") {
-          return DateConversion(date.toISOString());
+        // Check if value is "0" or empty
+        if (valStr === "0" || valStr === "" || valStr.trim() === "") {
+          return " ";
         }
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-          date.getDate()
-        )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
+        const numVal = parseInt(valStr, 10);
+        // If numeric value is 0 or negative, return N/A
+        if (!isNaN(numVal) && numVal <= 0) {
+          return " ";
+        }
+
+        const date = /^\d+$/.test(valStr)
+          ? new Date(parseInt(valStr, 10) * 1000)
+          : new Date(valStr);
+
+        if (isNaN(date.getTime())) return " ";
+
+        // Check if date is epoch (1970-01-01) which usually means unset/0
+        if (
+          date.getFullYear() === 1970 &&
+          date.getMonth() === 0 &&
+          date.getDate() === 1
+        ) {
+          return " ";
+        }
+
+        // Use the imported formatDate from "@/components/DateFormat"
+        return formatDate(date.toISOString());
       } catch {
-        return valStr;
+        return "N/A";
       }
     }
 
@@ -123,18 +140,20 @@ const Field: React.FC<FieldProps> = ({
 
   return (
     <div className="mb-2">
-      <div className="d-flex align-items-center justify-content-between mb-1">
-        <Form.Label className="text-muted text-left mb-0 fs-6">{label}</Form.Label>
+      <div className="d-flex align-items-center mb-1">
+        <Form.Label className="text-muted  mb-0 fs-6">
+          {label}
+        </Form.Label>
         {showAssignDriver && onAssignDriver && (
-          <Button
-            variant="link"
-            size="sm"
+          <button
+            // variant="link"
+            // size="sm"
             onClick={onAssignDriver}
-            className="text-decoration-none text-secondary p-0 fs-6"
+            className="text-decoration-none border-0 bg-transparent text-secondary p-0 fs-6"
             style={{ marginLeft: "8px" }}
           >
             (Assign Driver)
-          </Button>
+          </button>
         )}
       </div>
       <div className="d-flex align-items-center gap-2">
@@ -155,7 +174,9 @@ const Field: React.FC<FieldProps> = ({
             ) : (
               <Form.Control
                 as={type === "textarea" ? "textarea" : "input"}
-                type={type !== "textarea" && type !== "boolean" ? type : undefined}
+                type={
+                  type !== "textarea" && type !== "boolean" ? type : undefined
+                }
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
                 className="flex-grow-1"
@@ -232,7 +253,16 @@ const paymentStatusOptions = [
 interface FieldConfig {
   label: string;
   name: string;
-  type?: "text" | "number" | "tel" | "email" | "date" | "datetime-local" | "textarea" | "select" | "boolean";
+  type?:
+    | "text"
+    | "number"
+    | "tel"
+    | "email"
+    | "date"
+    | "datetime-local"
+    | "textarea"
+    | "select"
+    | "boolean";
   editable?: boolean;
   cols?: number;
   rows?: number;
@@ -247,11 +277,9 @@ interface SectionConfig {
   show?: boolean;
 }
 
-const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = ({
-  data,
-  onUpdate,
-  editable = true,
-}) => {
+const AmbulanceBookingDetailsForm: React.FC<
+  AmbulanceBookingDetailsFormProps
+> = ({ data, onUpdate, editable = true }) => {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [selectedDriver, setSelectedDriver] = useState("");
@@ -276,8 +304,10 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
     }
   };
 
-  const isBulkBooking = () => data?.booking_type === 2 || data?.booking_type === "2";
-  const isRentalBooking = () => data?.booking_type === 1 || data?.booking_type === "1";
+  const isBulkBooking = () =>
+    data?.booking_type === 2 || data?.booking_type === "2";
+  const isRentalBooking = () =>
+    data?.booking_type === 1 || data?.booking_type === "1";
 
   const handleAssignDriver = () => {
     setShowAssignModal(true);
@@ -297,17 +327,17 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
       //   vehicle_id: selectedVehicle,
       //   driver_id: selectedDriver
       // });
-      
-      console.log("Assigning:", { 
-        vehicle: selectedVehicle, 
+
+      console.log("Assigning:", {
+        vehicle: selectedVehicle,
         driver: selectedDriver,
-        booking_id: data?.booking_id
+        booking_id: data?.booking_id,
       });
-      
+
       setShowAssignModal(false);
       setSelectedVehicle("");
       setSelectedDriver("");
-      
+
       // Refresh booking data or update locally
       if (onUpdate) {
         onUpdate("booking_acpt_vehicle_id", selectedVehicle);
@@ -325,115 +355,426 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
     {
       title: "Consumer Information",
       fields: [
-        { label: "Consumer Name", name: "booking_con_name", editable: false, cols: 4, showViewIcon: true },
-        { label: "Consumer Mobile", name: "booking_con_mobile", type: "tel", editable: false, cols: 4 },
-        { label: "Consumer ID", name: "booking_by_cid", editable: false, cols: 4 },
+        {
+          label: "Consumer Name",
+          name: "booking_con_name",
+          editable: false,
+          cols: 4,
+          showViewIcon: true,
+        },
+        {
+          label: "Consumer Mobile",
+          name: "booking_con_mobile",
+          type: "tel",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Consumer ID",
+          name: "booking_by_cid",
+          editable: false,
+          cols: 4,
+        },
       ],
     },
     {
       title: "Booking Information",
       fields: [
-        { label: "Booking Type", name: "booking_type", type: "select", options: bookingTypeOptions, editable: false, cols: 2 },
-        { label: "Booking Source", name: "booking_source", editable: false, cols: 2 },
-        { label: "Generate Source", name: "booking_generate_source", editable: false, cols: 2 },
-        { label: "Category", name: "booking_view_category_name", editable: false, cols: 2 },
-        { label: "Schedule Time", name: "booking_schedule_time", type: "datetime-local", editable: false, cols: 2 },
-        { label: "Created At", name: "created_at", type: "datetime-local", editable: false, cols: 2 },
+        {
+          label: "Booking Type",
+          name: "booking_type",
+          type: "select",
+          options: bookingTypeOptions,
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Booking Source",
+          name: "booking_source",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Generate Source",
+          name: "booking_generate_source",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Category",
+          name: "booking_view_category_name",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Schedule Time",
+          name: "booking_schedule_time",
+          type: "datetime-local",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Created At",
+          name: "created_at",
+          type: "datetime-local",
+          editable: false,
+          cols: 2,
+        },
       ],
     },
     {
       title: "Location Information",
       fields: [
-        { label: "Pickup Location", name: "booking_pickup", type: "textarea", rows: 2, cols: 6 },
-        { label: "Drop Location", name: "booking_drop", type: "textarea", rows: 2, cols: 6 },
+        {
+          label: "Pickup Location",
+          name: "booking_pickup",
+          type: "textarea",
+          rows: 2,
+          cols: 6,
+        },
+        {
+          label: "Drop Location",
+          name: "booking_drop",
+          type: "textarea",
+          rows: 2,
+          cols: 6,
+        },
         { label: "Pickup City", name: "booking_pickup_city", cols: 3 },
-        { label: "Pickup Latitude", name: "booking_pick_lat", type: "number", editable: false, cols: 3 },
-        { label: "Pickup Longitude", name: "booking_pick_long", type: "number", editable: false, cols: 3 },
         { label: "Drop City", name: "booking_drop_city", cols: 3 },
-        { label: "Drop Latitude", name: "booking_drop_lat", type: "number", editable: false, cols: 3 },
-        { label: "Drop Longitude", name: "booking_drop_long", type: "number", editable: false, cols: 3 },
+        {
+          label: "Pickup Latitude",
+          name: "booking_pick_lat",
+          type: "number",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Pickup Longitude",
+          name: "booking_pick_long",
+          type: "number",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Drop Latitude",
+          name: "booking_drop_lat",
+          type: "number",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Drop Longitude",
+          name: "booking_drop_long",
+          type: "number",
+          editable: false,
+          cols: 3,
+        },
         { label: "Distance (KM)", name: "booking_distance", cols: 3 },
         { label: "Duration", name: "booking_duration", cols: 3 },
-        { label: "Duration (Sec)", name: "booking_duration_in_sec", editable: false, cols: 3 },
+        {
+          label: "Duration (Sec)",
+          name: "booking_duration_in_sec",
+          editable: false,
+          cols: 3,
+        },
         { label: "Radius", name: "booking_radius", cols: 3 },
       ],
     },
     {
       title: "Payment Information",
       fields: [
-        { label: "Total Amount", name: "booking_total_amount", type: "number", editable: false, cols: 3 },
-        { label: "Booking Amount", name: "booking_amount", type: "number", editable: false, cols: 3 },
-        { label: "Advance Amount", name: "booking_adv_amount", type: "number", cols: 3 },
-        { label: "Payment Method", name: "booking_payment_method", editable: false, cols: 3 },
-        { label: "Payment Type", name: "booking_payment_type", editable: false, cols: 3 },
-        { label: "Payment Status", name: "booking_payment_status", type: "select", options: paymentStatusOptions, cols: 3 },
+        {
+          label: "Total Amount",
+          name: "booking_total_amount",
+          type: "number",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Booking Amount",
+          name: "booking_amount",
+          type: "number",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Advance Amount",
+          name: "booking_adv_amount",
+          type: "number",
+          cols: 3,
+        },
+        {
+          label: "Payment Method",
+          name: "booking_payment_method",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Payment Type",
+          name: "booking_payment_type",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Payment Status",
+          name: "booking_payment_status",
+          type: "select",
+          options: paymentStatusOptions,
+          cols: 3,
+        },
       ],
     },
     {
       title: "Vehicle & Driver Information",
       fields: [
         { label: "Vehicle", name: "v_vehicle_name", editable: false, cols: 4 },
-        { label: "Vehicle RC", name: "vehicle_rc_number", editable: false, cols: 4 },
-        { label: "Driver Name", name: "driver_full_name", editable: false, cols: 4, showAssignDriver: true },
-        { label: "Driver Mobile", name: "driver_mobile", editable: false, cols: 4 },
-        { label: "Accept Time", name: "booking_acpt_time", type: "datetime-local", editable: false, cols: 4 },
-        { label: "Arrival to Pickup Duration (Sec)", name: "booking_a_t_p_duration_in_sec", editable: false, cols: 4 },
-        { label: "Arrival to Pickup Distance", name: "booking_ap_distance", editable: false, cols: 4 },
-        { label: "Arrival to Pickup Duration", name: "booking_ap_duration", editable: false, cols: 4 },
+        {
+          label: "Vehicle RC",
+          name: "vehicle_rc_number",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Driver Name",
+          name: "driver_full_name",
+          editable: false,
+          cols: 4,
+          showAssignDriver: true,
+        },
+        {
+          label: "Driver Mobile",
+          name: "driver_mobile",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Accept Time",
+          name: "booking_acpt_time",
+          type: "datetime-local",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Arrival to Pickup Duration (Sec)",
+          name: "booking_a_t_p_duration_in_sec",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Arrival to Pickup Distance",
+          name: "booking_ap_distance",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Arrival to Pickup Duration",
+          name: "booking_ap_duration",
+          editable: false,
+          cols: 4,
+        },
       ],
     },
     {
       title: "Rate Information",
       fields: [
-        { label: "Base Rate", name: "booking_view_base_rate", type: "number", editable: false, cols: 2 },
-        { label: "Per KM Rate", name: "booking_view_per_km_rate", type: "number", editable: false, cols: 2 },
-        { label: "KM Rate", name: "booking_view_km_rate", type: "number", editable: false, cols: 2 },
-        { label: "KM Till", name: "booking_view_km_till", editable: false, cols: 2 },
-        { label: "Per Extra KM Rate", name: "booking_view_per_ext_km_rate", type: "number", editable: false, cols: 2 },
-        { label: "Per Extra Min Rate", name: "booking_view_per_ext_min_rate", type: "number", editable: false, cols: 2 },
-        { label: "Service Charge", name: "booking_view_service_charge_rate", type: "number", editable: false, cols: 2 },
-        { label: "Service Charge Discount", name: "booking_view_service_charge_rate_discount", type: "number", editable: false, cols: 2 },
-        { label: "Total Fare", name: "booking_view_total_fare", type: "number", editable: false, cols: 2 },
+        {
+          label: "Base Rate",
+          name: "booking_view_base_rate",
+          type: "number",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Per KM Rate",
+          name: "booking_view_per_km_rate",
+          type: "number",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "KM Rate",
+          name: "booking_view_km_rate",
+          type: "number",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "KM Till",
+          name: "booking_view_km_till",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Per Extra KM Rate",
+          name: "booking_view_per_ext_km_rate",
+          type: "number",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Per Extra Min Rate",
+          name: "booking_view_per_ext_min_rate",
+          type: "number",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Service Charge",
+          name: "booking_view_service_charge_rate",
+          type: "number",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Service Charge Discount",
+          name: "booking_view_service_charge_rate_discount",
+          type: "number",
+          editable: false,
+          cols: 2,
+        },
+        {
+          label: "Total Fare",
+          name: "booking_view_total_fare",
+          type: "number",
+          editable: false,
+          cols: 2,
+        },
       ],
     },
     {
       title: "OTP & Verification",
       fields: [
         { label: "OTP", name: "booking_view_otp", editable: false, cols: 3 },
-        { label: "OTP Status", name: "booking_view_status_otp", type: "boolean", editable: false, cols: 3 },
-        { label: "Rating Status", name: "booking_view_rating_status", type: "boolean", editable: false, cols: 3 },
-        { label: "Consumer to Driver Rating Status", name: "booking_view_rating_c_to_d_status", type: "boolean", editable: false, cols: 3 },
+        {
+          label: "OTP Status",
+          name: "booking_view_status_otp",
+          type: "boolean",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Rating Status",
+          name: "booking_view_rating_status",
+          type: "boolean",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Consumer to Driver Rating Status",
+          name: "booking_view_rating_c_to_d_status",
+          type: "boolean",
+          editable: false,
+          cols: 3,
+        },
       ],
     },
     {
       title: "Bulk Booking Information",
       show: isBulkBooking(),
       fields: [
-        { label: "Bulk Master Key", name: "booking_bulk_master_key", editable: false, cols: 4 },
-        { label: "No. of Bulk", name: "booking_no_of_bulk", editable: false, cols: 4 },
-        { label: "Bulk Total", name: "booking_bulk_total", type: "number", editable: false, cols: 4 },
+        {
+          label: "Bulk Master Key",
+          name: "booking_bulk_master_key",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "No. of Bulk",
+          name: "booking_no_of_bulk",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Bulk Total",
+          name: "booking_bulk_total",
+          type: "number",
+          editable: false,
+          cols: 4,
+        },
       ],
     },
     {
       title: "Rental Booking Information",
       show: isRentalBooking(),
       fields: [
-        { label: "Rental Type", name: "booking_type_for_rental", editable: false, cols: 6 },
+        {
+          label: "Rental Type",
+          name: "booking_type_for_rental",
+          editable: false,
+          cols: 6,
+        },
       ],
     },
     {
       title: "Additional Information",
       fields: [
-        { label: "Arrival Time", name: "booking_view_arrival_time", type: "datetime-local", editable: false, cols: 4 },
-        { label: "Pickup Time", name: "booking_view_pickup_time", type: "datetime-local", editable: false, cols: 4 },
-        { label: "Dropped Time", name: "booking_view_dropped_time", type: "datetime-local", editable: false, cols: 4 },
-        { label: "Shoot Time", name: "bv_shoot_time", type: "datetime-local", editable: false, cols: 4 },
-        { label: "Virtual Number", name: "bv_virtual_number", type: "tel", editable: false, cols: 4 },
-        { label: "Virtual Number Status", name: "bv_virtual_number_status", type: "boolean", editable: false, cols: 4 },
-        { label: "Cloud Consumer CRID", name: "bv_cloud_con_crid", editable: false, cols: 4 },
-        { label: "Cloud Consumer CRID (C to D)", name: "bv_cloud_con_crid_c_to_d", editable: false, cols: 4 },
-        { label: "Category Icon", name: "booking_view_category_icon", editable: false, cols: 4 },
-        { label: "Includes", name: "booking_view_includes", type: "textarea", rows: 3, cols: 6 },
+        {
+          label: "Arrival Time",
+          name: "booking_view_arrival_time",
+          type: "datetime-local",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Pickup Time",
+          name: "booking_view_pickup_time",
+          type: "datetime-local",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Dropped Time",
+          name: "booking_view_dropped_time",
+          type: "datetime-local",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Shoot Time",
+          name: "bv_shoot_time",
+          type: "datetime-local",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Virtual Number",
+          name: "bv_virtual_number",
+          type: "tel",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Virtual Number Status",
+          name: "bv_virtual_number_status",
+          type: "boolean",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Cloud Consumer CRID",
+          name: "bv_cloud_con_crid",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Cloud Consumer CRID (C to D)",
+          name: "bv_cloud_con_crid_c_to_d",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Category Icon",
+          name: "booking_view_category_icon",
+          editable: false,
+          cols: 4,
+        },
+        {
+          label: "Includes",
+          name: "booking_view_includes",
+          type: "textarea",
+          rows: 3,
+          cols: 6,
+        },
       ],
     },
   ];
@@ -500,7 +841,9 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
                         label={f.label}
                         value={
                           f.name === "driver_full_name"
-                            ? `${data?.driver_name || ""} ${data?.driver_last_name || ""}`.trim() || "N/A"
+                            ? `${data?.driver_name || ""} ${
+                                data?.driver_last_name || ""
+                              }`.trim() || "N/A"
                             : data?.[f.name]
                         }
                         fieldName={f.name}
@@ -510,9 +853,13 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
                         rows={f.rows}
                         options={f.options}
                         showViewIcon={f.showViewIcon}
-                        consumerId={f.showViewIcon ? data?.booking_by_cid : undefined}
+                        consumerId={
+                          f.showViewIcon ? data?.booking_by_cid : undefined
+                        }
                         showAssignDriver={f.showAssignDriver}
-                        onAssignDriver={f.showAssignDriver ? handleAssignDriver : undefined}
+                        onAssignDriver={
+                          f.showAssignDriver ? handleAssignDriver : undefined
+                        }
                       />
                     </Col>
                   ))}
@@ -535,7 +882,11 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
             <Button variant="success" className="me-2 mb-2">
               Complete Booking
             </Button>
-            <Button variant="info" className="me-2 mb-2" onClick={handleAssignDriver}>
+            <Button
+              variant="info"
+              className="me-2 mb-2"
+              onClick={handleAssignDriver}
+            >
               Assign Driver
             </Button>
           </Section>
@@ -543,7 +894,11 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
       </Card>
 
       {/* Assign Driver Modal */}
-      <Modal show={showAssignModal} onHide={() => setShowAssignModal(false)} centered>
+      <Modal
+        show={showAssignModal}
+        onHide={() => setShowAssignModal(false)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Assign</Modal.Title>
         </Modal.Header>
@@ -575,8 +930,8 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             onClick={handleSubmitAssign}
             disabled={submitting}
           >
