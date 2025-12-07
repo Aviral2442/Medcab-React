@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Row, Col, Form, Button } from "react-bootstrap";
+import { Card, Row, Col, Form, Button, Modal } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX, TbEye } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import "@/global.css";
@@ -48,6 +48,8 @@ interface FieldProps {
   options?: { value: string | number; label: string }[];
   showViewIcon?: boolean;
   consumerId?: number;
+  showAssignDriver?: boolean;
+  onAssignDriver?: () => void;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -60,6 +62,8 @@ const Field: React.FC<FieldProps> = ({
   options = [],
   showViewIcon = false,
   consumerId,
+  showAssignDriver = false,
+  onAssignDriver,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value?.toString() || "");
@@ -119,7 +123,20 @@ const Field: React.FC<FieldProps> = ({
 
   return (
     <div className="mb-2">
-      <Form.Label className="text-muted mb-1 fs-6">{label}</Form.Label>
+      <div className="d-flex align-items-center justify-content-between mb-1">
+        <Form.Label className="text-muted text-left mb-0 fs-6">{label}</Form.Label>
+        {showAssignDriver && onAssignDriver && (
+          <Button
+            variant="link"
+            size="sm"
+            onClick={onAssignDriver}
+            className="text-decoration-none text-secondary p-0 fs-6"
+            style={{ marginLeft: "8px" }}
+          >
+            (Assign Driver)
+          </Button>
+        )}
+      </div>
       <div className="d-flex align-items-center gap-2">
         {isEditing ? (
           <>
@@ -211,11 +228,35 @@ const paymentStatusOptions = [
   { value: 3, label: "Refunded" },
 ];
 
+// Define field configuration interface
+interface FieldConfig {
+  label: string;
+  name: string;
+  type?: "text" | "number" | "tel" | "email" | "date" | "datetime-local" | "textarea" | "select" | "boolean";
+  editable?: boolean;
+  cols?: number;
+  rows?: number;
+  options?: { value: string | number; label: string }[];
+  showViewIcon?: boolean;
+  showAssignDriver?: boolean;
+}
+
+interface SectionConfig {
+  title: string;
+  fields: FieldConfig[];
+  show?: boolean;
+}
+
 const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = ({
   data,
   onUpdate,
   editable = true,
 }) => {
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState("");
+  const [selectedDriver, setSelectedDriver] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   const handleFieldUpdate = (field: string, value: string) =>
     onUpdate?.(field, value);
 
@@ -238,37 +279,79 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
   const isBulkBooking = () => data?.booking_type === 2 || data?.booking_type === "2";
   const isRentalBooking = () => data?.booking_type === 1 || data?.booking_type === "1";
 
-  const sections = [
+  const handleAssignDriver = () => {
+    setShowAssignModal(true);
+  };
+
+  const handleSubmitAssign = async () => {
+    if (!selectedVehicle || !selectedDriver) {
+      alert("Please select both vehicle and driver");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Call your API to assign driver and vehicle
+      // await axios.post(`${baseURL}/ambulance/assign_driver`, {
+      //   booking_id: data?.booking_id,
+      //   vehicle_id: selectedVehicle,
+      //   driver_id: selectedDriver
+      // });
+      
+      console.log("Assigning:", { 
+        vehicle: selectedVehicle, 
+        driver: selectedDriver,
+        booking_id: data?.booking_id
+      });
+      
+      setShowAssignModal(false);
+      setSelectedVehicle("");
+      setSelectedDriver("");
+      
+      // Refresh booking data or update locally
+      if (onUpdate) {
+        onUpdate("booking_acpt_vehicle_id", selectedVehicle);
+        onUpdate("booking_acpt_driver_id", selectedDriver);
+      }
+    } catch (error) {
+      console.error("Error assigning driver:", error);
+      alert("Failed to assign driver");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const sections: SectionConfig[] = [
     {
       title: "Consumer Information",
       fields: [
         { label: "Consumer Name", name: "booking_con_name", editable: false, cols: 4, showViewIcon: true },
-        { label: "Consumer Mobile", name: "booking_con_mobile", type: "tel" as const, editable: false, cols: 4 },
+        { label: "Consumer Mobile", name: "booking_con_mobile", type: "tel", editable: false, cols: 4 },
         { label: "Consumer ID", name: "booking_by_cid", editable: false, cols: 4 },
       ],
     },
     {
       title: "Booking Information",
       fields: [
-        { label: "Booking Type", name: "booking_type", type: "select" as const, options: bookingTypeOptions, editable: false, cols: 2 },
+        { label: "Booking Type", name: "booking_type", type: "select", options: bookingTypeOptions, editable: false, cols: 2 },
         { label: "Booking Source", name: "booking_source", editable: false, cols: 2 },
         { label: "Generate Source", name: "booking_generate_source", editable: false, cols: 2 },
         { label: "Category", name: "booking_view_category_name", editable: false, cols: 2 },
-        { label: "Schedule Time", name: "booking_schedule_time", type: "datetime-local" as const, editable: false, cols: 2 },
-        { label: "Created At", name: "created_at", type: "datetime-local" as const, editable: false, cols: 2 },
+        { label: "Schedule Time", name: "booking_schedule_time", type: "datetime-local", editable: false, cols: 2 },
+        { label: "Created At", name: "created_at", type: "datetime-local", editable: false, cols: 2 },
       ],
     },
     {
       title: "Location Information",
       fields: [
-        { label: "Pickup Location", name: "booking_pickup", type: "textarea" as const, rows: 2, cols: 6 },
-        { label: "Drop Location", name: "booking_drop", type: "textarea" as const, rows: 2, cols: 6 },
+        { label: "Pickup Location", name: "booking_pickup", type: "textarea", rows: 2, cols: 6 },
+        { label: "Drop Location", name: "booking_drop", type: "textarea", rows: 2, cols: 6 },
         { label: "Pickup City", name: "booking_pickup_city", cols: 3 },
-        { label: "Pickup Latitude", name: "booking_pick_lat", type: "number" as const, editable: false, cols: 3 },
-        { label: "Pickup Longitude", name: "booking_pick_long", type: "number" as const, editable: false, cols: 3 },
+        { label: "Pickup Latitude", name: "booking_pick_lat", type: "number", editable: false, cols: 3 },
+        { label: "Pickup Longitude", name: "booking_pick_long", type: "number", editable: false, cols: 3 },
         { label: "Drop City", name: "booking_drop_city", cols: 3 },
-        { label: "Drop Latitude", name: "booking_drop_lat", type: "number" as const, editable: false, cols: 3 },
-        { label: "Drop Longitude", name: "booking_drop_long", type: "number" as const, editable: false, cols: 3 },
+        { label: "Drop Latitude", name: "booking_drop_lat", type: "number", editable: false, cols: 3 },
+        { label: "Drop Longitude", name: "booking_drop_long", type: "number", editable: false, cols: 3 },
         { label: "Distance (KM)", name: "booking_distance", cols: 3 },
         { label: "Duration", name: "booking_duration", cols: 3 },
         { label: "Duration (Sec)", name: "booking_duration_in_sec", editable: false, cols: 3 },
@@ -278,20 +361,22 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
     {
       title: "Payment Information",
       fields: [
-        { label: "Total Amount", name: "booking_total_amount", type: "number" as const, editable: false, cols: 3 },
-        { label: "Booking Amount", name: "booking_amount", type: "number" as const, editable: false, cols: 3 },
-        { label: "Advance Amount", name: "booking_adv_amount", type: "number" as const, cols: 3 },
+        { label: "Total Amount", name: "booking_total_amount", type: "number", editable: false, cols: 3 },
+        { label: "Booking Amount", name: "booking_amount", type: "number", editable: false, cols: 3 },
+        { label: "Advance Amount", name: "booking_adv_amount", type: "number", cols: 3 },
         { label: "Payment Method", name: "booking_payment_method", editable: false, cols: 3 },
         { label: "Payment Type", name: "booking_payment_type", editable: false, cols: 3 },
-        { label: "Payment Status", name: "booking_payment_status", type: "select" as const, options: paymentStatusOptions, cols: 3 },
+        { label: "Payment Status", name: "booking_payment_status", type: "select", options: paymentStatusOptions, cols: 3 },
       ],
     },
     {
       title: "Vehicle & Driver Information",
       fields: [
-        { label: "Vehicle ID", name: "booking_acpt_vehicle_id", editable: false, cols: 4 },
-        { label: "Driver ID", name: "booking_acpt_driver_id", editable: false, cols: 4 },
-        { label: "Accept Time", name: "booking_acpt_time", type: "datetime-local" as const, editable: false, cols: 4 },
+        { label: "Vehicle", name: "v_vehicle_name", editable: false, cols: 4 },
+        { label: "Vehicle RC", name: "vehicle_rc_number", editable: false, cols: 4 },
+        { label: "Driver Name", name: "driver_full_name", editable: false, cols: 4, showAssignDriver: true },
+        { label: "Driver Mobile", name: "driver_mobile", editable: false, cols: 4 },
+        { label: "Accept Time", name: "booking_acpt_time", type: "datetime-local", editable: false, cols: 4 },
         { label: "Arrival to Pickup Duration (Sec)", name: "booking_a_t_p_duration_in_sec", editable: false, cols: 4 },
         { label: "Arrival to Pickup Distance", name: "booking_ap_distance", editable: false, cols: 4 },
         { label: "Arrival to Pickup Duration", name: "booking_ap_duration", editable: false, cols: 4 },
@@ -300,24 +385,24 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
     {
       title: "Rate Information",
       fields: [
-        { label: "Base Rate", name: "booking_view_base_rate", type: "number" as const, editable: false, cols: 2 },
-        { label: "Per KM Rate", name: "booking_view_per_km_rate", type: "number" as const, editable: false, cols: 2 },
-        { label: "KM Rate", name: "booking_view_km_rate", type: "number" as const, editable: false, cols: 2 },
+        { label: "Base Rate", name: "booking_view_base_rate", type: "number", editable: false, cols: 2 },
+        { label: "Per KM Rate", name: "booking_view_per_km_rate", type: "number", editable: false, cols: 2 },
+        { label: "KM Rate", name: "booking_view_km_rate", type: "number", editable: false, cols: 2 },
         { label: "KM Till", name: "booking_view_km_till", editable: false, cols: 2 },
-        { label: "Per Extra KM Rate", name: "booking_view_per_ext_km_rate", type: "number" as const, editable: false, cols: 2 },
-        { label: "Per Extra Min Rate", name: "booking_view_per_ext_min_rate", type: "number" as const, editable: false, cols: 2 },
-        { label: "Service Charge", name: "booking_view_service_charge_rate", type: "number" as const, editable: false, cols: 2 },
-        { label: "Service Charge Discount", name: "booking_view_service_charge_rate_discount", type: "number" as const, editable: false, cols: 2 },
-        { label: "Total Fare", name: "booking_view_total_fare", type: "number" as const, editable: false, cols: 2 },
+        { label: "Per Extra KM Rate", name: "booking_view_per_ext_km_rate", type: "number", editable: false, cols: 2 },
+        { label: "Per Extra Min Rate", name: "booking_view_per_ext_min_rate", type: "number", editable: false, cols: 2 },
+        { label: "Service Charge", name: "booking_view_service_charge_rate", type: "number", editable: false, cols: 2 },
+        { label: "Service Charge Discount", name: "booking_view_service_charge_rate_discount", type: "number", editable: false, cols: 2 },
+        { label: "Total Fare", name: "booking_view_total_fare", type: "number", editable: false, cols: 2 },
       ],
     },
     {
       title: "OTP & Verification",
       fields: [
         { label: "OTP", name: "booking_view_otp", editable: false, cols: 3 },
-        { label: "OTP Status", name: "booking_view_status_otp", type: "boolean" as const, editable: false, cols: 3 },
-        { label: "Rating Status", name: "booking_view_rating_status", type: "boolean" as const, editable: false, cols: 3 },
-        { label: "Consumer to Driver Rating Status", name: "booking_view_rating_c_to_d_status", type: "boolean" as const, editable: false, cols: 3 },
+        { label: "OTP Status", name: "booking_view_status_otp", type: "boolean", editable: false, cols: 3 },
+        { label: "Rating Status", name: "booking_view_rating_status", type: "boolean", editable: false, cols: 3 },
+        { label: "Consumer to Driver Rating Status", name: "booking_view_rating_c_to_d_status", type: "boolean", editable: false, cols: 3 },
       ],
     },
     {
@@ -326,7 +411,7 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
       fields: [
         { label: "Bulk Master Key", name: "booking_bulk_master_key", editable: false, cols: 4 },
         { label: "No. of Bulk", name: "booking_no_of_bulk", editable: false, cols: 4 },
-        { label: "Bulk Total", name: "booking_bulk_total", type: "number" as const, editable: false, cols: 4 },
+        { label: "Bulk Total", name: "booking_bulk_total", type: "number", editable: false, cols: 4 },
       ],
     },
     {
@@ -339,16 +424,16 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
     {
       title: "Additional Information",
       fields: [
-        { label: "Arrival Time", name: "booking_view_arrival_time", type: "datetime-local" as const, editable: false, cols: 4 },
-        { label: "Pickup Time", name: "booking_view_pickup_time", type: "datetime-local" as const, editable: false, cols: 4 },
-        { label: "Dropped Time", name: "booking_view_dropped_time", type: "datetime-local" as const, editable: false, cols: 4 },
-        { label: "Shoot Time", name: "bv_shoot_time", type: "datetime-local" as const, editable: false, cols: 4 },
-        { label: "Virtual Number", name: "bv_virtual_number", type: "tel" as const, editable: false, cols: 4 },
-        { label: "Virtual Number Status", name: "bv_virtual_number_status", type: "boolean" as const, editable: false, cols: 4 },
+        { label: "Arrival Time", name: "booking_view_arrival_time", type: "datetime-local", editable: false, cols: 4 },
+        { label: "Pickup Time", name: "booking_view_pickup_time", type: "datetime-local", editable: false, cols: 4 },
+        { label: "Dropped Time", name: "booking_view_dropped_time", type: "datetime-local", editable: false, cols: 4 },
+        { label: "Shoot Time", name: "bv_shoot_time", type: "datetime-local", editable: false, cols: 4 },
+        { label: "Virtual Number", name: "bv_virtual_number", type: "tel", editable: false, cols: 4 },
+        { label: "Virtual Number Status", name: "bv_virtual_number_status", type: "boolean", editable: false, cols: 4 },
         { label: "Cloud Consumer CRID", name: "bv_cloud_con_crid", editable: false, cols: 4 },
         { label: "Cloud Consumer CRID (C to D)", name: "bv_cloud_con_crid_c_to_d", editable: false, cols: 4 },
         { label: "Category Icon", name: "booking_view_category_icon", editable: false, cols: 4 },
-        { label: "Includes", name: "booking_view_includes", type: "textarea" as const, rows: 3, cols: 6 },
+        { label: "Includes", name: "booking_view_includes", type: "textarea", rows: 3, cols: 6 },
       ],
     },
   ];
@@ -413,7 +498,11 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
                     <Col lg={f.cols || 4} md={6} key={f.name}>
                       <Field
                         label={f.label}
-                        value={data?.[f.name]}
+                        value={
+                          f.name === "driver_full_name"
+                            ? `${data?.driver_name || ""} ${data?.driver_last_name || ""}`.trim() || "N/A"
+                            : data?.[f.name]
+                        }
                         fieldName={f.name}
                         editable={editable && f.editable !== false}
                         onEdit={(value) => handleFieldUpdate(f.name, value)}
@@ -422,6 +511,8 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
                         options={f.options}
                         showViewIcon={f.showViewIcon}
                         consumerId={f.showViewIcon ? data?.booking_by_cid : undefined}
+                        showAssignDriver={f.showAssignDriver}
+                        onAssignDriver={f.showAssignDriver ? handleAssignDriver : undefined}
                       />
                     </Col>
                   ))}
@@ -444,12 +535,55 @@ const AmbulanceBookingDetailsForm: React.FC<AmbulanceBookingDetailsFormProps> = 
             <Button variant="success" className="me-2 mb-2">
               Complete Booking
             </Button>
-            <Button variant="info" className="me-2 mb-2">
+            <Button variant="info" className="me-2 mb-2" onClick={handleAssignDriver}>
               Assign Driver
             </Button>
           </Section>
         </Card.Body>
       </Card>
+
+      {/* Assign Driver Modal */}
+      <Modal show={showAssignModal} onHide={() => setShowAssignModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Assign</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Vehicle</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="ENTER VEHICLE DETAILS"
+                value={selectedVehicle}
+                onChange={(e) => setSelectedVehicle(e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Driver</Form.Label>
+              <Form.Select
+                value={selectedDriver}
+                onChange={(e) => setSelectedDriver(e.target.value)}
+              >
+                <option value="">Select Driver</option>
+                {/* Add your driver options here */}
+                <option value="1">Driver 1</option>
+                <option value="2">Driver 2</option>
+                <option value="3">Driver 3</option>
+              </Form.Select>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button 
+            variant="primary" 
+            onClick={handleSubmitAssign}
+            disabled={submitting}
+          >
+            {submitting ? "Submitting..." : "Submit"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

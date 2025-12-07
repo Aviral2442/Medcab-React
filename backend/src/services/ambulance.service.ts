@@ -1626,8 +1626,6 @@ export const ambulanceBookingDetailService = async (bookingId: number) => {
         if (!rows || rows.length === 0) {
             throw new ApiError(404, "Ambulance booking not found");
         }
-        console.log(rows[0]);
-
         return {
             status: 200,
             message: "Ambulance booking detail fetched successfully",
