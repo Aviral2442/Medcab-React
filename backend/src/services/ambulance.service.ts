@@ -1797,3 +1797,22 @@ export const updateAmbulanceBookingScheduleTime = async (bookingId: number, book
         throw new ApiError(500, "Update Ambulance Booking Schedule Time Error On Updating");
     }
 };
+
+// SERVICE TO UPDATE AMBULANCE BOOKING CONSUMER DETAILS
+export const updateAmbulanceBookingConsumerDetails = async (bookingId: number, booking_con_name: string, booking_con_mobile: number) => {
+    try {
+
+        const [result]: any = await db.query(
+            `UPDATE booking_view SET booking_con_name = ?, booking_con_mobile = ? WHERE booking_id = ?`,
+            [booking_con_name, booking_con_mobile, bookingId]
+        );
+
+        return {
+            status: 200,
+            message: "Ambulance booking consumer details updated successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Update Ambulance Booking Consumer Details Error On Updating");
+    }
+};

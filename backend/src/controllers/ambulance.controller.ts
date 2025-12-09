@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, dashboardAmbulanceBookingService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, dashboardAmbulanceBookingService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
 
 // DASHBOARD AMBULANCE BOOKING CONTROLLER
 export const dashboardAmbulanceBookingController = async (req: Request, res: Response, next: NextFunction) => {
@@ -569,6 +569,31 @@ export const updateAmbulanceBookingScheduleTimeController = async (req: Request,
         console.log(bookingId, booking_schedule_time);
 
         const result = await updateAmbulanceBookingScheduleTime(bookingId, booking_schedule_time);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO UPDATE AMBULANCE BOOKING CONSUMER DETAILS
+export const updateAmbulanceBookingConsumerDetailsController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const bookingId = parseInt(req.params.bookingId);
+
+        if (!bookingId) {
+            return res.status(400).json({ status: 400, message: "Invalid booking ID" });
+        }
+
+        if (!req.body.booking_con_name) {
+            return res.status(400).json({ status: 400, message: "Consumer name is required" });
+        }
+
+        if (!req.body.booking_con_mobile) {
+            return res.status(400).json({ status: 400, message: "Consumer mobile number is required" });
+        }
+
+        const { booking_con_name, booking_con_mobile } = req.body;
+        const result = await updateAmbulanceBookingConsumerDetails(bookingId, booking_con_name, booking_con_mobile);
         res.status(200).json(result);
     } catch (error) {
         next(error);
