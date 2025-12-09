@@ -1710,6 +1710,7 @@ interface AmbulanceBookingData {
     // bv_shoot_time: string;
 }
 
+// SERVICE TO CREATE AMBULANCE BOOKING
 export const createAmbulanceBookingService = async (data: AmbulanceBookingData) => {
     try {
 
@@ -1767,5 +1768,32 @@ export const createAmbulanceBookingService = async (data: AmbulanceBookingData) 
 
     } catch (error) {
         throw new ApiError(500, "Create Ambulance Booking Error On Inserting");
+    }
+};
+
+// SERVICE TO UPDATE AMBULANCE BOOKING SCHEDULE TIME
+export const updateAmbulanceBookingScheduleTime = async (bookingId: number, booking_schedule_time: string) => {
+    try {
+
+        console.log(bookingId, booking_schedule_time);
+
+
+        if (!bookingId) {
+            throw new ApiError(400, "Invalid booking ID");
+        }
+
+        const [result]: any = await db.query(
+            `UPDATE booking_view SET booking_schedule_time = ? WHERE booking_id = ?`,
+            [booking_schedule_time, bookingId]
+        );
+
+        return {
+            status: 200,
+            message: "Ambulance booking schedule time updated successfully",
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Update Ambulance Booking Schedule Time Error On Updating");
     }
 };

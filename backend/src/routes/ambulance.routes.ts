@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { addAmbulanceCategoryController, addAmbulanceFacilitiesRateController, addAmbulanceFaqController, ambulanceBookingDetailController, dashboardAmbulanceBookingController, dashboardAmbulanceDriverController, dashboardAmbulanceDriverTransController, dashboardAmbulancePartnerController, dashboardAmbulancePartnerTransController, dashboardAmbulanceVehicleController, editAmbulanceCategoryController, editAmbulanceFacilitiesRateController, editAmbulanceFaqController, getAmbulanceBookingListController, getAmbulanceCategoryController, getAmbulanceCategoryListController, getAmbulanceFacilitiesRateController, getAmbulanceFacilitiesRateListController, getAmbulanceFaqController, getAmbulanceFaqListController, getBulkAmbulanceBookingListController, getRegularAmbulanceBookingListController, getRentalAmbulanceBookingListController, updateAmbulanceCategoryStatusController, updateAmbulanceFacilitiesRateStatusController, updateAmbulanceFaqStatusController } from '../controllers/ambulance.controller';
+import { addAmbulanceCategoryController, addAmbulanceFacilitiesRateController, addAmbulanceFaqController, ambulanceBookingDetailController, dashboardAmbulanceBookingController, dashboardAmbulanceDriverController, dashboardAmbulanceDriverTransController, dashboardAmbulancePartnerController, dashboardAmbulancePartnerTransController, dashboardAmbulanceVehicleController, editAmbulanceCategoryController, editAmbulanceFacilitiesRateController, editAmbulanceFaqController, getAmbulanceBookingListController, getAmbulanceCategoryController, getAmbulanceCategoryListController, getAmbulanceFacilitiesRateController, getAmbulanceFacilitiesRateListController, getAmbulanceFaqController, getAmbulanceFaqListController, getBulkAmbulanceBookingListController, getRegularAmbulanceBookingListController, getRentalAmbulanceBookingListController, updateAmbulanceBookingScheduleTimeController, updateAmbulanceCategoryStatusController, updateAmbulanceFacilitiesRateStatusController, updateAmbulanceFaqStatusController } from '../controllers/ambulance.controller';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -42,5 +42,8 @@ router.get('/get_rental_ambulance_booking_list', getRentalAmbulanceBookingListCo
 router.get('/get_bulk_ambulance_booking_list', getBulkAmbulanceBookingListController);
 router.get('/ambulance_booking_detail/:id', ambulanceBookingDetailController);
 router.post('/create_ambulance_booking', ambulanceBookingDetailController);
+
+// Booking Details Routes
+router.put('/update_ambulance_booking_schedule_time/:bookingId', updateAmbulanceBookingScheduleTimeController);
 
 export default router;

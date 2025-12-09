@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, dashboardAmbulanceBookingService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, dashboardAmbulanceBookingService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService } from "../services/ambulance.service";
 
 // DASHBOARD AMBULANCE BOOKING CONTROLLER
 export const dashboardAmbulanceBookingController = async (req: Request, res: Response, next: NextFunction) => {
@@ -555,6 +555,20 @@ export const ambulanceBookingDetailController = async (req: Request, res: Respon
     try {
         const bookingId = parseInt(req.params.id);
         const result = await ambulanceBookingDetailService(bookingId);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO UPDATE AMBULANCE BOOKING SCHEDULE TIME
+export const updateAmbulanceBookingScheduleTimeController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const bookingId = parseInt(req.params.bookingId);
+        const booking_schedule_time = req.body.booking_schedule_time;
+        console.log(bookingId, booking_schedule_time);
+
+        const result = await updateAmbulanceBookingScheduleTime(bookingId, booking_schedule_time);
         res.status(200).json(result);
     } catch (error) {
         next(error);
