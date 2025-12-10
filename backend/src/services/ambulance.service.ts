@@ -59,8 +59,10 @@ export const dashboardAmbulancePartnerService = async () => {
                 partner_city_id,
                 partner_registration_step,
                 created_at,
-                partner_status
+                partner_status,
+                city.city_name
             FROM partner
+            LEFT JOIN city ON partner.partner_city_id = city.city_id
             ORDER BY partner_id DESC
             LIMIT 5 OFFSET 0;   
             `
@@ -134,8 +136,10 @@ export const dashboardAmbulanceVehicleService = async () => {
                 vehicle.vehicle_exp_date,
                 vehicle.vehicle_verify_date,
                 vehicle.verify_type,
-                vehicle.created_at
+                vehicle.created_at,
+                ambulance_category_vehicle.ambulance_category_vehicle_name
             FROM vehicle
+            LEFT JOIN ambulance_category_vehicle ON vehicle.vehicle_category_type = ambulance_category_vehicle.ambulance_category_vehicle_id
             ORDER BY vehicle.vehicle_id DESC
             LIMIT 5 OFFSET 0;
             `

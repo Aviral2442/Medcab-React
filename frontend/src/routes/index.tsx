@@ -13,6 +13,11 @@ const TonAI = lazy(() => import("@/views/ai/ton-ai"));
 const Calendar = lazy(() => import("@/views/apps/calendar"));
 const Directory = lazy(() => import("@/views/apps/directory"));
 
+
+// Dashboard Pages
+const AmbulanceDashboard = lazy(() => import('@/views/pages/Dashboard/ambulance'))
+
+
 // Pages
 const EmptyPage = lazy(() => import("@/views/pages/empty"));
 const Invoice = lazy(() => import("@/views/pages/invoice"));
@@ -139,6 +144,7 @@ const errorRoutes: RouteObject[] = [
 
 const dashboardRoutes: RouteObject[] = [
   { path: "/manpower-dashboard", element: <Dashboard /> },
+  { path: "/ambulance-dashboard", element: <AmbulanceDashboard /> },
 ];
 
 const appsRoutes: RouteObject[] = [

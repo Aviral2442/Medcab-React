@@ -6,7 +6,7 @@ let bookingRows: any[] = [];
 const getAmbulanceBooking = async () => {
     try {
         const rows = await axios.get(`${baseURL}/ambulance/get_ambulance_booking_list`);
-        console.log("Bookings fetched:", rows);
+        // console.log("Bookings fetched:", rows);
         bookingRows = rows.data.jsonData?.booking_list || [];
     } catch (error) {
         console.error("Error fetching bookings:", error);
