@@ -126,9 +126,9 @@ export const getPartnerTransactionsController = async (req: Request, res: Respon
     try {
         const filters = {
             date: req.query.date as string,
-            // status: req.query.status as string,
             fromDate: req.query.fromDate as string,
             toDate: req.query.toDate as string,
+            partnerId: req.query.partner_id ? parseInt(req.query.partner_id as string) : undefined,
             page: req.query.page ? parseInt(req.query.page as string) : 1,
             limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         }

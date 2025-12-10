@@ -4,13 +4,17 @@ import { driverTransDataService, getConsumerTransactionList, getDriverTransactio
 // GET CONSUMER TRANSACTION LIST CONTROLLER
 export const consumerTransactionList = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await getConsumerTransactionList();
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        };
 
-        res.status(200).json({
-            status: 200,
-            message: "Consumer transaction list fetched successfully",
-            jsonData: result,
-        });
+        const result = await getConsumerTransactionList(filters);
+        res.status(200).json(result);
 
     } catch (error) {
         next(error);
@@ -20,12 +24,18 @@ export const consumerTransactionList = async (req: Request, res: Response, next:
 // GET VENDOR TRANSACTION LIST CONTROLLER
 export const vendorTransactionList = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await getVendorTransactionList();
-        res.status(200).json({
-            status: 200,
-            message: "Vendor transaction list fetched successfully",
-            jsonData: result,
-        });
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            page: req.query.page ? parseInt(req.query.page as string) : 1,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        };
+
+        const result = await getVendorTransactionList(filters);
+        res.status(200).json(result);
+
     } catch (error) {
         next(error);
     }

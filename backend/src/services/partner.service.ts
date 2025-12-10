@@ -413,9 +413,9 @@ export const getManpowerPartnerServices = async (filters?: {
 // Get Partner Transactions List
 export const getPartnerTransactionServices = async (filters?: {
     date?: string;
-    // status?: string;
     fromDate?: string;
     toDate?: string;
+    partnerId?: number;
     page?: number;
     limit?: number;
 }) => {
@@ -426,30 +426,23 @@ export const getPartnerTransactionServices = async (filters?: {
         const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
         const offset = (page - 1) * limit;
 
-        const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'partner_transection.created_at' });
+        const { whereSQL, params } = buildFilters({ ...filters, dateColumn: 'partner_transection.partner_transection_time_unix' });
 
         let finalWhereSQL = whereSQL;
+        let finalParams = [...params];
 
-        // if (filters?.status) {
-        //     const statusConsitionMap: Record<string, string> = {
-        //         new: "partner_man_power_status = 0",
-        //         active: "partner_man_power_status = 1",
-        //         inActive: "partner_man_power_status = 2",
-        //     };
-
-        //     const condition = statusConsitionMap[filters.status];
-
-        //     if (condition) {
-        //         if (/where\s+/i.test(finalWhereSQL)) {
-        //             finalWhereSQL += ` AND ${condition}`;
-        //         } else {
-        //             finalWhereSQL = `WHERE ${condition}`;
-        //         }
-        //     }
-        // }
+        // Add partner_id filter if provided
+        if (filters?.partnerId) {
+            const condition = "partner_transection.partner_transection_by = ?";
+            if (/where\s+/i.test(finalWhereSQL)) {
+                finalWhereSQL += ` AND ${condition}`;
+            } else {
+                finalWhereSQL = `WHERE ${condition}`;
+            }
+            finalParams.push(filters.partnerId);
+        }
 
         const query = `
-
             SELECT *, partner.partner_f_name , partner.partner_mobile , partner.partner_id 
             FROM partner_transection
             LEFT JOIN partner ON partner_transection.partner_transection_by = partner.partner_id
@@ -458,7 +451,7 @@ export const getPartnerTransactionServices = async (filters?: {
             LIMIT ? OFFSET ?;
         `;
 
-        const queryParams = [...params, limit, offset];
+        const queryParams = [...finalParams, limit, offset];
         const [rows]: any = await db.query(query, queryParams);
 
         const [countRows]: any = await db.query(
@@ -466,7 +459,7 @@ export const getPartnerTransactionServices = async (filters?: {
             SELECT COUNT(*) as total
             FROM partner_transection
             ${finalWhereSQL}
-            `, params
+            `, finalParams
         );
 
         const totalData = countRows[0]?.total || 0;

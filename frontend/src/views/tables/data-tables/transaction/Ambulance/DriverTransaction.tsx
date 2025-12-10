@@ -96,7 +96,11 @@ const ExportDataWithButtons = ({
       const transactions = res.data?.jsonData?.driverTransactions || [];
       setTableData(transactions);
 
-      if (res.data.pagination) {
+      // Fix: Check for 'paginations' (with 's') instead of 'pagination'
+      if (res.data?.paginations) {
+        setTotal(res.data.paginations.total);
+        setTotalPages(res.data.paginations.totalPages);
+      } else if (res.data?.pagination) {
         setTotal(res.data.pagination.total);
         setTotalPages(res.data.pagination.totalPages);
       } else {
