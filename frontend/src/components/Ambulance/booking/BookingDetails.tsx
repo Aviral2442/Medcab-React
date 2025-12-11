@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { Card, Row, Col, Form, Button, Modal } from "react-bootstrap";
-import { TbPencil, TbCheck, TbX, TbEye } from "react-icons/tb";
+import { Card, Row, Col, Form, Button, Modal, Spinner } from "react-bootstrap";
+import { TbPencil, TbCheck, TbX, TbEye, TbSearch } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "@/global.css";
 import DateConversion from "@/components/DateConversion";
 import { formatDate } from "@/components/DateFormat";
+
+const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
 interface AmbulanceBookingDetailsFormProps {
   data: any;
@@ -51,6 +54,8 @@ interface FieldProps {
   consumerId?: number;
   showAssignDriver?: boolean;
   onAssignDriver?: () => void;
+  showConsumerSearch?: boolean;
+  onConsumerSearch?: () => void;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -65,6 +70,8 @@ const Field: React.FC<FieldProps> = ({
   consumerId,
   showAssignDriver = false,
   onAssignDriver,
+  showConsumerSearch = false,
+  onConsumerSearch,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value?.toString() || "");
@@ -86,13 +93,11 @@ const Field: React.FC<FieldProps> = ({
 
     if (type === "date" || type === "datetime-local") {
       try {
-        // Check if value is "0" or empty
         if (valStr === "0" || valStr === "" || valStr.trim() === "") {
           return " ";
         }
 
         const numVal = parseInt(valStr, 10);
-        // If numeric value is 0 or negative, return N/A
         if (!isNaN(numVal) && numVal <= 0) {
           return " ";
         }
@@ -103,7 +108,6 @@ const Field: React.FC<FieldProps> = ({
 
         if (isNaN(date.getTime())) return " ";
 
-        // Check if date is epoch (1970-01-01) which usually means unset/0
         if (
           date.getFullYear() === 1970 &&
           date.getMonth() === 0 &&
@@ -112,7 +116,6 @@ const Field: React.FC<FieldProps> = ({
           return " ";
         }
 
-        // Use the imported formatDate from "@/components/DateFormat"
         return formatDate(date.toISOString());
       } catch {
         return "N/A";
@@ -134,6 +137,14 @@ const Field: React.FC<FieldProps> = ({
     setIsEditing(false);
   };
 
+  const handleEditClick = () => {
+    if (showConsumerSearch && onConsumerSearch) {
+      onConsumerSearch();
+    } else {
+      setIsEditing(true);
+    }
+  };
+
   React.useEffect(() => {
     setEditValue(value?.toString() || "");
   }, [value]);
@@ -141,13 +152,9 @@ const Field: React.FC<FieldProps> = ({
   return (
     <div className="mb-2">
       <div className="d-flex align-items-center mb-1">
-        <Form.Label className="text-muted  mb-0 fs-6">
-          {label}
-        </Form.Label>
+        <Form.Label className="text-muted  mb-0 fs-6">{label}</Form.Label>
         {showAssignDriver && onAssignDriver && (
           <button
-            // variant="link"
-            // size="sm"
             onClick={onAssignDriver}
             className="text-decoration-none border-0 bg-transparent text-secondary p-0 fs-6"
             style={{ marginLeft: "8px" }}
@@ -213,7 +220,7 @@ const Field: React.FC<FieldProps> = ({
             )}
             {editable && onEdit && (
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={handleEditClick}
                 className="text-muted bg-transparent border-0 p-1"
               >
                 <TbPencil size={18} />
@@ -269,12 +276,20 @@ interface FieldConfig {
   options?: { value: string | number; label: string }[];
   showViewIcon?: boolean;
   showAssignDriver?: boolean;
+  showConsumerSearch?: boolean;
 }
 
 interface SectionConfig {
   title: string;
   fields: FieldConfig[];
   show?: boolean;
+}
+
+interface Consumer {
+  consumer_id: number;
+  consumer_name: string;
+  consumer_mobile_no: string;
+  consumer_email_id?: string;
 }
 
 const AmbulanceBookingDetailsForm: React.FC<
@@ -285,8 +300,33 @@ const AmbulanceBookingDetailsForm: React.FC<
   const [selectedDriver, setSelectedDriver] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleFieldUpdate = (field: string, value: string) =>
+  // Consumer Search Modal State
+  const [showConsumerSearchModal, setShowConsumerSearchModal] = useState(false);
+  const [consumerSearchQuery, setConsumerSearchQuery] = useState("");
+  const [consumerSearchResults, setConsumerSearchResults] = useState<Consumer[]>([]);
+  const [searchingConsumer, setSearchingConsumer] = useState(false);
+
+  const handleFieldUpdate = async (field: string, value: string) => {
+    if (data?.booking_id === undefined) {
+      alert("Invalid booking ID");
+      return;
+    }
+    if (field === "booking_schedule_time") {
+      try {
+        await axios.put(
+          `${baseURL}/ambulance/update_ambulance_booking_schedule_time/${data?.booking_id}`,
+          { booking_schedule_time: value }
+        );
+        console.log("Schedule time updated successfully");
+      } catch (error) {
+        console.error("Error updating schedule time:", error);
+        alert("Failed to update schedule time");
+        return;
+      }
+    }
+
     onUpdate?.(field, value);
+  };
 
   const formatDate = (value: string | number) => {
     if (!value && value !== 0) return "N/A";
@@ -313,6 +353,57 @@ const AmbulanceBookingDetailsForm: React.FC<
     setShowAssignModal(true);
   };
 
+  const handleConsumerSearch = () => {
+    setShowConsumerSearchModal(true);
+    setConsumerSearchQuery("");
+    setConsumerSearchResults([]);
+  };
+
+  const searchConsumers = async () => {
+    if (!consumerSearchQuery.trim()) {
+      alert("Please enter a search term");
+      return;
+    }
+
+    setSearchingConsumer(true);
+    try {
+      const response = await axios.get(
+        `${baseURL}/consumer/search_consumer?query=${encodeURIComponent(consumerSearchQuery)}`
+      );
+      setConsumerSearchResults(response.data.jsonData || response.data.data || []);
+    } catch (error) {
+      console.error("Error searching consumers:", error);
+      alert("Failed to search consumers");
+    } finally {
+      setSearchingConsumer(false);
+    }
+  };
+
+  const handleSelectConsumer = async (consumer: Consumer) => {
+    try {
+      // Update consumer details via API
+      await axios.put(
+        `${baseURL}/ambulance/update_ambulance_booking_consumer_details/${data?.booking_id}`,
+        {
+          booking_con_name: consumer.consumer_name,
+          booking_con_mobile: consumer.consumer_mobile_no,
+        }
+      );
+
+      // Update local state
+      onUpdate?.("booking_con_name", consumer.consumer_name);
+      onUpdate?.("booking_con_mobile", consumer.consumer_mobile_no);
+      onUpdate?.("booking_by_cid", consumer.consumer_id.toString());
+
+      setShowConsumerSearchModal(false);
+      setConsumerSearchQuery("");
+      setConsumerSearchResults([]);
+    } catch (error) {
+      console.error("Error updating consumer details:", error);
+      alert("Failed to update consumer details");
+    }
+  };
+
   const handleSubmitAssign = async () => {
     if (!selectedVehicle || !selectedDriver) {
       alert("Please select both vehicle and driver");
@@ -321,13 +412,6 @@ const AmbulanceBookingDetailsForm: React.FC<
 
     setSubmitting(true);
     try {
-      // Call your API to assign driver and vehicle
-      // await axios.post(`${baseURL}/ambulance/assign_driver`, {
-      //   booking_id: data?.booking_id,
-      //   vehicle_id: selectedVehicle,
-      //   driver_id: selectedDriver
-      // });
-
       console.log("Assigning:", {
         vehicle: selectedVehicle,
         driver: selectedDriver,
@@ -338,7 +422,6 @@ const AmbulanceBookingDetailsForm: React.FC<
       setSelectedVehicle("");
       setSelectedDriver("");
 
-      // Refresh booking data or update locally
       if (onUpdate) {
         onUpdate("booking_acpt_vehicle_id", selectedVehicle);
         onUpdate("booking_acpt_driver_id", selectedDriver);
@@ -358,22 +441,18 @@ const AmbulanceBookingDetailsForm: React.FC<
         {
           label: "Consumer Name",
           name: "booking_con_name",
-          editable: false,
+          editable: true,
           cols: 4,
           showViewIcon: true,
+          showConsumerSearch: true,
         },
         {
           label: "Consumer Mobile",
           name: "booking_con_mobile",
           type: "tel",
-          editable: false,
+          editable: true,
           cols: 4,
-        },
-        {
-          label: "Consumer ID",
-          name: "booking_by_cid",
-          editable: false,
-          cols: 4,
+          showConsumerSearch: true,
         },
       ],
     },
@@ -386,39 +465,39 @@ const AmbulanceBookingDetailsForm: React.FC<
           type: "select",
           options: bookingTypeOptions,
           editable: false,
-          cols: 2,
+          cols: 3,
         },
         {
           label: "Booking Source",
           name: "booking_source",
           editable: false,
-          cols: 2,
+          cols: 3,
         },
         {
           label: "Generate Source",
           name: "booking_generate_source",
           editable: false,
-          cols: 2,
+          cols: 3,
         },
         {
           label: "Category",
           name: "booking_view_category_name",
           editable: false,
-          cols: 2,
+          cols: 3,
         },
         {
           label: "Schedule Time",
           name: "booking_schedule_time",
           type: "datetime-local",
-          editable: false,
-          cols: 2,
+          editable: true,
+          cols: 4,
         },
         {
           label: "Created At",
           name: "created_at",
           type: "datetime-local",
           editable: false,
-          cols: 2,
+          cols: 4,
         },
       ],
     },
@@ -429,6 +508,7 @@ const AmbulanceBookingDetailsForm: React.FC<
           label: "Pickup Location",
           name: "booking_pickup",
           type: "textarea",
+          editable: false,
           rows: 2,
           cols: 6,
         },
@@ -436,48 +516,21 @@ const AmbulanceBookingDetailsForm: React.FC<
           label: "Drop Location",
           name: "booking_drop",
           type: "textarea",
+          editable: false,
           rows: 2,
           cols: 6,
         },
-        { label: "Pickup City", name: "booking_pickup_city", cols: 3 },
-        { label: "Drop City", name: "booking_drop_city", cols: 3 },
-        // {
-        //   label: "Pickup Latitude",
-        //   name: "booking_pick_lat",
-        //   type: "number",
-        //   editable: false,
-        //   cols: 3,
-        // },
-        // {
-        //   label: "Pickup Longitude",
-        //   name: "booking_pick_long",
-        //   type: "number",
-        //   editable: false,
-        //   cols: 3,
-        // },
-        // {
-        //   label: "Drop Latitude",
-        //   name: "booking_drop_lat",
-        //   type: "number",
-        //   editable: false,
-        //   cols: 3,
-        // },
-        // {
-        //   label: "Drop Longitude",
-        //   name: "booking_drop_long",
-        //   type: "number",
-        //   editable: false,
-        //   cols: 3,
-        // },
-        { label: "Distance (KM)", name: "booking_distance", cols: 3 },
-        { label: "Duration", name: "booking_duration", cols: 3 },
+        { label: "Pickup City", name: "booking_pickup_city", editable: false, cols: 3 },
+        { label: "Drop City", name: "booking_drop_city", editable: false, cols: 3 },
+        { label: "Distance (KM)", name: "booking_distance", editable: false, cols: 3 },
+        { label: "Duration", name: "booking_duration", editable: false, cols: 3 },
         {
           label: "Duration (Sec)",
           name: "booking_duration_in_sec",
           editable: false,
           cols: 3,
         },
-        { label: "Radius", name: "booking_radius", cols: 3 },
+        { label: "Radius", name: "booking_radius", editable: false, cols: 3 },
       ],
     },
     {
@@ -860,6 +913,10 @@ const AmbulanceBookingDetailsForm: React.FC<
                         onAssignDriver={
                           f.showAssignDriver ? handleAssignDriver : undefined
                         }
+                        showConsumerSearch={f.showConsumerSearch}
+                        onConsumerSearch={
+                          f.showConsumerSearch ? handleConsumerSearch : undefined
+                        }
                       />
                     </Col>
                   ))}
@@ -893,6 +950,100 @@ const AmbulanceBookingDetailsForm: React.FC<
         </Card.Body>
       </Card>
 
+      {/* Consumer Search Modal */}
+      <Modal
+        show={showConsumerSearchModal}
+        onHide={() => setShowConsumerSearchModal(false)}
+        centered
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Search Consumer</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form
+            onSubmit={(e) => {
+              e.preventDefault();
+              searchConsumers();
+            }}
+          >
+            <div className="d-flex gap-2 mb-3">
+              <Form.Control
+                type="text"
+                placeholder="Search by name or mobile number..."
+                value={consumerSearchQuery}
+                onChange={(e) => setConsumerSearchQuery(e.target.value)}
+              />
+              <Button
+                variant="primary"
+                onClick={searchConsumers}
+                disabled={searchingConsumer}
+              >
+                {searchingConsumer ? (
+                  <Spinner size="sm" animation="border" />
+                ) : (
+                  <TbSearch size={20} />
+                )}
+              </Button>
+            </div>
+          </Form>
+
+          {searchingConsumer ? (
+            <div className="text-center py-4">
+              <Spinner animation="border" variant="primary" />
+              <p className="mt-2">Searching...</p>
+            </div>
+          ) : consumerSearchResults.length > 0 ? (
+            <div className="table-responsive" style={{ maxHeight: "300px", overflowY: "auto" }}>
+              <table className="table table-hover">
+                <thead className="table-light sticky-top">
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {consumerSearchResults.map((consumer) => (
+                    <tr key={consumer.consumer_id}>
+                      <td>{consumer.consumer_id}</td>
+                      <td>{consumer.consumer_name}</td>
+                      <td>{consumer.consumer_mobile_no}</td>
+                      <td>
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => handleSelectConsumer(consumer)}
+                        >
+                          Select
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : consumerSearchQuery && !searchingConsumer ? (
+            <div className="text-center text-muted py-4">
+              No consumers found. Try a different search term.
+            </div>
+          ) : (
+            <div className="text-center text-muted py-4">
+              Enter a name or mobile number to search for consumers.
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConsumerSearchModal(false)}
+          >
+            Cancel
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {/* Assign Driver Modal */}
       <Modal
         show={showAssignModal}
@@ -921,7 +1072,6 @@ const AmbulanceBookingDetailsForm: React.FC<
                 onChange={(e) => setSelectedDriver(e.target.value)}
               >
                 <option value="">Select Driver</option>
-                {/* Add your driver options here */}
                 <option value="1">Driver 1</option>
                 <option value="2">Driver 2</option>
                 <option value="3">Driver 3</option>

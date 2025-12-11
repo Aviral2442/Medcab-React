@@ -69,16 +69,16 @@ const Vehicle = () => {
     fetchVehicles();
   }, []);
 
-  const getAddedType = (type: string): string => {
-    switch (type) {
-      case "0":
-        return "Self";
-      case "1":
-        return "Partner";
-      default:
-        return "N/A";
-    }
-  };
+  // const getAddedType = (type: string): string => {
+  //   switch (type) {
+  //     case "0":
+  //       return "Self";
+  //     case "1":
+  //       return "Partner";
+  //     default:
+  //       return "N/A";
+  //   }
+  // };
 
   const getTransactionByType = (type: string): JSX.Element => {
     switch (type) {
