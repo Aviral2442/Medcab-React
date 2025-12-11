@@ -134,8 +134,14 @@ export const dashboardAmbulanceVehicleService = async () => {
                 vehicle.vehicle_exp_date,
                 vehicle.vehicle_verify_date,
                 vehicle.verify_type,
-                vehicle.created_at
+                vehicle.created_at,
+                driver.driver_name,
+                driver.driver_mobile,
+                partner.partner_f_name,
+                partner.partner_mobile
             FROM vehicle
+            LEFT JOIN driver ON vehicle.vehicle_added_type = 0 AND vehicle.vehicle_added_by = driver.driver_id
+            LEFT JOIN partner ON vehicle.vehicle_added_type = 1 AND vehicle.vehicle_added_by = partner.partner_id
             ORDER BY vehicle.vehicle_id DESC
             LIMIT 5 OFFSET 0;
             `
