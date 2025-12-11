@@ -7,8 +7,10 @@ import {
   Table,
 } from "react-bootstrap";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { formatDate } from "@/components/DateFormat";
+import { FaUser } from "react-icons/fa";
+import { FaUserGroup } from "react-icons/fa6";
 
 const Vehicle = () => {
   const basePath = (import.meta as any).env?.VITE_PATH ?? "";
@@ -26,18 +28,23 @@ const Vehicle = () => {
     verify_type: string;
     created_at: string;
     ambulance_category_vehicle_name: string;
+    driver_name: string;
+    driver_mobile: string;
+    partner_f_name: string;
+    partner_l_name: string;
+    partner_mobile: string;
   }
 
   const headers = [
     "ID",
+    "By",
     "Vehicle Name",
-    "Added Type",
-    "Added By",
-    "Category",
+    "Added",
+    // "Category",
     // "Service ID",
     // "Verify Type",
-    "Verify Date",
-    "Exp Date",
+    // "Verify Date",
+    // "Exp Date",
     "Date",
   ];
 
@@ -48,7 +55,7 @@ const Vehicle = () => {
       const response = await axios.get(
         `${basePath}/ambulance/dashboard_ambulance_vehicles`
       );
-    //   console.log("Vehicles Data", response.data);
+        console.log("Vehicles Data", response.data);
       const rows = response.data?.jsonData?.dashboard_ambulance_vehicles || [];
       setData(rows);
       return rows;
@@ -73,29 +80,40 @@ const Vehicle = () => {
     }
   };
 
-//   const getCategoryType = (type: number): string => {
-//     switch (type) {
-//       case 1:
-//         return "Type 1";
-//       case 2:
-//         return "Type 2";
-//       default:
-//         return "N/A";
-//     }
-//   };
+  const getTransactionByType = (type: string): JSX.Element => {
+    switch (type) {
+      case "0":
+        return <FaUser title="Driver" />;
+      case "1":
+        return <FaUserGroup title="By Partner" />;
+      default:
+        return <span>{type || "N/A"}</span>;
+    }
+  };
 
-//   const getVerifyType = (type: string): JSX.Element => {
-//     if (!type) return <span className="badge bg-secondary">Not Set</span>;
+  //   const getCategoryType = (type: number): string => {
+  //     switch (type) {
+  //       case 1:
+  //         return "Type 1";
+  //       case 2:
+  //         return "Type 2";
+  //       default:
+  //         return "N/A";
+  //     }
+  //   };
 
-//     switch (type.toLowerCase()) {
-//       case "manual":
-//         return <span className="badge bg-primary">Manual</span>;
-//       case "automated":
-//         return <span className="badge bg-success">Automated</span>;
-//       default:
-//         return <span className="badge bg-secondary">{type}</span>;
-//     }
-//   };
+  //   const getVerifyType = (type: string): JSX.Element => {
+  //     if (!type) return <span className="badge bg-secondary">Not Set</span>;
+
+  //     switch (type.toLowerCase()) {
+  //       case "manual":
+  //         return <span className="badge bg-primary">Manual</span>;
+  //       case "automated":
+  //         return <span className="badge bg-success">Automated</span>;
+  //       default:
+  //         return <span className="badge bg-secondary">{type}</span>;
+  //     }
+  //   };
 
   return (
     <Card>
@@ -123,30 +141,35 @@ const Vehicle = () => {
               data.map((row, idx) => (
                 <tr key={idx}>
                   <td>{row.vehicle_id}</td>
+                    <td>{getTransactionByType(row.vehicle_added_type)}</td>
                   <td>
                     {row.v_vehicle_name}
-                    <br />
+                    {/* <br />
                     <small className="text-muted">
                       ID: {row.v_vehicle_name_id}
-                    </small>
+                    </small> */}
                   </td>
-                  <td>{getAddedType(row.vehicle_added_type)}</td>
-                  <td>{row.vehicle_added_by || "N/A"}</td>
-                  <td>{row.ambulance_category_vehicle_name}</td>
+                  <td>{
+                    //also handle null values
+                    getTransactionByType(row.vehicle_added_type) === <FaUser title="Driver" />
+                      ? `${row.driver_name} (${row.driver_mobile})` || " "
+                      : `${row.partner_f_name} ${row.partner_l_name} (${row.partner_mobile})` || " "
+                    }</td>
+                  {/* <td>{row.ambulance_category_vehicle_name}</td> */}
                   {/* <td>
                     <small className="text-muted">
                       {row.vehicle_category_type_service_id || "N/A"}
                     </small>
                   </td> */}
                   {/* <td>{getVerifyType(row.verify_type)}</td> */}
-                  <td>
+                  {/* <td>
                     {row.vehicle_verify_date
                       ? formatDate(row.vehicle_verify_date)
                       : ""}
                   </td>
                   <td>
                     {row.vehicle_exp_date ? formatDate(row.vehicle_exp_date) : ""}
-                  </td>
+                  </td> */}
                   <td>{formatDate(row.created_at)}</td>
                 </tr>
               ))

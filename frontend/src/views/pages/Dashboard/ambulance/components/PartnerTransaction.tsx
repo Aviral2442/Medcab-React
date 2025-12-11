@@ -32,8 +32,8 @@ const PartnerTransaction = () => {
     "Partner Name",
     "Mobile",
     "Type",
-    "Amount",
     "Prev Amt",
+    "Amount",
     "New Amt",
     "Note",
     "Status",
@@ -142,13 +142,13 @@ const PartnerTransaction = () => {
                       {getTransactionType(row.partner_transection_type)}
                     </small>
                   </td>
+                  <td>₹{formatValue(row.partner_transection_wallet_previous_amount)}</td>
                   <td>
                     <span className={`fw-semibold ${getAmountColor(row.partner_transection_type)}`}>
                       {row.partner_transection_type === 2 ? "-" : ""}₹
                       {formatValue(row.partner_transection_amount)}
                     </span>
                   </td>
-                  <td>₹{formatValue(row.partner_transection_wallet_previous_amount)}</td>
                   <td>₹{formatValue(row.partner_transection_wallet_new_amount)}</td>
                   <td>{row.partner_transection_note || "-"}</td>
                   <td>{getTransactionStatus(row.partner_transection_status)}</td>

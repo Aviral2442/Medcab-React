@@ -37,8 +37,8 @@ const DriverTransaction = () => {
     "Mobile",
     "Type",
     "Note",
-    "Amount",
     "Prev Amt",
+    "Amount",
     "New Amt",
     "Status",
     "Date",
@@ -162,6 +162,7 @@ const DriverTransaction = () => {
                     </small>
                   </td>
                   <td>{row.driver_transection_note || " "}</td>
+                    <td>₹{formatValue(row.driver_transection_wallet_previous_amount)}</td>
                   <td>
                     {row.driver_transection_type === "1" ||
                     row.driver_transection_type === "4" ||
@@ -176,7 +177,6 @@ const DriverTransaction = () => {
                       </span>
                     )}
                   </td>
-                  <td>₹{formatValue(row.driver_transection_wallet_previous_amount)}</td>
                   <td>₹{formatValue(row.driver_transection_wallet_new_amount)}</td>
                   <td>{getTransactionStatus(row.driver_transection_status)}</td>
                   <td>{formatDate(row.created_at)}</td>

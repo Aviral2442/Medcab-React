@@ -31,12 +31,12 @@ const Partner = () => {
 
   const headers = [
     "ID",
-    "Image",
+    "Profile",
     "Name",
-    "Mobile",
-    "Wallet",
+    // "Mobile",
+    // "Wallet",
     "City",
-    "Reg Step",
+    // "Reg Step",
     "Status",
     "Date",
   ];
@@ -75,12 +75,6 @@ const Partner = () => {
     }
   };
 
-  const formatValue = (value: number | string | null | undefined): string => {
-    if (value === null || value === undefined) return "0.00";
-    const num = parseFloat(String(value));
-    if (isNaN(num)) return "0.00";
-    return num.toFixed(2);
-  };
 
   return (
     <Card>
@@ -111,40 +105,37 @@ const Partner = () => {
                   <td>
                     {row.partner_profile_img ? (
                       <img
-                        src={`${imgBasePath}/${row.partner_profile_img}`}
+                        src={`${imgBasePath}/${row.partner_profile_img}` || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTdZViE66j-NjGxox1Yz2JCNB7cP_byawE3w&s"}
                         alt={row.partner_f_name}
                         style={{
-                          width: "40px",
-                          height: "40px",
+                          width: "24px",
+                          height: "24px",
                           borderRadius: "50%",
                           objectFit: "cover",
                         }}
                       />
                     ) : (
-                      <div
+                      <img 
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTdZViE66j-NjGxox1Yz2JCNB7cP_byawE3w&s"
+                        alt="" 
                         style={{
-                          width: "40px",
-                          height: "40px",
+                          width: "24px",
+                          height: "24px",
                           borderRadius: "50%",
-                          backgroundColor: "#e9ecef",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
                         }}
-                      >
-                        N/A
-                      </div>
+                      />
                     )}
                   </td>
                   <td>
-                    {row.partner_f_name} {row.partner_l_name}
+                    {row.partner_f_name} {row.partner_l_name} <br />
+                    ({row.partner_mobile})
                   </td>
-                  <td>{row.partner_mobile}</td>
-                  <td className="text-success fw-semibold">
+                  {/* <td>{row.partner_mobile}</td> */}
+                  {/* <td className="text-success fw-semibold">
                     ₹{formatValue(row.partner_wallet)}
-                  </td>
+                  </td> */}
                   <td>{row.city_name || "N/A"}</td>
-                  <td>{row.partner_registration_step}</td>
+                  {/* <td>{row.partner_registration_step}</td> */}
                   <td>{getPartnerStatus(row.partner_status)}</td>
                   <td>{formatDate(row.created_at)}</td>
                 </tr>

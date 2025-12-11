@@ -7,8 +7,10 @@ import {
   Table,
 } from "react-bootstrap";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { formatDate } from "@/components/DateFormat";
+import { FaUser } from "react-icons/fa";
+import { FaUserGroup } from "react-icons/fa6";
 
 const DriverList = () => {
   const basePath = (import.meta as any).env?.VITE_PATH ?? "";
@@ -21,7 +23,7 @@ const DriverList = () => {
     driver_mobile: string;
     driver_wallet_amount: number;
     driver_city_id: number;
-    driver_created_by: number;
+    driver_created_by: string;
     driver_profile_img: string;
     driver_registration_step: number;
     driver_duty_status: string;
@@ -31,11 +33,11 @@ const DriverList = () => {
 
   const headers = [
     "ID",
+    "By",
     "Profile",
     "Driver",
-    "Wallet",
-    "Created By",
-    "Duty Status",
+    // "Wallet",
+    // "Duty Status",
     "Status",
     "Date",
   ];
@@ -61,24 +63,26 @@ const DriverList = () => {
     driverList();
   }, []);
 
-  const handleCreatedBy = (type: number) => {
-    switch (type) {
-      case 0:
-        return "Self";
-      case 1:
-        return "Partner";
-      default:
-        return "-";
-    }
-  };
 
-  const handleDutyStatus = (status: string) => {
-    return status === "ON" ? (
-      <span className="badge badge-soft-success">ON</span>
-    ) : (
-      <span className="badge badge-soft-danger">OFF</span>
-    );
-  };
+    const getTransactionByType = (type: number | string): JSX.Element => {
+      const typeNum = Number(type);
+      switch (typeNum) {
+        case 0:
+          return <FaUser title="Driver" />;
+        case 1:
+          return <FaUserGroup title="By Partner" />;
+        default:
+          return <span>{type || "N/A"}</span>;
+      }
+    };
+
+  // const handleDutyStatus = (status: string) => {
+  //   return status === "ON" ? (
+  //     <span className="badge badge-soft-success">ON</span>
+  //   ) : (
+  //     <span className="badge badge-soft-danger">OFF</span>
+  //   );
+  // };
 
   const handleDriverStatus = (status: number) => {
     const statusMap: Record<number, { label: string; class: string }> = {
@@ -124,6 +128,7 @@ const DriverList = () => {
             {data.map((row, idx) => (
               <tr key={idx}>
                 <td>{row.driver_id}</td>
+                <td>{getTransactionByType(row.driver_created_by)}</td>
                 <td>
                   {row.driver_profile_img ? (
                     <img
@@ -137,28 +142,23 @@ const DriverList = () => {
                       }}
                     />
                   ) : (
-                    <div
+                    <img
+                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTdZViE66j-NjGxox1Yz2JCNB7cP_byawE3w&s"
+                      alt=""
                       style={{
-                        width: "40px",
-                        height: "40px",
+                        width: "24px",
+                        height: "24px",
                         borderRadius: "50%",
-                        backgroundColor: "#e9ecef",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
                       }}
-                    >
-                      N/A
-                    </div>
+                    />
                   )}
                 </td>
                 <td>
                   {row.driver_name} {row.driver_last_name} <br /> (
                   {row.driver_mobile})
                 </td>
-                <td>₹{row.driver_wallet_amount || 0}</td>
-                <td>{handleCreatedBy(row.driver_created_by)}</td>
-                <td>{handleDutyStatus(row.driver_duty_status)}</td>
+                {/* <td>₹{row.driver_wallet_amount || 0}</td> */}
+                {/* <td>{handleDutyStatus(row.driver_duty_status)}</td> */}
                 <td>{handleDriverStatus(row.driver_status)}</td>
                 <td>{formatDate(row.created_at)}</td>
               </tr>

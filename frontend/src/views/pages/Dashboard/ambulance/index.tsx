@@ -20,7 +20,7 @@ const Page = () => {
 
       <Row>
         <Col xxl={6}>
-          <Booking />
+          <Partner />
         </Col>
         <Col xxl={6}>
           <Driver />
@@ -28,13 +28,15 @@ const Page = () => {
       </Row>
       <Row>
         <Col xxl={6}>
-          <Partner />
         </Col>
         <Col xxl={6}>
           <Vehicle />
         </Col>
       </Row>
       <Row>
+        <Col cols={6}>
+          <Booking />
+        </Col>
         <Col cols={6}>
           <DriverTransaction />
         </Col>
