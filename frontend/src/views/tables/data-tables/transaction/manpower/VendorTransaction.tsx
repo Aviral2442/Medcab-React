@@ -95,13 +95,15 @@ const ExportDataWithButtons = ({
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
       console.log("API Response:", res.data);
 
-      // Fix: Changed from partnerTransactions to consumerTransactions
-      const transactions = res.data?.jsonData?.transactions || [];
+      const transactions = res.data?.jsonData?.vendorTransactions || [];
       setTableData(transactions);
 
-      if (res.data.paginations) {
+      if (res.data?.paginations) {
         setTotal(res.data.paginations.total);
         setTotalPages(res.data.paginations.totalPages);
+      } else if (res.data?.pagination) {
+        setTotal(res.data.pagination.total);
+        setTotalPages(res.data.pagination.totalPages);
       } else {
         setTotal(transactions.length);
         setTotalPages(Math.ceil(transactions.length / pageSize));

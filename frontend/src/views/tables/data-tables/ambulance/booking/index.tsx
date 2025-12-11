@@ -158,7 +158,7 @@ const ExportDataWithButtons = ({
     try {
       const params = getFilterParams(pageSize, filterParams);
       const res = await axios.get(`${baseURL}${endpoint}`, { params });
-      console.log("API Response:", res.data);
+      // console.log("API Response:", res.data);
 
       let dataArray: any[] = [];
       let bookings_id: any[] = [];
