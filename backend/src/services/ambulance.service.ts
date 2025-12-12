@@ -19,11 +19,9 @@ export const dashboardAmbulanceBookingService = async () => {
                 booking_view.booking_con_mobile,
                 booking_view.booking_category,
                 booking_view.booking_schedule_time,
-                booking_view.booking_pickup,
-                booking_view.booking_drop,
+                booking_view.booking_pickup_city,
                 booking_view.booking_status,
                 booking_view.booking_total_amount,
-                booking_view.created_at
             FROM booking_view
             ORDER BY booking_view.booking_id DESC
             LIMIT 17 OFFSET 0
