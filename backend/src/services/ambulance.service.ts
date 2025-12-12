@@ -26,7 +26,7 @@ export const dashboardAmbulanceBookingService = async () => {
                 booking_view.created_at
             FROM booking_view
             ORDER BY booking_view.booking_id DESC
-            LIMIT 5 OFFSET 0
+            LIMIT 17 OFFSET 0
             `
         )
 
