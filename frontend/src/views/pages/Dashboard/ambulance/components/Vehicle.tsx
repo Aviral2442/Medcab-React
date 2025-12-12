@@ -55,7 +55,7 @@ const Vehicle = () => {
       const response = await axios.get(
         `${basePath}/ambulance/dashboard_ambulance_vehicles`
       );
-        console.log("Vehicles Data", response.data);
+        // console.log("Vehicles Data", response.data);
       const rows = response.data?.jsonData?.dashboard_ambulance_vehicles || [];
       setData(rows);
       return rows;

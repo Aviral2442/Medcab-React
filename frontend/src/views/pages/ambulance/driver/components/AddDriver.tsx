@@ -278,7 +278,7 @@ const AddDriver: React.FC = () => {
                   </Card.Header>
                   <Card.Body>
                     <Row className="g-3">
-                      <Col md={6}>
+                      <Col md={3}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             First Name <span className="text-danger">*</span>
@@ -298,7 +298,7 @@ const AddDriver: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={3}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Last Name <span className="text-danger">*</span>
@@ -318,7 +318,7 @@ const AddDriver: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={3}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Mobile Number <span className="text-danger">*</span>
@@ -339,7 +339,7 @@ const AddDriver: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={3}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Date of Birth <span className="text-danger">*</span>
@@ -358,7 +358,7 @@ const AddDriver: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={4}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Gender <span className="text-danger">*</span>
@@ -381,7 +381,7 @@ const AddDriver: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={4}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             City <span className="text-danger">*</span>
@@ -401,7 +401,7 @@ const AddDriver: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={4}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Created By <span className="text-danger">*</span>
@@ -507,13 +507,23 @@ const AddDriver: React.FC = () => {
                           />
                         </Form.Group>
                       </Col>
-                      <Col md={2}>
+                      <Col md={1}>
                         {dlFrontPreview && (
                           <Image
                             src={dlFrontPreview}
                             alt="DL Front"
                             thumbnail
-                            style={{ maxWidth: "200px", maxHeight: "200px" }}
+                            style={{ maxWidth: "80px", maxHeight: "80px" }}
+                          />
+                        )}
+                      </Col>
+                      <Col md={1}>
+                        {dlBackPreview && (
+                          <Image
+                            src={dlBackPreview}
+                            alt="DL Back"
+                            thumbnail
+                            style={{ maxWidth: "80px", maxHeight: "80px" }}
                           />
                         )}
                       </Col>
@@ -532,16 +542,6 @@ const AddDriver: React.FC = () => {
                             }
                           />
                         </Form.Group>
-                      </Col>
-                      <Col md={2}>
-                        {dlBackPreview && (
-                          <Image
-                            src={dlBackPreview}
-                            alt="DL Back"
-                            thumbnail
-                            style={{ maxWidth: "200px", maxHeight: "200px" }}
-                          />
-                        )}
                       </Col>
                       <Col md={6}>
                         <Form.Group>
