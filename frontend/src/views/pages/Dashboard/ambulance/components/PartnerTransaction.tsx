@@ -7,7 +7,7 @@ import {
   Table,
 } from "react-bootstrap";
 import axios from "axios";
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useState } from "react";
 import { formatDate } from "@/components/DateFormat";
 
 const PartnerTransaction = () => {

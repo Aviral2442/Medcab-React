@@ -7,7 +7,7 @@ import {
   Table,
 } from "react-bootstrap";
 import axios from "axios";
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useState } from "react";
 import { formatDate } from "@/components/DateFormat";
 
 const DriverTransaction = () => {
@@ -103,18 +103,18 @@ const DriverTransaction = () => {
     }
   };
 
-  const getTransactionStatus = (status: string): JSX.Element => {
-    switch (status) {
-      case "0":
-        return <span className="badge bg-success">Success</span>;
-      case "1":
-        return <span className="badge bg-warning">Pending</span>;
-      case "2":
-        return <span className="badge bg-danger">Refunded</span>;
-      default:
-        return <span className="badge bg-secondary">N/A</span>;
-    }
-  };
+  // const getTransactionStatus = (status: string): JSX.Element => {
+  //   switch (status) {
+  //     case "0":
+  //       return <span className="badge bg-success">Success</span>;
+  //     case "1":
+  //       return <span className="badge bg-warning">Pending</span>;
+  //     case "2":
+  //       return <span className="badge bg-danger">Refunded</span>;
+  //     default:
+  //       return <span className="badge bg-secondary">N/A</span>;
+  //   }
+  // };
 
   const formatValue = (value: number | string | null | undefined): string => {
     if (value === null || value === undefined) return "0.00";
