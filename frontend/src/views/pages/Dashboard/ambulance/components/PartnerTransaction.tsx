@@ -47,7 +47,7 @@ const PartnerTransaction = () => {
       const response = await axios.get(
         `${basePath}/ambulance/dashboard_ambulance_partner_transactions`
       );
-      console.log("Partner Transactions Data", response.data);
+      // console.log("Partner Transactions Data", response.data);
       const rows = response.data?.jsonData?.dashboard_ambulance_partner_transactions || [];
       setData(rows);
       return rows;

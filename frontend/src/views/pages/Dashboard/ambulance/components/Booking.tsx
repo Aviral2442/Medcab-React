@@ -20,7 +20,7 @@ const BookingList = () => {
     booking_type: string;
     booking_category: string;
     booking_schedule_time: string;
-    booking_pickup: string;
+    booking_pickup_city: string;
     booking_drop: string;
     booking_total_amount: string;
     booking_status: string;
@@ -31,11 +31,11 @@ const BookingList = () => {
     "ID",
     "Consumer",
     "Type & Ctg",
-    "Schedule Time",
     "Pickup",
     // "Drop",
     "Amount",
     "Status",
+    "Schedule Time",
     // "Date",
   ];
 
@@ -46,7 +46,7 @@ const BookingList = () => {
       const response = await axios.get(
         `${basePath}/ambulance/dashboard_ambulance_bookings`
       );
-      // console.log("Bookings Data", response.data);
+      console.log("Bookings Data", response.data);
       const rows = response.data?.jsonData?.dashboard_ambulance_bookings || [];
       setData(rows);
       // console.log("Booking Trans", rows);
@@ -127,11 +127,11 @@ const BookingList = () => {
                 </td>
                 <td>{handleBookingType(row.booking_type)} <br /> {row.booking_category} </td>
                 {/* <td></td> */}
-                <td>{row.booking_schedule_time}</td>
-                <td>{row.booking_pickup}</td>
+                <td>{row.booking_pickup_city}</td>
                 {/* <td>{row.booking_drop}</td> */}
                 <td>₹{row.booking_total_amount}</td>
                 <td>{handleBookingStatus(row.booking_status)}</td>
+                <td>{row.booking_schedule_time}</td>
                 {/* <td>{formatDate(row.created_at)}</td> */}
               </tr>
             ))}
