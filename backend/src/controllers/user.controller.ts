@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addRemarksById, getAllUsers, getCityService, getConsumerEmergencyList, getDriverEmergencyList, getRazorpayTransService, getStateService } from "../services/user.service";
+import { addRemarksById, getAllUsers, getCityService, getConsumerEmergencyList, getDriverEmergencyList, getRazorpayTransService, getRemarksById, getStateService } from "../services/user.service";
 import { ApiError } from "../utils/api-error";
 
 // Get All Users
@@ -23,6 +23,22 @@ export const addRemarks = async (req: Request, res: Response, next: NextFunction
     next(error);
   }
 };
+
+// Get Remarks by User ID
+export const getRemarksByIdController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+
+    if (!req.params.columnName || !req.params.primaryKey) {
+      throw new ApiError(400, "Missing required parameters: columnName and primaryKey");
+    }
+
+    const { columnName, primaryKey } = req.params;
+    const response = await getRemarksById(columnName, parseInt(primaryKey));
+    return res.status(response.status).json(response);
+  } catch (error) {
+    next(error);
+  }
+}
 
 // Driver Emergency List Controller
 export const getDriverEmergencyListController = async (req: Request, res: Response, next: NextFunction) => {
