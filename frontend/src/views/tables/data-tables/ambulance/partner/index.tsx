@@ -41,7 +41,7 @@ const tableConfig: Record<
       "Reg_Step",
       // "City",
       "Date",
-      "Remark",
+      // "Remark",
       "Status",
     ],
   },

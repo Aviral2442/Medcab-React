@@ -184,7 +184,7 @@ const CountsDashboard = () => {
     <>
       <Row>
         <Col xs={12} className="">
-          <h5 className="">Booking Statistics</h5>
+          <h5 className="fs-5">Booking Statistics</h5>
         </Col>
         {bookingData.map((category, idx) => (
           <CountCard key={idx} category={category} />
@@ -193,7 +193,7 @@ const CountsDashboard = () => {
 
       <Row className="">
         <Col xs={12} className="">
-          <h5 className="">Partner & Driver Statistics</h5>
+          <h5 className="fs-5">Partner & Driver Statistics</h5>
         </Col>
         {partnerData.map((category, idx) => (
           <CountCard key={idx} category={category} />

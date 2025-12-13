@@ -68,7 +68,7 @@ export const partnerColumns = [
             return formatDate(data);
         }
     },
-    { data: 'remark_text' },
+    // { data: 'remark_text' },
     {
         data: 'partner_status',
         render: (data: number) => {
@@ -95,7 +95,7 @@ export const partnerTableData: TableType<PartnerInfoType> = {
         "Wallet",
         "City",
         "Created At",
-        "Remark",
+        // "Remark",
         "Status"
     ],
     body: partnerRows,

@@ -88,9 +88,9 @@ export const driverColumns = [
             return formatDate(data);
         }
     },
-    { data: 'remark_text',
-        defaultContent: ' ',
-     },
+    // { data: 'remark_text',
+    //     defaultContent: ' ',
+    //  },
     {
         data: 'driver_status',
         render: (data: number) => {
@@ -122,7 +122,7 @@ export const driverTableData: TableType<DriverInfoType> = {
         "Profile",
         "Duty Status",
         "Created At",
-        "Remark",
+        // "Remark",
         "Status"
     ],
     body: driverRows,
