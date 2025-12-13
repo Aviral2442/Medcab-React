@@ -78,6 +78,30 @@ export const addRemarksById = async (remarkData: RemarkData) => {
   }
 };
 
+// GET REMARKS SERVICE BY ID
+export const getRemarksById = async (columnName: string, primaryKey: number) => {
+  try {
+
+    const [rows]: any = await db.query(
+      `SELECT * FROM remark_data 
+         WHERE ${columnName} = ? 
+         ORDER BY remark_id DESC`,
+      [primaryKey]
+    );
+
+    return {
+      status: 200,
+      message: "Remarks fetched successfully",
+      jsonData: {
+        remarks_list: rows
+      }
+    };
+
+  } catch (error) {
+    throw new ApiError(500, "Failed to fetch remarks");
+  }
+};
+
 // Driver Emergency List with Filters and Pagination
 export const getDriverEmergencyList = async (filters?: {
   date?: string;
