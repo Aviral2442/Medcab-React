@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Col, Container, Row, Nav } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import Booking from "./components/Booking";
 import Driver from "./components/Driver";
 import Partner from "./components/Partner";
@@ -17,8 +17,8 @@ const Page = () => {
   const [activeTab, setActiveTab] = useState(1);
 
   const tabs = [
-    { key: 1, title: "Graphical Dashboard" },
-    { key: 2, title: "Counts Dashboard" },
+    { key: 1, title: "Graphical" },
+    { key: 2, title: "Counts" },
   ];
 
   return (

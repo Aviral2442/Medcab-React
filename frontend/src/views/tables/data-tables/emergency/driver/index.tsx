@@ -45,7 +45,7 @@ const tableConfig: Record<
       "Amount",
       "req time",
       "Date",
-      "Remark",
+      // "Remark",
     ],
   },
 };
@@ -214,11 +214,11 @@ const ExportDataWithButtons = ({
         return formatDate(data);
       },
     },
-    {
-      title: "Remark",
-      data: "remark_text",
-      render: (data: any) => data || "",
-    },
+    // {
+    //   title: "Remark",
+    //   data: "remark_text",
+    //   render: (data: any) => data || "",
+    // },
     {
       title: "Actions",
       data: null,

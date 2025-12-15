@@ -43,7 +43,6 @@ const tableConfig: Record<
       "Ref_Code",
       "Ref_By",
       "Register",
-      "Remark",
       "Status",
     ],
   },

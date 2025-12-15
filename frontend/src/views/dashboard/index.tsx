@@ -27,7 +27,7 @@ const Page = () => {
 
                 <Col>
                     <TotalActiveOtherStatusVendor/>
-                </Col>
+                </Col>  
 
                 <Col>
                     <TotalCancelOngoingBooking/>

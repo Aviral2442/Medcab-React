@@ -50,7 +50,6 @@ export const consumerColumns = [
             return formatDate(data) || ' ';
         }
     },
-    { data: 'remark_text' },
     {
         data: 'consumer_status',
         render: (data: number) => {
@@ -68,6 +67,6 @@ export const consumerColumns = [
 
 // Export table data structure
 export const consumerTableData: TableType<ConsumerInfoType> = {
-    header: ["S.No." ,"ID", "Name", "Mobile", "Email", "Wallet", "Ref Code", "Ref By", "Register", "Remark","Status"],
+    header: ["S.No." ,"ID", "Name", "Mobile", "Email", "Wallet", "Ref Code", "Ref By", "Register","Status"],
     body: consumerRows,
 };

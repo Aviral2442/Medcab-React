@@ -43,7 +43,7 @@ const tableConfig: Record<
       "Partner",
       "Duty Status",
       "Date",
-      "Remark",
+      // "Remark",
       "Status",
     ],
   },
