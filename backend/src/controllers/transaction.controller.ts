@@ -50,9 +50,12 @@ export const vendorTransDataController = async (req: Request, res: Response, nex
             return res.status(400).json({ message: 'Invalid vendor ID' });
         }
 
-        const result = await vendorTransDataService(vendorId);
+        const page = req.query.page ? parseInt(req.query.page as string, 10) : undefined;
+        const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
 
-        console.log(result, vendorId);
+        const result = await vendorTransDataService(vendorId, page, limit);
+
+        // console.log(result, vendorId);
 
         res.status(200).json(result);
     } catch (error) {

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card, Row, Col, Form } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX, TbUpload } from "react-icons/tb";
+import userPlaceholder from '@/assets/images/image.png'
 
 interface VendorDetailsProps {
   data: any;
@@ -126,6 +127,8 @@ const Field: React.FC<FieldProps> = ({
     setEditValue(value?.toString() || "");
   }, [value]);
 
+  const imgSrc = previewUrl || (value ? String(value) : userPlaceholder);
+
   return (
     <div className="mb-2">
       <Form.Label className="text-muted mb-1 fs-6">{label}</Form.Label>
@@ -141,7 +144,7 @@ const Field: React.FC<FieldProps> = ({
           />
 
           <img
-            src={previewUrl || String(value)}
+            src={imgSrc}
             alt={label}
             onClick={() => document.getElementById(`file-${label}`)?.click()}
             style={{
@@ -208,17 +211,8 @@ const Field: React.FC<FieldProps> = ({
         ) : (
           <>
             {type === "image" ? (
-              /* For image type, only show upload button */
-              editable &&
-              onEdit && (
-                <label
-                  htmlFor={`file-${label}`}
-                  className="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 mb-0"
-                  style={{ cursor: "pointer" }}
-                >
-                  <TbUpload size={18} />
-                </label>
-              )
+              /* Remove upload button in non-edit mode - keep image clickable */
+              null
             ) : (
               /* For other types, show the input field with value */
               <div className="d-flex align-items-center flex-grow-1 border rounded p-0">

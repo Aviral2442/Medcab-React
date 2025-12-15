@@ -10,7 +10,10 @@ const vendorDetails = () => {
   const [loading, setLoading] = React.useState(true);
   const [VendorData, setVendorData] = React.useState<any>(null);
   const [transactions, setTransactions] = React.useState<any[]>([]);
+  const [transactionPagination, setTransactionPagination] = React.useState<any>(null);
   const [activeTab, setActiveTab] = React.useState(1);
+  const [pageIndex, setPageIndex] = React.useState(0); // zero-based
+  const [pageSize] = React.useState(10);
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
   const tabs = [
@@ -38,10 +41,12 @@ const vendorDetails = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        `${baseURL}/transaction/vendor_transaction_data/${id}`
+        `${baseURL}/transaction/vendor_transaction_data/${id}`,
+        { params: { page: pageIndex + 1, limit: pageSize } }
       );
       console.log("Transactions List:", res.data);
       setTransactions(res.data?.jsonData?.vendorTransactions || []);
+      setTransactionPagination(res.data?.pagination || null);
     } catch (error) {
       console.error("Error fetching transactions list:", error);
     } finally {
@@ -54,7 +59,7 @@ const vendorDetails = () => {
     else if (activeTab === 2) {
       fetchTransactionsList();
     }
-  }, [activeTab, id]);
+  }, [activeTab, id, pageIndex]);
 
   const handleFieldUpdate = async (field: string, value: string) => {
     try {
@@ -91,7 +96,13 @@ const vendorDetails = () => {
         );
       case 2:
         return transactions ? (
-          <TransactionList data={transactions} />
+          <TransactionList
+            data={transactions}
+            pagination={transactionPagination}
+            currentPage={pageIndex}
+            onPageChange={(idx) => setPageIndex(idx)}
+            loading={loading}
+          />
         ) : (
           <div className="text-center p-5">
             <p className="text-muted">No Transactions Data Found</p>

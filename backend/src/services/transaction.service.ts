@@ -168,17 +168,20 @@ export const getVendorTransactionList = async (filters?: {
 };
 
 // Get Vendor Transaction Data
-export const vendorTransDataService = async (vendorId: number) => {
-
+export const vendorTransDataService = async (vendorId: number, page?: number, limit?: number) => {
     try {
+        const [vendorRows]: any = await db.query(
+            `SELECT vendor_id FROM vendor WHERE vendor_id = ?;`,
+            [vendorId]
+        );
 
-        const checkVendorExist = `
-            SELECT vendor_transection FROM vendor WHERE vendor_transection_by = ?;
-        `;
-
-        if(!checkVendorExist){
+        if (!vendorRows || vendorRows.length === 0) {
             throw new ApiError(404, "Vendor not found");
         }
+
+        const currentPage = page && page > 0 ? page : 1;
+        const pageLimit = limit && limit > 0 ? limit : 10;
+        const offset = (currentPage - 1) * pageLimit;
 
         const [rows]: any = await db.query(
             `
@@ -188,23 +191,35 @@ export const vendorTransDataService = async (vendorId: number) => {
                 ON vendor_transection.vendor_transection_by_type = 0 
                 AND vendor_transection.vendor_transection_by = vendor.vendor_id
             WHERE vendor_transection.vendor_transection_by = ?
-            ORDER BY vendor_transection.vendor_transection_id DESC;
+            ORDER BY vendor_transection.vendor_transection_id DESC
+            LIMIT ? OFFSET ?;
             `,
+            [vendorId, pageLimit, offset]
+        );
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) AS total FROM vendor_transection WHERE vendor_transection.vendor_transection_by = ?`,
             [vendorId]
         );
 
-        if (rows.length === 0 || !rows) {
-            throw new ApiError(404, "No vendor transactions found for the given vendor ID");
-        }
+        const total = countRows[0]?.total || 0;
+        const totalPages = Math.ceil(total / pageLimit);
 
         return {
             status: 200,
             message: "Vendor Transaction Data Fetch Successful",
+            pagination: {
+                page: currentPage,
+                limit: pageLimit,
+                total,
+                totalPages,
+            },
             jsonData: {
-                vendorTransactions: rows
-            }
+                vendorTransactions: rows || [],
+            },
         };
     } catch (error) {
+        if (error instanceof ApiError) throw error;
         throw new ApiError(500, "Failed to fetch vendor transaction data");
     }
 };

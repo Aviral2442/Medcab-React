@@ -10,6 +10,7 @@ import pdfmake from "pdfmake";
 import "pdfmake/build/vfs_fonts";
 import { formatDate } from "@/components/DateFormat";
 import { Spinner } from "react-bootstrap";
+import TablePagination from "@/components/table/TablePagination";
 import '@/global.css'
 
 // Register plugins
@@ -22,6 +23,8 @@ interface TransactionListProps {
   loading?: boolean;
   error?: string | null;
   currentPage?: number;
+  pagination?: { page: number; limit: number; total: number; totalPages: number } | null;
+  onPageChange?: (pageIndex: number) => void;
   onViewTransaction?: (transaction: any) => void;
 }
 
@@ -30,6 +33,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
   loading = false,
   error = null,
   currentPage = 0,
+  pagination,
+  onPageChange,
 }) => {
   const tableRef = useRef<any>(null);
 
@@ -311,6 +316,27 @@ const TransactionList: React.FC<TransactionListProps> = ({
               </tr>
             </thead>
           </DataTable>
+
+          {pagination && pagination.totalPages > 0 && (
+            <div className="mt-3">
+              {(() => {
+                const pageIndexLocal = (pagination.page || 1) - 1;
+                return (
+                  <TablePagination
+                    start={pageIndexLocal + 1}
+                    showInfo={true}
+                    previousPage={() => onPageChange && onPageChange(Math.max(0, pageIndexLocal - 1))}
+                    canPreviousPage={pageIndexLocal > 0}
+                    pageCount={pagination.totalPages}
+                    pageIndex={pageIndexLocal}
+                    setPageIndex={(p) => onPageChange && onPageChange(p)}
+                    nextPage={() => onPageChange && onPageChange(Math.min(pagination.totalPages - 1, pageIndexLocal + 1))}
+                    canNextPage={pageIndexLocal < pagination.totalPages - 1}
+                  />
+                );
+              })()}
+            </div>
+          )}
         </div>
       )}
     </ComponentCard>
