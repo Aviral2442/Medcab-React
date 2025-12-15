@@ -83,7 +83,10 @@ export const getRemarksById = async (columnName: string, primaryKey: number) => 
   try {
 
     const [rows]: any = await db.query(
-      `SELECT * FROM remark_data 
+      `SELECT remark_data.*, 
+        admin.admin_name
+        FROM remark_data 
+        LEFT JOIN admin ON remark_data.remark_type = admin.id
          WHERE ${columnName} = ? 
          ORDER BY remark_id DESC`,
       [primaryKey]

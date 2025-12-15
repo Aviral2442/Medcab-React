@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Card, Row, Col, Form } from "react-bootstrap";
+import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX, TbUpload } from "react-icons/tb";
-import userPlaceholder from '@/assets/images/image.png'
+import userPlaceholder from "@/assets/images/image.png";
+import { FaWhatsapp } from "react-icons/fa";
 
 interface VendorDetailsProps {
   data: any;
@@ -210,10 +211,9 @@ const Field: React.FC<FieldProps> = ({
           </>
         ) : (
           <>
-            {type === "image" ? (
-              /* Remove upload button in non-edit mode - keep image clickable */
-              null
-            ) : (
+            {type ===
+            "image" ? /* Remove upload button in non-edit mode - keep image clickable */
+            null : (
               /* For other types, show the input field with value */
               <div className="d-flex align-items-center flex-grow-1 border rounded p-0">
                 <Form.Control
@@ -245,7 +245,16 @@ const Field: React.FC<FieldProps> = ({
 interface FieldDef {
   label: string;
   name: string;
-  type?: "text" | "number" | "tel" | "email" | "date" | "datetime-local" | "image" | "textarea" | "select";
+  type?:
+    | "text"
+    | "number"
+    | "tel"
+    | "email"
+    | "date"
+    | "datetime-local"
+    | "image"
+    | "textarea"
+    | "select";
   editable?: boolean;
   rows?: number;
   options?: { value: string | number; label: string }[];
@@ -257,16 +266,16 @@ const genderOptions = [
   { value: "2", label: "Female" },
 ];
 
-const vendorStatusOptions = [
-  { value: "0", label: "Inactive" },
-  { value: "1", label: "Active" },
-  { value: "2", label: "New" },
-  { value: "3", label: "Pending Approval" },
-  { value: "4", label: "Assigned" },
-  { value: "5", label: "Free" },
-  { value: "6", label: "On Duty" },
-  { value: "7", label: "Off Duty" },
-];
+// const vendorStatusOptions = [
+//   { value: "0", label: "Inactive" },
+//   { value: "1", label: "Active" },
+//   { value: "2", label: "New" },
+//   { value: "3", label: "Pending Approval" },
+//   { value: "4", label: "Assigned" },
+//   { value: "5", label: "Free" },
+//   { value: "6", label: "On Duty" },
+//   { value: "7", label: "Off Duty" },
+// ];
 
 const vendortypeOptions = [
   { value: "0", label: "Manpower Vendor" },
@@ -283,8 +292,18 @@ const vendorFieldGroups: Record<string, FieldDef[]> = {
       type: "image",
       editable: true,
     },
-    { label: "Aadhar Back", name: "vendor_aadhar_back", type: "image", editable: true },
-    { label: "Certificate", name: "vpd_certificate", type: "image", editable: true },
+    {
+      label: "Aadhar Back",
+      name: "vendor_aadhar_back",
+      type: "image",
+      editable: true,
+    },
+    {
+      label: "Certificate",
+      name: "vpd_certificate",
+      type: "image",
+      editable: true,
+    },
   ],
   main: [
     { label: "Name", name: "vendor_name", type: "text", editable: true },
@@ -297,54 +316,112 @@ const vendorFieldGroups: Record<string, FieldDef[]> = {
       editable: true,
       options: genderOptions,
     },
+    // {
+    //   label: "Status",
+    //   name: "vendor_status",
+    //   type: "select",
+    //   editable: false,
+    //   options: vendorStatusOptions,
+    // },
     {
-      label: "Status",
-      name: "vendor_status",
+      label: "Type",
+      name: "vendor_type",
       type: "select",
       editable: false,
-      options: vendorStatusOptions,
+      options: vendortypeOptions,
     },
-    { label: "Type", name: "vendor_type", type: "select", editable: false, options: vendortypeOptions },
     { label: "Rating", name: "vendor_rating", type: "number", editable: false },
-    { label: "Wallet Amount", name: "vendor_wallet", type: "number", editable: false },
+    {
+      label: "Wallet Amount",
+      name: "vendor_wallet",
+      type: "number",
+      editable: false,
+    },
     {
       label: "Created At",
       name: "vendor_created_at",
       type: "datetime-local",
       editable: false,
     },
-    {
-      label: "Updated At",
-      name: "vendor_updated_at",
-      type: "datetime-local",
-      editable: false,
-    },
-    {
-      label: "Approved At",
-      name: "vendor_approved_at",
-      type: "datetime-local",
-      editable: false,
-    },
+    // {
+    //   label: "Updated At",
+    //   name: "vendor_updated_at",
+    //   type: "datetime-local",
+    //   editable: false,
+    // },
+    // {
+    //   label: "Approved At",
+    //   name: "vendor_approved_at",
+    //   type: "datetime-local",
+    //   editable: false,
+    // },
     { label: "DOB", name: "vendor_dob", type: "date", editable: true },
     { label: "City", name: "city_name", type: "text", editable: true },
-    { label: "Category Name", name: "mp_cat_name", type: "text", editable: true },
+    {
+      label: "Category Name",
+      name: "mp_cat_name",
+      type: "text",
+      editable: true,
+    },
     {
       label: "Prefer City Location",
       name: "work_location_city_name",
       type: "number",
       editable: true,
     },
-    { label: "Manpower Partner", name: "partner_full_name", type: "text", editable: true },
+    {
+      label: "Manpower Partner",
+      name: "partner_full_name",
+      type: "text",
+      editable: true,
+    },
   ],
   ids_and_refs: [
-    { label: "Aadhar No", name: "vendor_aadhar_no", type: "text", editable: true },
-    { label: "Pancard No", name: "vendor_pancard_no", type: "text", editable: true },
-    { label: "Ref Code", name: "vendor_ref_code", type: "text", editable: true },
-    { label: "Own Ref Code", name: "vendor_own_ref_code", type: "text", editable: true },
+    {
+      label: "Aadhar No",
+      name: "vendor_aadhar_no",
+      type: "text",
+      editable: true,
+    },
+    {
+      label: "Pancard No",
+      name: "vendor_pancard_no",
+      type: "text",
+      editable: true,
+    },
+    {
+      label: "Ref Code",
+      name: "vendor_ref_code",
+      type: "text",
+      editable: true,
+    },
+    {
+      label: "Own Ref Code",
+      name: "vendor_own_ref_code",
+      type: "text",
+      editable: true,
+    },
+    {
+      label: "Qualification",
+      name: "vpd_qualification",
+      type: "text",
+      editable: true,
+    },
+    { label: "License", name: "vpd_license", type: "text", editable: true },
   ],
   status_and_tokens: [
-    { label: "OTP Verification Status", name: "v_otp_verification_status", type: "number", editable: true },
-    { label: "Duty Status", name: "vendor_duty_status", type: "number", editable: true },
+    {
+      label: "OTP Verification Status",
+      name: "v_otp_verification_status",
+      type: "number",
+      editable: true,
+    },
+    {
+      label: "Duty Status",
+      name: "vendor_duty_status",
+      type: "number",
+      editable: true,
+    },
     {
       label: "Last Booking Notified Time",
       name: "vendor_last_booking_notified_time",
@@ -353,17 +430,21 @@ const vendorFieldGroups: Record<string, FieldDef[]> = {
     },
   ],
   account_details: [
-    { label: "Holder Name", name: "vad_account_holder", type: "text", editable: true },
-    { label: "Account Number", name: "vad_account_no", type: "text", editable: true },
+    {
+      label: "Holder Name",
+      name: "vad_account_holder",
+      type: "text",
+      editable: true,
+    },
+    {
+      label: "Account Number",
+      name: "vad_account_no",
+      type: "text",
+      editable: true,
+    },
     { label: "IFSC Code", name: "vad_ifsc", type: "text", editable: true },
-    { label: "Created Date", name: "vad_created_at", type: "date", editable: false },
+    // { label: "Created Date", name: "vad_created_at", type: "date", editable: false },
   ],
-  professional_details: [
-    { label: "Qualification", name: "vpd_qualification", type: "text", editable: true },
-    { label: "License", name: "vpd_license", type: "text", editable: true },
-    { label: "Created Date", name: "vpd_created_at", type: "date", editable: false }
-  ],
-  
 };
 
 const VendorDetails: React.FC<VendorDetailsProps> = ({
@@ -407,7 +488,18 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
           <div className="h5 mb-0 fs-4 fw-semibold">
             {data?.vendor_name ?? "N/A"}
           </div>
-
+          <div>
+            <span className="h4 fs-4 fw-semibold">Duty:</span>{" "}
+            <strong className="fs-4 text-muted">
+              {data?.vendor_duty_status === 1 ? "On Duty" : "Off Duty"}
+            </strong>
+          </div>
+          <div>
+            <span className="h4 fs-4 fw-semibold">Status:</span>{" "}
+            <strong className="fs-4 text-muted">
+              {data?.vendor_status === 1 ? "Active" : "Inactive"}
+            </strong>
+          </div>
           <div>
             <span className="h4 fs-4 fw-semibold">Registered:</span>{" "}
             <strong className="fs-4 text-muted">
@@ -473,7 +565,7 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
             <div>
               <Row>
                 {vendorFieldGroups.ids_and_refs.map((f) => (
-                  <Col md={3} key={f.name}>
+                  <Col md={2} key={f.name}>
                     <Field
                       label={f.label}
                       value={data?.[f.name]}
@@ -498,7 +590,7 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
             <div>
               <Row>
                 {vendorFieldGroups.status_and_tokens.map((f) => (
-                  <Col lg={2} md={4} key={f.name}>
+                  <Col lg={4} md={4} key={f.name}>
                     <Field
                       label={f.label}
                       value={data?.[f.name]}
@@ -517,14 +609,13 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
         </Card.Body>
       </Card>
 
-
       <Card className="mb-4">
         <Card.Body>
           <Section title="Account Details">
             <div>
               <Row>
                 {vendorFieldGroups.account_details.map((f) => (
-                  <Col lg={3} md={6} key={f.name}>
+                  <Col lg={4} md={6} key={f.name}>
                     <Field
                       label={f.label}
                       value={data?.[f.name]}
@@ -534,7 +625,7 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
                       options={f.options}
                       editable={!!(editable && f.editable !== false)}
                       onEdit={(value) => handleFieldUpdate(f.name, value)}
-                    />  
+                    />
                   </Col>
                 ))}
               </Row>
@@ -545,25 +636,22 @@ const VendorDetails: React.FC<VendorDetailsProps> = ({
 
       <Card className="mb-4">
         <Card.Body>
-          <Section title="Professional Details">
-            <div>
-              <Row>
-                {vendorFieldGroups.professional_details.map((f) => (
-                  <Col lg={3} md={6} key={f.name}>
-                    <Field
-                      label={f.label}
-                      value={data?.[f.name]}
-                      fieldName={f.name}
-                      type={f.type}
-                      rows={f.rows}
-                      options={f.options}
-                      editable={!!(editable && f.editable !== false)}
-                      onEdit={(value) => handleFieldUpdate(f.name, value)}
-                    />  
-                  </Col>
-                ))}
-              </Row>
-            </div>
+          <Section title="">
+            <Button variant="" className="me-2 mb-2 bg-light ">
+              Cancel
+            </Button>
+            <Button variant="" className="me-2 mb-2 bg-light">
+              OTP Match
+            </Button>
+            <Button variant="" className="me-2 mb-2 bg-light">
+              Complete
+            </Button>
+            <Button variant="" className="me-2 mb-2 bg-light">
+              Assign
+            </Button>
+            <Button variant="" className="me-2 mb-2 bg-light">
+              <FaWhatsapp size={15} /> <span className="ms-1">WhatsApp</span>
+            </Button>
           </Section>
         </Card.Body>
       </Card>

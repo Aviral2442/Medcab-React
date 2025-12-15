@@ -38,7 +38,7 @@ const tableConfig: Record<
       "address",
       "Price",
       "date",
-      "Remark",
+      // "Remark",
       "status",
     ],
   },

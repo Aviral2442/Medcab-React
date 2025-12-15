@@ -2,6 +2,7 @@ import React from "react";
 import { Card, Row, Col, Image, Spinner, Alert, Button} from "react-bootstrap";
 import DateConversion from "../../DateConversion";
 import "@/global.css";
+import { FaWhatsapp } from "react-icons/fa";
 
 type DriverDetail = {
   driver_id?: number;
@@ -119,6 +120,7 @@ const getFieldGroups = (): Record<
         { name: "driver_dob", label: "Date of Birth", type: "date" },
         { name: "driver_gender", label: "Gender" },
         { name: "city_name", label: "City Name" },
+        { name: "driver_duty_status", label: "Duty Status" },
       ],
     },
     partnerInfo: {
@@ -138,7 +140,6 @@ const getFieldGroups = (): Record<
       fields: [
         { name: "driver_registration_step", label: "Registration Step" },
         { name: "driver_otp_verification", label: "OTP Verification" },
-        { name: "driver_duty_status", label: "Duty Status" },
         { name: "driver_status", label: "Status" },
         { name: "driver_on_booking_status", label: "On Booking Status" },
       ],
@@ -352,17 +353,20 @@ const DriverDetails: React.FC<Props> = ({ data, loading = false, error = null })
       <Card className="mb-4">
         <Card.Body>
           <Section title="">
-            <Button variant="outline-secondary" className="me-2 mb-2">
+            <Button variant="" className="me-2 mb-2 bg-light ">
               Cancel
             </Button>
-            <Button variant="secondary" className="me-2 mb-2">
+            <Button variant="" className="me-2 mb-2 bg-light">
               OTP Match
             </Button>
-            <Button variant="success" className="me-2 mb-2">
+            <Button variant="" className="me-2 mb-2 bg-light">
               Complete
             </Button>
-            <Button variant="info" className="me-2 mb-2">
+            <Button variant="" className="me-2 mb-2 bg-light">
               Assign
+            </Button>
+            <Button variant="" className="me-2 mb-2 bg-light">
+              <FaWhatsapp size={15}/>  <span className="ms-1">WhatsApp</span>
             </Button>
           </Section>
         </Card.Body>

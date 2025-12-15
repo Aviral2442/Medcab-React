@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
-import '@/global.css';
+import "@/global.css";
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
 import "datatables.net-buttons-bs5";
@@ -41,7 +41,7 @@ const tableConfig: Record<
       "City",
       "Category ",
       "Date",
-      "Remark",
+      // "Remark",
       "Status",
     ],
   },
@@ -175,18 +175,22 @@ const ExportDataWithButtons = ({
         td.innerHTML = "";
         const root = createRoot(td);
         root.render(
-            <div className="d-flex flex-row gap-1">
-                      <button className="eye-icon p-1"
-                        onClick={() => {
-                          navigate(`/vendor-details/${rowData.vendor_id}`);
-                        }}
-                      >
-                        <TbEye className="me-1" />
-                      </button>
-                        <button className="remark-icon" onClick={() => handleRemark(rowData)}>
-                        <TbReceipt className="me-1" />
-                      </button>
-                    </div>
+          <div className="d-flex flex-row gap-1">
+            <button
+              className="eye-icon p-1"
+              onClick={() => {
+                navigate(`/vendor-details/${rowData.vendor_id}`);
+              }}
+            >
+              <TbEye className="me-1" />
+            </button>
+            <button
+              className="remark-icon"
+              onClick={() => handleRemark(rowData)}
+            >
+              <TbReceipt className="me-1" />
+            </button>
+          </div>
         );
       },
     },
@@ -283,7 +287,7 @@ const ExportDataWithButtons = ({
           </div>
         )}
       </ComponentCard>
-      
+
       <AddRemark
         isOpen={isRemarkOpen}
         onClose={() => setIsRemarkOpen(false)}

@@ -60,7 +60,7 @@ export const vendorColumns = [
             return formatDate(data) || ' ';
         }
     },
-    { data: 'remark_text' },
+    // { data: 'remark_text' },
     {
         data: 'vendor_status',
         render: (data: number) => {
@@ -83,6 +83,6 @@ export const vendorColumns = [
 
 // Export table data structure
 export const vendorTableData: TableType<VendorInfoType> = {
-    header: ["S.No.","ID", "Picture", "Name", "Mobile", "Gender", "City", "Category", "Date", "Remark","Status"],
+    header: ["S.No.","ID", "Picture", "Name", "Mobile", "Gender", "City", "Category", "Date","Status"],
     body: vendorRows,
 };

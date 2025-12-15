@@ -925,18 +925,18 @@ const AmbulanceBookingDetailsForm: React.FC<
       <Card className="mb-4">
         <Card.Body>
           <Section title="">
-            <Button variant="" className="me-2 mb-2 bg-light text-dark">
+            <Button variant="" className="me-2 mb-2 bg-light">
               Cancel Booking
             </Button>
-            <Button variant="secondary" className="me-2 mb-2">
+            <Button variant="" className="me-2 mb-2  bg-light">
               Verify OTP
             </Button>
-            <Button variant="success" className="me-2 mb-2">
+            <Button variant="" className="me-2 mb-2  bg-light">
               Complete Booking
             </Button>
             <Button
-              variant="info"
-              className="me-2 mb-2"
+              variant=""
+              className="me-2 mb-2  bg-light"
               onClick={handleAssignDriver}
             >
               Assign Driver
