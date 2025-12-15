@@ -37,6 +37,34 @@ export const ambulanceBookingCountService = async () => {
     }
 };
 
+// SERVICE TO GET TOTAL AMBULANCE PARTNER COUNT
+export const ambulancePartnerCountService = async () => {
+    try {
+
+        let query = `
+            SELECT 
+            COUNT(partner_id) AS total_partners,
+            COUNT(CASE WHEN partner_status = '1' THEN 1 END) AS active_partners,
+            COUNT(CASE WHEN partner_status != '1' THEN 1 END) AS other_status_partners,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(created_at)) = CURDATE() THEN 1 END) AS today_new_partners
+            FROM partner
+        `;
+
+        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query);
+
+        if (rows.length === 0 || !rows) {
+            throw new ApiError(404, 'Data Not Found');
+        }
+
+        return {
+            vendorCounts: rows[0],
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Failed To Load Total Partner Count");
+    }
+};
+
 // DASHBOARD AMBULANCE BOOKINGS SERVICE
 export const dashboardAmbulanceBookingService = async () => {
     try {
