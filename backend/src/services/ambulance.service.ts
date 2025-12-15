@@ -29,7 +29,11 @@ export const ambulanceBookingCountService = async () => {
         }
 
         return {
-            ambBookingTotalCount: rows,
+            result: 200,
+            message: "Total booking count fetched successfully",
+            jsonData: {
+                total_booking_count: rows[0]
+            }
         };
 
     } catch (error) {
@@ -57,11 +61,46 @@ export const ambulancePartnerCountService = async () => {
         }
 
         return {
-            vendorCounts: rows[0],
+            result: 200,
+            message: "Total partner count fetched successfully",
+            jsonData: {
+                total_partner_count: rows[0]
+            }
         };
 
     } catch (error) {
         throw new ApiError(500, "Failed To Load Total Partner Count");
+    }
+};
+
+// SERVICE TO GET COMPLETE, ONGOING, CANCEL & REMINDER BOOKING COUNTS
+export const ambulanceCompleteOngoingCancelReminderBookingCounts = async () => {
+    try {
+        let query = `
+            SELECT
+            COUNT(CASE WHEN booking_status = 4 THEN 1 END) AS completed_bookings,
+            COUNT(CASE WHEN booking_status = 3 THEN 1 END) AS ongoing_bookings,
+            COUNT(CASE WHEN booking_status = 5 THEN 1 END) AS cancelled_bookings
+            FROM booking_view
+        `;
+
+        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query);
+
+        if (rows.length === 0 || !rows) {
+            throw new ApiError(404, 'Data Not Found');
+        }
+
+        return {
+            result: 200,
+            message: "Booking status counts fetched successfully",
+            jsonData: {
+                completed_ongoing_cancelled_counts: rows[0]
+            }
+        };
+    } catch (error) {
+        console.log(error);
+
+        throw new ApiError(500, "Failed To Load Booking Counts");
     }
 };
 
