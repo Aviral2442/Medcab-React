@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX } from "react-icons/tb";
 import "@/global.css";
-import DateConversion from "../DateConversion";
+import { formatDate } from "../DateFormat";
+import { FaWhatsapp } from "react-icons/fa";
 
 interface BookingDetailsFormProps {
   data: any;
@@ -70,20 +71,9 @@ const Field: React.FC<FieldProps> = ({
 
     if (type === "date" || type === "datetime-local") {
       try {
-        const date = /^\d+$/.test(valStr)
-          ? new Date(parseInt(valStr) * 1000)
-          : new Date(valStr);
-        if (isNaN(date.getTime())) return valStr;
-
-        const pad = (n: number) => String(n).padStart(2, "0");
-        if (type === "date") {
-          // Use DateConversion for date display
-          return DateConversion(date.toISOString());
-        }
-        // For datetime-local, format as YYYY-MM-DDTHH:mm for input
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-          date.getDate()
-        )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        // Pass the original value (could be number or string) to formatDate
+        // formatDate handles both Unix timestamps and date strings
+        return formatDate(val);
       } catch {
         return valStr;
       }
@@ -189,29 +179,13 @@ const mpoStatusOptions = [
   { value: 6, label: "Assigned" },
 ];
 
-// Safely build period duration string; fall back to "N/A" when parts are missing
-
-// 🌀 Config-driven field groups
 const getFieldGroups = (periodDuration: string) => ({
   orderInfo: [
     { label: "Order Category", name: "mpsc_name" },
-    // {
-    //   label: "Order ID",
-    //   name: "manpower_order_id",
-    //   type: "text",
-    //   editable: false,
-    // },
-    // {
-    //   label: "Status",
-    //   name: "mpo_status",
-    //   type: "select",
-    //   options: mpoStatusOptions,
-    //   editable: false,
-    // },
     {
       label: "Created At",
       name: "mpo_created_at",
-      type: "datetime-local",
+      type: "datetime-local" as const,
       editable: false,
     },
   ],
@@ -220,26 +194,26 @@ const getFieldGroups = (periodDuration: string) => ({
     {
       label: "Consumer Mobile",
       name: "consumer_mobile_no",
-      type: "tel",
+      type: "tel" as const,
       editable: false,
     },
     {
       label: "Consumer Wallet",
       name: "consumer_wallet_amount",
-      type: "number",
+      type: "number" as const,
       editable: false,
     },
     {
       label: "Consumer Registered Date",
       name: "consumer_registred_date",
-      type: "date",
+      type: "date" as const,
       editable: false,
     },
-    { label: "OTP", name: "mpo_otp", type: "number", editable: false },
+    { label: "OTP", name: "mpo_otp", type: "number" as const, editable: false },
     {
       label: "Verify OTP",
       name: "mpod_verify_otp",
-      type: "number",
+      type: "number" as const,
       editable: false,
     },
   ],
@@ -249,65 +223,57 @@ const getFieldGroups = (periodDuration: string) => ({
     {
       label: "Transfer Amount",
       name: "mpo_transfer_amount",
-      type: "number",
+      type: "number" as const,
       editable: false,
     },
     {
       label: "Final Price",
       name: "mpo_final_price",
-      type: "number",
+      type: "number" as const,
       editable: true,
     },
     {
       label: "GST Percentage",
       name: "mpo_gst_percentage",
-      type: "number",
+      type: "number" as const,
       editable: true,
     },
     {
       label: "GST Amount",
       name: "mpo_gst_amount",
-      type: "number",
+      type: "number" as const,
       editable: true,
     },
     {
       label: "Health Card Charges",
       name: "mpo_health_card_charges",
-      type: "number",
+      type: "number" as const,
       editable: true,
     },
     {
       label: "Health Card Discount",
       name: "mpo_health_card_discount",
-      type: "number",
+      type: "number" as const,
       editable: true,
     },
     {
       label: "Coupon Discount",
       name: "mpo_coupon_discount",
-      type: "number",
+      type: "number" as const,
       editable: true,
     },
   ],
-  // tax: [
-  // ],
   vendor: [
     {
       label: "Vendor Name",
       name: "mpo_vendor_name",
-      type: "text",
+      type: "text" as const,
       editable: true,
     },
     {
       label: "Vendor Mobile",
       name: "mpo_vendor_mobile",
-      type: "tel",
-      editable: true,
-    },
-    {
-      label: "Vendor Picture",
-      name: "mpo_vender_picture",
-      type: "text",
+      type: "tel" as const,
       editable: true,
     },
   ],
@@ -315,30 +281,30 @@ const getFieldGroups = (periodDuration: string) => ({
     {
       label: "Product Quantity",
       name: "mpod_product_quantity",
-      type: "number",
+      type: "number" as const,
     },
-    { label: "Price", name: "mpod_price", type: "number" },
-    { label: "Tax", name: "mpod_tax", type: "number" },
-    { label: "Offer Amount", name: "mpod_offer_amount", type: "number" },
-    { label: "Company Charge", name: "mpod_company_charge", type: "number" },
+    { label: "Price", name: "mpod_price", type: "number" as const },
+    { label: "Tax", name: "mpod_tax", type: "number" as const },
+    { label: "Offer Amount", name: "mpod_offer_amount", type: "number" as const },
+    { label: "Company Charge", name: "mpod_company_charge", type: "number" as const },
     {
       label: "Period Duration",
       name: periodDuration,
-      type: "text",
+      type: "text" as const,
       editable: false,
     },
-    { label: "Till Date", name: "mpod_till_date", type: "date" },
+    { label: "Till Date", name: "mpod_till_date", type: "date" as const },
     {
       label: "Status (Detail)",
       name: "mpod_status",
-      type: "select",
+      type: "select" as const,
       options: mpodStatusOptions,
     },
-    { label: "Assign Time", name: "mpod_assign_time", type: "datetime-local" },
+    { label: "Assign Time", name: "mpod_assign_time", type: "datetime-local" as const },
     {
       label: "Instruction",
       name: "mpod_instruction",
-      type: "textarea",
+      type: "textarea" as const,
       rows: 3,
     },
   ],
@@ -351,24 +317,6 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
 }) => {
   const handleFieldUpdate = (field: string, value: string) =>
     onUpdate?.(field, value);
-
-  const formatDate = (value: string | number) => {
-    if (!value && value !== 0) return "N/A";
-    const valStr = value.toString();
-
-    try {
-      const date = /^\d+$/.test(valStr)
-        ? new Date(parseInt(valStr) * 1000)
-        : new Date(valStr);
-
-      if (isNaN(date.getTime())) return valStr;
-
-      // Use DateConversion component for consistent formatting
-      return DateConversion(date.toISOString());
-    } catch {
-      return valStr;
-    }
-  };
 
   const periodDuration =
     [data?.mpod_period_duration, data?.mpod_period_type]
@@ -438,6 +386,7 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
                       fieldName={f.name}
                       editable={editable && f.editable !== false}
                       onEdit={(value) => handleFieldUpdate(f.name, value)}
+                      type={f.type}
                     />
                   </Col>
                 ))}
@@ -460,6 +409,7 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
                       fieldName={f.name}
                       editable={false}
                       onEdit={(value) => handleFieldUpdate(f.name, value)}
+                      type={f.type}
                     />
                   </Col>
                 ))}
@@ -491,6 +441,7 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
                       fieldName={f.name}
                       editable={editable && f.editable !== false}
                       onEdit={(value) => handleFieldUpdate(f.name, value)}
+                      type={f.type}
                     />
                   </Col>
                 ))}
@@ -513,6 +464,7 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
                       fieldName={f.name}
                       editable={editable && f.editable !== false}
                       onEdit={(value) => handleFieldUpdate(f.name, value)}
+                      type={f.type}
                     />
                   </Col>
                 ))}
@@ -535,6 +487,9 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
                       fieldName={f.name}
                       editable={editable && f.editable !== false}
                       onEdit={(value) => handleFieldUpdate(f.name, value)}
+                      type={f.type}
+                      rows={f.rows}
+                      options={f.options}
                     />
                   </Col>
                 ))}
@@ -547,17 +502,20 @@ const BookingDetailsForm: React.FC<BookingDetailsFormProps> = ({
       <Card className="mb-4">
         <Card.Body>
           <Section title="">
-            <Button variant="" className="me-2 mb-2 bg-light text-dark">
+            <Button variant="" className="me-2 mb-2 bg-light ">
               Cancel
             </Button>
-            <Button variant="secondary" className="me-2 mb-2">
+            <Button variant="" className="me-2 mb-2 bg-light">
               OTP Match
             </Button>
-            <Button variant="success" className="me-2 mb-2">
+            <Button variant="" className="me-2 mb-2 bg-light">
               Complete
             </Button>
-            <Button variant="info" className="me-2 mb-2">
+            <Button variant="" className="me-2 mb-2 bg-light">
               Assign
+            </Button>
+            <Button variant="" className="me-2 mb-2 bg-light">
+              <FaWhatsapp size={15}/>  <span className="ms-1">WhatsApp</span>
             </Button>
           </Section>
         </Card.Body>

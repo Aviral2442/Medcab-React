@@ -80,17 +80,17 @@ export const bookingColumns = [
         defaultContent: '-',
     },
     {
-        data: 'booking_schedule_time',
-        defaultContent: '-',
-        render: (data: any) => formatDate(data),
-    },
-    {
         data: 'booking_pickup',
         defaultContent: '-',
     },
     {
         data: 'booking_drop',
         defaultContent: '-',
+    },
+    {
+        data: 'booking_schedule_time',
+        defaultContent: '-',
+        render: (data: any) => formatDate(data),
     },
     {
         data: 'booking_total_amount',
@@ -115,6 +115,6 @@ export const bookingColumns = [
 ];
 
 export const bookingTableData: TableType<AmbulanceBookingInfoType> = {
-    header: ["S.No.", 'ID', 'Type', 'Consumer', 'Category', 'Schedule', 'Pickup', 'Drop', ' Amount', 'Created', 'Status'],
+    header: ["S.No.", 'ID', 'Type', 'Consumer', 'Category', 'Pickup', 'Drop', 'Schedule', 'Amount', 'Created', 'Status'],
     body: bookingRows,
 };

@@ -24,7 +24,7 @@ const BookingDetails = () => {
   const tabs = [
     { eventKey: 1, title: 'Booking Details' },
     { eventKey: 2, title: 'Transaction List' },
-    { eventKey: 3, title: 'PickUp City Vendor List' },
+    { eventKey: 3, title: 'Nearest Vendors' },
     { eventKey: 4, title: 'Reject List' },
     { eventKey: 5, title: 'Accept List' },
   ];

@@ -70,12 +70,12 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
       render: (data: any) => data || "N/A"
     },
     { 
-      title: "Order_ID", 
+      title: "ID", 
       data: "consumer_transection_order_id",
       render: (data: any) => data || "N/A"
     },
     { 
-      title: "Pay_ID", 
+      title: "Pay ID", 
       data: "consumer_transection_payment_id",
       render: (data: any) => data || "N/A"
     },
@@ -95,12 +95,12 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
       render: (data: any) => `₹${data || 0}`,
     },
     { 
-      title: "Pre_Amt", 
+      title: "Pre Amt", 
       data: "consumer_transection_previous_amount",
       render: (data: any) => `₹${data || 0}`,
     },
     { 
-      title: "New_Amt", 
+      title: "New Amt", 
       data: "consumer_transection_new_amount",
       render: (data: any) => `₹${data || 0}`,
     },
@@ -120,7 +120,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ data }) => {
       render: (data: any) => data || "N/A"
     },
     { 
-      title: "Trans_On", 
+      title: "Date", 
       data: "consumer_transection_time",
       render: (data: any) => formatValue(data, "datetime-local")
     },
