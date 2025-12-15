@@ -4,6 +4,38 @@ import { buildFilters } from "../utils/filters";
 import { currentUnixTime } from "../utils/current_unixtime";
 import { generateSlug } from "../utils/generate_sku";
 import { uploadFileCustom } from "../utils/file_uploads";
+import { FieldPacket, RowDataPacket } from 'mysql2';
+
+// SERVICE TO GET TOTAL AMBULANCE BOOKING COUNT
+export const ambulanceBookingCountService = async () => {
+    try {
+        const query = `
+            SELECT 
+            COUNT(booking_id) AS bookingTotalCount,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(booking_view.created_at_unix)) = CURDATE() THEN 1 END) AS today_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(booking_view.created_at_unix)) = CURDATE() - INTERVAL 1 DAY THEN 1 END) AS yesterday_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(booking_view.created_at_unix)) = CURDATE() - INTERVAL 2 DAY THEN 1 END) AS day_2_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(booking_view.created_at_unix)) = CURDATE() - INTERVAL 3 DAY THEN 1 END) AS day_3_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(booking_view.created_at_unix)) = CURDATE() - INTERVAL 4 DAY THEN 1 END) AS day_4_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(booking_view.created_at_unix)) = CURDATE() - INTERVAL 5 DAY THEN 1 END) AS day_5_bookings,
+            COUNT(CASE WHEN DATE(FROM_UNIXTIME(booking_view.created_at_unix)) = CURDATE() - INTERVAL 6 DAY THEN 1 END) AS day_6_bookings
+            FROM booking_view
+        `;
+
+        const [rows]: [RowDataPacket[], FieldPacket[]] = await db.query(query);
+
+        if (rows.length === 0 || !rows) {
+            throw new ApiError(404, 'Data Not Found');
+        }
+
+        return {
+            ambBookingTotalCount: rows,
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Failed To Load Total Booking Count");
+    }
+};
 
 // DASHBOARD AMBULANCE BOOKINGS SERVICE
 export const dashboardAmbulanceBookingService = async () => {
