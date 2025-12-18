@@ -10,7 +10,6 @@ import {
 } from "react-bootstrap";
 import axios from "axios";
 import SnowEditor from "@/views/forms/editors";
-import { values } from "lodash";
 
 interface AddSubCategoryProps {
   mode: "add" | "edit";

@@ -18,7 +18,7 @@ const CategoryValidationSchema = Yup.object().shape({
   ),
   ambulance_category_state_id: Yup.string().required("State is required"),
   ambulance_category_name: Yup.string().required("Category Name is required"),
-  iconPath: Yup.mixed().required("Icon is required"),
+  iconPath: Yup.mixed().nullable(),
   ambulance_catagory_desc: Yup.string().required("Description is required"),
 });
 
@@ -46,6 +46,7 @@ const AddCategory: React.FC<AddCategoryProps> = ({
   });
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [states, setStates] = React.useState<Array<any>>([]);
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
@@ -58,7 +59,7 @@ const AddCategory: React.FC<AddCategoryProps> = ({
           data.ambulance_category_service_type || "",
         ambulance_category_state_id: data.ambulance_category_state_id || "",
         ambulance_category_name: data.ambulance_category_name || "",
-        iconPath: null, // File can't be pre-populated easily
+        iconPath: null,
         ambulance_catagory_desc: data.ambulance_catagory_desc || "",
       });
     }
@@ -71,7 +72,6 @@ const AddCategory: React.FC<AddCategoryProps> = ({
   ) => {
     const { name, value } = e.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
-    // Clear error on change
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -91,7 +91,13 @@ const AddCategory: React.FC<AddCategoryProps> = ({
     setErrors({});
 
     try {
-      await CategoryValidationSchema.validate(formValues, {
+      // Validate only if adding or if icon is provided in edit mode
+      const validationSchema =
+        mode === "edit" && !formValues.iconPath
+          ? CategoryValidationSchema.omit(["iconPath"])
+          : CategoryValidationSchema;
+
+      await validationSchema.validate(formValues, {
         abortEarly: false,
       });
 
@@ -117,20 +123,26 @@ const AddCategory: React.FC<AddCategoryProps> = ({
         formValues.ambulance_catagory_desc
       );
       if (formValues.iconPath) {
-        formData.append("iconPath", formValues.iconPath);
+        formData.append("ambulance_category_icon", formValues.iconPath);
       }
 
-      const endpoint =
-        mode === "add"
-          ? "/ambulance/add_ambulance_category"
-          : "/ambulance/edit_ambulance_category";
-      if (mode === "edit" && data?.id) {
-        formData.append("id", data.id);
+      if (mode === "add") {
+        await axios.post(
+          `${baseURL}/ambulance/add_ambulance_category`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+      } else {
+        await axios.put(
+          `${baseURL}/ambulance/edit_ambulance_category/${data.ambulance_category_id}`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
       }
-
-      await axios.post(`${baseURL}${endpoint}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
 
       onDataChanged();
       onCancel();
@@ -145,84 +157,34 @@ const AddCategory: React.FC<AddCategoryProps> = ({
         setErrors(validationErrors);
       } else {
         console.error("Submission error:", err);
-        // Handle other errors, e.g., show a toast
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const fetchStates = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/get_states`);
+      setStates(response.data?.jsonData?.state_list || []);
+    } catch (error) {
+      console.error("Error fetching states:", error);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchStates();
+  }, []);
+
   return (
     <ComponentCard title={`${mode === "add" ? "Add" : "Edit"} Category`}>
       <Form onSubmit={handleSubmit}>
         <Row>
-          <Col md={6}>
+          <Col md={10}>
             <Form.Group className="mb-3">
-              <FormLabel>Category Type</FormLabel>
-              <FormControl
-                type="text"
-                name="ambulance_category_type"
-                value={formValues.ambulance_category_type}
-                onChange={handleInputChange}
-                isInvalid={!!errors.ambulance_category_type}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.ambulance_category_type}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <FormLabel>Service Type</FormLabel>
-              <FormControl
-                type="text"
-                name="ambulance_category_service_type"
-                value={formValues.ambulance_category_service_type}
-                onChange={handleInputChange}
-                isInvalid={!!errors.ambulance_category_service_type}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.ambulance_category_service_type}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <FormLabel>State ID</FormLabel>
-              <FormControl
-                type="text"
-                name="ambulance_category_state_id"
-                value={formValues.ambulance_category_state_id}
-                onChange={handleInputChange}
-                isInvalid={!!errors.ambulance_category_state_id}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.ambulance_category_state_id}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <FormLabel>Category Name</FormLabel>
-              <FormControl
-                type="text"
-                name="ambulance_category_name"
-                value={formValues.ambulance_category_name}
-                onChange={handleInputChange}
-                isInvalid={!!errors.ambulance_category_name}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.ambulance_category_name}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <FormLabel>Icon</FormLabel>
+              <FormLabel>
+                Icon {mode === "add" && <span className="text-danger">*</span>}
+              </FormLabel>
               <FormControl
                 type="file"
                 accept="image/*"
@@ -234,15 +196,134 @@ const AddCategory: React.FC<AddCategoryProps> = ({
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
+          <Col md={2}>
+            {mode === "edit" && data?.ambulance_category_icon && (
+              <div className="mb-3">
+                <img
+                  src={`${baseURL}/${data.ambulance_category_icon}`}
+                  alt="Category Icon"
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
+            )}
+            {formValues.iconPath && (
+              <div className="mb-3">
+                <img
+                  src={URL.createObjectURL(formValues.iconPath)}
+                  alt="Selected Icon"
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    objectFit: "cover",
+                  }}
+                  className="mt-2"
+                />
+              </div>
+            )}
+          </Col>
+        </Row>
+        <Row>
           <Col md={6}>
             <Form.Group className="mb-3">
-              <FormLabel>Description</FormLabel>
+              <FormLabel>
+                Category Type <span className="text-danger">*</span>
+              </FormLabel>
+              <FormControl
+                type="text"
+                name="ambulance_category_type"
+                value={formValues.ambulance_category_type}
+                onChange={handleInputChange}
+                placeholder="Enter category type"
+                isInvalid={!!errors.ambulance_category_type}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.ambulance_category_type}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <FormLabel>
+                Category Name <span className="text-danger">*</span>
+              </FormLabel>
+              <FormControl
+                type="text"
+                name="ambulance_category_name"
+                value={formValues.ambulance_category_name}
+                onChange={handleInputChange}
+                placeholder="Enter category name"
+                isInvalid={!!errors.ambulance_category_name}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.ambulance_category_name}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>
+                State <span className="text-danger">*</span>
+              </Form.Label>
+              <Form.Select
+                name="ambulance_category_state_id"
+                value={formValues.ambulance_category_state_id}
+                onChange={handleInputChange}
+                isInvalid={!!errors.ambulance_category_state_id}
+              >
+                <option value="">Select State</option>
+                {states.map((state: any) => (
+                  <option key={state.state_id} value={state.state_id}>
+                    {state.state_name}
+                  </option>
+                ))}
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                {errors.ambulance_category_state_id}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <FormLabel>
+                Service Type <span className="text-danger">*</span>
+              </FormLabel>
+              <Form.Select
+                name="ambulance_category_service_type"
+                value={formValues.ambulance_category_service_type}
+                onChange={handleInputChange}
+                isInvalid={!!errors.ambulance_category_service_type}
+              >
+                <option value="">Select Service Type</option>
+                <option value="1">Human</option>
+                <option value="2">Animal</option>
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                {errors.ambulance_category_service_type}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col md={12}>
+            <Form.Group className="mb-3">
+              <FormLabel>
+                Description <span className="text-danger">*</span>
+              </FormLabel>
               <FormControl
                 as="textarea"
                 rows={3}
                 name="ambulance_catagory_desc"
                 value={formValues.ambulance_catagory_desc}
                 onChange={handleInputChange}
+                placeholder="Enter description"
                 isInvalid={!!errors.ambulance_catagory_desc}
               />
               <Form.Control.Feedback type="invalid">
@@ -257,6 +338,7 @@ const AddCategory: React.FC<AddCategoryProps> = ({
               className="px-3 rounded text-black"
               onClick={onCancel}
               disabled={isSubmitting}
+              type="button"
             >
               Cancel
             </button>

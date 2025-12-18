@@ -462,7 +462,7 @@ export const addAmbulanceCategoryService = async (data: ambulanceCategoryData) =
             ambulance_category_name: data.ambulance_category_name,
             ambulance_category_icon: iconPath,
             ambulance_catagory_desc: data.ambulance_catagory_desc,
-            ambulance_category_sku: generateSlug(data.ambulance_category_sku),
+            ambulance_category_sku: generateSlug(data.ambulance_category_name),
             ambulance_category_added_date: currentUnixTime(),
             ambulance_category_status: 0
         };
