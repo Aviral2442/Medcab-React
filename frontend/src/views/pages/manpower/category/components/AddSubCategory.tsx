@@ -9,6 +9,8 @@ import {
   Button,
 } from "react-bootstrap";
 import axios from "axios";
+import SnowEditor from "@/views/forms/editors";
+import { values } from "lodash";
 
 interface AddSubCategoryProps {
   mode: "add" | "edit";
@@ -61,12 +63,8 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
         mpsc_overview: data.mpsc_overview || "",
         mpsc_description: data.mpsc_description || "",
         mpsc_gst_percentage: data.mpsc_gst_percentage || "",
-        mpsc_emergency_status: String(
-          data.mpsc_emergency_status ?? "0"
-        ),
-        mpsc_popular_status: String(
-          data.mpsc_popular_status ?? "0"
-        ),
+        mpsc_emergency_status: String(data.mpsc_emergency_status ?? "0"),
+        mpsc_popular_status: String(data.mpsc_popular_status ?? "0"),
         mpsc_status: String(data.mpsc_status ?? "0"),
         mpsc_visit_rate: data.mppm_visit_rate || "",
         mpsc_day_rate: data.mppm_days_rate || "",
@@ -98,19 +96,10 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
       formData.append("mpsc_image", formValues.mpsc_image);
     }
     formData.append("mpsc_overview", formValues.mpsc_overview);
-    formData.append(
-      "mpsc_description",
-      formValues.mpsc_description
-    );
+    formData.append("mpsc_description", formValues.mpsc_description);
     formData.append("mpsc_gst_percentage", formValues.mpsc_gst_percentage);
-    formData.append(
-      "mpsc_emergency_status",
-      formValues.mpsc_emergency_status
-    );
-    formData.append(
-      "mpsc_popular_status",
-      formValues.mpsc_popular_status
-    );
+    formData.append("mpsc_emergency_status", formValues.mpsc_emergency_status);
+    formData.append("mpsc_popular_status", formValues.mpsc_popular_status);
     formData.append("mpsc_status", formValues.mpsc_status);
     formData.append("mpsc_visit_rate", formValues.mpsc_visit_rate);
     formData.append("mpsc_day_rate", formValues.mpsc_day_rate);
@@ -152,7 +141,9 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
               <FormLabel>Manpower Category</FormLabel>
               <Form.Select
                 value={formValues.mpsc_category_id}
-                onChange={(e) => handleChange("mpsc_category_id", e.target.value)}
+                onChange={(e) =>
+                  handleChange("mpsc_category_id", e.target.value)
+                }
                 required
               >
                 <option value="">Select Category</option>
@@ -172,9 +163,7 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
               <FormControl
                 type="text"
                 value={formValues.mpsc_name}
-                onChange={(e) =>
-                  handleChange("mpsc_name", e.target.value)
-                }
+                onChange={(e) => handleChange("mpsc_name", e.target.value)}
                 required
               />
             </Form.Group>
@@ -199,23 +188,21 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
               <FormControl
                 type="text"
                 value={formValues.mpsc_overview}
-                onChange={(e) =>
-                  handleChange("mpsc_overview", e.target.value)
-                }
+                onChange={(e) => handleChange("mpsc_overview", e.target.value)}
               />
             </Form.Group>
           </Col>
 
           {/* Description */}
-          <Col lg={3}>
+          <Col md={12}>
             <Form.Group>
-              <FormLabel>Description</FormLabel>
-              <FormControl
-                as="textarea"
-                rows={2}
+              <Form.Label>
+                Description
+              </Form.Label>
+              <SnowEditor
                 value={formValues.mpsc_description}
-                onChange={(e) =>
-                  handleChange("mpsc_description", e.target.value)
+                onChange={(value: string) =>
+                  handleChange("mpsc_description", value)
                 }
               />
             </Form.Group>
@@ -229,7 +216,9 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
                 type="number"
                 placeholder="Enter GST %"
                 value={formValues.mpsc_gst_percentage}
-                onChange={(e) => handleChange("mpsc_gst_percentage", e.target.value)}
+                onChange={(e) =>
+                  handleChange("mpsc_gst_percentage", e.target.value)
+                }
               />
             </Form.Group>
           </Col>
@@ -272,9 +261,7 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
               <FormLabel>Status</FormLabel>
               <Form.Select
                 value={formValues.mpsc_status}
-                onChange={(e) =>
-                  handleChange("mpsc_status", e.target.value)
-                }
+                onChange={(e) => handleChange("mpsc_status", e.target.value)}
               >
                 <option value="0">Active</option>
                 <option value="1">Inactive</option>
@@ -303,9 +290,7 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
               <FormControl
                 type="number"
                 value={formValues.mpsc_day_rate}
-                onChange={(e) =>
-                  handleChange("mpsc_day_rate", e.target.value)
-                }
+                onChange={(e) => handleChange("mpsc_day_rate", e.target.value)}
               />
             </Form.Group>
           </Col>
@@ -330,9 +315,7 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
               <FormLabel>Gender</FormLabel>
               <Form.Select
                 value={formValues.mpsc_gender}
-                onChange={(e) =>
-                  handleChange("mpsc_gender", e.target.value)
-                }
+                onChange={(e) => handleChange("mpsc_gender", e.target.value)}
               >
                 <option value="">Select</option>
                 <option value="Male">Male</option>
@@ -349,9 +332,7 @@ const AddSubCategory: React.FC<AddSubCategoryProps> = ({
               <FormControl
                 type="text"
                 value={formValues.mpsc_city}
-                onChange={(e) =>
-                  handleChange("mpsc_city", e.target.value)
-                }
+                onChange={(e) => handleChange("mpsc_city", e.target.value)}
               />
             </Form.Group>
           </Col>

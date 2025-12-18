@@ -52,16 +52,16 @@ const Page = () => {
           );
         case 2:
           return (
-            <Addfacilities
+            <AddAmbulanceFAQ
               mode={formMode}
               data={editData}
               onCancel={handleCancel}
               onDataChanged={triggerRefresh}
             />
           );
-        case 3:
-          return (
-            <AddAmbulanceFAQ
+          case 3:
+            return (
+            <Addfacilities
               mode={formMode}
               data={editData}
               onCancel={handleCancel}

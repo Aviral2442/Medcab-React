@@ -98,20 +98,6 @@ const AddCoupon: React.FC<AddCouponProps> = ({
             </Form.Group>
           </Col>
 
-          {/* Coupon Description */}
-          <Col lg={3}>
-            <Form.Group controlId="mpc_coupon_description" className="mb-0">
-              <FormLabel>Coupon Description</FormLabel>
-              <FormControl
-                type="text"
-                value={formValues.mpc_coupon_description}
-                onChange={(e) =>
-                  handleChange("mpc_coupon_description", e.target.value)
-                }
-              />
-            </Form.Group>
-          </Col>
-
           {/* Min Cart Value */}
           <Col lg={3}>
             <Form.Group controlId="mpc_coupon_min_cart_value" className="mb-0">
@@ -154,6 +140,23 @@ const AddCoupon: React.FC<AddCouponProps> = ({
               />
             </Form.Group>
           </Col>
+          
+          {/* Coupon Description */}
+          <Col lg={12}>
+            <Form.Group controlId="mpc_coupon_description" className="mb-0">
+              <FormLabel>Coupon Description</FormLabel>
+              <FormControl
+                as="textarea"
+                rows={3}
+                value={formValues.mpc_coupon_description}
+                onChange={(e) =>
+                  handleChange("mpc_coupon_description", e.target.value)
+                }
+              />
+            </Form.Group>
+          </Col>
+
+
 
           {/* Max Discount Value */}
           <Col lg={3}>
