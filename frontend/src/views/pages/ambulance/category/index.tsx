@@ -2,8 +2,9 @@ import React from "react";
 import { Container } from "react-bootstrap";
 import ExportDataWithButtons from "@/views/tables/data-tables/ambulance/category";
 import AddCategory from "../category/components/AddCategory";
-import Addfacilities from "../category/components/Addfacilities";
+import AddfacilitiesRate from "./components/AddfacilitiesRate";
 import AddAmbulanceFAQ from "../category/components/AddAmbulanceFAQ";
+import Addfacilities from "./components/Addfacilities";
 
 const Page = () => {
   const [activeTab, setActiveTab] = React.useState(1);
@@ -16,6 +17,7 @@ const Page = () => {
     { key: 1, label: "Category" },
     { key: 2, label: "FAQ" },
     { key: 3, label: "Facilities" },
+    { key: 4, label: "Facilities Rate" },
   ];
 
   const handleAddNew = React.useCallback(() => {
@@ -59,9 +61,18 @@ const Page = () => {
               onDataChanged={triggerRefresh}
             />
           );
-          case 3:
-            return (
+        case 3:
+          return (
             <Addfacilities
+              mode={formMode}
+              data={editData}
+              onCancel={handleCancel}
+              onDataChanged={triggerRefresh}
+            />
+          );
+          case 4:
+            return (
+            <AddfacilitiesRate
               mode={formMode}
               data={editData}
               onCancel={handleCancel}

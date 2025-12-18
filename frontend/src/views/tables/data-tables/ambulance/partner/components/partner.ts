@@ -39,9 +39,9 @@ export const partnerColumns = [
         data: 'partner_profile_img',
         render: (data: string) => {
             if (data) {
-                return `<img src="${basePath}/${data}" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" />`;
+                return `<img src="https://appdata.medcab.in/${data}" alt="Profile" style="width: 25px; height: 25px; border-radius: 50%; object-fit: fit;" loading="lazy" />`;
             }
-            return 'N/A';
+            return ' ';
         }
     },
     { data: 'partner_f_name' },

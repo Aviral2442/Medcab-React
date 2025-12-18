@@ -34,20 +34,18 @@ const tableConfig: Record<number, { endpoint: string; headers: string[] }> = {
   },
   2: {
     endpoint: "/ambulance/get_ambulance_faq_list",
-    headers: [
-      "S.No.",
-      "ID",
-      "Question",
-      "Answer",
-      "Created At",
-      "Status",
-    ],
+    headers: ["S.No.", "ID", "Question", "Answer", "Created At", "Status"],
   },
   3: {
+    endpoint: "/ambulance/get_ambulance_facilities_list",
+    headers: ["S.No.", "ID", "Name", "State","Created At"],
+  },
+  4: {
     endpoint: "/ambulance/get_ambulance_facilities_rate_list",
     headers: [
       "S.No.",
       "ID",
+      "Name",
       "Amount",
       "Increase/Km",
       "From",
@@ -84,6 +82,7 @@ const ExportDataWithButtons = ({
   const [currentPage, setCurrentPage] = useState(0);
 
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
+  console.log("Base URL:", baseURL);
 
   const toggleCategoryStatus = async (
     categoryId: number,
@@ -111,10 +110,13 @@ const ExportDataWithButtons = ({
   const toggleFAQStatus = async (faqId: number, currentStatus: number) => {
     try {
       const newStatus = currentStatus === 0 ? 1 : 0;
-      
-      await axios.patch(`${baseURL}/ambulance/update_ambulance_faq_status/${faqId}`, {
-        ambulance_faq_status: newStatus,
-      });
+
+      await axios.patch(
+        `${baseURL}/ambulance/update_ambulance_faq_status/${faqId}`,
+        {
+          ambulance_faq_status: newStatus,
+        }
+      );
 
       if (onDataChanged) onDataChanged();
       fetchData();
@@ -164,11 +166,13 @@ const ExportDataWithButtons = ({
       } else if (tabKey === 2) {
         dataArray = res.data?.jsonData?.ambulance_faq_list || [];
       } else if (tabKey === 3) {
+        dataArray = res.data?.jsonData?.ambulance_facilities_list || [];
+      } else if (tabKey === 4) {
         dataArray = res.data?.jsonData?.ambulance_facilities_rate_list || [];
       }
 
       const validData = Array.isArray(dataArray) ? dataArray : [];
-      
+
       setTableData(validData);
 
       if (res.data.pagination) {
@@ -226,7 +230,7 @@ const ExportDataWithButtons = ({
         defaultContent: "N/A",
         render: (data: any) =>
           data
-            ? `<img src="${baseURL}/${data}" alt="Icon" style="width: 30px; height: 30px;" />`
+            ? `<img src="https://appdata.medcab.in/${data}" alt="Icon" style="width: 30px; height: 30px;" />`
             : "N/A",
       },
       {
@@ -239,27 +243,31 @@ const ExportDataWithButtons = ({
           else return "N/A";
         },
       },
-      { title: "Category Name", data: "ambulance_category_name", defaultContent: "N/A" },
+      {
+        title: "Category Name",
+        data: "ambulance_category_name",
+        defaultContent: "N/A",
+      },
       {
         title: "Created At",
         data: "ambulance_category_added_date",
         defaultContent: "N/A",
         render: (data: string) => {
-            const date = new Date(data);
-            return date.toLocaleDateString();
-    },
+          const date = new Date(data);
+          return date.toLocaleDateString();
+        },
       },
       {
         title: "Status",
         data: "ambulance_category_status",
         defaultContent: "N/A",
-      render: (data: any) => {
-        if (data == 0 || data == "0") {
-          return `<span class="badge badge-label badge-soft-success">Active</span>`;
-        } else if (data == 1 || data == "1") {
-          return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
-        }
-      },
+        render: (data: any) => {
+          if (data == 0 || data == "0") {
+            return `<span class="badge badge-label badge-soft-success">Active</span>`;
+          } else if (data == 1 || data == "1") {
+            return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
+          }
+        },
       },
       {
         title: "Actions",
@@ -383,9 +391,114 @@ const ExportDataWithButtons = ({
                 }
                 style={{
                   backgroundColor:
-                    rowData.ambulance_faq_status === 0
-                      ? "#d9534f"
-                      : "#3a833a",
+                    rowData.ambulance_faq_status === 0 ? "#d9534f" : "#3a833a",
+                }}
+              >
+                {rowData.ambulance_faq_status === 0 ? (
+                  <FaRegTimesCircle className="me-1" />
+                ) : (
+                  <FaRegCheckCircle className="me-1" />
+                )}
+              </button>
+              <button
+                className="edit-icon p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+                onClick={() => {
+                  if (onEditRow) onEditRow(rowData);
+                }}
+              >
+                <TbEdit className="me-1" />
+              </button>
+            </div>
+          );
+        },
+      },
+    ],
+    [currentPage, pageSize]
+  );
+
+  const FacilitiesColumns = useMemo(
+    () => [
+      {
+        title: "S.No.",
+        data: null,
+        orderable: false,
+        searchable: false,
+        render: (_data: any, _type: any, _row: any, meta: any) => {
+          return currentPage * pageSize + meta.row + 1;
+        },
+      },
+      { title: "ID", data: "ambulance_facilities_id", defaultContent: "N/A" },
+      {
+        title: "Icon",
+        data: "ambulance_facilities_image",
+        defaultContent: "N/A",
+        render: (data: any) =>
+          data
+            ? `<img src="https://appdata.medcab.in/${data}" alt="Icon" style="width: 30px; height: 30px;" />`
+            : "N/A",
+      },
+      {
+        title: "Name",
+        data: "ambulance_facilities_name",
+        defaultContent: "N/A",
+        render: (data: any, _type: any, row: any) => {
+          return (
+            data + " (" + row.ambulance_facilities_category_type + ")" || ""
+          );
+        },
+      },
+      {
+        title: "State",
+        data: "ambulance_facilities_state",
+        defaultContent: " ",
+      },
+      {
+        title: "Created At",
+        data: "ambulance_facilities_created_time",
+        defaultContent: " ",
+        render: (data: any) => {
+          return formatDate(data);
+        },
+      },
+      // {
+      //   title: "Status",
+      //   data: "ambulance_facilities_state",
+      //   defaultContent: "",
+      //   render: (data: any) => {
+      //     if (data == 0 || data == "0") {
+      //       return `<span class="badge badge-label badge-soft-success">Active</span>`;
+      //     } else if (data == 1 || data == "1") {
+      //       return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
+      //     }
+      //   },
+      // },
+      {
+        title: "Actions",
+        data: null,
+        orderable: false,
+        searchable: false,
+        render: () => "",
+        createdCell: (td: HTMLElement, _cellData: any, rowData: any) => {
+          td.innerHTML = "";
+          const root = createRoot(td);
+          root.render(
+            <div className="d-flex flex-row gap-1">
+              <button
+                className="p-0 p-1 text-white rounded-1 d-flex align-items-center justify-content-center"
+                onClick={() => {
+                  toggleFAQStatus(
+                    rowData.ambulance_faq_id,
+                    rowData.ambulance_faq_status
+                  );
+                }}
+                title={
+                  rowData.ambulance_faq_status === 0
+                    ? "Click to deactivate"
+                    : "Click to activate"
+                }
+                style={{
+                  backgroundColor:
+                    rowData.ambulance_faq_status === 0 ? "#d9534f" : "#3a833a",
                 }}
               >
                 {rowData.ambulance_faq_status === 0 ? (
@@ -421,42 +534,52 @@ const ExportDataWithButtons = ({
           return currentPage * pageSize + meta.row + 1;
         },
       },
-      { 
-        title: "ID", 
+      {
+        title: "ID",
         data: "ambulance_facilities_rate_id",
-        defaultContent: "N/A" 
+        defaultContent: "N/A",
       },
-      { 
-        title: "Amount", 
+      {
+        title: "Name",
+        data: "ambulance_facilities_name",
+        defaultContent: "",
+        render: (data: any, _type: any, row: any) => {
+          return (
+            data + " (" + row.ambulance_facilities_category_type + ")" || ""
+          );
+        },
+      },
+      {
+        title: "Amount",
         data: "ambulance_facilities_rate_amount",
-        defaultContent: "N/A"
+        defaultContent: "N/A",
       },
       {
         title: "Increase/Km",
         data: "ambulance_facilities_rate_increase_per_km",
-        defaultContent: "N/A"
+        defaultContent: "N/A",
       },
-      { 
-        title: "From", 
+      {
+        title: "From",
         data: "ambulance_facilities_rate_from",
-        defaultContent: "N/A"
+        defaultContent: "N/A",
       },
-      { 
-        title: "To", 
+      {
+        title: "To",
         data: "ambulance_facilities_rate_to",
-        defaultContent: "N/A"
+        defaultContent: "N/A",
       },
       {
         title: "Status",
         data: "ambulance_facilities_rate_status",
         defaultContent: "N/A",
-      render: (data: any) => {
-        if (data == 0 || data == "0") {
-          return `<span class="badge badge-label badge-soft-success">Active</span>`;
-        } else if (data == 1 || data == "1") {
-          return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
-        }
-      }
+        render: (data: any) => {
+          if (data == 0 || data == "0") {
+            return `<span class="badge badge-label badge-soft-success">Active</span>`;
+          } else if (data == 1 || data == "1") {
+            return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
+          }
+        },
       },
       {
         title: "Created At",
@@ -523,6 +646,8 @@ const ExportDataWithButtons = ({
       case 2:
         return FAQColumns;
       case 3:
+        return FacilitiesColumns;
+      case 4:
         return FacilitiesRateColumns;
       default:
         return [];
@@ -542,6 +667,8 @@ const ExportDataWithButtons = ({
               ? "Manage Ambulance Categories"
               : tabKey === 2
               ? "Manage Ambulance FAQs"
+              : tabKey === 3
+              ? "Manage Ambulance Facilities"
               : "Manage Ambulance Facilities Rates"}
           </div>
         }

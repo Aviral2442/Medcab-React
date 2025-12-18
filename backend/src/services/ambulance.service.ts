@@ -1060,8 +1060,11 @@ export const getAmbulanceFacilitiesRateListService = async (filters?: {
                 ambulance_facilities_rate.ambulance_facilities_rate_from,
                 ambulance_facilities_rate.ambulance_facilities_rate_to,
                 ambulance_facilities_rate.ambulance_facilities_rate_status,
-                ambulance_facilities_rate.ambulance_facilities_rate_date
+                ambulance_facilities_rate.ambulance_facilities_rate_date,
+                ambulance_facilities.ambulance_facilities_name,
+                ambulance_facilities.ambulance_facilities_category_type
             FROM ambulance_facilities_rate
+            LEFT JOIN ambulance_facilities ON ambulance_facilities_rate.ambulance_facilities_rate_f_id = ambulance_facilities.ambulance_facilities_id
             ${finalWhereSQL}
             ORDER BY ambulance_facilities_rate.ambulance_facilities_rate_id DESC
             LIMIT ? OFFSET ?
