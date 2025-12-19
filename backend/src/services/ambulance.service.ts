@@ -2051,3 +2051,34 @@ export const getAmbulanceDriverNameNoUsingVehicleIdService = async (vehicleId: n
         throw new ApiError(500, "Get Ambulance Driver Name Using Vehicle ID Error On Fetching");
     }
 };
+
+// SERVICE TO ASSIGN DRIVER AND VEHICLE TO AMBULANCE BOOKING
+export const assignDriverService = async (bookingId: number, driverId: number, vehicleId: number) => {
+    try {
+
+        const assignDriverBookingData = {
+            booking_acpt_driver_id: driverId,
+            booking_acpt_vehicle_id: vehicleId,
+            booking_acpt_time: currentUnixTime(),
+        }
+
+        const [result]: any = await db.query(
+            `UPDATE booking_view SET ? WHERE booking_id = ?`,
+            [assignDriverBookingData, bookingId]
+        );
+
+        const [updateDriverStatusData]: any = await db.query(
+            `UPDATE driver SET driver_on_booking_status = 1 WHERE driver_id = ?`,
+            [driverId]
+        );
+
+        return {
+            status: 200,
+            message: "Driver and vehicle assigned successfully",
+        };
+    }
+    catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Assign Driver Service Error On Updating");
+    }
+};
