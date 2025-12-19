@@ -1259,6 +1259,7 @@ export const getAmbulanceBookingListService = async (filters?: {
                 invoice: "booking_view.booking_status = 3",
                 complete: "booking_view.booking_status = 4",
                 cancel: "booking_view.booking_status = 5",
+                futureBooking: "booking_view.booking_status = 6",
             };
 
             const condition = statusConditionMap[filters.status];
@@ -1384,6 +1385,7 @@ export const getRegularAmbulanceBookingListService = async (filters?: {
                 invoice: "booking_view.booking_status = 3",
                 complete: "booking_view.booking_status = 4",
                 cancel: "booking_view.booking_status = 5",
+                futureBooking: "booking_view.booking_status = 6",
             };
 
             const condition = statusConditionMap[filters.status];
@@ -1506,6 +1508,7 @@ export const getRentalAmbulanceBookingListService = async (filters?: {
                 invoice: "booking_view.booking_status = 3",
                 complete: "booking_view.booking_status = 4",
                 cancel: "booking_view.booking_status = 5",
+                futureBooking: "booking_view.booking_status = 6",
             };
 
             const condition = statusConditionMap[filters.status];
@@ -1626,6 +1629,7 @@ export const getBulkAmbulanceBookingListService = async (filters?: {
                 invoice: "booking_view.booking_status = 3",
                 complete: "booking_view.booking_status = 4",
                 cancel: "booking_view.booking_status = 5",
+                futureBooking: "booking_view.booking_status = 6",
             };
 
             const condition = statusConditionMap[filters.status];
@@ -1963,31 +1967,37 @@ export const getAmbulanceConsumerNameNumberService = async (search?: string) => 
     }
 };
 
-// SERVICE TO GET VEHICLE NAME AND NUMBER (SEARCHABLE)
+// SERVICE TO GET VEHICLE NAME AND NUMBER (SEARCHABLE BY RC NUMBER)
 export const getAmbulanceVehicleNumberService = async (search?: string) => {
     try {
         let query = `
-            SELECT vehicle_id, v_vehicle_name, vehicle_rc_number, vehicle_status
+            SELECT
+                vehicle_id,
+                v_vehicle_name,
+                vehicle_rc_number,
+                vehicle_status
             FROM vehicle
         `;
+
         const params: any[] = [];
 
-        if (search && search.trim().length > 0) {
-            query += `
-                WHERE 
-                    vehicle_rc_number LIKE ?
-            `;
-            const term = `%${search.trim().toLowerCase()}%`;
-            params.push(term, term);
+        if (search && search.trim()) {
+            query += ` WHERE vehicle_rc_number LIKE ?`;
+            params.push(`%${search.trim()}%`);
         }
-        query += ` ORDER BY v_vehicle_name ASC LIMIT 20`;
+
+        query += `
+            ORDER BY vehicle_rc_number ASC
+            LIMIT 20
+        `;
 
         const [rows]: any = await db.query(query, params);
+
         return {
             status: 200,
             message: "Ambulance vehicle name and number fetched successfully",
             jsonData: {
-                ambulance_vehicle_name_number: rows
+                ambulance_vehicle_name_number: rows,
             },
         };
     } catch (error) {
@@ -1995,5 +2005,41 @@ export const getAmbulanceVehicleNumberService = async (search?: string) => {
             500,
             "Get Ambulance Vehicle Name And Number Error On Fetching"
         );
+    }
+};
+
+// SERVICE TO GET AMBULANCE DRIVER NAME USING VEHICLE ID
+export const getAmbulanceDriverNameNoUsingVehicleIdService = async (vehicleId: number) => {
+    try {
+
+        if (!vehicleId) {
+            throw new ApiError(400, "Invalid vehicle ID");
+        }
+
+        const [rows]: any = await db.query(
+            `
+            SELECT d.driver_id, d.driver_name, d.driver_last_name, d.driver_mobile, p.partner_id, p.partner_f_name, p.partner_l_name, p.partner_mobile 
+            FROM vehicle
+            LEFT JOIN driver as d ON vehicle.vehicle_added_type = 0 AND vehicle.vehicle_added_by = d.driver_id
+            LEFT JOIN partner as p ON vehicle.vehicle_added_type = 1 AND vehicle.vehicle_added_by = p.partner_id
+            WHERE vehicle_id = ?
+            `,
+            [vehicleId]
+        );
+
+        if (!rows || rows.length === 0) {
+            throw new ApiError(404, "Vehicle not found");
+        }
+
+        return {
+            status: 200,
+            message: "Ambulance driver name fetched successfully using vehicle ID",
+            jsonData: {
+                ambulance_driver_partner_data: rows[0]
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Get Ambulance Driver Name Using Vehicle ID Error On Fetching");
     }
 };
