@@ -2018,7 +2018,15 @@ export const getAmbulanceDriverNameNoUsingVehicleIdService = async (vehicleId: n
 
         const [rows]: any = await db.query(
             `
-            SELECT d.driver_id, d.driver_name, d.driver_last_name, d.driver_mobile, p.partner_id, p.partner_f_name, p.partner_l_name, p.partner_mobile 
+            SELECT 
+                d.driver_id as assign_id, 
+                d.driver_name as assign_name, 
+                d.driver_last_name as assign_last_name, 
+                d.driver_mobile as assign_mobile, 
+                p.partner_id as assign_id, 
+                p.partner_f_name as assign_name, 
+                p.partner_l_name as assign_last_name, 
+                p.partner_mobile as assign_mobile 
             FROM vehicle
             LEFT JOIN driver as d ON vehicle.vehicle_added_type = 0 AND vehicle.vehicle_added_by = d.driver_id
             LEFT JOIN partner as p ON vehicle.vehicle_added_type = 1 AND vehicle.vehicle_added_by = p.partner_id
