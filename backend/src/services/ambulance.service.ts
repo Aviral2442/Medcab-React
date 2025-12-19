@@ -1923,3 +1923,30 @@ export const updateAmbulanceBookingConsumerDetails = async (bookingId: number, b
         throw new ApiError(500, "Update Ambulance Booking Consumer Details Error On Updating");
     }
 };
+
+
+// SERVICE TO GET AMBULANCE DETAIL CONSUMER NAME AND MOBILE
+export const getAmbulanceConsumerNameNumberService = async (search?: string) => {
+    try {
+        let query = `SELECT consumer_id, consumer_name, consumer_mobile_no FROM consumer`;
+        const params: any[] = [];
+
+        if (search && search.trim() !== "") {
+            query += ` WHERE consumer_name LIKE ? OR consumer_mobile_no LIKE ?`;
+            const term = `%${search.trim()}%`;
+            params.push(term, term);
+        }
+        
+        const [rows]: any = await db.query(query, params);
+
+        return {
+            status: 200,
+            message: "Ambulance consumer name and mobile fetched successfully",
+            jsonData: {
+                ambulance_consumer_name_number: rows
+            },
+        };
+    } catch (error) {
+        throw new ApiError(500, "Get Ambulance Consumer Name And Mobile Error On Fetching");
+    }
+}

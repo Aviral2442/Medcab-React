@@ -234,13 +234,13 @@ const Field: React.FC<FieldProps> = ({
 };
 
 const bookingStatusOptions = [
-  { value: 0, label: "Pending" },
-  { value: 1, label: "Accepted" },
-  { value: 2, label: "On the Way" },
-  { value: 3, label: "Arrived" },
-  { value: 4, label: "Started" },
-  { value: 5, label: "Completed" },
-  { value: 6, label: "Cancelled" },
+  { value: 0, label: "Enquiry" },
+  { value: 1, label: "Booking Done" },
+  { value: 2, label: "Driver Assigned" },
+  { value: 3, label: "invoice" },
+  { value: 4, label: "complete" },
+  { value: 5, label: "Cancel" },
+  { value: 6, label: "Future Booking" },
 ];
 
 const bookingTypeOptions = [
@@ -378,9 +378,10 @@ const AmbulanceBookingDetailsForm: React.FC<
     setSearchingConsumer(true);
     try {
       const response = await axios.get(
-        `${baseURL}/consumer/search_consumer?query=${encodeURIComponent(consumerSearchQuery)}`
+        `${baseURL}/ambulance/get_ambulance_consumer_name_number?search=${encodeURIComponent(consumerSearchQuery)}`
       );
-      setConsumerSearchResults(response.data.jsonData || response.data.data || []);
+      console.log("Consumer search response:", response.data);
+      setConsumerSearchResults(response.data?.jsonData?.ambulance_consumer_name_number || []);
     } catch (error) {
       console.error("Error searching consumers:", error);
       alert("Failed to search consumers");
