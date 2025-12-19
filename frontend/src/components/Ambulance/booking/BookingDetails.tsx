@@ -6,6 +6,7 @@ import axios from "axios";
 import "@/global.css";
 import DateConversion from "@/components/DateConversion";
 import { formatDate } from "@/components/DateFormat";
+import Swal from "sweetalert2";
 
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
@@ -313,7 +314,9 @@ const AmbulanceBookingDetailsForm: React.FC<
   // Consumer Search Modal State
   const [showConsumerSearchModal, setShowConsumerSearchModal] = useState(false);
   const [consumerSearchQuery, setConsumerSearchQuery] = useState("");
-  const [consumerSearchResults, setConsumerSearchResults] = useState<Consumer[]>([]);
+  const [consumerSearchResults, setConsumerSearchResults] = useState<
+    Consumer[]
+  >([]);
   const [searchingConsumer, setSearchingConsumer] = useState(false);
 
   const handleFieldUpdate = async (field: string, value: string) => {
@@ -378,10 +381,14 @@ const AmbulanceBookingDetailsForm: React.FC<
     setSearchingConsumer(true);
     try {
       const response = await axios.get(
-        `${baseURL}/ambulance/get_ambulance_consumer_name_number?search=${encodeURIComponent(consumerSearchQuery)}`
+        `${baseURL}/ambulance/get_ambulance_consumer_name_number?search=${encodeURIComponent(
+          consumerSearchQuery
+        )}`
       );
       console.log("Consumer search response:", response.data);
-      setConsumerSearchResults(response.data?.jsonData?.ambulance_consumer_name_number || []);
+      setConsumerSearchResults(
+        response.data?.jsonData?.ambulance_consumer_name_number || []
+      );
     } catch (error) {
       console.error("Error searching consumers:", error);
       alert("Failed to search consumers");
@@ -392,26 +399,74 @@ const AmbulanceBookingDetailsForm: React.FC<
 
   const handleSelectConsumer = async (consumer: Consumer) => {
     try {
-      // Update consumer details via API
-      await axios.put(
-        `${baseURL}/ambulance/update_ambulance_booking_consumer_details/${data?.booking_id}`,
-        {
-          booking_con_name: consumer.consumer_name,
-          booking_con_mobile: consumer.consumer_mobile_no,
-        }
-      );
+      const result = await Swal.fire({
+        title: "Update Consumer Details?",
+        html: `
+        <div class="text-start">
+          <p><strong>Name:</strong> ${consumer.consumer_name}</p>
+          <p><strong>Mobile:</strong> ${consumer.consumer_mobile_no}</p>
+          <p class="text-muted mt-3">This will update the booking consumer details.</p>
+        </div>
+      `,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Update",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3e403e",
+        cancelButtonColor: "#9da39e",
+        reverseButtons: true,
+      });
 
-      // Update local state
-      onUpdate?.("booking_con_name", consumer.consumer_name);
-      onUpdate?.("booking_con_mobile", consumer.consumer_mobile_no);
-      onUpdate?.("booking_by_cid", consumer.consumer_id.toString());
+      if (result.isConfirmed) {
+        // Show loading state
+        Swal.fire({
+          title: "Updating...",
+          text: "Please wait while we update the consumer details.",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
 
-      setShowConsumerSearchModal(false);
-      setConsumerSearchQuery("");
-      setConsumerSearchResults([]);
+        // Update consumer details via API
+        await axios.put(
+          `${baseURL}/ambulance/update_ambulance_booking_consumer_details/${data?.booking_id}`,
+          {
+            booking_con_name: consumer.consumer_name,
+            booking_con_mobile: consumer.consumer_mobile_no,
+          }
+        );
+
+        // Update local state
+        onUpdate?.("booking_con_name", consumer.consumer_name);
+        onUpdate?.("booking_con_mobile", consumer.consumer_mobile_no);
+        onUpdate?.("booking_by_cid", consumer.consumer_id.toString());
+
+        // Close modal
+        setShowConsumerSearchModal(false);
+        setConsumerSearchQuery("");
+        setConsumerSearchResults([]);
+
+        // Show success message
+        Swal.fire({
+          title: "Updated!",
+          text: "Consumer details have been updated successfully.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      }
     } catch (error) {
       console.error("Error updating consumer details:", error);
-      alert("Failed to update consumer details");
+
+      // Show error message
+      Swal.fire({
+        title: "Error!",
+        text: "Failed to update consumer details. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
     }
   };
 
@@ -553,10 +608,30 @@ const AmbulanceBookingDetailsForm: React.FC<
           editable: false,
           cols: 6,
         },
-        { label: "Pickup City", name: "booking_pickup_city", editable: false, cols: 3 },
-        { label: "Drop City", name: "booking_drop_city", editable: false, cols: 3 },
-        { label: "Distance (KM)", name: "booking_distance", editable: false, cols: 3 },
-        { label: "Duration", name: "booking_duration", editable: false, cols: 3 },
+        {
+          label: "Pickup City",
+          name: "booking_pickup_city",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Drop City",
+          name: "booking_drop_city",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Distance (KM)",
+          name: "booking_distance",
+          editable: false,
+          cols: 3,
+        },
+        {
+          label: "Duration",
+          name: "booking_duration",
+          editable: false,
+          cols: 3,
+        },
         // {
         //   label: "Duration (Sec)",
         //   name: "booking_duration_in_sec",
@@ -723,11 +798,6 @@ const AmbulanceBookingDetailsForm: React.FC<
         },
       ],
     },
-    // {
-    //   title: "Rate Information",
-    //   fields: [
-    //   ],
-    // },
     {
       title: "Bulk Booking Information",
       show: isBulkBooking(),
@@ -922,7 +992,9 @@ const AmbulanceBookingDetailsForm: React.FC<
                         }
                         showConsumerSearch={f.showConsumerSearch}
                         onConsumerSearch={
-                          f.showConsumerSearch ? handleConsumerSearch : undefined
+                          f.showConsumerSearch
+                            ? handleConsumerSearch
+                            : undefined
                         }
                       />
                     </Col>
@@ -1001,7 +1073,10 @@ const AmbulanceBookingDetailsForm: React.FC<
               <p className="mt-2">Searching...</p>
             </div>
           ) : consumerSearchResults.length > 0 ? (
-            <div className="table-responsive" style={{ maxHeight: "300px", overflowY: "auto" }}>
+            <div
+              className="table-responsive"
+              style={{ maxHeight: "300px", overflowY: "auto" }}
+            >
               <table className="table table-hover">
                 <thead className="table-light sticky-top">
                   <tr>
@@ -1041,14 +1116,6 @@ const AmbulanceBookingDetailsForm: React.FC<
             </div>
           )}
         </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowConsumerSearchModal(false)}
-          >
-            Cancel
-          </Button>
-        </Modal.Footer>
       </Modal>
 
       {/* Assign Driver Modal */}

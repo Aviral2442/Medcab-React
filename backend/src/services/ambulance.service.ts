@@ -1962,3 +1962,38 @@ export const getAmbulanceConsumerNameNumberService = async (search?: string) => 
         );
     }
 };
+
+// SERVICE TO GET VEHICLE NAME AND NUMBER (SEARCHABLE)
+export const getAmbulanceVehicleNumberService = async (search?: string) => {
+    try {
+        let query = `
+            SELECT vehicle_id, v_vehicle_name, vehicle_rc_number, vehicle_status
+            FROM vehicle
+        `;
+        const params: any[] = [];
+
+        if (search && search.trim().length > 0) {
+            query += `
+                WHERE 
+                    vehicle_rc_number LIKE ?
+            `;
+            const term = `%${search.trim().toLowerCase()}%`;
+            params.push(term, term);
+        }
+        query += ` ORDER BY v_vehicle_name ASC LIMIT 20`;
+
+        const [rows]: any = await db.query(query, params);
+        return {
+            status: 200,
+            message: "Ambulance vehicle name and number fetched successfully",
+            jsonData: {
+                ambulance_vehicle_name_number: rows
+            },
+        };
+    } catch (error) {
+        throw new ApiError(
+            500,
+            "Get Ambulance Vehicle Name And Number Error On Fetching"
+        );
+    }
+};
