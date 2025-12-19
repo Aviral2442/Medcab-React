@@ -632,10 +632,15 @@ export const updateAmbulanceBookingConsumerDetailsController = async (req: Reque
     }
 };
 
-// CONTROLLER TO GET AMBULANCE CONSUMER NAME & NUMBER
+// CONTROLLER TO GET AMBULANCE CONSUMER NAME & NUMBER (SEARCHABLE)
 export const getAmbulanceConsumerNameNumberController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await getAmbulanceConsumerNameNumberService();
+        const { search } = req.query;
+
+        const result = await getAmbulanceConsumerNameNumberService(
+            typeof search === "string" ? search : undefined
+        );
+
         res.status(200).json(result);
     } catch (error) {
         next(error);
