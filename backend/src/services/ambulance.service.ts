@@ -349,6 +349,8 @@ export const dashboardAmbulanceDriverTransService = async () => {
     }
 }
 
+// --------------------------------------------- AMBULANCE CATEGORY SERVICES -------------------------------------------------- //
+
 interface ambulanceCategoryData {
     ambulance_category_type: string;
     ambulance_category_service_type: string; // enum('0','1')
@@ -575,6 +577,9 @@ export const updateAmbulanceCategoryStatusService = async (categoryId: number, s
 };
 
 
+// --------------------------------------------- AMBULANCE FAQ SERVICES -------------------------------------------------- //
+
+
 interface ambulanceFaqData {
     ambulance_id: number;
     ambulance_faq_que: string;
@@ -778,6 +783,10 @@ export const updateAmbulanceFaqStatusService = async (faqId: number, status: num
     }
 
 };
+
+
+// --------------------------------------------- AMBULANCE FACILITIES SERVICES -------------------------------------------------- //
+
 
 interface ambulanceFacilitiesData {
     ambulance_facilities_image?: Express.Multer.File;
@@ -999,6 +1008,9 @@ export const updateAmbulanceFacilitiesStatusService = async (facilityId: number,
         throw new ApiError(500, "Update Ambulance Facilities Status Error On Updating");
     }
 };
+
+
+// --------------------------------------------- AMBULANCE FACILITIES RATE SERVICES -------------------------------------------------- //
 
 
 interface ambulanceFacilitiesRateData {
@@ -1228,6 +1240,10 @@ export const updateAmbulanceFacilitiesRateStatusService = async (rateId: number,
     }
 
 };
+
+
+// --------------------------------------------- AMBULANCE BOOKING SERVICES -------------------------------------------------- //
+
 
 // SERVICE TO GET AMBULANCE BOOKING LIST WITH FILTERS AND PAGINATION
 export const getAmbulanceBookingListService = async (filters?: {
@@ -1716,6 +1732,10 @@ export const getBulkAmbulanceBookingListService = async (filters?: {
     }
 };
 
+
+// ---------------------------------------------- AMBULANCE BOOKING DETAIL SERVICE -------------------------------------------------- //
+
+
 // SERVICE TO GET AMBULANCE BOOKING DETAIL
 export const ambulanceBookingDetailService = async (bookingId: number) => {
     try {
@@ -1726,11 +1746,16 @@ export const ambulanceBookingDetailService = async (bookingId: number) => {
             driver.driver_name,
             driver.driver_last_name,
             driver.driver_mobile,
+            partner.partner_id,
+            partner.partner_f_name,
+            partner.partner_l_name,
+            partner.partner_mobile,
             vehicle.v_vehicle_name,
             vehicle.vehicle_rc_number
             FROM booking_view
             LEFT JOIN driver ON booking_view.booking_acpt_driver_id > 0 AND booking_view.booking_acpt_driver_id = driver.driver_id
             LEFT JOIN vehicle ON booking_view.booking_acpt_vehicle_id > 0 AND booking_view.booking_acpt_vehicle_id = vehicle.vehicle_id
+            LEFT JOIN partner ON driver.driver_created_by = 1 AND driver.driver_created_partner_id = partner.partner_id
             WHERE booking_view.booking_id = ?`,
             [bookingId]
         );
@@ -2070,13 +2095,14 @@ export const assignDriverService = async (bookingId: number, driverId: number, v
 
         const currentStatus = rows[0].booking_status;
 
-        const allowedStatuses = [0, 4, 5]; // Enquiry, Completed, Cancelled
+        const notAllowedStatuses = [0, 2, 3, 4, 5, 6]; // Enquiry, Completed, Cancelled
 
-        if (!allowedStatuses.includes(currentStatus)) {
+        if (notAllowedStatuses.includes(currentStatus)) {
             return {
                 status: 400,
                 message:
                     "Driver can only be assigned to bookings with status Enquiry, Completed, or Cancelled",
+                booking_status: currentStatus,
             };
         }
 
@@ -2095,6 +2121,9 @@ export const assignDriverService = async (bookingId: number, driverId: number, v
             `UPDATE driver SET driver_on_booking_status = 1 WHERE driver_id = ?`,
             [driverId]
         );
+
+        // booking_a_c_history
+        // for lang & long , we have to fetch driver live location from another table 
 
         return {
             status: 200,
@@ -2127,16 +2156,8 @@ export const cancelAmbulanceBookingService = async (bookingId: number, cancelRea
             [bookingId]
         );
 
-        const bookingCancelReasonData = {
-            booking_cancel_reasons_text: cancelReason,
-            booking_cancel_reasons_status: 1,
-            cancel_reason_type: 0, // Admin
-        }
-
-        await db.query(
-            `INSERT INTO booking_cancel_reasons SET ?`,
-            [bookingCancelReasonData]
-        );
+        // booking_a_c_history
+        // for lang & long , we have to fetch driver live location from another table
 
         const assignedDriverId = rows[0].booking_acpt_driver_id;
 
@@ -2175,7 +2196,7 @@ export const verifyOTPAmbulanceBookingService = async (bookingId: number) => {
 
         const currentBookingStatus = rows[0].booking_status;
 
-        if (currentBookingStatus == 0) {
+        if (currentBookingStatus == 2) {
 
             const arrivalTime = rows[0].booking_view_pickup_time;
             const currentTime = currentUnixTime();
@@ -2202,3 +2223,246 @@ export const verifyOTPAmbulanceBookingService = async (bookingId: number) => {
         throw new ApiError(500, "Verify OTP Ambulance Booking Service Error On Verifying");
     }
 };
+
+// generate invoice code
+
+// $totalAmounts = $request -> input('totalAmounts');
+// $advance_amounts = $request -> input('advance_amounts');
+// $extra_km = $request -> input('extra_km') ?? 0;
+// $extra_minute = $request -> input('extra_hour') ?? 0;
+
+// $bookingData = DB:: table('booking_view') -> where('booking_id', $bookingId) -> first();
+
+// $bookingcustomerId = $bookingData -> booking_by_cid;
+// $bookingdriverId = $bookingData -> booking_acpt_driver_id;
+// $bi_base_rate = $bookingData -> booking_view_base_rate;
+// $bi_base_km = $bookingData -> booking_view_km_rate;
+// $bi_km_rate = $bookingData -> booking_view_per_ext_km_rate;
+// $bi_ext_min = $bookingData -> booking_view_per_ext_min_rate;
+
+
+
+// $discount_mrp = $totalAmounts * 0.10;
+
+// $discount_prices = ($discount_mrp > $advance_amounts) ? ($discount_mrp - $advance_amounts) : 0;
+// $discount_amount_with_services = $totalAmounts - $advance_amounts;
+
+// $bi_ext_km_rate = floatval($extra_km) * floatval($bi_km_rate);
+// $bi_ext_min_rate = floatval($extra_minute) * floatval($bi_ext_min);
+
+// $bi_total_amount_with_sc = $totalAmounts + $bi_ext_km_rate + $bi_ext_min_rate;
+
+// $invoice_data = DB:: table('booking_invoice') -> insert([
+//     'bi_booking_id' => $bookingId,
+//     'bi_driver_id' => $bookingdriverId,
+//     'bi_consumer_id' => $bookingcustomerId,
+//     'bi_base_rate' => $bi_base_rate,
+//     'bi_km_rate' => $bi_base_km,
+//     'bi_addons_rate' => 0,
+//     'bi_ext_km' => $extra_km,
+//     'bi_ext_km_rate' => $bi_ext_km_rate,
+//     'bi_ext_min' => $extra_minute,
+//     'bi_ext_min_rate' => $bi_ext_min_rate,
+//     'bi_total_amount_without_SC' => $discount_amount_with_services,
+//     'bi_discount_in_sc' => round($discount_prices, 2),
+//     'bi_service_charge' => $advance_amounts,
+//     'bi_total_amount_with_sc' => $bi_total_amount_with_sc,
+//     'bi_payment_status' => '1',
+//     'bi_cash_pay_amount' => 0,
+//     'bi_online_pay_amount' => 0,
+//     'bi_status' => '2',
+//     'bi_invoice_genrated_time_unix' => Carbon:: now() -> timestamp,
+//     'created_at' => now(),
+//     'updated_at' => now()
+// ]);
+
+
+// $updateStatus = DB:: table('booking_view') -> where('booking_id', $bookingId) -> update(['booking_status' => '3', 'booking_payment_status' => '']);
+
+// if ($invoice_data) {
+//     return response() -> json(['success' => true, 'message' => 'Invoice Generate Receive Successfully']);
+// } else {
+//     return response() -> json(['error' => true, 'message' => 'Something went Wroung !!']);
+// }
+
+
+
+
+
+// complete booking 
+
+// $bookingData = DB:: table('booking_view') -> where('booking_id', '=', $bookingId)
+//     -> first();
+
+// $driverId = $bookingData -> booking_acpt_driver_id;
+// $consumerId = $bookingData -> booking_by_cid;
+
+// if ($driverId === 'null' || $driverId == '0') {
+//     return redirect() -> back() ->with ('error', 'Please Choose the driver !!');
+// } elseif($consumerId === 'null' || $consumerId == '0') {
+//     return redirect() -> back() ->with ('error', 'Please Choose the consumer !!');
+// } else {
+//     $bookingDetails = DB:: table('booking_invoice')
+//         -> leftjoin('consumer', 'booking_invoice.bi_consumer_id', '=', 'consumer.consumer_id')
+//         -> leftjoin('driver', 'driver.driver_id', '=', 'booking_invoice.bi_driver_id')
+//         -> leftjoin('driver_live_location', 'driver.driver_id', '=', 'driver_live_location.driver_live_location_d_id')
+//         -> where('bi_booking_id', '=', $bookingId)
+//         -> first();
+
+//     $paymentStatus = $bookingDetails -> bi_payment_status;
+//     $totalAmounts = $bookingDetails -> bi_total_amount_with_sc;
+//     $booking_adv_amount = $bookingDetails -> bi_service_charge;
+//     $consumerId = $bookingDetails -> bi_consumer_id;
+//     $driverId = $bookingDetails -> bi_driver_id;
+//     $driverWalletAmount = $bookingDetails -> driver_wallet_amount;
+
+//     $bookingPayments = DB:: table('booking_payments')
+//         -> where('booking_id', $bookingId)
+//         -> where('consumer_id', $consumerId)
+//         -> get();
+
+//     $bookingSum = $bookingPayments -> sum('amount') ?? '0'; // the sum the total consumer pay amounts
+
+//     if ($bookingSum == $booking_adv_amount) {
+
+//         $releaseDriver = DB:: table('driver')
+//             -> where('driver_id', $driverId)
+//             -> update([
+//                 'driver_on_booking_status' => '0'
+//             ]);                                           // realese the drivewr in bookings
+
+//         $updateBooking = DB:: table('booking_view')
+//             -> where('booking_id', $bookingId)
+//             -> update([
+//                 'booking_payment_status' => '2',
+//                 'booking_payment_method' => '2',
+//                 'booking_status' => '4'
+//             ]);
+
+//         $total_cash = $totalAmounts - $bookingSum;
+//         $updateBooking = DB:: table('booking_invoice')
+//             -> where('bi_booking_id', $bookingId)
+//             -> update([
+//                 'bi_payment_status' => '0',
+//                 'bi_cash_pay_amount' => $total_cash,
+//                 'bi_online_pay_amount' => $bookingSum
+//             ]);
+
+//         return redirect() -> back() ->with ('success', 'Booking successfully completed');
+//     } elseif($bookingSum > $booking_adv_amount) {
+//         $paydriverAmounts = $bookingSum - $booking_adv_amount;
+//         $driver_pay_booking_id = 'BOOKING_CHARGE_'.$bookingId. '_'.time();
+
+//         $driverlatestWallet = $paydriverAmounts + $driverWalletAmount;
+//         $driverTransactionInsert = DB:: table('driver_transection')
+//             -> insert([
+//                 'driver_transection_by' => $driverId,
+//                 'driver_transection_by_type' => '0',
+//                 'driver_transection_by_type_pid' => '0',
+//                 'driver_transection_amount' => $paydriverAmounts,
+//                 'driver_transection_pay_id' => $driver_pay_booking_id,
+//                 'driver_transection_type' => '4',
+//                 'driver_transection_wallet_new_amount' => $driverlatestWallet,
+//                 'driver_transection_wallet_previous_amount' => $driverWalletAmount,
+//                 'driver_transection_note' => 'Booking Charge: '.$bookingId,
+//                 'driver_transection_time_unix' => Carbon:: now() -> timestamp,
+//                 'driver_transection_order_id' => '0',
+//                 'driver_transection_bank_ref_no' => '',
+//                 'driver_transection_order_status' => '',
+//                 'driver_transection_payment_mode' => '',
+//                 'driver_transection_payment_mobile' => '',
+//                 'driver_transection_cc_time' => '',
+//                 'updated_at' => Carbon:: now(),
+//                 'created_at' => Carbon:: now()
+//             ]);
+
+//         $updatedriverWallet = DB:: table('driver')
+//             -> where('driver_id', $driverId)
+//             -> update([
+//                 'driver_wallet_amount' => $driverlatestWallet,
+//                 'driver_on_booking_status' => '0'
+//             ]);
+
+//         $updateBooking = DB:: table('booking_view')
+//             -> where('booking_id', $bookingId)
+//             -> update([
+//                 'booking_payment_status' => '1',
+//                 'booking_payment_method' => '2',
+//                 'booking_status' => '4'
+//             ]);
+
+//         $total_cash = $totalAmounts - $bookingSum;
+//         $updateBooking = DB:: table('booking_invoice')
+//             -> where('bi_booking_id', $bookingId)
+//             -> update([
+//                 'bi_payment_status' => '0',
+//                 'bi_cash_pay_amount' => $total_cash,
+//                 'bi_online_pay_amount' => $bookingSum
+//             ]);
+
+//         return redirect() -> back() ->with ('success', 'Booking successfully completed');
+//     } elseif($bookingSum < $booking_adv_amount) { // cash collect
+
+//         $paydriverAmounts = $booking_adv_amount - $bookingSum;
+//         $driverlatestWallet = $driverWalletAmount - $paydriverAmounts;
+
+//         $driver_pay_booking_id = 'BOOKING_CHARGE_'.$bookingId. '_'.time();
+
+//         $driverTransactionInsert = DB:: table('driver_transection')
+//             -> insert([
+//                 'driver_transection_by' => $driverId,
+//                 'driver_transection_by_type' => '0',
+//                 'driver_transection_by_type_pid' => '0',
+//                 'driver_transection_amount' => $paydriverAmounts,
+//                 'driver_transection_pay_id' => $driver_pay_booking_id,
+//                 'driver_transection_type' => '3',
+//                 'driver_transection_wallet_new_amount' => $driverlatestWallet,
+//                 'driver_transection_wallet_previous_amount' => $driverWalletAmount,
+//                 'driver_transection_note' => 'Booking Charge: '.$bookingId,
+//                 'driver_transection_time_unix' => Carbon:: now() -> timestamp,
+//                 'driver_transection_order_id' => '0',
+//                 'driver_transection_bank_ref_no' => '',
+//                 'driver_transection_order_status' => '',
+//                 'driver_transection_payment_mode' => '',
+//                 'driver_transection_payment_mobile' => '',
+//                 'driver_transection_cc_time' => '',
+//                 'updated_at' => Carbon:: now(),
+//                 'created_at' => Carbon:: now()
+//             ]);
+
+//         $updatedriverWallet = DB:: table('driver')
+//             -> where('driver_id', $driverId)
+//             -> update([
+//                 'driver_wallet_amount' => $driverlatestWallet,
+//                 'driver_on_booking_status' => '0'
+//             ]);
+
+//         if ($bookingSum > 1) {
+//             $pay_type = '2';
+//             $booking_payment_method = '2';
+//         } else {
+//             $pay_type = '3';
+//             $booking_payment_method = '1';
+//         }
+//         $updateBooking = DB:: table('booking_view')
+//             -> where('booking_id', $bookingId)
+//             -> update([
+//                 'booking_payment_status' => '2',
+//                 'booking_payment_type' => $pay_type,
+//                 'booking_payment_method' => $booking_payment_method,
+//                 'booking_status' => '4'
+//             ]);
+
+//         $total_cash = $totalAmounts - $bookingSum;
+//         $updateBooking = DB:: table('booking_invoice')
+//             -> where('bi_booking_id', $bookingId)
+//             -> update([
+//                 'bi_payment_status' => '0',
+//                 'bi_cash_pay_amount' => $total_cash,
+//                 'bi_online_pay_amount' => $bookingSum
+//             ]);
+//         return redirect() -> back() ->with ('success', 'Booking successfully completed');
+//     } else {
+//         return redirect() -> back() ->with ('error', 'Somthing went wrong please try again!');
+//     }
+// }

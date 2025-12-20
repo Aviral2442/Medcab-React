@@ -111,7 +111,7 @@ export const getVehicleListService = async (filters?: {
                 vehicle.vehicle_status,
                 ambulance_category_vehicle.ambulance_category_vehicle_name
             FROM vehicle
-            LEFT JOIN driver ON vehicle.vehicle_added_by = driver.driver_id
+            LEFT JOIN driver ON driver.driver_assigned_vehicle_id = vehicle.vehicle_id
             LEFT JOIN ambulance_category_vehicle ON vehicle.vehicle_category_type = ambulance_category_vehicle.ambulance_category_vehicle_cat_type
             ${finalWhereSQL}
             ORDER BY vehicle.vehicle_id DESC
