@@ -2056,6 +2056,17 @@ export const getAmbulanceDriverNameNoUsingVehicleIdService = async (vehicleId: n
 export const assignDriverService = async (bookingId: number, driverId: number, vehicleId: number) => {
     try {
 
+        const bookingCurrentStatus: any = await db.query(
+            `SELECT booking_status FROM booking_view WHERE booking_id = ?`,
+            [bookingId]
+        );
+
+        if (!bookingCurrentStatus || bookingCurrentStatus.length === 0) {
+            if (bookingCurrentStatus[0].booking_status !== 0 && bookingCurrentStatus[0].booking_status !== 4 && bookingCurrentStatus[0].booking_status !== 5) {
+                throw new ApiError(404, "Booking not found or invalid status for assignment");
+            }
+        }
+
         const assignDriverBookingData = {
             booking_acpt_driver_id: driverId,
             booking_acpt_vehicle_id: vehicleId,
