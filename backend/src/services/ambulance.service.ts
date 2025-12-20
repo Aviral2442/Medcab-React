@@ -2105,3 +2105,45 @@ export const assignDriverService = async (bookingId: number, driverId: number, v
         throw new ApiError(500, "Assign Driver Service Error On Updating");
     }
 };
+
+// SERVICE TO CANCEL AMBULANCE BOOKING
+export const cancelAmbulanceBookingService = async (bookingId: number, cancelReason: string) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT booking_status FROM booking_view WHERE booking_id = ?`,
+            [bookingId]
+        );
+
+        if (!rows || rows.length === 0) {
+            return {
+                status: 404,
+                message: "Booking not found",
+            };
+        }
+
+        await db.query(
+            `UPDATE booking_view SET booking_status = 5 WHERE booking_id = ?`,
+            [bookingId]
+        );
+
+        const bookingCancelReasonData = {
+            booking_cancel_reasons_text: cancelReason,
+            booking_cancel_reasons_status: 1,
+            cancel_reason_type: 0, // Admin
+        }
+
+        await db.query(
+            `INSERT INTO booking_cancel_reasons SET ?`,
+            [bookingCancelReasonData]
+        );
+
+        return {
+            status: 200,
+            message: "Ambulance booking cancelled successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Cancel Ambulance Booking Service Error On Updating");
+    }
+};

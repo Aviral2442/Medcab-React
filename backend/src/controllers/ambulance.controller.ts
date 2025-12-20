@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, getAmbulanceVehicleNumberService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, ambulanceBookingCountService, dashboardAmbulanceBookingService, getAmbulanceConsumerNameNumberService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService, ambulancePartnerCountService, ambulanceCompleteOngoingCancelReminderBookingCounts, getAmbulanceDriverNameNoUsingVehicleIdService, assignDriverService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, getAmbulanceVehicleNumberService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, ambulanceBookingCountService, dashboardAmbulanceBookingService, getAmbulanceConsumerNameNumberService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService, ambulancePartnerCountService, ambulanceCompleteOngoingCancelReminderBookingCounts, getAmbulanceDriverNameNoUsingVehicleIdService, assignDriverService, cancelAmbulanceBookingService } from "../services/ambulance.service";
 
 // CONTROLLER TO GET TOTAL AMBULANCE BOOKING COUNT
 export const ambulanceBookingCountController = async (req: Request, res: Response, next: NextFunction) => {
@@ -693,6 +693,19 @@ export const assignDriverController = async (req: Request, res: Response, next: 
             vehicleId
         );
 
+        res.status(result.status).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO CANCEL AMBULANCE BOOKING
+export const cancelAmbulanceBookingController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const bookingId = Number(req.params.bookingId);
+        const { cancelReason } = req.body;
+
+        const result = await cancelAmbulanceBookingService(bookingId, cancelReason);
         res.status(result.status).json(result);
     } catch (error) {
         next(error);
