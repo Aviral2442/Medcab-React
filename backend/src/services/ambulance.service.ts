@@ -2056,29 +2056,42 @@ export const getAmbulanceDriverNameNoUsingVehicleIdService = async (vehicleId: n
 export const assignDriverService = async (bookingId: number, driverId: number, vehicleId: number) => {
     try {
 
-        const bookingCurrentStatus: any = await db.query(
+        const [rows]: any = await db.query(
             `SELECT booking_status FROM booking_view WHERE booking_id = ?`,
             [bookingId]
         );
 
-        if (!bookingCurrentStatus || bookingCurrentStatus.length === 0) {
-            if (bookingCurrentStatus[0].booking_status !== 0 && bookingCurrentStatus[0].booking_status !== 4 && bookingCurrentStatus[0].booking_status !== 5) {
-                throw new ApiError(404, "Booking not found or invalid status for assignment");
-            }
+        if (!rows || rows.length === 0) {
+            return {
+                status: 404,
+                message: "Booking not found",
+            };
+        }
+
+        const currentStatus = rows[0].booking_status;
+
+        const allowedStatuses = [0, 4, 5]; // Enquiry, Completed, Cancelled
+
+        if (!allowedStatuses.includes(currentStatus)) {
+            return {
+                status: 400,
+                message:
+                    "Driver can only be assigned to bookings with status Enquiry, Completed, or Cancelled",
+            };
         }
 
         const assignDriverBookingData = {
             booking_acpt_driver_id: driverId,
             booking_acpt_vehicle_id: vehicleId,
             booking_acpt_time: currentUnixTime(),
-        }
+        };
 
-        const [result]: any = await db.query(
+        await db.query(
             `UPDATE booking_view SET ? WHERE booking_id = ?`,
             [assignDriverBookingData, bookingId]
         );
 
-        const [updateDriverStatusData]: any = await db.query(
+        await db.query(
             `UPDATE driver SET driver_on_booking_status = 1 WHERE driver_id = ?`,
             [driverId]
         );
@@ -2087,9 +2100,8 @@ export const assignDriverService = async (bookingId: number, driverId: number, v
             status: 200,
             message: "Driver and vehicle assigned successfully",
         };
-    }
-    catch (error) {
-        console.log(error);
+    } catch (error) {
+        console.error(error);
         throw new ApiError(500, "Assign Driver Service Error On Updating");
     }
 };

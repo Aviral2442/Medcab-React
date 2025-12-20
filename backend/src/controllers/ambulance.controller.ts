@@ -677,15 +677,23 @@ export const getAmbulanceDriverNameNoUsingVehicleIdController = async (req: Requ
 // CONTROLLER TO ASSIGN DRIVER TO AMBULANCE BOOKING
 export const assignDriverController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (!req.params.bookingId && !req.body.driverId && !req.body.vehicleId) {
-            return res.status(400).json({ status: 400, message: "Booking ID is required" });
-        }
-
-        const bookingId = parseInt(req.params.bookingId);
+        const bookingId = Number(req.params.bookingId);
         const { driverId, vehicleId } = req.body;
 
-        const result = await assignDriverService(bookingId, driverId, vehicleId);
-        res.status(200).json(result);
+        if (!bookingId || !driverId || !vehicleId) {
+            return res.status(400).json({
+                status: 400,
+                message: "Booking ID, Driver ID and Vehicle ID are required",
+            });
+        }
+
+        const result = await assignDriverService(
+            bookingId,
+            driverId,
+            vehicleId
+        );
+
+        res.status(result.status).json(result);
     } catch (error) {
         next(error);
     }
