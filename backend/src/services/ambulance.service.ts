@@ -2156,3 +2156,49 @@ export const cancelAmbulanceBookingService = async (bookingId: number, cancelRea
         throw new ApiError(500, "Cancel Ambulance Booking Service Error On Updating");
     }
 };
+
+// SERVICE TO VERIFY OTP FOR AMBULANCE BOOKING
+export const verifyOTPAmbulanceBookingService = async (bookingId: number) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT booking_view_status_otp FROM booking_view WHERE booking_id = ?`,
+            [bookingId]
+        );
+
+        if (!rows || rows.length === 0) {
+            return {
+                status: 404,
+                message: "Booking not found",
+            };
+        }
+
+        const currentBookingStatus = rows[0].booking_status;
+
+        if (currentBookingStatus == 0) {
+
+            const arrivalTime = rows[0].booking_view_pickup_time;
+            const currentTime = currentUnixTime();
+            const timeDifference = Math.floor((currentTime - arrivalTime) / 60000); // Convert milliseconds to minutes
+
+            await db.query(
+                `UPDATE booking_view SET booking_view_status_otp = 0, booking_view_arrival_time = ? WHERE booking_id = ?`,
+                [timeDifference, bookingId]
+            );
+
+            return {
+                status: 200,
+                message: "OTP verified successfully for ambulance booking",
+            };
+
+        } else {
+            return {
+                status: 400,
+                message: "OTP can only be verified If Booking Assigned To Driver",
+            };
+        }
+
+    } catch (error) {
+        throw new ApiError(500, "Verify OTP Ambulance Booking Service Error On Verifying");
+    }
+};
