@@ -2138,6 +2138,15 @@ export const cancelAmbulanceBookingService = async (bookingId: number, cancelRea
             [bookingCancelReasonData]
         );
 
+        const assignedDriverId = rows[0].booking_acpt_driver_id;
+
+        if (assignedDriverId && assignedDriverId > 0) {
+            await db.query(
+                `UPDATE driver SET driver_on_booking_status = 0 WHERE driver_id = ?`,
+                [assignedDriverId]
+            );
+        }
+
         return {
             status: 200,
             message: "Ambulance booking cancelled successfully",
