@@ -151,6 +151,7 @@ const ExportDataWithButtons = ({
     { label: "Invoice", value: "invoice" },
     { label: "Complete", value: "complete" },
     { label: "Cancel", value: "cancel" },
+    { label: "Future Booking", value: "futureBooking" },
   ];
 
   const fetchData = async () => {

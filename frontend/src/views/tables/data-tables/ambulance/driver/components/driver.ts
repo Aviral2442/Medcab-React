@@ -10,7 +10,7 @@ type DriverInfoType = {
     driver_wallet_amount: number;
     created_partner_mobile: string;
     created_partner_name: string;
-    driver_created_by: number; // 0: Self, 1: Partner
+    driver_created_by: string; // 0: Self, 1: Partner
     driver_registration_step: number;
     driver_duty_status: string;
     driver_status: number;
@@ -58,8 +58,8 @@ export const driverColumns = [
     // { data: 'driver_city_id' },
     {
         data: 'driver_created_by',
-        render: (data: number) => {
-            return data === 0 ? 'Self' : 'Partner';
+        render: (data: string) => {
+            return data === "0" ? 'Self' : 'Partner';
         }
     },
     {

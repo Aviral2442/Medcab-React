@@ -42,6 +42,7 @@ const statusMap: Record<number, [string, string]> = {
     3: ["warning", "Invoice"],
     4: ["success", "Complete"],
     5: ["danger", "Cancel"],
+    6: ["dark", "Future Booking"],
 };
 
 // BOOKING COLUMNS

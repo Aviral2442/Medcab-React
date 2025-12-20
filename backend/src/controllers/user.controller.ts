@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addRemarksById, getAllUsers, getCityService, getConsumerEmergencyList, getDriverEmergencyList, getRazorpayTransService, getRemarksById, getStateService } from "../services/user.service";
+import { addRemarksById, getAllUsers, getCityService, getStateIdByCityIdService, getConsumerEmergencyList, getDriverEmergencyList, getRazorpayTransService, getRemarksById, getStateService, getAdminsService } from "../services/user.service";
 import { ApiError } from "../utils/api-error";
 
 // Get All Users
@@ -107,6 +107,17 @@ export const getCityController = async (req: Request, res: Response) => {
   }
 };
 
+// Get State ID by City ID Controller
+export const getStateIdByCityIdController = async (req: Request, res: Response) => {
+  try {
+    const cityId = parseInt(req.params.cityId);
+    const result = await getStateIdByCityIdService(cityId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch state ID by city ID" });
+  }
+};
+
 // Get Razorpay Transactions Controller
 export const getRazorpayTransactions = async (
   req: Request,
@@ -126,4 +137,14 @@ export const getRazorpayTransactions = async (
   } catch (error) {
     next(error);
   }
+};
+
+// Get Admins Controller
+export const getAdminsController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await getAdminsService();
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
 };

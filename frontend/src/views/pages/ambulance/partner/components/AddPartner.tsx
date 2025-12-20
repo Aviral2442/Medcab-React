@@ -17,8 +17,14 @@ const partnerValidationSchema = Yup.object().shape({
   partner_gender: Yup.string()
     .oneOf(["Male", "Female", "Other"], "Select a valid gender")
     .required("Gender is required"),
+  partner_state: Yup.string().required("State is required"),
   partner_city_id: Yup.number().required("City is required"),
   partner_created_by: Yup.string().required("Created by is required"),
+  partner_created_by_id: Yup.number().when('partner_created_by', {
+    is: '1',
+    then: (schema) => schema.required("Admin is required when created by admin"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   partner_aadhar_no: Yup.string()
     .matches(/^[0-9]{12}$/, "Aadhar number must be 12 digits")
     .required("Aadhar number is required"),
@@ -48,8 +54,17 @@ const AddPartner: React.FC = () => {
 
   // Preview states for images
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
-  const [aadharFrontPreview, setAadharFrontPreview] = useState<string | null>(null);
-  const [aadharBackPreview, setAadharBackPreview] = useState<string | null>(null);
+  const [aadharFrontPreview, setAadharFrontPreview] = useState<string | null>(
+    null
+  );
+  const [aadharBackPreview, setAadharBackPreview] = useState<string | null>(
+    null
+  );
+
+  //states
+  const [states, setStates] = useState<Array<any>>([]);
+  const [cities, setCities] = useState<Array<any>>([]);
+  const [admins, setAdmins] = useState<Array<any>>([]);
 
   const [initialValues, setInitialValues] = useState({
     partner_profile_img: null as File | null,
@@ -58,8 +73,10 @@ const AddPartner: React.FC = () => {
     partner_mobile: "",
     partner_dob: "",
     partner_gender: "",
+    partner_state: "",
     partner_city_id: "",
     partner_created_by: "",
+    partner_created_by_id: "",
     partner_aadhar_front: null as File | null,
     partner_aadhar_back: null as File | null,
     partner_aadhar_no: "",
@@ -78,29 +95,54 @@ const AddPartner: React.FC = () => {
   const fetchPartnerDetails = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${baseURL}/partner/fetch_partner_by_id/${id}`);
+      const response = await axios.get(
+        `${baseURL}/partner/fetch_partner_by_id/${id}`
+      );
       const partner = response.data.jsonData.partner;
       console.log("Fetched Partner Details:", partner);
+
+      // Fix date conversion - check if partner_dob exists and is valid
+      let formattedDob = "";
+      if (partner.partner_dob) {
+        try {
+          const dobTimestamp = Number(partner.partner_dob);
+          if (dobTimestamp > 0) {
+            const date = new Date(dobTimestamp * 1000);
+            if (!isNaN(date.getTime())) {
+              formattedDob = date.toISOString().split("T")[0];
+            }
+          }
+        } catch (error) {
+          console.error("Error parsing DOB:", error);
+        }
+      }
 
       setInitialValues({
         partner_profile_img: null,
         partner_f_name: partner.partner_f_name || "",
         partner_l_name: partner.partner_l_name || "",
         partner_mobile: partner.partner_mobile || "",
-        partner_dob: partner.partner_dob
-          ? new Date(partner.partner_dob * 1000).toISOString().split("T")[0]
-          : "",
+        partner_dob: formattedDob,
         partner_gender: partner.partner_gender || "",
+        partner_state: partner.partner_state?.toString() || "",
         partner_city_id: partner.partner_city_id?.toString() || "",
         partner_created_by: partner.partner_created_by || "",
+        partner_created_by_id: partner.partner_created_by_id?.toString() || "",
         partner_aadhar_front: null,
         partner_aadhar_back: null,
         partner_aadhar_no: partner.partner_aadhar_no || "",
         partner_wallet: partner.partner_wallet?.toString() || "0",
-        partner_pending_wallet_to_comp: partner.partner_pending_wallet_to_comp?.toString() || "0",
-        partner_registration_step: partner.partner_registration_step?.toString() || "1",
+        partner_pending_wallet_to_comp:
+          partner.partner_pending_wallet_to_comp?.toString() || "0",
+        partner_registration_step:
+          partner.partner_registration_step?.toString() || "1",
         referral_referral_by: partner.referral_referral_by || "",
       });
+
+      // Fetch cities for the state
+      if (partner.partner_state) {
+        await fetchCitiesByState(partner.partner_state.toString());
+      }
 
       // Set preview images
       if (partner.partner_profile_img)
@@ -111,11 +153,52 @@ const AddPartner: React.FC = () => {
         setAadharBackPreview(`${basePath}/${partner.partner_aadhar_back}`);
     } catch (err: any) {
       console.error("Error fetching partner details:", err);
-      setError(err.response?.data?.message || "Failed to fetch partner details");
+      setError(
+        err.response?.data?.message || "Failed to fetch partner details"
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  const fetchStates = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/get_states`);
+      setStates(response.data?.jsonData?.state_list || []);
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      setStates([]);
+    }
+  };
+
+  const fetchAdmins = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/get_admins`);
+      setAdmins(response.data?.jsonData?.admin_list || []);
+    } catch (error) {
+      console.error("Error fetching admins:", error);
+      setAdmins([]);
+    }
+  };
+
+  const fetchCitiesByState = async (stateId: string) => {
+    if (!stateId) {
+      setCities([]);
+      return;
+    }
+    try {
+      const response = await axios.get(`${baseURL}/get_cities/${stateId}`);
+      setCities(response.data?.jsonData?.city_list || []);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      setCities([]);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchStates();
+    fetchAdmins();
+  }, []);
 
   const handleImageChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -134,6 +217,16 @@ const AddPartner: React.FC = () => {
     }
   };
 
+  const handleStateChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    setFieldValue: any
+  ) => {
+    const stateId = e.target.value;
+    setFieldValue("partner_state", stateId);
+    setFieldValue("partner_city_id", ""); // Reset city when state changes
+    await fetchCitiesByState(stateId);
+  };
+
   const handleSubmit = async (values: typeof initialValues) => {
     setSubmitting(true);
     setError(null);
@@ -148,26 +241,41 @@ const AddPartner: React.FC = () => {
       formData.append("partner_dob", values.partner_dob);
       formData.append("partner_gender", values.partner_gender);
       formData.append("partner_city_id", values.partner_city_id);
-      formData.append("partner_created_by", values.partner_created_by);
       formData.append("partner_aadhar_no", values.partner_aadhar_no);
-      formData.append("partner_wallet", values.partner_wallet);
-      formData.append("partner_pending_wallet_to_comp", values.partner_pending_wallet_to_comp);
-      formData.append("partner_registration_step", values.partner_registration_step);
       
+      formData.append("partner_created_by", values.partner_created_by);
+      
+      if (values.partner_created_by === "1" && values.partner_created_by_id) {
+        formData.append("partner_created_by_id", values.partner_created_by_id);
+      } else if (isEditMode) {
+        formData.append("partner_created_by_id", "0");
+      }
+
       if (values.referral_referral_by) {
         formData.append("referral_referral_by", values.referral_referral_by);
       }
 
-      // Append images
-      if (values.partner_profile_img)
+      // Append images only if they are new files
+      if (values.partner_profile_img instanceof File) {
         formData.append("partner_profile_img", values.partner_profile_img);
-      if (values.partner_aadhar_front)
+      }
+      if (values.partner_aadhar_front instanceof File) {
         formData.append("partner_aadhar_front", values.partner_aadhar_front);
-      if (values.partner_aadhar_back)
+      }
+      if (values.partner_aadhar_back instanceof File) {
         formData.append("partner_aadhar_back", values.partner_aadhar_back);
+      }
+
+      // Log formData for debugging
+      console.log("FormData being sent:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
 
       let response;
       if (isEditMode) {
+        console.log("Updating Partner ID:", id);
+        console.log("FormData for update:", formData);
         response = await axios.put(
           `${baseURL}/partner/update_partner/${id}`,
           formData,
@@ -178,6 +286,18 @@ const AddPartner: React.FC = () => {
           }
         );
       } else {
+        console.log("Adding Partner");
+        // For add, include wallet and registration step fields
+        formData.append("partner_wallet", values.partner_wallet);
+        formData.append(
+          "partner_pending_wallet_to_comp",
+          values.partner_pending_wallet_to_comp
+        );
+        formData.append(
+          "partner_registration_step",
+          values.partner_registration_step
+        );
+        
         response = await axios.post(
           `${baseURL}/partner/add_partner`,
           formData,
@@ -193,7 +313,11 @@ const AddPartner: React.FC = () => {
         navigate("/ambulance/partner");
       }
     } catch (err: any) {
-      console.error(`Error ${isEditMode ? "updating" : "adding"} partner:`, err);
+      console.error(
+        `Error ${isEditMode ? "updating" : "adding"} partner:`,
+        err
+      );
+      console.error("Error response:", err.response?.data);
       setError(
         err.response?.data?.message ||
           `Failed to ${isEditMode ? "update" : "add"} partner`
@@ -250,7 +374,7 @@ const AddPartner: React.FC = () => {
                   </Card.Header>
                   <Card.Body>
                     <Row className="g-3">
-                      <Col md={6}>
+                      <Col md={3}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             First Name <span className="text-danger">*</span>
@@ -272,7 +396,7 @@ const AddPartner: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={3}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Last Name <span className="text-danger">*</span>
@@ -294,7 +418,7 @@ const AddPartner: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={3}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Mobile Number <span className="text-danger">*</span>
@@ -317,7 +441,7 @@ const AddPartner: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={3}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Date of Birth <span className="text-danger">*</span>
@@ -328,7 +452,9 @@ const AddPartner: React.FC = () => {
                             value={values.partner_dob}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            isInvalid={touched.partner_dob && !!errors.partner_dob}
+                            isInvalid={
+                              touched.partner_dob && !!errors.partner_dob
+                            }
                           />
                           <Form.Control.Feedback type="invalid">
                             {errors.partner_dob}
@@ -336,7 +462,7 @@ const AddPartner: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={4}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Gender <span className="text-danger">*</span>
@@ -361,57 +487,72 @@ const AddPartner: React.FC = () => {
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      <Col md={4}>
+                        <Form.Group>
+                          <Form.Label className="fs-6 fw-semibold">
+                            State <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Select
+                            name="partner_state"
+                            value={values.partner_state}
+                            onChange={(e) =>
+                              handleStateChange(e, setFieldValue)
+                            }
+                            onBlur={handleBlur}
+                            isInvalid={
+                              touched.partner_state && !!errors.partner_state
+                            }
+                          >
+                            <option value="">Select State</option>
+                            {states.map((state) => (
+                              <option
+                                key={state.state_id}
+                                value={state.state_id}
+                              >
+                                {state.state_name}
+                              </option>
+                            ))}
+                          </Form.Select>
+                          <Form.Control.Feedback type="invalid">
+                            {errors.partner_state}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+
+                      <Col md={4}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             City <span className="text-danger">*</span>
                           </Form.Label>
-                          <Form.Control
-                            type="number"
+                          <Form.Select
                             name="partner_city_id"
                             value={values.partner_city_id}
                             onChange={handleChange}
                             onBlur={handleBlur}
                             isInvalid={
-                              touched.partner_city_id && !!errors.partner_city_id
+                              touched.partner_city_id &&
+                              !!errors.partner_city_id
                             }
-                            placeholder="Enter city ID"
-                          />
+                            disabled={!values.partner_state}
+                          >
+                            <option value="">Select City</option>
+                            {cities.map((city) => (
+                              <option key={city.city_id} value={city.city_id}>
+                                {city.city_name}
+                              </option>
+                            ))}
+                          </Form.Select>
                           <Form.Control.Feedback type="invalid">
                             {errors.partner_city_id}
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
 
-                      <Col md={6}>
+                      {/* <Col md={6}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
-                            Created By <span className="text-danger">*</span>
-                          </Form.Label>
-                          <Form.Select
-                            name="partner_created_by"
-                            value={values.partner_created_by}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            isInvalid={
-                              touched.partner_created_by &&
-                              !!errors.partner_created_by
-                            }
-                          >
-                            <option value="">Select</option>
-                            <option value="Self">Self</option>
-                            <option value="Admin">Admin</option>
-                          </Form.Select>
-                          <Form.Control.Feedback type="invalid">
-                            {errors.partner_created_by}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-
-                      <Col md={6}>
-                        <Form.Group>
-                          <Form.Label className="fs-6 fw-semibold">
-                            Registration Step <span className="text-danger">*</span>
+                            Registration Step{" "}
+                            <span className="text-danger">*</span>
                           </Form.Label>
                           <Form.Control
                             type="number"
@@ -431,18 +572,22 @@ const AddPartner: React.FC = () => {
                             {errors.partner_registration_step}
                           </Form.Control.Feedback>
                         </Form.Group>
-                      </Col>
+                      </Col> */}
 
                       <Col lg={10}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Profile Image{" "}
-                            {!isEditMode && <span className="text-danger">*</span>}
+                            {!isEditMode && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Form.Label>
                           <Form.Control
                             type="file"
                             accept="image/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
                               handleImageChange(
                                 e,
                                 "partner_profile_img",
@@ -510,12 +655,16 @@ const AddPartner: React.FC = () => {
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Aadhar Front Image{" "}
-                            {!isEditMode && <span className="text-danger">*</span>}
+                            {!isEditMode && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Form.Label>
                           <Form.Control
                             type="file"
                             accept="image/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
                               handleImageChange(
                                 e,
                                 "partner_aadhar_front",
@@ -541,12 +690,16 @@ const AddPartner: React.FC = () => {
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Aadhar Back Image{" "}
-                            {!isEditMode && <span className="text-danger">*</span>}
+                            {!isEditMode && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Form.Label>
                           <Form.Control
                             type="file"
                             accept="image/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
                               handleImageChange(
                                 e,
                                 "partner_aadhar_back",
@@ -638,11 +791,11 @@ const AddPartner: React.FC = () => {
               <Col lg={12}>
                 <Card className="border">
                   <Card.Header className="bg-light">
-                    <h6 className="mb-0">Referral Information</h6>
+                    <h6 className="mb-0">Referral & Admin Information</h6>
                   </Card.Header>
                   <Card.Body>
                     <Row className="g-3">
-                      <Col md={12}>
+                      <Col md={4}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Referred By (Optional)
@@ -655,6 +808,64 @@ const AddPartner: React.FC = () => {
                             onBlur={handleBlur}
                             placeholder="Enter referral code or partner ID"
                           />
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group>
+                          <Form.Label className="fs-6 fw-semibold">
+                            Created By <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Select
+                            name="partner_created_by"
+                            value={values.partner_created_by}
+                            onChange={(e) => {
+                              handleChange(e);
+                              // Reset admin field when changing created by
+                              if (e.target.value !== "1") {
+                                setFieldValue("partner_created_by_id", "");
+                              }
+                            }}
+                            onBlur={handleBlur}
+                            isInvalid={
+                              touched.partner_created_by &&
+                              !!errors.partner_created_by
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="0">Self</option>
+                            <option value="1">Admin</option>
+                          </Form.Select>
+                          <Form.Control.Feedback type="invalid">
+                            {errors.partner_created_by}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                      <Col md={4}>
+                        <Form.Group>
+                          <Form.Label className="fs-6 fw-semibold">
+                            Admin {values.partner_created_by === "1" && <span className="text-danger">*</span>}
+                          </Form.Label>
+                          <Form.Select
+                            name="partner_created_by_id"
+                            value={values.partner_created_by_id}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            disabled={values.partner_created_by !== "1"}
+                            isInvalid={
+                              touched.partner_created_by_id &&
+                              !!errors.partner_created_by_id
+                            }
+                          >
+                            <option value="">Select Admin</option>
+                            {admins.map((admin) => (
+                              <option key={admin.id} value={admin.id}>
+                                {admin.admin_name}
+                              </option>
+                            ))}
+                          </Form.Select>
+                          <Form.Control.Feedback type="invalid">
+                            {errors.partner_created_by_id}
+                          </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
                     </Row>

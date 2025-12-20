@@ -37,10 +37,15 @@ export const addPartnerController = async (req: Request, res: Response, next: Ne
             partner_dob: req.body.partner_dob as string | undefined,
             partner_gender: req.body.partner_gender as string | undefined,
             partner_city_id: req.body.partner_city_id !== undefined ? Number(req.body.partner_city_id) : undefined,
+            partner_created_by: req.body.partner_created_by as string | undefined,
+            partner_created_by_id: req.body.partner_created_by_id !== undefined ? Number(req.body.partner_created_by_id) : undefined,
             partner_profile_img: files?.partner_profile_img?.[0] || undefined,
             partner_aadhar_front: files?.partner_aadhar_front?.[0] || undefined,
             partner_aadhar_back: files?.partner_aadhar_back?.[0] || undefined,
             partner_aadhar_no: req.body.partner_aadhar_no as string | undefined,
+            partner_wallet: req.body.partner_wallet !== undefined ? Number(req.body.partner_wallet) : undefined,
+            partner_pending_wallet_to_comp: req.body.partner_pending_wallet_to_comp !== undefined ? Number(req.body.partner_pending_wallet_to_comp) : undefined,
+            partner_registration_step: req.body.partner_registration_step !== undefined ? Number(req.body.partner_registration_step) : undefined,
             referral_referral_by: req.body.referral_referral_by as string | undefined,
         };
 
@@ -84,11 +89,16 @@ export const updatePartnerController = async (req: Request, res: Response, next:
             partner_dob: req.body.partner_dob as string | undefined,
             partner_gender: req.body.partner_gender as string | undefined,
             partner_city_id: req.body.partner_city_id !== undefined ? Number(req.body.partner_city_id) : undefined,
-            partner_aadhar_no: req.body.partner_aadhar_no as string | undefined,
-            referral_referral_by: req.body.referral_referral_by as string | undefined,
+            partner_created_by: req.body.partner_created_by as string | undefined,
+            partner_created_by_id: req.body.partner_created_by_id !== undefined ? Number(req.body.partner_created_by_id) : undefined,
             partner_profile_img: files?.partner_profile_img?.[0] || undefined,
             partner_aadhar_front: files?.partner_aadhar_front?.[0] || undefined,
             partner_aadhar_back: files?.partner_aadhar_back?.[0] || undefined,
+            partner_aadhar_no: req.body.partner_aadhar_no as string | undefined,
+            partner_wallet: req.body.partner_wallet !== undefined ? Number(req.body.partner_wallet) : undefined,
+            partner_pending_wallet_to_comp: req.body.partner_pending_wallet_to_comp !== undefined ? Number(req.body.partner_pending_wallet_to_comp) : undefined,
+            partner_registration_step: req.body.partner_registration_step !== undefined ? Number(req.body.partner_registration_step) : undefined,
+            referral_referral_by: req.body.referral_referral_by as string | undefined,
         };
 
         const response = await updatePartnerService(partnerId, updateData);

@@ -378,6 +378,38 @@ export const getCityService = async (stateId: number) => {
   }
 };
 
+
+// GET STATE ID BY CITY ID SERVICE
+export const getStateIdByCityIdService = async (cityId: number) => {
+  try {
+
+    const [rows]: any = await db.query(
+      `SELECT city.city_state as state_id, state.state_name 
+       FROM city 
+       LEFT JOIN state ON city.city_state = state.state_id
+       WHERE city.city_id = ?`,
+      [cityId]
+    );
+
+    if (rows.length === 0) {
+      throw new ApiError(404, "City not found");
+    }
+
+    return {
+      status: 200,
+      message: 'State Fetch Successful',
+      jsonData: {
+        state_id: rows[0].state_id,
+        state_name: rows[0].state_name
+      }
+    };
+
+  } catch (error) {
+    console.log(error);
+    throw new ApiError(500, "Get State ID By City ID Service Error On Fetching");
+  }
+};
+
 // Initialize Razorpay
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY!,
@@ -428,5 +460,26 @@ export const getRazorpayTransService = async (filters?: {
   } catch (error: any) {
     console.error("Razorpay API Error:", error);
     throw new ApiError(500, "Failed to fetch Razorpay transactions");
+  }
+};
+
+// Get Admins Service
+export const getAdminsService = async () => {
+  try {
+    const [rows]: any = await db.query(
+      `SELECT id, admin_name FROM admin ORDER BY admin_name ASC`
+    );
+
+    return {
+      status: 200,
+      message: "Admin list fetched successfully",
+      jsonData: {
+        admin_list: rows
+      }
+    };
+
+  } catch (error) {
+    console.log(error);
+    throw new ApiError(500, "Get Admins Service Error On Fetching");
   }
 };

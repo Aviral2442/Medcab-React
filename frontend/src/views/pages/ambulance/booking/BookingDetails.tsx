@@ -2,7 +2,7 @@ import axios from 'axios';
 import React from 'react';
 import { Container, Spinner, Nav } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import AmbulanceBookingDetailsForm from '@/components/Ambulance/booking/BookingDetails';
+import AmbulanceBookingDetails from '@/components/Ambulance/booking/BookingDetails';
 
 const BookingDetails = () => {
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
@@ -36,27 +36,18 @@ const BookingDetails = () => {
   }, [activeTab, id]);
 
   const handleFieldUpdate = async (field: string, value: string) => {
-    try {
-      await axios.put(`${baseURL}/ambulance/ambulance_booking_update/${id}`, {
-        [field]: value
-      });
-      
+
       setBookingData((prev: any) => ({
         ...prev,
         [field]: value
       }));
-      
-      console.log(`Updated ${field} to ${value}`);
-    } catch (error) {
-      console.error("Error updating booking:", error);
-    }
   };
 
   const renderTabContent = (tabKey: number) => {
     switch(tabKey) {
       case 1:
         return bookingData ? (
-          <AmbulanceBookingDetailsForm
+          <AmbulanceBookingDetails
             data={bookingData}
             onUpdate={handleFieldUpdate}
             editable={true}

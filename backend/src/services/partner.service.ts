@@ -14,6 +14,11 @@ interface PartnerData {
     partner_profile_img?: Express.Multer.File;
     partner_aadhar_front?: Express.Multer.File;
     partner_aadhar_back?: Express.Multer.File;
+    partner_created_by?: string;
+    partner_created_by_id?: number;
+    partner_wallet?: number;
+    partner_pending_wallet_to_comp?: number;
+    partner_registration_step?: number;
     partner_aadhar_no?: string;
     referral_referral_by?: string;
 }
@@ -154,86 +159,68 @@ export const addPartnerService = async (data: PartnerData) => {
 
         // aadhar front
         if (data.partner_aadhar_front) {
-            const uploadedPath = uploadFileCustom(data.partner_aadhar_front, "/partners/aadhar");
+            const uploadedPath = uploadFileCustom(data.partner_aadhar_front, "/partners");
             aadharFrontPath = uploadedPath;
         }
 
         // aadhar back
         if (data.partner_aadhar_back) {
-            const uploadedPath = uploadFileCustom(data.partner_aadhar_back, "/partners/aadhar");
+            const uploadedPath = uploadFileCustom(data.partner_aadhar_back, "/partners");
             aadharBackPath = uploadedPath;
         }
 
-        if (data.referral_referral_by) {
-            const checkExistReferral = `SELECT partner_id FROM partner WHERE partner_referral = ?`;
-            const [referralData]: any = await db.query(checkExistReferral, [data.referral_referral_by]);
-
-            if (referralData.length === 0) {
-                throw new ApiError(400, 'Invalid referral ID provided');
-            } else {
-                data.referral_referral_by = referralData[0].partner_id;
-            }
-        }
-
-        const insertData = {
+        const partnerData = {
             partner_f_name: data.partner_f_name,
             partner_l_name: data.partner_l_name,
             partner_mobile: data.partner_mobile,
-            partner_wallet: 0,
-            partner_pending_wallet_to_comp: 0,
             partner_dob: dobTimestamp,
-            partner_gender: data.partner_gender || null,
-            partner_city_id: data.partner_city_id || null,
-            partner_created_by: 0,
+            partner_gender: data.partner_gender,
+            partner_city_id: data.partner_city_id,
+            partner_created_by: data.partner_created_by,
+            partner_created_by_id: data.partner_created_by_id,
             partner_profile_img: profile,
             partner_aadhar_front: aadharFrontPath,
             partner_aadhar_back: aadharBackPath,
             partner_aadhar_no: data.partner_aadhar_no,
-            partner_registration_step: 0,
-            partner_auth_key: ' ',
-            partner_referral: ' ',
-            referral_referral_by: data.referral_referral_by || " ",
+            partner_wallet: data.partner_wallet || 0,
+            partner_pending_wallet_to_comp: data.partner_pending_wallet_to_comp || 0,
+            partner_registration_step: data.partner_registration_step || 1,
+            referral_referral_by: data.referral_referral_by || 0,
             created_at: new Date(),
             updated_at: new Date(),
-            partner_status: 0,
         };
 
-        const [result]: any = await db.query(
-            `INSERT INTO partner SET ?`,
-            [insertData]
-        );
-
-        const updateReferralCode = `UPDATE partner SET partner_referral = ? WHERE partner_id = ?`;
-        const referralCode = `MEDCAB${result.insertId}`;
-        await db.query(updateReferralCode, [referralCode, result.insertId]);
+        const [result]: any = await db.query('INSERT INTO partner SET ?', partnerData);
 
         return {
             status: 201,
             message: 'Partner added successfully',
             jsonData: {
-                partnerId: result.insertId
+                partner_id: result.insertId
             }
         };
 
     } catch (error) {
-        console.log(error);
-
-        throw new ApiError(500, 'Failed to add partner service');
+        console.error(error);
+        throw new ApiError(500, 'Failed to add partner');
     }
 };
 
 // Fetch Partner By ID Service
 export const fetchPartnerByIdService = async (partnerId: number) => {
     try {
-
-        if (!partnerId) {
-            throw new ApiError(400, 'Partner ID is required');
-        }
-
         const [rows]: any = await db.query(
-            `SELECT * FROM partner WHERE partner_id = ?`,
+            `SELECT 
+                partner.*,
+                city.city_state as partner_state,
+                city.city_name,
+                state.state_name
+            FROM partner
+            LEFT JOIN city ON partner.partner_city_id = city.city_id
+            LEFT JOIN state ON city.city_state = state.state_id
+            WHERE partner.partner_id = ?`,
             [partnerId]
-        )
+        );
 
         if (rows.length === 0) {
             throw new ApiError(404, 'Partner not found');
@@ -246,71 +233,66 @@ export const fetchPartnerByIdService = async (partnerId: number) => {
                 partner: rows[0]
             }
         };
+
     } catch (error) {
         console.error(error);
         throw new ApiError(500, 'Failed to fetch partner');
     }
-}
+};
 
 // Update Partner Service
 export const updatePartnerService = async (partnerId: number, data: PartnerData) => {
     try {
-
-        if (!partnerId) {
-            throw new ApiError(400, 'Partner ID is required');
-        }        
-
         let dobTimestamp: number | null = null;
         if (data.partner_dob) {
             const t = Math.floor(new Date(data.partner_dob).getTime() / 1000);
-            dobTimestamp = Number.isFinite(t) && t > 0 ? t: null;
+            dobTimestamp = Number.isFinite(t) && t > 0 ? t : null;
         }
 
-        const updatePartnerData: any = {};
+        const updateData: any = {
+            partner_f_name: data.partner_f_name,
+            partner_l_name: data.partner_l_name,
+            partner_mobile: data.partner_mobile,
+            partner_dob: dobTimestamp,
+            partner_gender: data.partner_gender,
+            partner_city_id: data.partner_city_id,
+            // Remove partner_state
+            partner_created_by: data.partner_created_by,
+            partner_created_by_id: data.partner_created_by_id,
+            partner_aadhar_no: data.partner_aadhar_no,
+            partner_wallet: data.partner_wallet,
+            partner_pending_wallet_to_comp: data.partner_pending_wallet_to_comp,
+            partner_registration_step: data.partner_registration_step,
+            referral_referral_by: data.referral_referral_by || 0,
+            updated_at: new Date(),
+        };
 
-        if (data.partner_f_name) updatePartnerData.partner_f_name = data.partner_f_name;
-        if (data.partner_l_name) updatePartnerData.partner_l_name = data.partner_l_name;
-        if (data.partner_mobile) updatePartnerData.partner_mobile = data.partner_mobile;
-        if (data.partner_dob) updatePartnerData.partner_dob = dobTimestamp;
-        if (data.partner_gender) updatePartnerData.partner_gender = data.partner_gender;
-        if (data.partner_city_id) updatePartnerData.partner_city_id = data.partner_city_id;
-        if (data.partner_aadhar_no) updatePartnerData.partner_aadhar_no = data.partner_aadhar_no;
-
+        // Handle file uploads
         if (data.partner_profile_img) {
             const uploadedPath = uploadFileCustom(data.partner_profile_img, "/partners");
-            updatePartnerData.partner_profile_img = uploadedPath;
+            updateData.partner_profile_img = uploadedPath;
         }
 
         if (data.partner_aadhar_front) {
-            const uploadedPath = uploadFileCustom(data.partner_aadhar_front, "/partners/aadhar");
-            updatePartnerData.partner_aadhar_front = uploadedPath;
+            const uploadedPath = uploadFileCustom(data.partner_aadhar_front, "/partners");
+            updateData.partner_aadhar_front = uploadedPath;
         }
 
         if (data.partner_aadhar_back) {
-            const uploadedPath = uploadFileCustom(data.partner_aadhar_back, "/partners/aadhar");
-            updatePartnerData.partner_aadhar_back = uploadedPath;
+            const uploadedPath = uploadFileCustom(data.partner_aadhar_back, "/partners");
+            updateData.partner_aadhar_back = uploadedPath;
         }
 
-        updatePartnerData.updated_at = new Date();
-
-        console.log('Partner Id:', partnerId, 'data:', data, 'updateData:', updatePartnerData);
-
-
-        await db.query(
-            `UPDATE partner SET ? WHERE partner_id = ?`,
-            [updatePartnerData, partnerId]
-        );
+        await db.query('UPDATE partner SET ? WHERE partner_id = ?', [updateData, partnerId]);
 
         return {
             status: 200,
-            message: 'Partner updated successfully',
-            jsonData: {
-                partnerId: partnerId
-            }
-        }
+            message: 'Partner updated successfully'
+        };
 
     } catch (error) {
-        throw new ApiError(500, 'Failed to update partner service');
+        console.error(error);
+        throw new ApiError(500, 'Failed to update partner');
     }
 };
 

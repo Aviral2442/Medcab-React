@@ -171,3 +171,12 @@
   gap: 16px; 
   margin-bottom: 0px;
 }
+
+.hover-shadow {
+  transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+  background-color: #fafaf7;
+  cursor: pointer;
+}
