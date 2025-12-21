@@ -3,6 +3,7 @@ import { ApiError } from '../utils/api-error';
 import { buildFilters } from '../utils/filters';
 import { currentUnixTime } from '../utils/current_unixtime';
 import { uploadFileCustom } from '../utils/file_uploads';
+import { json } from 'stream/consumers';
 
 interface VehicleData {
     vehicle_added_type?: number; // 0 self, 1 partner
@@ -348,3 +349,36 @@ export const updateVehicleService = async (vehicleId: number, data: VehicleData)
         throw new ApiError(500, "Failed to update vehicle");
     }
 };
+
+
+export const fetchVehicleAddedByDriverDetailsService = async () => {
+    try {
+        const query = `SELECT driver_id AS id, driver_name AS name, driver_last_name AS last_name, driver_mobile AS mobile FROM driver`;
+        const [rows]: any = await db.query(query);
+        return {
+            status: 200,
+            message: "Added by details fetched successfully",
+            jsonData: {
+                added_by_details: rows || null
+            }
+        };
+    } catch (error) {
+        throw new ApiError(500, "Failed to fetch added by details");
+    }
+}
+
+export const fetchVehicleAddedByPartnerDetailsService = async () => {
+    try {
+        const query = `SELECT partner_id AS id, partner_f_name AS name, partner_l_name AS last_name, partner_mobile AS mobile FROM partner`;
+        const [rows]: any = await db.query(query);
+        return {
+            status: 200,
+            message: "Added by details fetched successfully",
+            jsonData: {
+                added_by_details: rows || null
+            }
+        };
+    } catch (error) {
+        throw new ApiError(500, "Failed to fetch added by details");
+    }
+}

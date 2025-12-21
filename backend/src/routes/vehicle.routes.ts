@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from "multer";
-import { addVehicleController, getVehicleController, getVehicleListController, updateVehicleController } from '../controllers/vehicle.controller';
+import { addVehicleController, fetchVehicleAddedByDriverDetailsController, fetchVehicleAddedByPartnerDetailsController, getVehicleController, getVehicleListController, updateVehicleController } from '../controllers/vehicle.controller';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -34,6 +34,7 @@ router.put(
     ]),
     updateVehicleController
 );
-
+router.get("/get_vehicle_added_by_driver_details", fetchVehicleAddedByDriverDetailsController);
+router.get("/get_vehicle_added_by_partner_details", fetchVehicleAddedByPartnerDetailsController);
 
 export default router;

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { addVehicleService, fetchVehicleService, getVehicleListService, updateVehicleService } from '../services/vehicle.service';
+import { addVehicleService, fetchVehicleAddedByDriverDetailsService, fetchVehicleAddedByPartnerDetailsService, fetchVehicleService, getVehicleListService, updateVehicleService } from '../services/vehicle.service';
 
 // Get Vehicle List Controller
 export const getVehicleListController = async (req: Request, res: Response, next: NextFunction) => {
@@ -80,3 +80,20 @@ export const updateVehicleController = async (req: Request, res: Response, next:
     }
 };
 
+export const fetchVehicleAddedByDriverDetailsController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const response = await fetchVehicleAddedByDriverDetailsService();
+        return res.status(response.status).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const fetchVehicleAddedByPartnerDetailsController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const response = await fetchVehicleAddedByPartnerDetailsService();
+        return res.status(response.status).json(response);
+    } catch (error) {
+        next(error);
+    }
+};
