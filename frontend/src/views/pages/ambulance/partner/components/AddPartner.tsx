@@ -18,7 +18,7 @@ const partnerValidationSchema = Yup.object().shape({
     .oneOf(["Male", "Female", "Other"], "Select a valid gender")
     .required("Gender is required"),
   partner_state: Yup.string().required("State is required"),
-  partner_city_id: Yup.number().required("City is required"),
+  partner_city_id: Yup.string().required("City is required"),
   partner_created_by: Yup.string().required("Created by is required"),
   partner_created_by_id: Yup.number().when('partner_created_by', {
     is: '1',
@@ -28,16 +28,13 @@ const partnerValidationSchema = Yup.object().shape({
   partner_aadhar_no: Yup.string()
     .matches(/^[0-9]{12}$/, "Aadhar number must be 12 digits")
     .required("Aadhar number is required"),
-  partner_wallet: Yup.number()
-    .min(0, "Wallet amount cannot be negative")
+  partner_wallet: Yup.string()
     .required("Wallet amount is required"),
-  partner_pending_wallet_to_comp: Yup.number()
-    .min(0, "Pending wallet cannot be negative")
-    .required("Pending wallet is required"),
-  partner_registration_step: Yup.number()
-    .min(1, "Registration step must be at least 1")
-    .max(5, "Registration step cannot be more than 5")
-    .required("Registration step is required"),
+  partner_pending_wallet_to_comp: Yup.string().required("Pending wallet is required"),
+  // partner_registration_step: Yup.number()
+  //   .min(1, "Registration step must be at least 1")
+  //   .max(5, "Registration step cannot be more than 5")
+  //   .required("Registration step is required"),
   referral_referral_by: Yup.string().optional(),
 });
 
@@ -99,33 +96,29 @@ const AddPartner: React.FC = () => {
         `${baseURL}/partner/fetch_partner_by_id/${id}`
       );
       const partner = response.data.jsonData.partner;
-      console.log("Fetched Partner Details:", partner);
 
-      // Fix date conversion - check if partner_dob exists and is valid
+      // Normalize DOB for <input type="date">
       let formattedDob = "";
       if (partner.partner_dob) {
-        try {
-          const dobTimestamp = Number(partner.partner_dob);
-          if (dobTimestamp > 0) {
-            const date = new Date(dobTimestamp * 1000);
-            if (!isNaN(date.getTime())) {
-              formattedDob = date.toISOString().split("T")[0];
-            }
-          }
-        } catch (error) {
-          console.error("Error parsing DOB:", error);
+        const dt = new Date(partner.partner_dob);
+        if (!isNaN(dt.getTime())) {
+          formattedDob = dt.toISOString().slice(0, 10); // yyyy-MM-dd
         }
       }
 
-      setInitialValues({
+       const stateId = partner.partner_state?.toString() || partner.city_state?.toString() ||"";
+      const cityId = partner.partner_city_id?.toString() || "";
+
+      setInitialValues((prev) => ({
+        ...prev,
         partner_profile_img: null,
         partner_f_name: partner.partner_f_name || "",
         partner_l_name: partner.partner_l_name || "",
         partner_mobile: partner.partner_mobile || "",
         partner_dob: formattedDob,
         partner_gender: partner.partner_gender || "",
-        partner_state: partner.partner_state?.toString() || "",
-        partner_city_id: partner.partner_city_id?.toString() || "",
+        partner_state: stateId,
+        partner_city_id: cityId,
         partner_created_by: partner.partner_created_by || "",
         partner_created_by_id: partner.partner_created_by_id?.toString() || "",
         partner_aadhar_front: null,
@@ -137,14 +130,10 @@ const AddPartner: React.FC = () => {
         partner_registration_step:
           partner.partner_registration_step?.toString() || "1",
         referral_referral_by: partner.referral_referral_by || "",
-      });
+      }));
 
-      // Fetch cities for the state
-      if (partner.partner_state) {
-        await fetchCitiesByState(partner.partner_state.toString());
-      }
+      if (stateId) await fetchCitiesByState(stateId);
 
-      // Set preview images
       if (partner.partner_profile_img)
         setProfilePreview(`${basePath}/${partner.partner_profile_img}`);
       if (partner.partner_aadhar_front)
@@ -152,10 +141,7 @@ const AddPartner: React.FC = () => {
       if (partner.partner_aadhar_back)
         setAadharBackPreview(`${basePath}/${partner.partner_aadhar_back}`);
     } catch (err: any) {
-      console.error("Error fetching partner details:", err);
-      setError(
-        err.response?.data?.message || "Failed to fetch partner details"
-      );
+      setError(err?.message || "Failed to fetch partner");
     } finally {
       setLoading(false);
     }
@@ -234,94 +220,48 @@ const AddPartner: React.FC = () => {
     try {
       const formData = new FormData();
 
-      // Append basic partner info
+      // DO NOT send state to backend (only city)
       formData.append("partner_f_name", values.partner_f_name);
       formData.append("partner_l_name", values.partner_l_name);
       formData.append("partner_mobile", values.partner_mobile);
       formData.append("partner_dob", values.partner_dob);
       formData.append("partner_gender", values.partner_gender);
       formData.append("partner_city_id", values.partner_city_id);
-      formData.append("partner_aadhar_no", values.partner_aadhar_no);
-      
       formData.append("partner_created_by", values.partner_created_by);
-      
-      if (values.partner_created_by === "1" && values.partner_created_by_id) {
+      if (values.partner_created_by === "1" && values.partner_created_by_id)
         formData.append("partner_created_by_id", values.partner_created_by_id);
-      } else if (isEditMode) {
-        formData.append("partner_created_by_id", "0");
-      }
-
-      if (values.referral_referral_by) {
+      formData.append("partner_aadhar_no", values.partner_aadhar_no);
+      formData.append("partner_wallet", values.partner_wallet);
+      formData.append(
+        "partner_pending_wallet_to_comp",
+        values.partner_pending_wallet_to_comp
+      );
+      formData.append("partner_registration_step", values.partner_registration_step);
+      if (values.referral_referral_by)
         formData.append("referral_referral_by", values.referral_referral_by);
-      }
 
-      // Append images only if they are new files
-      if (values.partner_profile_img instanceof File) {
+      // files
+      if (values.partner_profile_img)
         formData.append("partner_profile_img", values.partner_profile_img);
-      }
-      if (values.partner_aadhar_front instanceof File) {
+      if (values.partner_aadhar_front)
         formData.append("partner_aadhar_front", values.partner_aadhar_front);
-      }
-      if (values.partner_aadhar_back instanceof File) {
+      if (values.partner_aadhar_back)
         formData.append("partner_aadhar_back", values.partner_aadhar_back);
-      }
 
-      // Log formData for debugging
-      console.log("FormData being sent:");
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
+      const url = isEditMode
+        ? `${baseURL}/partner/update_partner/${id}`
+        : `${baseURL}/partner/add_partner`;
 
-      let response;
-      if (isEditMode) {
-        console.log("Updating Partner ID:", id);
-        console.log("FormData for update:", formData);
-        response = await axios.put(
-          `${baseURL}/partner/update_partner/${id}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-      } else {
-        console.log("Adding Partner");
-        // For add, include wallet and registration step fields
-        formData.append("partner_wallet", values.partner_wallet);
-        formData.append(
-          "partner_pending_wallet_to_comp",
-          values.partner_pending_wallet_to_comp
-        );
-        formData.append(
-          "partner_registration_step",
-          values.partner_registration_step
-        );
-        
-        response = await axios.post(
-          `${baseURL}/partner/add_partner`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-      }
+      const method = isEditMode ? axios.put : axios.post;
+      const response = await method(url, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-      if (response.data.status === 201 || response.data.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         navigate("/ambulance/partner");
       }
     } catch (err: any) {
-      console.error(
-        `Error ${isEditMode ? "updating" : "adding"} partner:`,
-        err
-      );
-      console.error("Error response:", err.response?.data);
-      setError(
-        err.response?.data?.message ||
-          `Failed to ${isEditMode ? "update" : "add"} partner`
-      );
+      setError(err?.response?.data?.message || "Failed to submit partner");
     } finally {
       setSubmitting(false);
     }

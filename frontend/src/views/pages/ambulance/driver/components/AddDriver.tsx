@@ -8,6 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import "@/global.css";
 
 const driverValidationSchema = Yup.object().shape({
+  driver_profile_img: Yup.mixed().nullable().required("Profile image is required"),
   driver_name: Yup.string().required("Driver name is required"),
   driver_last_name: Yup.string().required("Driver last name is required"),
   driver_mobile: Yup.string()
@@ -15,14 +16,15 @@ const driverValidationSchema = Yup.object().shape({
     .matches(/^[0-9]{10}$/, "Mobile number must be 10 digits"),
   driver_dob: Yup.string().required("Date of birth is required"),
   driver_gender: Yup.string().required("Gender is required"),
-  driver_city_id: Yup.number().required("City is required"),
-  driver_created_by: Yup.number().required("Created by is required"),
-  driver_created_partner_id: Yup.number().when("driver_created_by", {
-    is: 1,
+  driver_state: Yup.string().required("State is required"),
+  driver_city_id: Yup.string().required("City is required"),
+  driver_created_by: Yup.string().required("Created by is required"),
+  driver_created_partner_id: Yup.string().when("driver_created_by", {
+    is: "1",
     then: (schema) => schema.required("Partner ID is required"),
     otherwise: (schema) => schema.notRequired(),
   }),
-  
+
   // Driver Details
   driver_details_dl_number: Yup.string().required("DL number is required"),
   driver_details_dl_exp_date: Yup.string().required("DL expiry date is required"),
@@ -30,8 +32,7 @@ const driverValidationSchema = Yup.object().shape({
     .required("Aadhar number is required")
     .matches(/^[0-9]{12}$/, "Aadhar must be 12 digits"),
   driver_details_pan_card_number: Yup.string()
-    .required("PAN number is required")
-    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Invalid PAN format"),
+    .required("PAN number is required"),
   driver_details_police_verification_date: Yup.string().required(
     "Police verification date is required"
   ),
@@ -43,19 +44,30 @@ const AddDriver: React.FC = () => {
   const isEditMode = Boolean(id);
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
   const basePath = (import.meta as any).env?.BASE_PATH ?? "";
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Preview states for images
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [dlFrontPreview, setDlFrontPreview] = useState<string | null>(null);
   const [dlBackPreview, setDlBackPreview] = useState<string | null>(null);
-  const [aadharFrontPreview, setAadharFrontPreview] = useState<string | null>(null);
-  const [aadharBackPreview, setAadharBackPreview] = useState<string | null>(null);
+  const [aadharFrontPreview, setAadharFrontPreview] = useState<string | null>(
+    null
+  );
+  const [aadharBackPreview, setAadharBackPreview] = useState<string | null>(
+    null
+  );
   const [panFrontPreview, setPanFrontPreview] = useState<string | null>(null);
-  const [policeVerificationPreview, setPoliceVerificationPreview] = useState<string | null>(null);
+  const [policeVerificationPreview, setPoliceVerificationPreview] = useState<
+    string | null
+  >(null);
+
+  // States and Partners
+  const [states, setStates] = useState<Array<any>>([]);
+  const [cities, setCities] = useState<Array<any>>([]);
+  const [partners, setPartners] = useState<Array<any>>([]);
 
   const [initialValues, setInitialValues] = useState({
     driver_profile_img: null as File | null,
@@ -64,12 +76,13 @@ const AddDriver: React.FC = () => {
     driver_mobile: "",
     driver_dob: "",
     driver_gender: "",
+    driver_state: "",
     driver_city_id: "",
     driver_created_by: "",
     driver_created_partner_id: "",
     driver_auth_key: "",
     partner_auth_key: "",
-    
+
     // Driver Details
     driver_details_dl_front_img: null as File | null,
     driver_details_dl_back_image: null as File | null,
@@ -90,49 +103,125 @@ const AddDriver: React.FC = () => {
     }
   }, [id]);
 
+  // Fetch states, cities, and partners on mount
+  useEffect(() => {
+    fetchStates();
+    fetchPartners();
+  }, []);
+
+  const fetchStates = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/get_states`);
+      setStates(response.data?.jsonData?.state_list || []);
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      setStates([]);
+    }
+  };
+
+  const fetchPartners = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/partner/get_partners_list`);
+      setPartners(response.data?.jsonData?.partners || []);
+    } catch (error) {
+      console.error("Error fetching partners:", error);
+      setPartners([]);
+    }
+  };
+
+  const fetchCitiesByState = async (stateId: string) => {
+    if (!stateId) {
+      setCities([]);
+      return;
+    }
+    try {
+      const response = await axios.get(`${baseURL}/get_cities/${stateId}`);
+      setCities(response.data?.jsonData?.city_list || []);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      setCities([]);
+    }
+  };
+
   const fetchDriverDetails = async () => {
     setLoading(true);
     try {
       const response = await axios.get(`${baseURL}/driver/get_driver/${id}`);
       const driver = response.data.jsonData.driver_fetch[0];
+      console.log("Fetched driver details:", driver);
+      // Fix date conversion - handle invalid dates properly
+    
 
-      setInitialValues({
+      const formattedDob = driver.driver_dob
+        ? new Date(driver.driver_dob * 1000).toISOString().split("T")[0]
+        : "";
+
+      // Format DL expiry date
+      let formattedDlExpDate = "";
+      if (driver.driver_details_dl_exp_date) {
+        const dt = new Date(driver.driver_details_dl_exp_date);
+        if (!isNaN(dt.getTime()))
+          formattedDlExpDate = dt.toISOString().slice(0, 10);
+      }
+
+        const stateId = driver.city_state?.toString() || driver.driver_state?.toString() || ""; // state from joined city
+      const cityId = driver.driver_city_id?.toString() || "";
+
+      setInitialValues((prev) => ({
+        ...prev,
         driver_profile_img: null,
         driver_name: driver.driver_name || "",
         driver_last_name: driver.driver_last_name || "",
         driver_mobile: driver.driver_mobile || "",
-        driver_dob: driver.driver_dob ? new Date(driver.driver_dob * 1000).toISOString().split('T')[0] : "",
+        driver_dob: formattedDob,
         driver_gender: driver.driver_gender || "",
-        driver_city_id: driver.driver_city_id?.toString() || "",
-        driver_created_by: driver.driver_created_by?.toString() || "",
+        driver_state: stateId,
+        driver_city_id: cityId,
+        driver_created_by: driver.driver_created_by || "",
         driver_created_partner_id: driver.driver_created_partner_id?.toString() || "",
         driver_auth_key: driver.driver_auth_key || "",
         partner_auth_key: driver.partner_auth_key || "",
-        
-        driver_details_dl_front_img: null,
-        driver_details_dl_back_image: null,
         driver_details_dl_number: driver.driver_details_dl_number || "",
-        driver_details_dl_exp_date: driver.driver_details_dl_exp_date || "",
-        driver_details_aadhar_front_img: null,
-        driver_details_aadhar_back_img: null,
+        driver_details_dl_exp_date: formattedDlExpDate,
         driver_details_aadhar_number: driver.driver_details_aadhar_number || "",
-        driver_details_pan_card_front_img: null,
-        driver_details_pan_card_number: driver.driver_details_pan_card_number || "",
-        driver_details_police_verification_image: null,
-        driver_details_police_verification_date: driver.driver_details_police_verification_date || "",
-      });
+        driver_details_pan_card_number:
+          driver.driver_details_pan_card_number || "",
+        driver_details_police_verification_date:
+          driver.driver_details_police_verification_date
+            ? new Date(driver.driver_details_police_verification_date)
+                .toISOString()
+                .slice(0, 10)
+            : "",
+      }));
 
-      // Set preview images
-      if (driver.driver_profile_img) setProfilePreview(`${basePath}/${driver.driver_profile_img}`);
-      if (driver.driver_details_dl_front_img) setDlFrontPreview(`${basePath}/${driver.driver_details_dl_front_img}`);
-      if (driver.driver_details_dl_back_image) setDlBackPreview(`${basePath}/${driver.driver_details_dl_back_image}`);
-      if (driver.driver_details_aadhar_front_img) setAadharFrontPreview(`${basePath}/${driver.driver_details_aadhar_front_img}`);
-      if (driver.driver_details_aadhar_back_img) setAadharBackPreview(`${basePath}/${driver.driver_details_aadhar_back_img}`);
-      if (driver.driver_details_pan_card_front_img) setPanFrontPreview(`${basePath}/${driver.driver_details_pan_card_front_img}`);
-      if (driver.driver_details_police_verification_image) setPoliceVerificationPreview(`${basePath}/${driver.driver_details_police_verification_image}`);
+      // load cities for the saved state
+      if (stateId) await fetchCitiesByState(stateId);
+
+      // previews
+      if (driver.driver_profile_img)
+        setProfilePreview(`${basePath}/${driver.driver_profile_img}`);
+      if (driver.driver_details_dl_front_img)
+        setDlFrontPreview(`${basePath}/${driver.driver_details_dl_front_img}`);
+      if (driver.driver_details_dl_back_image)
+        setDlBackPreview(`${basePath}/${driver.driver_details_dl_back_image}`);
+      if (driver.driver_details_aadhar_front_img)
+        setAadharFrontPreview(
+          `${basePath}/${driver.driver_details_aadhar_front_img}`
+        );
+      if (driver.driver_details_aadhar_back_img)
+        setAadharBackPreview(
+          `${basePath}/${driver.driver_details_aadhar_back_img}`
+        );
+      if (driver.driver_details_pan_card_front_img)
+        setPanFrontPreview(
+          `${basePath}/${driver.driver_details_pan_card_front_img}`
+        );
+      if (driver.driver_details_police_verification_image)
+        setPoliceVerificationPreview(
+          `${basePath}/${driver.driver_details_police_verification_image}`
+        );
     } catch (err: any) {
-      console.error("Error fetching driver details:", err);
-      setError(err.response?.data?.message || "Failed to fetch driver details");
+      setError(err?.message || "Failed to fetch driver details");
     } finally {
       setLoading(false);
     }
@@ -155,6 +244,16 @@ const AddDriver: React.FC = () => {
     }
   };
 
+  const handleStateChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    setFieldValue: any
+  ) => {
+    const stateId = e.target.value;
+    setFieldValue("driver_state", stateId);
+    setFieldValue("driver_city_id", ""); // Reset city when state changes
+    await fetchCitiesByState(stateId);
+  };
+
   const handleSubmit = async (values: typeof initialValues) => {
     setSubmitting(true);
     setError(null);
@@ -162,70 +261,94 @@ const AddDriver: React.FC = () => {
     try {
       const formData = new FormData();
 
-      // Append basic driver info
+      // DO NOT send state to backend (only city)
       formData.append("driver_name", values.driver_name);
       formData.append("driver_last_name", values.driver_last_name);
       formData.append("driver_mobile", values.driver_mobile);
       formData.append("driver_dob", values.driver_dob);
       formData.append("driver_gender", values.driver_gender);
-      formData.append("driver_city_id", values.driver_city_id);
+      formData.append("driver_city_id", values.driver_city_id); // keep city
       formData.append("driver_created_by", values.driver_created_by);
-      
-      if (values.driver_created_by === "1" && values.driver_created_partner_id) {
-        formData.append("driver_created_partner_id", values.driver_created_partner_id);
-      }
-      
-      if (values.driver_auth_key) formData.append("driver_auth_key", values.driver_auth_key);
-      if (values.partner_auth_key) formData.append("partner_auth_key", values.partner_auth_key);
+      formData.append("driver_created_partner_id", values.driver_created_partner_id);
+      formData.append("driver_auth_key", values.driver_auth_key || "");
+      formData.append("partner_auth_key", values.partner_auth_key || "");
 
-      // Append images
-      if (values.driver_profile_img) formData.append("driver_profile_img", values.driver_profile_img);
-      if (values.driver_details_dl_front_img) formData.append("driver_details_dl_front_img", values.driver_details_dl_front_img);
-      if (values.driver_details_dl_back_image) formData.append("driver_details_dl_back_image", values.driver_details_dl_back_image);
-      if (values.driver_details_aadhar_front_img) formData.append("driver_details_aadhar_front_img", values.driver_details_aadhar_front_img);
-      if (values.driver_details_aadhar_back_img) formData.append("driver_details_aadhar_back_img", values.driver_details_aadhar_back_img);
-      if (values.driver_details_pan_card_front_img) formData.append("driver_details_pan_card_front_img", values.driver_details_pan_card_front_img);
-      if (values.driver_details_police_verification_image) formData.append("driver_details_police_verification_image", values.driver_details_police_verification_image);
-
-      // Append driver details
-      formData.append("driver_details_dl_number", values.driver_details_dl_number);
-      formData.append("driver_details_dl_exp_date", values.driver_details_dl_exp_date);
-      formData.append("driver_details_aadhar_number", values.driver_details_aadhar_number);
-      formData.append("driver_details_pan_card_number", values.driver_details_pan_card_number);
-      formData.append("driver_details_police_verification_date", values.driver_details_police_verification_date);
-
-      let response;
-      if (isEditMode) {
-        response = await axios.put(
-          `${baseURL}/driver/update_driver/${id}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
+      // files (append only if chosen)
+      if (values.driver_profile_img)
+        formData.append("driver_profile_img", values.driver_profile_img);
+      if (values.driver_details_dl_front_img)
+        formData.append(
+          "driver_details_dl_front_img",
+          values.driver_details_dl_front_img
         );
-      } else {
-        response = await axios.post(
-          `${baseURL}/driver/add_driver`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
+      if (values.driver_details_dl_back_image)
+        formData.append(
+          "driver_details_dl_back_image",
+          values.driver_details_dl_back_image
         );
-      }
+      if (values.driver_details_aadhar_front_img)
+        formData.append(
+          "driver_details_aadhar_front_img",
+          values.driver_details_aadhar_front_img
+        );
+      if (values.driver_details_aadhar_back_img)
+        formData.append(
+          "driver_details_aadhar_back_img",
+          values.driver_details_aadhar_back_img
+        );
+      if (values.driver_details_pan_card_front_img)
+        formData.append(
+          "driver_details_pan_card_front_img",
+          values.driver_details_pan_card_front_img
+        );
+      if (values.driver_details_police_verification_image)
+        formData.append(
+          "driver_details_police_verification_image",
+          values.driver_details_police_verification_image
+        );
 
-      if (response.data.status === 201 || response.data.status === 200) {
+      // optional text fields
+      if (values.driver_details_dl_number)
+        formData.append(
+          "driver_details_dl_number",
+          values.driver_details_dl_number
+        );
+      if (values.driver_details_dl_exp_date)
+        formData.append(
+          "driver_details_dl_exp_date",
+          values.driver_details_dl_exp_date
+        );
+      if (values.driver_details_aadhar_number)
+        formData.append(
+          "driver_details_aadhar_number",
+          values.driver_details_aadhar_number
+        );
+      if (values.driver_details_pan_card_number)
+        formData.append(
+          "driver_details_pan_card_number",
+          values.driver_details_pan_card_number
+        );
+      if (values.driver_details_police_verification_date)
+        formData.append(
+          "driver_details_police_verification_date",
+          values.driver_details_police_verification_date
+        );
+
+      // console.log("Submitting form data:", Array.from(formData.entries()));
+      const url = isEditMode
+        ? `${baseURL}/driver/update_driver/${id}`
+        : `${baseURL}/driver/add_driver`;
+
+      const method = isEditMode ? axios.put : axios.post;
+      const response = await method(url, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.status === 200 || response.status === 201) {
         navigate("/ambulance/driver");
       }
     } catch (err: any) {
-      console.error(`Error ${isEditMode ? "updating" : "adding"} driver:`, err);
-      setError(
-        err.response?.data?.message ||
-          `Failed to ${isEditMode ? "update" : "add"} driver`
-      );
+      setError(err?.response?.data?.message || "Failed to submit driver");
     } finally {
       setSubmitting(false);
     }
@@ -289,7 +412,9 @@ const AddDriver: React.FC = () => {
                             value={values.driver_name}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            isInvalid={touched.driver_name && !!errors.driver_name}
+                            isInvalid={
+                              touched.driver_name && !!errors.driver_name
+                            }
                             placeholder="Enter first name"
                           />
                           <Form.Control.Feedback type="invalid">
@@ -309,7 +434,10 @@ const AddDriver: React.FC = () => {
                             value={values.driver_last_name}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            isInvalid={touched.driver_last_name && !!errors.driver_last_name}
+                            isInvalid={
+                              touched.driver_last_name &&
+                              !!errors.driver_last_name
+                            }
                             placeholder="Enter last name"
                           />
                           <Form.Control.Feedback type="invalid">
@@ -329,7 +457,9 @@ const AddDriver: React.FC = () => {
                             value={values.driver_mobile}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            isInvalid={touched.driver_mobile && !!errors.driver_mobile}
+                            isInvalid={
+                              touched.driver_mobile && !!errors.driver_mobile
+                            }
                             placeholder="Enter 10-digit mobile number"
                             maxLength={10}
                           />
@@ -350,7 +480,9 @@ const AddDriver: React.FC = () => {
                             value={values.driver_dob}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            isInvalid={touched.driver_dob && !!errors.driver_dob}
+                            isInvalid={
+                              touched.driver_dob && !!errors.driver_dob
+                            }
                           />
                           <Form.Control.Feedback type="invalid">
                             {errors.driver_dob}
@@ -368,7 +500,9 @@ const AddDriver: React.FC = () => {
                             value={values.driver_gender}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            isInvalid={touched.driver_gender && !!errors.driver_gender}
+                            isInvalid={
+                              touched.driver_gender && !!errors.driver_gender
+                            }
                           >
                             <option value="">Select Gender</option>
                             <option value="Male">Male</option>
@@ -384,24 +518,65 @@ const AddDriver: React.FC = () => {
                       <Col md={4}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
+                            State <span className="text-danger">*</span>
+                          </Form.Label>
+                          <Form.Select
+                            name="driver_state"
+                            value={values.driver_state}
+                            onChange={(e) =>
+                              handleStateChange(e, setFieldValue)
+                            }
+                            onBlur={handleBlur}
+                            isInvalid={
+                              touched.driver_state && !!errors.driver_state
+                            }
+                          >
+                            <option value="">Select State</option>
+                            {states.map((state) => (
+                              <option
+                                key={state.state_id}
+                                value={state.state_id}
+                              >
+                                {state.state_name}
+                              </option>
+                            ))}
+                          </Form.Select>
+                          <Form.Control.Feedback type="invalid">
+                            {errors.driver_state}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+
+                      <Col md={4}>
+                        <Form.Group>
+                          <Form.Label className="fs-6 fw-semibold">
                             City <span className="text-danger">*</span>
                           </Form.Label>
-                          <Form.Control
-                            type="number"
+                          <Form.Select
                             name="driver_city_id"
                             value={values.driver_city_id}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            isInvalid={touched.driver_city_id && !!errors.driver_city_id}
-                            placeholder="Enter city ID"
-                          />
+                            isInvalid={
+                              touched.driver_city_id &&
+                              !!errors.driver_city_id
+                            }
+                            disabled={!values.driver_state}
+                          >
+                            <option value="">Select City</option>
+                            {cities.map((city) => (
+                              <option key={city.city_id} value={city.city_id}>
+                                {city.city_name}
+                              </option>
+                            ))}
+                          </Form.Select>
                           <Form.Control.Feedback type="invalid">
                             {errors.driver_city_id}
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
 
-                      <Col md={4}>
+                      <Col md={6}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Created By <span className="text-danger">*</span>
@@ -411,7 +586,10 @@ const AddDriver: React.FC = () => {
                             value={values.driver_created_by}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            isInvalid={touched.driver_created_by && !!errors.driver_created_by}
+                            isInvalid={
+                              touched.driver_created_by &&
+                              !!errors.driver_created_by
+                            }
                           >
                             <option value="">Select</option>
                             <option value="0">Self</option>
@@ -427,10 +605,9 @@ const AddDriver: React.FC = () => {
                         <Col md={6}>
                           <Form.Group>
                             <Form.Label className="fs-6 fw-semibold">
-                              Partner ID <span className="text-danger">*</span>
+                              Partner <span className="text-danger">*</span>
                             </Form.Label>
-                            <Form.Control
-                              type="number"
+                            <Form.Select
                               name="driver_created_partner_id"
                               value={values.driver_created_partner_id}
                               onChange={handleChange}
@@ -439,8 +616,19 @@ const AddDriver: React.FC = () => {
                                 touched.driver_created_partner_id &&
                                 !!errors.driver_created_partner_id
                               }
-                              placeholder="Enter partner ID"
-                            />
+                            >
+                              <option value="">Select Partner</option>
+                              {partners.map((partner) => (
+                                <option
+                                  key={partner.partner_id}
+                                  value={partner.partner_id}
+                                >
+                                  {partner.partner_f_name}{" "}
+                                  {partner.partner_l_name} -{" "}
+                                  {partner.partner_mobile}
+                                </option>
+                              ))}
+                            </Form.Select>
                             <Form.Control.Feedback type="invalid">
                               {errors.driver_created_partner_id}
                             </Form.Control.Feedback>
@@ -452,13 +640,22 @@ const AddDriver: React.FC = () => {
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Profile Image{" "}
-                            {!isEditMode && <span className="text-danger">*</span>}
+                            {!isEditMode && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Form.Label>
                           <Form.Control
                             type="file"
                             accept="image/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                              handleImageChange(e, "driver_profile_img", setFieldValue, setProfilePreview)
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
+                              handleImageChange(
+                                e,
+                                "driver_profile_img",
+                                setFieldValue,
+                                setProfilePreview
+                              )
                             }
                             onBlur={handleBlur}
                           />
@@ -496,13 +693,22 @@ const AddDriver: React.FC = () => {
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             DL Front Image{" "}
-                            {!isEditMode && <span className="text-danger">*</span>}
+                            {!isEditMode && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Form.Label>
                           <Form.Control
                             type="file"
                             accept="image/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                              handleImageChange(e, "driver_details_dl_front_img", setFieldValue, setDlFrontPreview)
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
+                              handleImageChange(
+                                e,
+                                "driver_details_dl_front_img",
+                                setFieldValue,
+                                setDlFrontPreview
+                              )
                             }
                           />
                         </Form.Group>
@@ -532,13 +738,22 @@ const AddDriver: React.FC = () => {
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             DL Back Image{" "}
-                            {!isEditMode && <span className="text-danger">*</span>}
+                            {!isEditMode && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Form.Label>
                           <Form.Control
                             type="file"
                             accept="image/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                              handleImageChange(e, "driver_details_dl_back_image", setFieldValue, setDlBackPreview)
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
+                              handleImageChange(
+                                e,
+                                "driver_details_dl_back_image",
+                                setFieldValue,
+                                setDlBackPreview
+                              )
                             }
                           />
                         </Form.Group>
@@ -569,7 +784,8 @@ const AddDriver: React.FC = () => {
                       <Col md={6}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
-                            DL Expiry Date <span className="text-danger">*</span>
+                            DL Expiry Date{" "}
+                            <span className="text-danger">*</span>
                           </Form.Label>
                           <Form.Control
                             type="date"
@@ -587,7 +803,6 @@ const AddDriver: React.FC = () => {
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
-
                     </Row>
                   </Card.Body>
                 </Card>
@@ -605,13 +820,22 @@ const AddDriver: React.FC = () => {
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Aadhar Front Image{" "}
-                            {!isEditMode && <span className="text-danger">*</span>}
+                            {!isEditMode && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Form.Label>
                           <Form.Control
                             type="file"
                             accept="image/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                              handleImageChange(e, "driver_details_aadhar_front_img", setFieldValue, setAadharFrontPreview)
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
+                              handleImageChange(
+                                e,
+                                "driver_details_aadhar_front_img",
+                                setFieldValue,
+                                setAadharFrontPreview
+                              )
                             }
                           />
                         </Form.Group>
@@ -631,13 +855,22 @@ const AddDriver: React.FC = () => {
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Aadhar Back Image{" "}
-                            {!isEditMode && <span className="text-danger">*</span>}
+                            {!isEditMode && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Form.Label>
                           <Form.Control
                             type="file"
                             accept="image/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                              handleImageChange(e, "driver_details_aadhar_back_img", setFieldValue, setAadharBackPreview)
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
+                              handleImageChange(
+                                e,
+                                "driver_details_aadhar_back_img",
+                                setFieldValue,
+                                setAadharBackPreview
+                              )
                             }
                           />
                         </Form.Group>
@@ -675,7 +908,6 @@ const AddDriver: React.FC = () => {
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
-
                     </Row>
                   </Card.Body>
                 </Card>
@@ -693,13 +925,22 @@ const AddDriver: React.FC = () => {
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             PAN Card Image{" "}
-                            {!isEditMode && <span className="text-danger">*</span>}
+                            {!isEditMode && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Form.Label>
                           <Form.Control
                             type="file"
                             accept="image/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                              handleImageChange(e, "driver_details_pan_card_front_img", setFieldValue, setPanFrontPreview)
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
+                              handleImageChange(
+                                e,
+                                "driver_details_pan_card_front_img",
+                                setFieldValue,
+                                setPanFrontPreview
+                              )
                             }
                           />
                         </Form.Group>
@@ -738,7 +979,6 @@ const AddDriver: React.FC = () => {
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
-
                     </Row>
                   </Card.Body>
                 </Card>
@@ -756,12 +996,16 @@ const AddDriver: React.FC = () => {
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
                             Verification Certificate{" "}
-                            {!isEditMode && <span className="text-danger">*</span>}
+                            {!isEditMode && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Form.Label>
                           <Form.Control
                             type="file"
                             accept="image/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>
+                            ) =>
                               handleImageChange(
                                 e,
                                 "driver_details_police_verification_image",
@@ -785,12 +1029,15 @@ const AddDriver: React.FC = () => {
                       <Col md={12}>
                         <Form.Group>
                           <Form.Label className="fs-6 fw-semibold">
-                            Verification Date <span className="text-danger">*</span>
+                            Verification Date{" "}
+                            <span className="text-danger">*</span>
                           </Form.Label>
                           <Form.Control
                             type="date"
                             name="driver_details_police_verification_date"
-                            value={values.driver_details_police_verification_date}
+                            value={
+                              values.driver_details_police_verification_date
+                            }
                             onChange={handleChange}
                             onBlur={handleBlur}
                             isInvalid={
@@ -803,7 +1050,6 @@ const AddDriver: React.FC = () => {
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
-
                     </Row>
                   </Card.Body>
                 </Card>

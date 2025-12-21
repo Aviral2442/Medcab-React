@@ -1,7 +1,6 @@
 import axios from "axios";
 import { formatDate } from "@/components/DateFormat";
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
-const basePath = (import.meta as any).env?.base_Path ?? "http://localhost:4000";
 
 type PartnerInfoType = {
     partner_id: number;

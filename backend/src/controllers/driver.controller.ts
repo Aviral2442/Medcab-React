@@ -17,6 +17,7 @@ export const getDriversController = async (req: Request, res: Response, next: Ne
 
         const result = await getDriverService(filters);
         res.status(200).json(result);
+        
 
     } catch (error) {
         next(error);

@@ -192,7 +192,7 @@ export const addDriverService = async (data: DriverData) => {
             data.driver_gender,
             data.driver_city_id,
             data.driver_created_by,
-            createdPartnerId || 0,
+            data.driver_created_partner_id,
             data.driver_auth_key || ' ',
             profileImg,
             data.partner_auth_key || ' '
@@ -277,8 +277,9 @@ export const addDriverService = async (data: DriverData) => {
 export const fetchDriverService = async (driverId: number) => {
     try {
         const query = `
-            SELECT d.*, dd.*
+            SELECT d.*, c.city_name, c.city_state, dd.*
             FROM driver d
+            LEFT JOIN city c ON d.driver_city_id = c.city_id
             LEFT JOIN driver_details dd
             ON d.driver_id = dd.driver_details_driver_id
             WHERE d.driver_id = ?
@@ -313,12 +314,8 @@ export const updateDriverService = async (driverId: number, data: DriverData) =>
         if (data.driver_dob !== undefined) updateDriverData.driver_dob = dobTimestamp;
         if (data.driver_gender !== undefined) updateDriverData.driver_gender = data.driver_gender;
         if (data.driver_city_id !== undefined) updateDriverData.driver_city_id = data.driver_city_id;
-
-        if (data.driver_created_by !== undefined) {
-            updateDriverData.driver_created_by = data.driver_created_by;
-            updateDriverData.driver_created_partner_id =
-                data.driver_created_by === 1 ? data.driver_created_partner_id : null;
-        }
+        if (data.driver_created_by !== undefined) updateDriverData.driver_created_by = data.driver_created_by;
+        if (data.driver_created_partner_id !== undefined) updateDriverData.driver_created_partner_id = data.driver_created_partner_id;
 
         if (data.driver_profile_img) {
             const uploaded = uploadFileCustom(data.driver_profile_img, "/drivers");
