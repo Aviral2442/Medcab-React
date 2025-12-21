@@ -60,7 +60,7 @@ const PartnerDetailed: React.FC = () => {
       );
       const partnerAccountDetail = resp.data?.jsonData?.partnerAccountDetail;
       const partnerBasicDetail = resp.data?.jsonData?.partnerBasicDetail;
-
+      console.log("Partner Response:", resp.data);
       const partner = {
         ...partnerBasicDetail[0],
         ...partnerAccountDetail[0],

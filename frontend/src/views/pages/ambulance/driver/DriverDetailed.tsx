@@ -29,6 +29,7 @@ const DriverDetailed: React.FC = () => {
     try {
       const resp = await axios.post(`${baseURL}/driver/driver_detail/${id}`);
       const driver = resp.data?.jsonData?.driver;
+      console.log("Driver Response:", resp.data);
       if (!driver) {
         setError("Driver not found");
         setDriverData(null);

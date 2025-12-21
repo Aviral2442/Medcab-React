@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, Row, Col, Image, Spinner, Alert, Button} from "react-bootstrap";
-import DateConversion from "../../DateConversion";
+import { Card, Row, Col, Image, Spinner, Alert, Button } from "react-bootstrap";
+import { formatDate } from "@/components/DateFormat";
 import "@/global.css";
 import { FaWhatsapp } from "react-icons/fa";
 
@@ -53,7 +53,8 @@ const basePath = (import.meta as any).env?.base_Path ?? "";
 type FieldConfig = {
   name: keyof DriverDetail;
   label: string;
-  type?: "text" | "date" | "datetime" | "currency" | "image";
+  type?: "text" | "date" | "datetime" | "currency" | "image" | "select";
+  options?: { value: string | number; label: string }[];
 };
 
 const formatValue = (val: any, type?: FieldConfig["type"]) => {
@@ -61,11 +62,7 @@ const formatValue = (val: any, type?: FieldConfig["type"]) => {
 
   if (type === "date" || type === "datetime") {
     try {
-      const date = /^\d+$/.test(String(val))
-        ? new Date(parseInt(String(val)) * 1000)
-        : new Date(val);
-      if (isNaN(date.getTime())) return String(val);
-      return DateConversion(date.toISOString());
+      return formatDate(val);
     } catch {
       return String(val);
     }
@@ -82,12 +79,15 @@ const Field: React.FC<{
   label: string;
   value?: any;
   type?: FieldConfig["type"];
-}> = ({ label, value, type = "text" }) => {
+  options?: { value: string | number; label: string }[];
+}> = ({ label, value, type = "text", options }) => {
   return (
     <div className="mb-2">
       <div className="text-muted mb-1 fs-6">{label}</div>
       <div className="border rounded px-2 py-1 bg-body text-body">
-        {formatValue(value, type)}
+        {type === "select" && options
+          ? options.find((opt) => opt.value === value)?.label || " "
+          : formatValue(value, type)}
       </div>
     </div>
   );
@@ -103,6 +103,32 @@ const Section: React.FC<{
     {children}
   </div>
 );
+
+const createdByOptions = [
+  { value: "0", label: "Self" },
+  { value: "1", label: "Partner" },
+];
+
+//0 for new driver, 1 for active driver, 2 for inactive, 3 for deleted driver, 4 Applied for verification
+const driverStatusOptions = [
+  { value: 0, label: "New" },
+  { value: 1, label: "Active" },
+  { value: 2, label: "Inactive" },
+  { value: 3, label: "Deleted" },
+  { value: 4, label: "Applied for verification" },
+];
+
+//0 for free 1 for in booking
+const driverOnBookingStatusOptions = [
+  { value: "0", label: "Free" },
+  { value: "1", label: "In Booking" },
+];
+
+//0 for verified 1 for Un-verified
+const driverOTPverification = [
+  { value: "0", label: "Verified" },
+  { value: "1", label: "Un-verified" },
+]
 
 const getFieldGroups = (): Record<
   string,
@@ -127,8 +153,8 @@ const getFieldGroups = (): Record<
       title: "Partner Information",
       cols: 3,
       fields: [
-        { name: "driver_created_by", label: "Created By" },
-        { name: "driver_created_partner_id", label: "Partner ID" },
+        { name: "driver_created_by", label: "Created By", type: "select", options: createdByOptions },
+        // { name: "driver_created_partner_id", label: "Partner ID" },
         { name: "partner_f_name", label: "Partner First Name" },
         { name: "partner_l_name", label: "Partner Last Name" },
         { name: "partner_mobile", label: "Partner Mobile" },
@@ -139,9 +165,9 @@ const getFieldGroups = (): Record<
       cols: 3,
       fields: [
         { name: "driver_registration_step", label: "Registration Step" },
-        { name: "driver_otp_verification", label: "OTP Verification" },
-        { name: "driver_status", label: "Status" },
-        { name: "driver_on_booking_status", label: "On Booking Status" },
+        { name: "driver_otp_verification", label: "OTP Verification", type: "select", options: driverOTPverification },
+        { name: "driver_status", label: "Status", type: "select", options: driverStatusOptions },
+        { name: "driver_on_booking_status", label: "On Booking Status", type: "select", options: driverOnBookingStatusOptions },
       ],
     },
     stats: {
@@ -171,27 +197,47 @@ const getFieldGroups = (): Record<
           label: "Aadhar Front Image",
           type: "image",
         },
-        { name: "driver_details_aadhar_back_img", label: "Aadhar Back Image", type: "image" },
-        { name: "driver_details_dl_front_img", label: "DL Front Image" , type: "image" },
-        { name: "driver_details_dl_back_image", label: "DL Back Image" , type: "image" },
+        {
+          name: "driver_details_aadhar_back_img",
+          label: "Aadhar Back Image",
+          type: "image",
+        },
+        {
+          name: "driver_details_dl_front_img",
+          label: "DL Front Image",
+          type: "image",
+        },
+        {
+          name: "driver_details_dl_back_image",
+          label: "DL Back Image",
+          type: "image",
+        },
         {
           name: "driver_details_pan_card_front_img",
           label: "PAN Card Front Image",
-          type: "image"
+          type: "image",
         },
         {
           name: "driver_details_police_verification_image",
           label: "Police Verification Image",
-          type: "image"
+          type: "image",
         },
-        { name: "driver_details_aadhar_number", label: "Aadhar Number" },
-        { name: "driver_details_dl_number", label: "DL Number" },
+        {
+          name: "driver_details_aadhar_number",
+          label: "Aadhar Number",
+          type: "text",
+        },
+        { name: "driver_details_dl_number", label: "DL Number", type: "text" },
         {
           name: "driver_details_dl_exp_date",
           label: "DL Expiry Date",
           type: "date",
         },
-        { name: "driver_details_pan_card_number", label: "PAN Card Number" },
+        {
+          name: "driver_details_pan_card_number",
+          label: "PAN Card Number",
+          type: "text",
+        },
         {
           name: "driver_details_police_verification_date",
           label: "Police Verification Date",
@@ -208,7 +254,11 @@ type Props = {
   error?: string | null;
 };
 
-const DriverDetails: React.FC<Props> = ({ data, loading = false, error = null }) => {
+const DriverDetails: React.FC<Props> = ({
+  data,
+  loading = false,
+  error = null,
+}) => {
   if (loading) {
     return (
       <div className="d-flex justify-content-center p-4">
@@ -229,39 +279,69 @@ const DriverDetails: React.FC<Props> = ({ data, loading = false, error = null })
 
   return (
     <div>
+      {/* Partner Info */}
+      <Card className="mb-4">
+        <Card.Body>
+          <Section title="Profile & Documents">
+            <Row>
+              <Col lg={3} md={4}>
+                <div className="text-muted mb-1 fs-6">Profile Image</div>
+                {data.driver_profile_img ? (
+                  <Image
+                    src={`${basePath}/${data.driver_profile_img}`}
+                    alt="Profile"
+                    thumbnail
+                    style={{ maxWidth: 240, maxHeight: 240 }}
+                  />
+                ) : (
+                  <div
+                    className="border rounded d-flex align-items-center justify-content-center"
+                    style={{ height: 200 }}
+                  >
+                    <div className="text-muted">No Image</div>
+                  </div>
+                )}
+              </Col>
+              {fieldGroups.Documents.fields.map((f) => (
+                <Col lg={3} md={6} key={String(f.name)}>
+                  {f.type === "image" && (
+                    <div className="mb-3">
+                      <div className="text-muted mb-1 fs-6">{f.label}</div>
+                      {data[f.name] ? (
+                        <Image
+                          src={`${basePath}/${data[f.name]}`}
+                          alt={f.label}
+                          thumbnail
+                          style={{ maxWidth: "100%", maxHeight: 240 }}
+                        />
+                      ) : (
+                        <div
+                          className="border rounded d-flex align-items-center justify-content-center"
+                          style={{ height: 200 }}
+                        >
+                          <div className="text-muted">No Image</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Col>
+              ))}
+            </Row>
+          </Section>
+        </Card.Body>
+      </Card>
       {/* Driver */}
       <Card className="mb-4 mt-2">
         <Card.Body>
-          <Row className="g-3">
-            <Col lg={3} md={4}>
-              <div className="text-muted mb-1 fs-6">Profile Image</div>
-              {data.driver_profile_img ? (
-                <Image
-                  src={`${basePath}/${data.driver_profile_img}`}
-                  alt="Profile"
-                  thumbnail
-                  style={{ maxWidth: 240, maxHeight: 240 }}
-                />
-              ) : (
-                <div
-                  className="border rounded d-flex align-items-center justify-content-center"
-                  style={{ height: 240 }}
-                >
-                  <div className="text-muted">No Image</div>
-                </div>
-              )}
-            </Col>
-
-            <Col lg={9} md={8}>
-              <Row>
-                {fieldGroups.basicInfo.fields.map((f) => (
-                  <Col lg={4} md={6} key={String(f.name)}>
-                    <Field label={f.label} value={data[f.name]} type={f.type} />
-                  </Col>
-                ))}
-              </Row>
-            </Col>
-          </Row>
+          <Section title={fieldGroups.basicInfo.title}>
+            <Row>
+              {fieldGroups.basicInfo.fields.map((f) => (
+                <Col lg={2} md={6} key={String(f.name)}>
+                  <Field label={f.label} value={data[f.name]} type={f.type} options={f.options} />
+                </Col>
+              ))}
+            </Row>
+          </Section>
         </Card.Body>
       </Card>
 
@@ -272,7 +352,7 @@ const DriverDetails: React.FC<Props> = ({ data, loading = false, error = null })
             <Row>
               {fieldGroups.partnerInfo.fields.map((f) => (
                 <Col lg={2} md={6} key={String(f.name)}>
-                  <Field label={f.label} value={data[f.name]} type={f.type} />
+                  <Field label={f.label} value={data[f.name]} type={f.type} options={f.options} />
                 </Col>
               ))}
             </Row>
@@ -287,7 +367,7 @@ const DriverDetails: React.FC<Props> = ({ data, loading = false, error = null })
             <Row>
               {fieldGroups.statusAndRegistration.fields.map((f) => (
                 <Col lg={2} md={6} key={String(f.name)}>
-                  <Field label={f.label} value={data[f.name]} type={f.type} />
+                  <Field label={f.label} value={data[f.name]} type={f.type} options={f.options} />
                 </Col>
               ))}
             </Row>
@@ -303,7 +383,7 @@ const DriverDetails: React.FC<Props> = ({ data, loading = false, error = null })
               <Row>
                 {fieldGroups.stats.fields.map((f) => (
                   <Col lg={2} md={6} key={String(f.name)}>
-                    <Field label={f.label} value={data[f.name]} type={f.type} />
+                    <Field label={f.label} value={data[f.name]} type={f.type} options={f.options} />
                   </Col>
                 ))}
               </Row>
@@ -316,36 +396,15 @@ const DriverDetails: React.FC<Props> = ({ data, loading = false, error = null })
       <Card className="mb-4">
         <Card.Body>
           <Section title={fieldGroups.Documents.title}>
-            <div>
-              <Row>
-                {fieldGroups.Documents.fields.map((f) => (
-                  <Col lg={3} md={6} key={String(f.name)}>
-                    {f.type === "image" ? (
-                      <div className="mb-3">
-                        <div className="text-muted mb-1 fs-6">{f.label}</div>
-                        {data[f.name] ? (
-                          <Image
-                            src={`${basePath}/${data[f.name]}`}
-                            alt={f.label}
-                            thumbnail
-                            style={{ maxWidth: "100%", maxHeight: 200 }}
-                          />
-                        ) : (
-                          <div
-                            className="border rounded d-flex align-items-center justify-content-center"
-                            style={{ height: 200 }}
-                          >
-                            <div className="text-muted">No Image</div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <Field label={f.label} value={data[f.name]} type={f.type} />
-                    )}
-                  </Col>
-                ))}
-              </Row>
-            </div>
+            <Row>
+              {fieldGroups.Documents.fields.map((f) => (
+                <Col lg={2} md={6} key={String(f.name)} >
+                  {f.type !== "image" && (
+                    <Field label={f.label} value={data[f.name]} type={f.type} options={f.options} />
+                  )}
+                </Col>
+              ))}
+            </Row>
           </Section>
         </Card.Body>
       </Card>
@@ -366,7 +425,7 @@ const DriverDetails: React.FC<Props> = ({ data, loading = false, error = null })
               Assign
             </Button>
             <Button variant="" className="me-2 mb-2 bg-light">
-              <FaWhatsapp size={15}/>  <span className="ms-1">WhatsApp</span>
+              <FaWhatsapp size={15} /> <span className="ms-1">WhatsApp</span>
             </Button>
           </Section>
         </Card.Body>

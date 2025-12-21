@@ -12,7 +12,7 @@ type PartnerDetail = {
   partner_pending_wallet_to_comp?: number;
   partner_dob?: number | string | null;
   partner_gender?: string | null;
-  partner_city_id?: number | string | null;
+  city_name?: number | string | null;
   partner_created_by?: number | string | null;
   partner_profile_img?: string | null;
   partner_aadhar_front?: string | null;
@@ -32,6 +32,7 @@ type PartnerDetail = {
   partner_acc_dtl_acc_holder?: string | null;
   partner_acc_dtl_added_date?: string | number | null;
   partner_acc_dtl_status?: number | string | null;
+  partner_created_by_name?: number | string | null;
 };
 
 const basePath = (import.meta as any).env?.base_Path ?? "";
@@ -39,7 +40,8 @@ const basePath = (import.meta as any).env?.base_Path ?? "";
 type FieldConfig = {
   name: keyof PartnerDetail;
   label: string;
-  type?: "text" | "date" | "datetime" | "currency";
+  type?: "text" | "date" | "datetime" | "currency" | "select";
+  options?: { value: string; label: string }[];
 };
 
 const formatValue = (val: any, type?: FieldConfig["type"]) => {
@@ -64,14 +66,29 @@ const Field: React.FC<{
   label: string;
   value?: any;
   type?: FieldConfig["type"];
-}> = ({ label, value, type = "text" }) => (
+  options?: FieldConfig["options"];
+}> = ({ label, value, type = "text", options = [] }) => (
   <div className="mb-2">
     <div className="text-muted mb-1 fs-6">{label}</div>
     <div className="border rounded px-2 py-1 bg-body text-body">
-      {formatValue(value, type)}
+      {type === "select"
+        ? options.find((opt) => opt.value === String(value))?.label || "N/A"
+        : formatValue(value, type)}
     </div>
   </div>
 );
+
+const createdByOptions = [
+  { value: "0", label: "Self" },
+  { value: "1", label: "Admin" },
+];
+
+//0 for new user,1 for active user, 2 for inactive
+const partnerStatusOptions = [
+  { value: "0", label: "New" },
+  { value: "1", label: "Active" },
+  { value: "2", label: "Inactive" },
+];
 
 const Section: React.FC<{
   title: string;
@@ -93,7 +110,7 @@ const getFieldGroups = (): Record<
       title: "Basic Information",
       cols: 3,
       fields: [
-        { name: "partner_id", label: "Partner ID" },
+        // { name: "partner_id", label: "Partner ID" },
         { name: "partner_f_name", label: "First Name" },
         { name: "partner_l_name", label: "Last Name" },
         { name: "partner_mobile", label: "Mobile" },
@@ -105,7 +122,7 @@ const getFieldGroups = (): Record<
         },
         { name: "partner_dob", label: "Date of Birth", type: "date" },
         { name: "partner_gender", label: "Gender" },
-        { name: "partner_city_id", label: "City ID" },
+        { name: "city_name", label: "City ID" },
       ],
     },
     kyc: {
@@ -139,10 +156,11 @@ const getFieldGroups = (): Record<
       title: "Created & Status",
       cols: 3,
       fields: [
-        { name: "partner_created_by", label: "Created By" },
+        { name: "partner_created_by", label: "Created By", type: "select", options: createdByOptions },
+        { name: "partner_created_by_name", label: "Admin" },
         { name: "created_at", label: "Created At", type: "datetime" },
-        { name: "updated_at", label: "Updated At", type: "datetime" },
-        { name: "partner_status", label: "Status" },
+        // { name: "updated_at", label: "Updated At", type: "datetime" },
+        { name: "partner_status", label: "Status", type: "select", options: partnerStatusOptions},
       ],
     },
   };
@@ -257,7 +275,8 @@ const PartnerDetails: React.FC<{ data: PartnerDetail | null }> = ({ data }) => {
               <Row>
                 {fieldGroups.basicInfo.fields.map((f) => (
                   <Col lg={2} md={6} key={String(f.name)}>
-                    <Field label={f.label} value={data[f.name]} type={f.type} />
+                    <Field label={f.label} value={data[f.name]} type={f.type} options={f.options} />
+                    
                   </Col>
                 ))}
               </Row>
@@ -271,7 +290,7 @@ const PartnerDetails: React.FC<{ data: PartnerDetail | null }> = ({ data }) => {
             <Row>
               {fieldGroups.kyc.fields.map((f) => (
                 <Col lg={3} md={6} key={String(f.name)}>
-                  <Field label={f.label} value={data[f.name]} type={f.type} />
+                  <Field label={f.label} value={data[f.name]} type={f.type} options={f.options} />
                 </Col>
               ))}
             </Row>
@@ -286,7 +305,7 @@ const PartnerDetails: React.FC<{ data: PartnerDetail | null }> = ({ data }) => {
             <Row>
               {fieldGroups.account.fields.map((f) => (
                 <Col lg={2} md={6} key={String(f.name)}>
-                  <Field label={f.label} value={data[f.name]} type={f.type} />
+                  <Field label={f.label} value={data[f.name]} type={f.type} options={f.options} />
                 </Col>
               ))}
             </Row>
@@ -301,7 +320,7 @@ const PartnerDetails: React.FC<{ data: PartnerDetail | null }> = ({ data }) => {
             <Row>
               {fieldGroups.createdStatus.fields.map((f) => (
                 <Col lg={3} md={6} key={String(f.name)}>
-                  <Field label={f.label} value={data[f.name]} type={f.type} />
+                  <Field label={f.label} value={data[f.name]} type={f.type} options={f.options} />
                 </Col>
               ))}
             </Row>

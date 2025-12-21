@@ -473,7 +473,13 @@ export const getPartnerDetailServices = async (partnerId: number) => {
 
     try {
 
-        const partnerBasicDetail = `SELECT * FROM partner WHERE partner_id = ?`;
+        const partnerBasicDetail = `
+        SELECT partner.*, city.city_name, admin.admin_name AS partner_created_by_name
+        FROM 
+        partner 
+        LEFT JOIN city ON partner.partner_city_id = city.city_id
+        LEFT JOIN admin ON partner.partner_created_by_id = admin.id
+        WHERE partner_id = ?`;
 
         const partnerAccountDetail = `SELECT * FROM partner_acc_dtl WHERE partner_acc_dtl_p_id = ?`;
 
