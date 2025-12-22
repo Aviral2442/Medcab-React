@@ -2333,6 +2333,8 @@ export const verifyOTPAmbulanceBookingService = async (bookingId: number, adminI
         }
 
     } catch (error) {
+        console.log(error);
+        
         throw new ApiError(500, "Verify OTP Ambulance Booking Service Error On Verifying");
     }
 };
