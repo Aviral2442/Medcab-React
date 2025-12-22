@@ -181,7 +181,7 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
       show={show}
       onHide={onHide}
       centered
-      size="md" // Changed from default to md
+      size="lg" // Changed from default to md
     >
       <Modal.Header closeButton>
         <Modal.Title>Reason for Cancellation</Modal.Title>

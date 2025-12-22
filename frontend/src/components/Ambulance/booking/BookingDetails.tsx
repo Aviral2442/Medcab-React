@@ -1280,7 +1280,7 @@ const AmbulanceBookingDetailsForm: React.FC<
         show={showConsumerSearchModal}
         onHide={() => setShowConsumerSearchModal(false)}
         centered
-        size="md"
+        size="sm"
       >
         <Modal.Header closeButton>
           <Modal.Title>Search Consumer</Modal.Title>
@@ -1362,7 +1362,7 @@ const AmbulanceBookingDetailsForm: React.FC<
           setDriverData(null);
         }}
         centered
-        size="md"
+        size="lg"
       >
         <Modal.Header closeButton>
           <Modal.Title>Assign Vehicle & Driver</Modal.Title>
