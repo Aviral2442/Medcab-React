@@ -1,9 +1,9 @@
 import React from "react";
 import { Container } from "react-bootstrap";
 import ExportDataWithButtons from "@/views/tables/data-tables/ambulance/category";
-import AddCategory from "../category/components/AddCategory";
+import AddCategory from "./components/AddCategory";
 import AddfacilitiesRate from "./components/AddfacilitiesRate";
-import AddAmbulanceFAQ from "../category/components/AddAmbulanceFAQ";
+import AddAmbulanceFAQ from "./components/AddAmbulanceFAQ";
 import Addfacilities from "./components/AddFacilities";
 
 const Page = () => {
