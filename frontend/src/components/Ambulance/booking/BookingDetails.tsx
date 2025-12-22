@@ -8,6 +8,7 @@ import DateConversion from "@/components/DateConversion";
 import { formatDate } from "@/components/DateFormat";
 import Swal from "sweetalert2";
 import CancelBookingModal from "./CancelBookingModal";
+import { jwtDecode } from "jwt-decode";
 
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
@@ -398,6 +399,190 @@ const AmbulanceBookingDetailsForm: React.FC<
     setConsumerSearchResults([]);
   };
 
+
+  const verifyOTP = async () => {
+    if (!data?.booking_id) {
+      Swal.fire({
+        title: "Error",
+        text: "Invalid booking ID",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+
+    try {
+      // Ask for confirmation first
+      const result = await Swal.fire({
+        title: "Verify OTP?",
+        text: "Are you sure you want to verify the OTP for this booking?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Verify",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        reverseButtons: true,
+      });
+
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      // Get adminId from token
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      const decodedToken = jwtDecode(token) as any;
+      const adminId = decodedToken?.id;
+
+      if (!adminId) {
+        throw new Error("Admin ID not found in token");
+      }
+
+      // Show loading
+      Swal.fire({
+        title: "Verifying OTP...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      console.log("Verifying OTP for booking ID:", data.booking_id, "by admin ID:", adminId);
+      const response = await axios.post(
+        `${baseURL}/ambulance/verify_otp/${data.booking_id}`,
+        { adminId }
+      );
+
+      console.log("OTP Verification response:", response.data);
+
+      if (response.data.status == 200) {
+        // Update local state to reflect OTP verification
+        onUpdate?.("booking_view_status_otp", "1");
+
+        Swal.fire({
+          title: "Success",
+          text: "OTP verified successfully.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } else {
+        throw new Error(response.data.message || "OTP verification failed");
+      }
+    } catch (error: any) {
+      console.error("Error verifying OTP:", error);
+      Swal.fire({
+        title: "Error",
+        text:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to verify OTP. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    }
+  };
+  // const completeBooking = async () => {
+  //   if (!data?.booking_id) {
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: "Invalid booking ID",
+  //       icon: "error",
+  //       confirmButtonColor: "#d33",
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     // Ask for confirmation first
+  //     const result = await Swal.fire({
+  //       title: "Verify OTP?",
+  //       text: "Are you sure you want to verify the OTP for this booking?",
+  //       icon: "question",
+  //       showCancelButton: true,
+  //       confirmButtonText: "Yes, Verify",
+  //       cancelButtonText: "Cancel",
+  //       confirmButtonColor: "#3085d6",
+  //       cancelButtonColor: "#d33",
+  //       reverseButtons: true,
+  //     });
+
+  //     if (!result.isConfirmed) {
+  //       return;
+  //     }
+
+  //     // Get adminId from token
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       throw new Error("Authentication token not found");
+  //     }
+
+  //     const decodedToken = jwtDecode(token) as any;
+  //     const adminId = decodedToken?.id;
+
+  //     if (!adminId) {
+  //       throw new Error("Admin ID not found in token");
+  //     }
+
+  //     // Show loading
+  //     Swal.fire({
+  //       title: "Verifying OTP...",
+  //       text: "Please wait",
+  //       allowOutsideClick: false,
+  //       didOpen: () => {
+  //         Swal.showLoading();
+  //       },
+  //     });
+
+  //     console.log("Verifying OTP for booking ID:", data.booking_id, "by admin ID:", adminId);
+  //     const response = await axios.post(
+  //       `${baseURL}/ambulance/verify_otp/${data.booking_id}`,
+  //       { adminId }
+  //     );
+
+  //     console.log("OTP Verification response:", response.data);
+
+  //     if (response.data.status == 200) {
+  //       // Update local state to reflect OTP verification
+  //       onUpdate?.("booking_view_status_otp", "1");
+
+  //       Swal.fire({
+  //         title: "Success",
+  //         text: "OTP verified successfully.",
+  //         icon: "success",
+  //         confirmButtonColor: "#3085d6",
+  //         timer: 2000,
+  //         timerProgressBar: true,
+  //       });
+  //     } else {
+  //       throw new Error(response.data.message || "OTP verification failed");
+  //     }
+  //   } catch (error: any) {
+  //     console.error("Error verifying OTP:", error);
+  //     Swal.fire({
+  //       title: "Error",
+  //       text:
+  //         error.response?.data?.message ||
+  //         error.message ||
+  //         "Failed to verify OTP. Please try again.",
+  //       icon: "error",
+  //       confirmButtonColor: "#d33",
+  //     });
+  //   }
+  // };
+
+
+  <Button variant="" className="me-2 mb-2 bg-light" onClick={verifyOTP}>
+    Verify OTP
+  </Button>;
+
+  // ...existing code...
   const searchConsumers = async (query: string) => {
     if (!query.trim()) {
       setConsumerSearchResults([]);
@@ -1243,7 +1428,11 @@ const AmbulanceBookingDetailsForm: React.FC<
             >
               Cancel Booking
             </Button>
-            <Button variant="" className="me-2 mb-2  bg-light">
+            <Button
+              variant=""
+              className="me-2 mb-2 bg-light"
+              onClick={verifyOTP}
+            >
               Verify OTP
             </Button>
             <Button variant="" className="me-2 mb-2  bg-light">
@@ -1333,7 +1522,6 @@ const AmbulanceBookingDetailsForm: React.FC<
           )}
         </Modal.Body>
       </Modal>
-
 
       {/* Assign Driver Modal */}
       <Modal
@@ -1434,16 +1622,16 @@ const AmbulanceBookingDetailsForm: React.FC<
           </Form>
         </Modal.Body>
         <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setShowAssignModal(false);
-                setVehicleSearchResults([]);
-                setVehicleSearchQuery("");
-              }}
-            >
-              Close
-            </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowAssignModal(false);
+              setVehicleSearchResults([]);
+              setVehicleSearchQuery("");
+            }}
+          >
+            Close
+          </Button>
         </Modal.Footer>
       </Modal>
 

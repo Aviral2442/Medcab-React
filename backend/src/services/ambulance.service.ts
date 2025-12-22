@@ -2271,7 +2271,16 @@ export const verifyOTPAmbulanceBookingService = async (bookingId: number, adminI
     try {
 
         const [rows]: any = await db.query(
-            `SELECT booking_view_status_otp FROM booking_view WHERE booking_id = ?`,
+            `
+            SELECT 
+                booking_view_status_otp, 
+                booking_status,
+                booking_view_pickup_time,
+                booking_acpt_driver_id,
+                booking_acpt_vehicle_id,
+                booking_by_cid
+            FROM booking_view 
+            WHERE booking_id = ?`,
             [bookingId]
         );
 
@@ -2284,7 +2293,8 @@ export const verifyOTPAmbulanceBookingService = async (bookingId: number, adminI
 
         const currentBookingStatus = rows[0].booking_status;
 
-        if (currentBookingStatus == 2) {
+        console.log("currentBookingStatus", rows[0]);
+        if (currentBookingStatus === "2") {
 
             const arrivalTime = rows[0].booking_view_pickup_time;
             const currentTime = currentUnixTime();
