@@ -2062,7 +2062,9 @@ export const getAmbulanceVehicleAndAssignDataService = async (search?: string) =
         return {
             status: 200,
             message: "Vehicle and driver/partner data fetched successfully",
-            jsonData: rows
+            jsonData: {
+                vehicle_and_assign_data: rows
+            }
         };
 
     } catch (error) {
