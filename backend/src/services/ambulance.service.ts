@@ -2377,6 +2377,34 @@ export const cancelDriverFromAmbulanceBookingService = async (bookingId: number)
     }
 };
 
+// SERVICE TO UPDATE AMBULANCE BOOKING AMOUNT
+export const updateAmbulanceBookingAmountService = async (bookingId: number, newAmount: number, amountColumnName: string) => {
+    try {
+
+        const validColumns = ['booking_amount', 'booking_adv_amount', 'booking_total_amount', 'booking_view_base_rate', 'booking_view_km_till', 'booking_view_per_km_rate', 'booking_view_per_ext_km_rate', 'booking_view_per_ext_min_rate', 'booking_view_km_rate', 'booking_view_total_fare', 'booking_view_service_charge_rate', 'booking_view_service_charge_rate_discount'];
+
+        if (!validColumns.includes(amountColumnName)) {
+            return {
+                status: 400,
+                message: "Invalid amount column name",
+            }
+        }
+
+        const [result]: any = await db.query(
+            `UPDATE booking_view SET ${amountColumnName} = ? WHERE booking_id = ?`,
+            [newAmount, bookingId]
+        );
+
+        return {
+            status: 200,
+            message: "Ambulance booking amount updated successfully ` " + amountColumnName + " " + newAmount + " ` ",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Update Ambulance Booking Amount Service Error On Updating");
+    }
+};
+
 // generate invoice code
 
 // $totalAmounts = $request -> input('totalAmounts');
