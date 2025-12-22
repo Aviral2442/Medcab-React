@@ -717,7 +717,8 @@ export const cancelAmbulanceBookingController = async (req: Request, res: Respon
 export const verifyOTPAmbulanceBookingController = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const bookingId = parseInt(req.params.id);
-        const result = await verifyOTPAmbulanceBookingService(bookingId);
+        const {adminId} = req.body;
+        const result = await verifyOTPAmbulanceBookingService(bookingId, adminId);
         res.status(200).json(result);
     } catch (error) {
         next(error);

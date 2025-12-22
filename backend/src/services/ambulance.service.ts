@@ -2264,7 +2264,7 @@ export const cancelAmbulanceBookingService = async (bookingId: number, cancelRea
 };
 
 // SERVICE TO VERIFY OTP FOR AMBULANCE BOOKING
-export const verifyOTPAmbulanceBookingService = async (bookingId: number) => {
+export const verifyOTPAmbulanceBookingService = async (bookingId: number, adminId: number) => {
     try {
 
         const [rows]: any = await db.query(
@@ -2290,6 +2290,32 @@ export const verifyOTPAmbulanceBookingService = async (bookingId: number) => {
             await db.query(
                 `UPDATE booking_view SET booking_view_status_otp = 0, booking_view_arrival_time = ? WHERE booking_id = ?`,
                 [timeDifference, bookingId]
+            );
+
+            const [driverLatlong]: any = await db.query(
+                `SELECT driver_live_location_lat, driver_live_location_long 
+                FROM driver_live_location
+                WHERE driver_live_location_d_id = ?`
+                , [rows[0].booking_acpt_driver_id]
+            );
+
+            const booking_a_c_history_data = {
+                bah_booking_id: bookingId,
+                bah_driver_id: rows[0].booking_acpt_driver_id,
+                bah_vehicle_id: rows[0].booking_acpt_vehicle_id || 0,
+                bah_driver_latitude: driverLatlong[0]?.driver_live_location_lat || 0,
+                bah_driver_longitude: driverLatlong[0]?.driver_live_location_long || 0,
+                bah_consumer_id: rows[0]?.booking_by_cid || 0,
+                bah_time: currentUnixTime(),
+                bah_user_type: 0,
+                bah_admin_id: adminId,
+                created_at: new Date(),
+                bah_status: 1,
+            };
+
+            await db.query(
+                `INSERT INTO booking_a_c_history SET ?`,
+                [booking_a_c_history_data]
             );
 
             return {
