@@ -2381,6 +2381,25 @@ export const cancelDriverFromAmbulanceBookingService = async (bookingId: number)
 export const updateAmbulanceBookingAmountService = async (bookingId: number, newAmount: number, amountColumnName: string) => {
     try {
 
+        const [rows]: any = await db.query(
+            `SELECT booking_id FROM booking_view WHERE booking_id = ?`,
+            [bookingId]
+        );
+
+        if (!rows || rows.length === 0) {
+            return {
+                status: 404,
+                message: "Booking not found",
+            };
+        }
+
+        if (rows[0].booking_status == 3 || rows[0].booking_status == 4 || rows[0].booking_status == 5 || rows[0].booking_status == 6) {
+            return {
+                status: 400,
+                message: "Cannot update amount for ongoing, completed, cancelled or future bookings",
+            };
+        }
+
         const validColumns = ['booking_amount', 'booking_adv_amount', 'booking_total_amount', 'booking_view_base_rate', 'booking_view_km_till', 'booking_view_per_km_rate', 'booking_view_per_ext_km_rate', 'booking_view_per_ext_min_rate', 'booking_view_km_rate', 'booking_view_total_fare', 'booking_view_service_charge_rate', 'booking_view_service_charge_rate_discount'];
 
         if (!validColumns.includes(amountColumnName)) {
