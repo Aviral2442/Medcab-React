@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, getAmbulanceVehicleNumberService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, ambulanceBookingCountService, dashboardAmbulanceBookingService, getAmbulanceConsumerMobileService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService, ambulancePartnerCountService, ambulanceCompleteOngoingCancelReminderBookingCounts, getAmbulanceDriverNameNoUsingVehicleIdService, assignDriverService, cancelAmbulanceBookingService, verifyOTPAmbulanceBookingService, cancelReasonService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, ambulanceBookingCountService, dashboardAmbulanceBookingService, getAmbulanceConsumerMobileService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService, ambulancePartnerCountService, ambulanceCompleteOngoingCancelReminderBookingCounts, assignDriverService, cancelAmbulanceBookingService, verifyOTPAmbulanceBookingService, cancelReasonService, getAmbulanceVehicleAndAssignDataService } from "../services/ambulance.service";
 
 // CONTROLLER TO GET TOTAL AMBULANCE BOOKING COUNT
 export const ambulanceBookingCountController = async (req: Request, res: Response, next: NextFunction) => {
@@ -647,27 +647,17 @@ export const getAmbulanceConsumerMobileController = async (req: Request, res: Re
     }
 };
 
-// CONTROLLER TO GET AMBULANCE VEHICLE NUMBER (SEARCHABLE)
-export const getAmbulanceVehicleNumberController = async (req: Request, res: Response, next: NextFunction) => {
+// CONTROLLER TO GET AMBULANCE VEHICLE AND ASSIGN DATA (SEARCHABLE)
+export const getAmbulanceVehicleAndAssignDataController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const search = typeof req.query.search === "string" ? req.query.search : undefined;
 
-        const result = await getAmbulanceVehicleNumberService(search);
+        const result = await getAmbulanceVehicleAndAssignDataService(search);
 
-        res.status(200).json(result);
-    } catch (error) {
-        next(error);
-    }
-};
-
-// CONTROLLER TO GET AMBULANCE DRIVER & PARTNER DATA USING VEHICLE ID
-export const getAmbulanceDriverNameNoUsingVehicleIdController = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        if (!req.params.vehicleId) {
-            return res.status(400).json({ status: 400, message: "Vehicle ID is required" });
-        }
-        const vehicleId = parseInt(req.params.vehicleId);
-        const result = await getAmbulanceDriverNameNoUsingVehicleIdService(vehicleId);
         res.status(200).json(result);
     } catch (error) {
         next(error);

@@ -2000,88 +2000,76 @@ export const getAmbulanceConsumerMobileService = async (search?: string) => {
     }
 };
 
-// SERVICE TO GET VEHICLE NAME AND NUMBER (SEARCHABLE BY RC NUMBER)
-export const getAmbulanceVehicleNumberService = async (search?: string) => {
+// SERVICE: GET VEHICLE + DRIVER/PARTNER USING RC NUMBER
+export const getAmbulanceVehicleAndAssignDataService = async (search?: string) => {
     try {
-        let query = `
-            SELECT
-                vehicle_id,
-                v_vehicle_name,
-                vehicle_rc_number,
-                vehicle_status
-            FROM vehicle
-        `;
 
-        const params: any[] = [];
-
-        if (search && search.trim()) {
-            query += ` WHERE vehicle_rc_number LIKE ?`;
-            params.push(`%${search.trim()}%`);
+        if (!search || !search.trim()) {
+            return {
+                status: 200,
+                message: "No search term provided",
+                jsonData: []
+            };
         }
 
-        query += `
-            ORDER BY vehicle_rc_number ASC
-            LIMIT 20
+        const query = `
+            SELECT
+                v.vehicle_id,
+                v.v_vehicle_name,
+                v.vehicle_rc_number,
+                v.vehicle_status,
+                v.vehicle_added_type,
+
+                CASE 
+                    WHEN v.vehicle_added_type = 0 THEN d.driver_id
+                    WHEN v.vehicle_added_type = 1 THEN p.partner_id
+                END AS assign_id,
+
+                CASE 
+                    WHEN v.vehicle_added_type = 0 THEN d.driver_name
+                    WHEN v.vehicle_added_type = 1 THEN p.partner_f_name
+                END AS assign_name,
+
+                CASE 
+                    WHEN v.vehicle_added_type = 0 THEN d.driver_last_name
+                    WHEN v.vehicle_added_type = 1 THEN p.partner_l_name
+                END AS assign_last_name,
+
+                CASE 
+                    WHEN v.vehicle_added_type = 0 THEN d.driver_mobile
+                    WHEN v.vehicle_added_type = 1 THEN p.partner_mobile
+                END AS assign_mobile,
+
+                CASE
+                    WHEN v.vehicle_added_type = 0 THEN 'DRIVER'
+                    WHEN v.vehicle_added_type = 1 THEN 'PARTNER'
+                END AS assign_type
+
+            FROM vehicle v
+            LEFT JOIN driver d 
+                ON v.vehicle_added_type = 0 
+                AND v.vehicle_added_by = d.driver_id
+
+            LEFT JOIN partner p 
+                ON v.vehicle_added_type = 1 
+                AND v.vehicle_added_by = p.partner_id
+
+            WHERE v.vehicle_rc_number LIKE ?
         `;
 
-        const [rows]: any = await db.query(query, params);
+        const [rows]: any = await db.query(query, [`%${search.trim()}%`]);
 
         return {
             status: 200,
-            message: "Ambulance vehicle name and number fetched successfully",
-            jsonData: {
-                ambulance_vehicle_name_number: rows,
-            },
+            message: "Vehicle and driver/partner data fetched successfully",
+            jsonData: rows
         };
+
     } catch (error) {
         throw new ApiError(
             500,
-            "Get Ambulance Vehicle Name And Number Error On Fetching"
+            "Get Vehicle And Assign Data Error On Fetching"
         );
-    }
-};
-
-// SERVICE TO GET AMBULANCE DRIVER NAME USING VEHICLE ID
-export const getAmbulanceDriverNameNoUsingVehicleIdService = async (vehicleId: number) => {
-    try {
-
-        if (!vehicleId) {
-            throw new ApiError(400, "Invalid vehicle ID");
-        }
-
-        const [rows]: any = await db.query(
-            `
-            SELECT 
-                d.driver_id as assign_id, 
-                d.driver_name as assign_name, 
-                d.driver_last_name as assign_last_name, 
-                d.driver_mobile as assign_mobile, 
-                p.partner_id as assign_id, 
-                p.partner_f_name as assign_name, 
-                p.partner_l_name as assign_last_name, 
-                p.partner_mobile as assign_mobile 
-            FROM vehicle
-            LEFT JOIN driver as d ON vehicle.vehicle_added_type = 0 AND vehicle.vehicle_added_by = d.driver_id
-            LEFT JOIN partner as p ON vehicle.vehicle_added_type = 1 AND vehicle.vehicle_added_by = p.partner_id
-            WHERE vehicle_id = ?
-            `,
-            [vehicleId]
-        );
-
-        if (!rows || rows.length === 0) {
-            throw new ApiError(404, "Vehicle not found");
-        }
-
-        return {
-            status: 200,
-            message: "Ambulance driver name fetched successfully using vehicle ID",
-            jsonData: {
-                ambulance_driver_partner_data: rows[0]
-            },
-        };
-
-    } catch (error) {
-        throw new ApiError(500, "Get Ambulance Driver Name Using Vehicle ID Error On Fetching");
     }
 };
 
