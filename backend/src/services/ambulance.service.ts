@@ -2118,7 +2118,7 @@ export const assignDriverService = async (bookingId: number, driverId: number, v
             [driverId]
         );
 
-        const [driverLatlong]:any = await db.query(
+        const [driverLatlong]: any = await db.query(
             `SELECT driver_live_location_lat, driver_live_location_long 
             FROM driver_live_location
             WHERE driver_live_location_d_id = ?`
@@ -2189,7 +2189,7 @@ export const cancelReasonService = async () => {
 };
 
 // SERVICE TO CANCEL AMBULANCE BOOKING
-export const cancelAmbulanceBookingService = async (bookingId: number, cancelReason: string) => {
+export const cancelAmbulanceBookingService = async (bookingId: number, cancelReasonId: number, cancelReason: string, cancelUserType: number, adminId: number) => {
     try {
 
         const [rows]: any = await db.query(
@@ -2204,13 +2204,17 @@ export const cancelAmbulanceBookingService = async (bookingId: number, cancelRea
             };
         }
 
+        if (!adminId) {
+            return {
+                status: 400,
+                message: "Admin Id is required to cancel booking",
+            }
+        }
+
         await db.query(
             `UPDATE booking_view SET booking_status = 5 WHERE booking_id = ?`,
             [bookingId]
         );
-
-        // booking_a_c_history
-        // for lang & long , we have to fetch driver live location from another table
 
         const assignedDriverId = rows[0].booking_acpt_driver_id;
 
@@ -2220,6 +2224,34 @@ export const cancelAmbulanceBookingService = async (bookingId: number, cancelRea
                 [assignedDriverId]
             );
         }
+
+        const [driverLatlong]: any = await db.query(
+            `SELECT driver_live_location_lat, driver_live_location_long 
+            FROM driver_live_location
+            WHERE driver_live_location_d_id = ?`
+            , [assignedDriverId]
+        );
+
+        const booking_a_c_history_data = {
+            bah_booking_id: bookingId,
+            bah_driver_id: assignedDriverId,
+            bah_vehicle_id: rows[0].booking_acpt_vehicle_id || 0,
+            bah_driver_latitude: driverLatlong[0]?.driver_live_location_lat || 0,
+            bah_driver_longitude: driverLatlong[0]?.driver_live_location_long || 0,
+            bah_consumer_id: rows[0]?.booking_by_cid || 0,
+            bah_time: currentUnixTime(),
+            bah_user_type: cancelUserType, // 0 for Driver, 1 for Consumer
+            bah_cancel_reason_id: cancelReasonId,
+            bah_cancel_reason_text: cancelReason,
+            bah_admin_id: adminId,
+            created_at: new Date(),
+            bah_status: 2,
+        };
+
+        await db.query(
+            `INSERT INTO booking_a_c_history SET ?`,
+            [booking_a_c_history_data]
+        );
 
         return {
             status: 200,

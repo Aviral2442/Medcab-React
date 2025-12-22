@@ -704,9 +704,9 @@ export const cancelReasonController = async (req: Request, res: Response, next: 
 export const cancelAmbulanceBookingController = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const bookingId = Number(req.params.bookingId);
-        const { cancelReason } = req.body;
+        const { cancelReasonId, cancelReason, cancelUserType, adminId } = req.body;
 
-        const result = await cancelAmbulanceBookingService(bookingId, cancelReason);
+        const result = await cancelAmbulanceBookingService(bookingId, cancelReasonId, cancelReason, cancelUserType, adminId);
         res.status(result.status).json(result);
     } catch (error) {
         next(error);
