@@ -1954,7 +1954,7 @@ export const updateAmbulanceBookingConsumerDetails = async (bookingId: number, b
 };
 
 // SERVICE TO GET AMBULANCE CONSUMER NAME & MOBILE (SEARCHABLE)
-export const getAmbulanceConsumerNameNumberService = async (search?: string) => {
+export const getAmbulanceConsumerMobileService = async (search?: string) => {
     try {
         let query = `
             SELECT consumer_id, consumer_name, consumer_mobile_no
@@ -1965,29 +1965,25 @@ export const getAmbulanceConsumerNameNumberService = async (search?: string) => 
 
         if (search && search.trim().length > 0) {
             query += `
-                WHERE 
-                    LOWER(consumer_name) LIKE ? 
-                    OR consumer_mobile_no LIKE ?
+                WHERE consumer_mobile_no LIKE ?
             `;
-            const term = `%${search.trim().toLowerCase()}%`;
-            params.push(term, term);
+            const term = `%${search.trim()}%`;
+            params.push(term);
         }
-
-        query += ` ORDER BY consumer_name ASC LIMIT 20`;
 
         const [rows]: any = await db.query(query, params);
 
         return {
             status: 200,
-            message: "Ambulance consumer name and mobile fetched successfully",
+            message: "Ambulance consumer mobile fetched successfully",
             jsonData: {
-                ambulance_consumer_name_number: rows
+                ambulance_consumer_data: rows
             },
         };
     } catch (error) {
         throw new ApiError(
             500,
-            "Get Ambulance Consumer Name And Mobile Error On Fetching"
+            "Get Ambulance Consumer Mobile Error On Fetching"
         );
     }
 };
