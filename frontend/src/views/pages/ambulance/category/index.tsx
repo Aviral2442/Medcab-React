@@ -4,7 +4,7 @@ import ExportDataWithButtons from "@/views/tables/data-tables/ambulance/category
 import AddCategory from "./components/AddCategory";
 import AddfacilitiesRate from "./components/AddfacilitiesRate";
 import AddAmbulanceFAQ from "./components/AddAmbulanceFAQ";
-import Addfacilities from "./components/AddFacilities";
+import Addfacilities from "./components/Addfacilities";
 
 const Page = () => {
   const [activeTab, setActiveTab] = React.useState(1);
