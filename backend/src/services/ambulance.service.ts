@@ -1956,30 +1956,42 @@ export const updateAmbulanceBookingConsumerDetails = async (bookingId: number, b
 // SERVICE TO GET AMBULANCE CONSUMER NAME & MOBILE (SEARCHABLE)
 export const getAmbulanceConsumerMobileService = async (search?: string) => {
     try {
-        let query = `
+
+        if (search) {
+            let query = `
             SELECT consumer_id, consumer_name, consumer_mobile_no
             FROM consumer
         `;
 
-        const params: any[] = [];
+            const params: any[] = [];
 
-        if (search && search.trim().length > 0) {
-            query += `
+            if (search && search.trim().length > 0) {
+                query += `
                 WHERE consumer_mobile_no LIKE ?
             `;
-            const term = `%${search.trim()}%`;
-            params.push(term);
+                const term = `%${search.trim()}%`;
+                params.push(term);
+            }
+
+            const [rows]: any = await db.query(query, params);
+
+            return {
+                status: 200,
+                message: "Ambulance consumer mobile fetched successfully",
+                jsonData: {
+                    ambulance_consumer_data: rows
+                },
+            };
+        } else {
+            return {
+                status: 200,
+                message: "No search term provided",
+                jsonData: {
+                    ambulance_consumer_data: []
+                },
+            };
         }
 
-        const [rows]: any = await db.query(query, params);
-
-        return {
-            status: 200,
-            message: "Ambulance consumer mobile fetched successfully",
-            jsonData: {
-                ambulance_consumer_data: rows
-            },
-        };
     } catch (error) {
         throw new ApiError(
             500,
@@ -2285,7 +2297,7 @@ export const verifyOTPAmbulanceBookingService = async (bookingId: number) => {
 
 
 
-// complete booking 
+// complete booking
 
 // $bookingData = DB:: table('booking_view') -> where('booking_id', '=', $bookingId)
 //     -> first();
