@@ -2074,7 +2074,7 @@ export const getAmbulanceVehicleAndAssignDataService = async (search?: string) =
 };
 
 // SERVICE TO ASSIGN DRIVER AND VEHICLE TO AMBULANCE BOOKING
-export const assignDriverService = async (bookingId: number, driverId: number, vehicleId: number) => {
+export const assignDriverService = async (bookingId: number, driverId: number, vehicleId: number, adminId: number) => {
     try {
 
         const [rows]: any = await db.query(
@@ -2091,7 +2091,7 @@ export const assignDriverService = async (bookingId: number, driverId: number, v
 
         const currentStatus = rows[0].booking_status;
 
-        const notAllowedStatuses = [0, 2, 3, 4, 5, 6]; // Enquiry, Completed, Cancelled
+        const notAllowedStatuses = [0, 2, 3, 4, 5, 6];
 
         if (notAllowedStatuses.includes(currentStatus)) {
             return {
@@ -2118,8 +2118,31 @@ export const assignDriverService = async (bookingId: number, driverId: number, v
             [driverId]
         );
 
-        // booking_a_c_history
-        // for lang & long , we have to fetch driver live location from another table 
+        const [driverLatlong]:any = await db.query(
+            `SELECT driver_live_location_lat, driver_live_location_long 
+            FROM driver_live_location
+            WHERE driver_live_location_d_id = ?`
+            , [driverId]
+        );
+
+        const booking_a_c_history_data = {
+            bah_booking_id: bookingId,
+            bah_driver_id: driverId,
+            bah_vehicle_id: vehicleId,
+            bah_driver_latitude: driverLatlong[0]?.driver_live_location_lat || 0,
+            bah_driver_longitude: driverLatlong[0]?.driver_live_location_long || 0,
+            bah_consumer_id: rows[0]?.booking_by_cid || 0,
+            bah_time: currentUnixTime(),
+            bah_user_type: 1,
+            bah_admin_id: adminId,
+            created_at: new Date(),
+            bah_status: 1,
+        };
+
+        await db.query(
+            `INSERT INTO booking_a_c_history SET ?`,
+            [booking_a_c_history_data]
+        );
 
         return {
             status: 200,
