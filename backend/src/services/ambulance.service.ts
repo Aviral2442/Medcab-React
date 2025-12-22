@@ -2337,6 +2337,46 @@ export const verifyOTPAmbulanceBookingService = async (bookingId: number, adminI
     }
 };
 
+// SERVICE TO CANCEL DRIVER FROM AMBULANCE BOOKING
+export const cancelDriverFromAmbulanceBookingService = async (bookingId: number) => {
+    try {
+
+        const [rows]: any = await db.query(
+            `SELECT booking_acpt_driver_id, booking_acpt_vehicle_id FROM booking_view WHERE booking_id = ?`,
+            [bookingId]
+        );
+
+        if (!rows || rows.length === 0) {
+            return {
+                status: 404,
+                message: "Booking not found",
+            };
+        }
+
+        await db.query(
+            `UPDATE booking_view SET booking_acpt_driver_id = 0, booking_acpt_vehicle_id = 0, booking_status = 1 WHERE booking_id = ?`,
+            [bookingId]
+        );
+
+        const assignedDriverId = rows[0].booking_acpt_driver_id;
+
+        if (assignedDriverId && assignedDriverId > 0) {
+            await db.query(
+                `UPDATE driver SET driver_on_booking_status = 0 WHERE driver_id = ?`,
+                [assignedDriverId]
+            );
+        }
+
+        return {
+            status: 200,
+            message: "Driver cancelled from ambulance booking successfully",
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Cancel Driver From Ambulance Booking Service Error On Updating");
+    }
+};
+
 // generate invoice code
 
 // $totalAmounts = $request -> input('totalAmounts');
