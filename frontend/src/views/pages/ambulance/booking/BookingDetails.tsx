@@ -4,6 +4,7 @@ import { Container, Spinner, Nav } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import AmbulanceBookingDetails from '@/components/Ambulance/booking/BookingDetails';
 
+
 const BookingDetails = () => {
   const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 

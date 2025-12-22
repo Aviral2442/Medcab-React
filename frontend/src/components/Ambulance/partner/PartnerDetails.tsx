@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Row, Col, Image, Alert } from "react-bootstrap";
+import { Card, Row, Col, Image, Alert, Button } from "react-bootstrap";
 import { formatDate } from "@/components/DateFormat";
 import "@/global.css";
 
@@ -324,6 +324,19 @@ const PartnerDetails: React.FC<{ data: PartnerDetail | null }> = ({ data }) => {
                 </Col>
               ))}
             </Row>
+          </Section>
+        </Card.Body>
+      </Card>
+
+      <Card className="mb-4">
+        <Card.Body>
+          <Section title="">
+            <Button variant="" className="me-2 mb-2 bg-light ">
+              Approve
+            </Button>
+            <Button variant="" className="me-2 mb-2 bg-light">
+              Reject
+            </Button>
           </Section>
         </Card.Body>
       </Card>

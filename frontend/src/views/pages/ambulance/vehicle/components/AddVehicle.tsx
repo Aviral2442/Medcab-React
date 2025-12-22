@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import ComponentCard from "@/components/ComponentCard";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import Select from "react-select";
 import "@/global.css";
 
 const vehicleValidationSchema = Yup.object().shape({
@@ -295,9 +296,13 @@ const AddVehicle: React.FC = () => {
       console.log("Response data:", res.data);
       const details = res.data?.jsonData?.added_by_details;
 
-      // Ensure it's an array
+      // Ensure it's an array and format for react-select
       if (Array.isArray(details)) {
-        setAddedByOptions(details);
+        const formattedOptions = details.map((item: any) => ({
+          value: item.id,
+          label: `${item.name} ${item.last_name} (${item.mobile})`,
+        }));
+        setAddedByOptions(formattedOptions);
       } else {
         console.warn("added_by_details is not an array:", details);
         setAddedByOptions([]);
@@ -508,37 +513,60 @@ const AddVehicle: React.FC = () => {
                           <Form.Label className="fs-6 fw-semibold">
                             Added By{" "}
                             {values.vehicle_added_type === "0"
-                              ? "(Driver ID)"
+                              ? "(Driver)"
                               : values.vehicle_added_type === "1"
-                              ? "(Partner ID)"
+                              ? "(Partner)"
                               : ""}{" "}
                             <span className="text-danger">*</span>
                           </Form.Label>
-                          <Form.Select
+                          <Select
+                            classNamePrefix="select"
                             name="vehicle_added_by"
-                            value={values.vehicle_added_by}
-                            onChange={(e) =>
-                              setFieldValue("vehicle_added_by", e.target.value)
+                            value={
+                              addedByOptions.find(
+                                (opt) =>
+                                  opt.value.toString() === values.vehicle_added_by
+                              ) || null
                             }
-                            disabled={
+                            onChange={(selectedOption) => {
+                              setFieldValue(
+                                "vehicle_added_by",
+                                selectedOption ? selectedOption.value : ""
+                              );
+                            }}
+                            options={addedByOptions}
+                            isDisabled={
                               !values.vehicle_added_type || loadingAddedBy
                             }
-                          >
-                            <option value="">
-                              {loadingAddedBy ? "Loading..." : "Select"}
-                            </option>
-
-                            {Array.isArray(addedByOptions) &&
-                              addedByOptions.map((item) => (
-                                <option key={item.id} value={item.id}>
-                                  {item.name} {item.last_name} ({item.mobile})
-                                </option>
-                              ))}
-                          </Form.Select>
-
-                          <Form.Control.Feedback type="invalid">
-                            {errors.vehicle_added_by}
-                          </Form.Control.Feedback>
+                            isLoading={loadingAddedBy}
+                            isClearable={true}
+                            isSearchable={true}
+                            placeholder={
+                              loadingAddedBy
+                                ? "Loading..."
+                                : values.vehicle_added_type === "0"
+                                ? "Search driver..."
+                                : values.vehicle_added_type === "1"
+                                ? "Search partner..."
+                                : "Select type first"
+                            }
+                            styles={{
+                              control: (base) => ({
+                                ...base,
+                                borderColor:
+                                  touched.vehicle_added_by &&
+                                  errors.vehicle_added_by
+                                    ? "#dc3545"
+                                    : base.borderColor,
+                              }),
+                            }}
+                          />
+                          {touched.vehicle_added_by &&
+                            errors.vehicle_added_by && (
+                              <div className="text-danger small mt-1">
+                                {errors.vehicle_added_by}
+                              </div>
+                            )}
                         </Form.Group>
                       </Col>
 
