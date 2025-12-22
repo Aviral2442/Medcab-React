@@ -3,14 +3,12 @@ import { Card, Row, Col, Form, Button, Modal, Spinner } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX, TbEye } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 import "@/global.css";
-import DateConversion from "@/components/DateConversion";
 import { formatDate } from "@/components/DateFormat";
 import Swal from "sweetalert2";
 import CancelBookingModal from "./CancelBookingModal";
 import { jwtDecode } from "jwt-decode";
 import BookingDetailsApiData from "./BookingDetailsApiData";
 
-const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
 interface AmbulanceBookingDetailsFormProps {
   data: any;
