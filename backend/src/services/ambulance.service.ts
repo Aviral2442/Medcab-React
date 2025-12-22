@@ -2175,7 +2175,7 @@ export const cancelReasonService = async () => {
     } catch (error) {
         throw new ApiError(500, "Get Cancel Reason Service Error On Fetching");
     }
-}
+};
 
 // SERVICE TO CANCEL AMBULANCE BOOKING
 export const cancelAmbulanceBookingService = async (bookingId: number, cancelReason: string) => {
