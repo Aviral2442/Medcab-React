@@ -7,6 +7,7 @@ import "@/global.css";
 import DateConversion from "@/components/DateConversion";
 import { formatDate } from "@/components/DateFormat";
 import Swal from "sweetalert2";
+import CancelBookingModal from "./CancelBookingModal";
 
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
@@ -339,6 +340,9 @@ const AmbulanceBookingDetailsForm: React.FC<
   const [driverData, setDriverData] = useState<any>(null);
   const [loadingDriverData, setLoadingDriverData] = useState(false);
 
+  // Cancel Booking Modal State
+  const [showCancelBookingModal, setShowCancelBookingModal] = useState(false);
+
   const handleFieldUpdate = async (field: string, value: string) => {
     if (data?.booking_id === undefined) {
       alert("Invalid booking ID");
@@ -401,13 +405,13 @@ const AmbulanceBookingDetailsForm: React.FC<
     setSearchingConsumer(true);
     try {
       const response = await axios.get(
-        `${baseURL}/ambulance/get_ambulance_consumer_name_number?search=${encodeURIComponent(
+        `${baseURL}/ambulance/get_ambulance_consumer_mobile?search=${encodeURIComponent(
           consumerSearchQuery
         )}`
       );
       console.log("Consumer search response:", response.data);
       setConsumerSearchResults(
-        response.data?.jsonData?.ambulance_consumer_name_number || []
+        response.data?.jsonData?.ambulance_consumer_data || []
       );
     } catch (error) {
       console.error("Error searching consumers:", error);
@@ -729,6 +733,19 @@ const AmbulanceBookingDetailsForm: React.FC<
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleCancelBooking = () => {
+    setShowCancelBookingModal(true);
+  };
+
+  const handleBookingCancelled = () => {
+    // Refresh booking data or update status
+    if (onUpdate) {
+      onUpdate("booking_status", "5"); 
+    }
+    // You may want to reload the entire page or fetch fresh data
+    window.location.reload();
   };
 
   const sections: SectionConfig[] = [
@@ -1074,67 +1091,60 @@ const AmbulanceBookingDetailsForm: React.FC<
           name: "booking_view_arrival_time",
           type: "datetime-local",
           editable: false,
-          cols: 4,
+          cols: 3,
         },
         {
           label: "Pickup Time",
           name: "booking_view_pickup_time",
           type: "datetime-local",
           editable: false,
-          cols: 4,
+          cols: 3,
         },
         {
           label: "Dropped Time",
           name: "booking_view_dropped_time",
           type: "datetime-local",
           editable: false,
-          cols: 4,
+          cols: 3,
         },
         {
           label: "Shoot Time",
           name: "bv_shoot_time",
           type: "datetime-local",
           editable: false,
-          cols: 4,
+          cols: 3,
         },
         {
           label: "Virtual Number",
           name: "bv_virtual_number",
           type: "tel",
           editable: false,
-          cols: 4,
+          cols: 3,
         },
         {
           label: "Virtual Number Status",
           name: "bv_virtual_number_status",
           type: "boolean",
           editable: false,
-          cols: 4,
+          cols: 3,
         },
         {
           label: "Cloud Consumer CRID",
           name: "bv_cloud_con_crid",
           editable: false,
-          cols: 4,
+          cols: 3,
         },
         {
           label: "Cloud Consumer CRID (C to D)",
           name: "bv_cloud_con_crid_c_to_d",
           editable: false,
-          cols: 4,
-        },
-        {
-          label: "Category Icon",
-          name: "booking_view_category_icon",
-          editable: false,
-          cols: 4,
+          cols: 3,
         },
         {
           label: "Includes",
           name: "booking_view_includes",
-          type: "textarea",
-          rows: 3,
-          cols: 6,
+          type: "text",
+          cols: 3,
         },
       ],
     },
@@ -1240,7 +1250,11 @@ const AmbulanceBookingDetailsForm: React.FC<
       <Card className="mb-4">
         <Card.Body>
           <Section title="">
-            <Button variant="" className="me-2 mb-2 bg-light">
+            <Button
+              variant=""
+              className="me-2 mb-2 bg-light"
+              onClick={handleCancelBooking}
+            >
               Cancel Booking
             </Button>
             <Button variant="" className="me-2 mb-2  bg-light">
@@ -1265,7 +1279,7 @@ const AmbulanceBookingDetailsForm: React.FC<
         show={showConsumerSearchModal}
         onHide={() => setShowConsumerSearchModal(false)}
         centered
-        size="lg"
+        size="md"
       >
         <Modal.Header closeButton>
           <Modal.Title>Search Consumer</Modal.Title>
@@ -1280,21 +1294,10 @@ const AmbulanceBookingDetailsForm: React.FC<
             <div className="d-flex gap-2 mb-3">
               <Form.Control
                 type="text"
-                placeholder="Search by name or mobile number..."
+                placeholder="Search by mobile number..."
                 value={consumerSearchQuery}
                 onChange={(e) => setConsumerSearchQuery(e.target.value)}
               />
-              <Button
-                variant="primary"
-                onClick={searchConsumers}
-                disabled={searchingConsumer}
-              >
-                {searchingConsumer ? (
-                  <Spinner size="sm" animation="border" />
-                ) : (
-                  <TbSearch size={20} />
-                )}
-              </Button>
             </div>
           </Form>
 
@@ -1308,34 +1311,30 @@ const AmbulanceBookingDetailsForm: React.FC<
               className="table-responsive"
               style={{ maxHeight: "300px", overflowY: "auto" }}
             >
-              <table className="table table-hover">
-                <thead className="table-light sticky-top">
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Mobile</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {consumerSearchResults.map((consumer) => (
-                    <tr key={consumer.consumer_id}>
-                      <td>{consumer.consumer_id}</td>
-                      <td>{consumer.consumer_name}</td>
-                      <td>{consumer.consumer_mobile_no}</td>
-                      <td>
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => handleSelectConsumer(consumer)}
-                        >
-                          Select
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {consumerSearchResults.map((consumer) => (
+                <div key={consumer.consumer_id}>
+                  <div
+                    className="d-flex justify-content-between align-items-center border px-2 rounded-2 mb-2 hover:shadow-sm cursor-pointer"
+                    onClick={() => handleSelectConsumer(consumer)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Form.Control
+                      readOnly
+                      plaintext
+                      value={consumer.consumer_name || ""}
+                      className="flex-grow-1 mb-0"
+                      title={consumer.consumer_name}
+                    />
+                    <Form.Control
+                      readOnly
+                      plaintext
+                      value={consumer.consumer_mobile_no || ""}
+                      className="ms-3 mb-0"
+                      title={consumer.consumer_mobile_no}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : consumerSearchQuery && !searchingConsumer ? (
             <div className="text-center text-muted py-4">
@@ -1343,7 +1342,7 @@ const AmbulanceBookingDetailsForm: React.FC<
             </div>
           ) : (
             <div className="text-center text-muted py-4">
-              Enter a name or mobile number to search for consumers.
+              Enter mobile number to search for consumers.
             </div>
           )}
         </Modal.Body>
@@ -1362,7 +1361,7 @@ const AmbulanceBookingDetailsForm: React.FC<
           setDriverData(null);
         }}
         centered
-        size="sm"
+        size="md"
       >
         <Modal.Header closeButton>
           <Modal.Title>Assign Vehicle & Driver</Modal.Title>
@@ -1549,6 +1548,15 @@ const AmbulanceBookingDetailsForm: React.FC<
           </Button>
         </Modal.Footer>
       </Modal>
+
+
+
+      <CancelBookingModal
+        show={showCancelBookingModal}
+        onHide={() => setShowCancelBookingModal(false)}
+        bookingId={data?.booking_id || ""}
+        onBookingCancelled={handleBookingCancelled}
+      />
     </div>
   );
 };

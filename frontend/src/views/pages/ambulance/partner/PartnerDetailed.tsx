@@ -48,7 +48,7 @@ const PartnerDetailed: React.FC = () => {
   const tabs = [
     { eventKey: 1, title: "Partner" },
     { eventKey: 2, title: "Transactions" },
-    { eventKey: 3, title: "Manpower Partners" },
+    // { eventKey: 3, title: "Manpower Partners" },
   ];
 
   const fetchPartner = async () => {

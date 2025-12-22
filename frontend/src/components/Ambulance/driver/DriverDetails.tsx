@@ -2,7 +2,6 @@ import React from "react";
 import { Card, Row, Col, Image, Spinner, Alert, Button } from "react-bootstrap";
 import { formatDate } from "@/components/DateFormat";
 import "@/global.css";
-import { FaWhatsapp } from "react-icons/fa";
 
 type DriverDetail = {
   driver_id?: number;
@@ -413,19 +412,10 @@ const DriverDetails: React.FC<Props> = ({
         <Card.Body>
           <Section title="">
             <Button variant="" className="me-2 mb-2 bg-light ">
-              Cancel
+              Block
             </Button>
             <Button variant="" className="me-2 mb-2 bg-light">
-              OTP Match
-            </Button>
-            <Button variant="" className="me-2 mb-2 bg-light">
-              Complete
-            </Button>
-            <Button variant="" className="me-2 mb-2 bg-light">
-              Assign
-            </Button>
-            <Button variant="" className="me-2 mb-2 bg-light">
-              <FaWhatsapp size={15} /> <span className="ms-1">WhatsApp</span>
+              Reject
             </Button>
           </Section>
         </Card.Body>
