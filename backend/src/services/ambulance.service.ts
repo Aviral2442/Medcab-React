@@ -2143,6 +2143,40 @@ export const assignDriverService = async (bookingId: number, driverId: number, v
     }
 };
 
+// SERVICE TO GET CANCEL REASON LIST
+export const cancelReasonService = async () => {
+    try {
+
+        const [rows]: any = await db.query(
+            `
+            SELECT booking_cancel_reasons_id, booking_cancel_reasons_text
+            FROM booking_cancel_reasons 
+            WHERE cancel_reason_type = 1
+            ORDER BY booking_cancel_reasons_text ASC`
+        );
+
+        const [rows2]: any = await db.query(
+            `
+            SELECT booking_cancel_reasons_id, booking_cancel_reasons_text
+            FROM booking_cancel_reasons 
+            WHERE cancel_reason_type = 2
+            ORDER BY booking_cancel_reasons_text ASC`
+        );
+
+        return {
+            status: 200,
+            message: "Cancel reasons fetched successfully",
+            jsonData: {
+                cancel_reasons_consumer: rows,
+                cancel_reasons_driver: rows2,
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Get Cancel Reason Service Error On Fetching");
+    }
+}
+
 // SERVICE TO CANCEL AMBULANCE BOOKING
 export const cancelAmbulanceBookingService = async (bookingId: number, cancelReason: string) => {
     try {
