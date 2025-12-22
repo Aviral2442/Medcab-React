@@ -174,6 +174,7 @@ const Field: React.FC<FieldProps> = ({
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
                 className="flex-grow-1"
+                style={{ minWidth: 0 }}
               >
                 {options.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -190,16 +191,25 @@ const Field: React.FC<FieldProps> = ({
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
                 className="flex-grow-1"
+                style={{ 
+                  minWidth: 0,
+                  ...(type === "datetime-local" && { maxWidth: "calc(100% - 80px)" })
+                }}
                 {...(type === "textarea" ? { rows } : {})}
               />
             )}
             <button
               onClick={handleSave}
-              className="p-1 rounded bg-black text-white"
+              className="p-1 rounded bg-black text-white flex-shrink-0"
+              style={{ minWidth: "32px", height: "32px" }}
             >
               <TbCheck size={18} />
             </button>
-            <button onClick={handleCancel} className="p-1 rounded border-0">
+            <button 
+              onClick={handleCancel} 
+              className="p-1 rounded border-0 flex-shrink-0"
+              style={{ minWidth: "32px", height: "32px" }}
+            >
               <TbX size={18} />
             </button>
           </>
@@ -211,11 +221,12 @@ const Field: React.FC<FieldProps> = ({
               value={displayValue}
               as={type === "textarea" ? "textarea" : "input"}
               className="flex-grow-1 px-2 input-field"
+              style={{ minWidth: 0 }}
             />
             {showViewIcon && consumerId && (
               <button
                 onClick={() => navigate(`/consumer-details/${consumerId}`)}
-                className="text-primary bg-transparent border-0 p-1"
+                className="text-primary bg-transparent border-0 p-1 flex-shrink-0"
                 title="View Consumer Details"
               >
                 <TbEye size={18} />
@@ -224,7 +235,7 @@ const Field: React.FC<FieldProps> = ({
             {editable && onEdit && (
               <button
                 onClick={handleEditClick}
-                className="text-muted bg-transparent border-0 p-1"
+                className="text-muted bg-transparent border-0 p-1 flex-shrink-0"
               >
                 <TbPencil size={18} />
               </button>
@@ -267,6 +278,13 @@ const ratingStatus = [
 const ratingCtoDStatus = [
   { value: 0, label: "Rated" },
   { value: 1, label: "No Rating" },
+];
+
+//1 for full payment ,2 for advance payment, 3 for Zero Pay
+const paymentMethodOptions = [
+  { value: 1, label: "Full Payment" },
+  { value: 2, label: "Advance Payment" },
+  { value: 3, label: "Zero Pay" },
 ];
 
 // Define field configuration interface
@@ -351,6 +369,8 @@ const AmbulanceBookingDetailsForm: React.FC<
       alert("Invalid booking ID");
       return;
     }
+
+    // Handle schedule time update
     if (field === "booking_schedule_time") {
       try {
         await axios.put(
@@ -365,6 +385,47 @@ const AmbulanceBookingDetailsForm: React.FC<
       }
     }
 
+    // Handle payment fields update
+    const paymentFields = [
+      'booking_amount',
+      'booking_adv_amount',
+      'booking_total_amount',
+      'booking_view_base_rate',
+      'booking_view_km_till',
+      'booking_view_per_km_rate',
+      'booking_view_per_ext_km_rate',
+      'booking_view_per_ext_min_rate',
+      'booking_view_km_rate',
+      'booking_view_total_fare',
+      'booking_view_service_charge_rate',
+      'booking_view_service_charge_rate_discount'
+    ];
+
+    if (paymentFields.includes(field)) {
+      try {
+        const response = await axios.patch(
+          `${baseURL}/ambulance/update_ambulance_booking_amount/${data?.booking_id}`,
+          {
+            newAmount: value,
+            amountColumnName: field
+          }
+        );
+        
+        if (response.data.status === 200) {
+          console.log(`${field} updated successfully`);
+        } else {
+          console.error(`Failed to update ${field}:`, response.data.message);
+          alert(`Failed to update ${field}`);
+          return;
+        }
+      } catch (error) {
+        console.error(`Error updating ${field}:`, error);
+        alert(`Failed to update ${field}`);
+        return;
+      }
+    }
+
+    // Update local state
     onUpdate?.(field, value);
   };
 
@@ -488,101 +549,88 @@ const AmbulanceBookingDetailsForm: React.FC<
       });
     }
   };
-  // const completeBooking = async () => {
-  //   if (!data?.booking_id) {
-  //     Swal.fire({
-  //       title: "Error",
-  //       text: "Invalid booking ID",
-  //       icon: "error",
-  //       confirmButtonColor: "#d33",
-  //     });
-  //     return;
-  //   }
+  const completeBooking = async () => {
+    if (!data?.booking_id) {
+      Swal.fire({
+        title: "Error",
+        text: "Invalid booking ID",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
 
-  //   try {
-  //     // Ask for confirmation first
-  //     const result = await Swal.fire({
-  //       title: "Verify OTP?",
-  //       text: "Are you sure you want to verify the OTP for this booking?",
-  //       icon: "question",
-  //       showCancelButton: true,
-  //       confirmButtonText: "Yes, Verify",
-  //       cancelButtonText: "Cancel",
-  //       confirmButtonColor: "#3085d6",
-  //       cancelButtonColor: "#d33",
-  //       reverseButtons: true,
-  //     });
+    try {
+      // Ask for confirmation first
+      const result = await Swal.fire({
+        title: "Complete Booking?",
+        text: "Are you sure you want to complete this booking?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Complete",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        reverseButtons: true,
+      });
 
-  //     if (!result.isConfirmed) {
-  //       return;
-  //     }
+      if (!result.isConfirmed) {
+        return;
+      }
 
-  //     // Get adminId from token
-  //     const token = localStorage.getItem("token");
-  //     if (!token) {
-  //       throw new Error("Authentication token not found");
-  //     }
+      // Show loading
+      Swal.fire({
+        title: "Completing Booking...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
 
-  //     const decodedToken = jwtDecode(token) as any;
-  //     const adminId = decodedToken?.id;
+      console.log("Completing booking for booking ID:", data.booking_id);
+      const response = await axios.post(
+        `${baseURL}/ambulance/complete_booking/${data.booking_id}`
+      );
 
-  //     if (!adminId) {
-  //       throw new Error("Admin ID not found in token");
-  //     }
+      console.log("Complete booking response:", response.data);
 
-  //     // Show loading
-  //     Swal.fire({
-  //       title: "Verifying OTP...",
-  //       text: "Please wait",
-  //       allowOutsideClick: false,
-  //       didOpen: () => {
-  //         Swal.showLoading();
-  //       },
-  //     });
+      if (response.data.status == 200) {
+        // Update local state to reflect OTP verification
+        onUpdate?.("booking_status", "4");
+        onUpdate?.("booking_payment_status", "2");
+        onUpdate?.("booking_payment_method", "2");
 
-  //     console.log("Verifying OTP for booking ID:", data.booking_id, "by admin ID:", adminId);
-  //     const response = await axios.post(
-  //       `${baseURL}/ambulance/verify_otp/${data.booking_id}`,
-  //       { adminId }
-  //     );
-
-  //     console.log("OTP Verification response:", response.data);
-
-  //     if (response.data.status == 200) {
-  //       // Update local state to reflect OTP verification
-  //       onUpdate?.("booking_view_status_otp", "1");
-
-  //       Swal.fire({
-  //         title: "Success",
-  //         text: "OTP verified successfully.",
-  //         icon: "success",
-  //         confirmButtonColor: "#3085d6",
-  //         timer: 2000,
-  //         timerProgressBar: true,
-  //       });
-  //     } else {
-  //       throw new Error(response.data.message || "OTP verification failed");
-  //     }
-  //   } catch (error: any) {
-  //     console.error("Error verifying OTP:", error);
-  //     Swal.fire({
-  //       title: "Error",
-  //       text:
-  //         error.response?.data?.message ||
-  //         error.message ||
-  //         "Failed to verify OTP. Please try again.",
-  //       icon: "error",
-  //       confirmButtonColor: "#d33",
-  //     });
-  //   }
-  // };
+        Swal.fire({
+          title: "Success",
+          text: "Booking completed successfully.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } else {
+        throw new Error(response.data.message || "Booking completion failed");
+      }
+    } catch (error: any) {
+      console.error("Error completing booking:", error);
+      Swal.fire({
+        title: "Error",
+        text:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to complete booking. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    }
+  };
 
 
   <Button variant="" className="me-2 mb-2 bg-light" onClick={verifyOTP}>
     Verify OTP
   </Button>;
 
-  // ...existing code...
   const searchConsumers = async (query: string) => {
     if (!query.trim()) {
       setConsumerSearchResults([]);
@@ -995,17 +1043,17 @@ const AmbulanceBookingDetailsForm: React.FC<
           cols: 2,
         },
         {
-          label: "Schedule Time",
-          name: "booking_schedule_time",
-          type: "datetime-local",
-          editable: true,
-          cols: 2,
-        },
-        {
           label: "Created At",
           name: "created_at",
           type: "datetime-local",
           editable: false,
+          cols: 2,
+        },
+        {
+          label: "Schedule Time",
+          name: "booking_schedule_time",
+          type: "datetime-local",
+          editable: true,
           cols: 2,
         },
       ],
@@ -1051,13 +1099,6 @@ const AmbulanceBookingDetailsForm: React.FC<
           editable: false,
           cols: 3,
         },
-        // {
-        //   label: "Duration (Sec)",
-        //   name: "booking_duration_in_sec",
-        //   editable: false,
-        //   cols: 3,
-        // },
-        // { label: "Radius", name: "booking_radius", editable: false, cols: 3 },
       ],
     },
     {
@@ -1087,19 +1128,27 @@ const AmbulanceBookingDetailsForm: React.FC<
         {
           label: "Payment Method",
           name: "booking_payment_method",
-          editable: true,
+          editable: false,
+          type: "select",
+          options: [
+            { value: 1, label: "Cash" },
+            { value: 2, label: "Online" },
+          ],
           cols: 2,
         },
         {
           label: "Payment Type",
           name: "booking_payment_type",
-          editable: true,
+          editable: false,
+          type: "select",
+          options: paymentMethodOptions,
           cols: 2,
         },
         {
           label: "Payment Status",
           name: "booking_payment_status",
           type: "select",
+          editable: false,
           options: paymentStatusOptions,
           cols: 2,
         },
@@ -1107,62 +1156,62 @@ const AmbulanceBookingDetailsForm: React.FC<
           label: "Base Rate",
           name: "booking_view_base_rate",
           type: "number",
-          editable: false,
+          editable: true,
           cols: 2,
         },
         {
           label: "Per KM Rate",
           name: "booking_view_per_km_rate",
           type: "number",
-          editable: false,
+          editable: true,
           cols: 2,
         },
         {
           label: "KM Rate",
           name: "booking_view_km_rate",
           type: "number",
-          editable: false,
+          editable: true,
           cols: 2,
         },
         {
           label: "KM Till",
           name: "booking_view_km_till",
-          editable: false,
+          editable: true,
           cols: 2,
         },
         {
           label: "Per Extra KM Rate",
           name: "booking_view_per_ext_km_rate",
           type: "number",
-          editable: false,
+          editable: true,
           cols: 2,
         },
         {
           label: "Per Extra Min Rate",
           name: "booking_view_per_ext_min_rate",
           type: "number",
-          editable: false,
+          editable: true,
           cols: 2,
         },
         {
           label: "Service Charge",
           name: "booking_view_service_charge_rate",
           type: "number",
-          editable: false,
+          editable: true,
           cols: 2,
         },
         {
           label: "Service Charge Discount",
           name: "booking_view_service_charge_rate_discount",
           type: "number",
-          editable: false,
+          editable: true,
           cols: 2,
         },
         {
           label: "Total Fare",
           name: "booking_view_total_fare",
           type: "number",
-          editable: false,
+          editable: true,
           cols: 2,
         },
       ],
@@ -1435,7 +1484,11 @@ const AmbulanceBookingDetailsForm: React.FC<
             >
               Verify OTP
             </Button>
-            <Button variant="" className="me-2 mb-2  bg-light">
+            <Button
+              variant=""
+              className="me-2 mb-2 bg-light"
+              onClick={completeBooking}
+            >
               Complete Booking
             </Button>
             <Button
