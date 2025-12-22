@@ -2105,6 +2105,7 @@ export const assignDriverService = async (bookingId: number, driverId: number, v
         }
 
         const assignDriverBookingData = {
+            booking_status: 2,
             booking_acpt_driver_id: driverId,
             booking_acpt_vehicle_id: vehicleId,
             booking_acpt_time: currentUnixTime(),
