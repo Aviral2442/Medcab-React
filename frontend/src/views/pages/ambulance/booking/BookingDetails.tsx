@@ -1,13 +1,11 @@
-import axios from 'axios';
 import React from 'react';
 import { Container, Spinner, Nav } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import AmbulanceBookingDetails from '@/components/Ambulance/booking/BookingDetails';
-
+import BookingDetailsApiData from '@/components/Ambulance/booking/BookingDetailsApiData';
 
 const BookingDetails = () => {
-  const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
-
+  const api = BookingDetailsApiData();
   const { id } = useParams();
   const [bookingData, setBookingData] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
@@ -20,9 +18,10 @@ const BookingDetails = () => {
   const fetchBookingDetails = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${baseURL}/ambulance/ambulance_booking_detail/${id}`);
-      setBookingData(response.data.jsonData.booking_detail);
-      console.log(response.data.jsonData.booking_detail);
+      const result = await api.fetchBookingDetails(id!);
+      if (result.success) {
+        setBookingData(result.data);
+      }
     } catch (error) {
       console.error("Error fetching booking details:", error);
     } finally {
@@ -37,11 +36,10 @@ const BookingDetails = () => {
   }, [activeTab, id]);
 
   const handleFieldUpdate = async (field: string, value: string) => {
-
-      setBookingData((prev: any) => ({
-        ...prev,
-        [field]: value
-      }));
+    setBookingData((prev: any) => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const renderTabContent = (tabKey: number) => {

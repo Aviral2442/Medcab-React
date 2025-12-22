@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Card, Row, Col, Form, Button, Modal, Spinner } from "react-bootstrap";
 import { TbPencil, TbCheck, TbX, TbEye } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import "@/global.css";
 import DateConversion from "@/components/DateConversion";
 import { formatDate } from "@/components/DateFormat";
 import Swal from "sweetalert2";
 import CancelBookingModal from "./CancelBookingModal";
 import { jwtDecode } from "jwt-decode";
+import BookingDetailsApiData from "./BookingDetailsApiData";
 
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
@@ -191,9 +191,11 @@ const Field: React.FC<FieldProps> = ({
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
                 className="flex-grow-1"
-                style={{ 
+                style={{
                   minWidth: 0,
-                  ...(type === "datetime-local" && { maxWidth: "calc(100% - 80px)" })
+                  ...(type === "datetime-local" && {
+                    maxWidth: "calc(100% - 80px)",
+                  }),
                 }}
                 {...(type === "textarea" ? { rows } : {})}
               />
@@ -205,8 +207,8 @@ const Field: React.FC<FieldProps> = ({
             >
               <TbCheck size={18} />
             </button>
-            <button 
-              onClick={handleCancel} 
+            <button
+              onClick={handleCancel}
               className="p-1 rounded border-0 flex-shrink-0"
               style={{ minWidth: "32px", height: "32px" }}
             >
@@ -339,17 +341,16 @@ interface Vehicle {
 const AmbulanceBookingDetailsForm: React.FC<
   AmbulanceBookingDetailsFormProps
 > = ({ data, onUpdate, editable = true }) => {
-  const [showAssignModal, setShowAssignModal] = useState(false);
+  // Initialize API data
+  const api = BookingDetailsApiData();
 
-  // Consumer Search Modal State
+  const [showAssignModal, setShowAssignModal] = useState(false);
   const [showConsumerSearchModal, setShowConsumerSearchModal] = useState(false);
   const [consumerSearchQuery, setConsumerSearchQuery] = useState("");
   const [consumerSearchResults, setConsumerSearchResults] = useState<
     Consumer[]
   >([]);
   const [searchingConsumer, setSearchingConsumer] = useState(false);
-
-  // Vehicle Search Modal State
   const [vehicleSearchResults, setVehicleSearchResults] = useState<Vehicle[]>(
     []
   );
@@ -357,11 +358,7 @@ const AmbulanceBookingDetailsForm: React.FC<
   const [searchingVehicle, setSearchingVehicle] = useState(false);
   const [selectedVehicleData, setSelectedVehicleData] =
     useState<Vehicle | null>(null);
-
-  // Driver data based on selected vehicle
   const [_driverData, setDriverData] = useState<any>(null);
-
-  // Cancel Booking Modal State
   const [showCancelBookingModal, setShowCancelBookingModal] = useState(false);
 
   const handleFieldUpdate = async (field: string, value: string) => {
@@ -372,55 +369,37 @@ const AmbulanceBookingDetailsForm: React.FC<
 
     // Handle schedule time update
     if (field === "booking_schedule_time") {
-      try {
-        await axios.put(
-          `${baseURL}/ambulance/update_ambulance_booking_schedule_time/${data?.booking_id}`,
-          { booking_schedule_time: value }
-        );
-        console.log("Schedule time updated successfully");
-      } catch (error) {
-        console.error("Error updating schedule time:", error);
-        alert("Failed to update schedule time");
+      const result = await api.updateScheduleTime(data.booking_id, value);
+      if (!result.success) {
+        alert(result.message);
         return;
       }
     }
 
     // Handle payment fields update
     const paymentFields = [
-      'booking_amount',
-      'booking_adv_amount',
-      'booking_total_amount',
-      'booking_view_base_rate',
-      'booking_view_km_till',
-      'booking_view_per_km_rate',
-      'booking_view_per_ext_km_rate',
-      'booking_view_per_ext_min_rate',
-      'booking_view_km_rate',
-      'booking_view_total_fare',
-      'booking_view_service_charge_rate',
-      'booking_view_service_charge_rate_discount'
+      "booking_amount",
+      "booking_adv_amount",
+      "booking_total_amount",
+      "booking_view_base_rate",
+      "booking_view_km_till",
+      "booking_view_per_km_rate",
+      "booking_view_per_ext_km_rate",
+      "booking_view_per_ext_min_rate",
+      "booking_view_km_rate",
+      "booking_view_total_fare",
+      "booking_view_service_charge_rate",
+      "booking_view_service_charge_rate_discount",
     ];
 
     if (paymentFields.includes(field)) {
-      try {
-        const response = await axios.patch(
-          `${baseURL}/ambulance/update_ambulance_booking_amount/${data?.booking_id}`,
-          {
-            newAmount: value,
-            amountColumnName: field
-          }
-        );
-        
-        if (response.data.status === 200) {
-          console.log(`${field} updated successfully`);
-        } else {
-          console.error(`Failed to update ${field}:`, response.data.message);
-          alert(`Failed to update ${field}`);
-          return;
-        }
-      } catch (error) {
-        console.error(`Error updating ${field}:`, error);
-        alert(`Failed to update ${field}`);
+      const result = await api.updatePaymentDetails(
+        data.booking_id,
+        value,
+        field
+      );
+      if (!result.success) {
+        alert(result.message);
         return;
       }
     }
@@ -429,208 +408,6 @@ const AmbulanceBookingDetailsForm: React.FC<
     onUpdate?.(field, value);
   };
 
-  const formatDate = (value: string | number) => {
-    if (!value && value !== 0) return "N/A";
-    const valStr = value.toString();
-
-    try {
-      const date = /^\d+$/.test(valStr)
-        ? new Date(parseInt(valStr) * 1000)
-        : new Date(valStr);
-
-      if (isNaN(date.getTime())) return valStr;
-      return DateConversion(date.toISOString());
-    } catch {
-      return valStr;
-    }
-  };
-
-  const isBulkBooking = () =>
-    data?.booking_type === 2 || data?.booking_type === "2";
-  const isRentalBooking = () =>
-    data?.booking_type === 1 || data?.booking_type === "1";
-
-  const handleAssignDriver = () => {
-    setShowAssignModal(true);
-  };
-
-  const handleConsumerSearch = () => {
-    setShowConsumerSearchModal(true);
-    setConsumerSearchQuery("");
-    setConsumerSearchResults([]);
-  };
-
-
-  const verifyOTP = async () => {
-    if (!data?.booking_id) {
-      Swal.fire({
-        title: "Error",
-        text: "Invalid booking ID",
-        icon: "error",
-        confirmButtonColor: "#d33",
-      });
-      return;
-    }
-
-    try {
-      // Ask for confirmation first
-      const result = await Swal.fire({
-        title: "Verify OTP?",
-        text: "Are you sure you want to verify the OTP for this booking?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes, Verify",
-        cancelButtonText: "Cancel",
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        reverseButtons: true,
-      });
-
-      if (!result.isConfirmed) {
-        return;
-      }
-
-      // Get adminId from token
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token not found");
-      }
-
-      const decodedToken = jwtDecode(token) as any;
-      const adminId = decodedToken?.id;
-
-      if (!adminId) {
-        throw new Error("Admin ID not found in token");
-      }
-
-      // Show loading
-      Swal.fire({
-        title: "Verifying OTP...",
-        text: "Please wait",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      console.log("Verifying OTP for booking ID:", data.booking_id, "by admin ID:", adminId);
-      const response = await axios.post(
-        `${baseURL}/ambulance/verify_otp/${data.booking_id}`,
-        { adminId }
-      );
-
-      console.log("OTP Verification response:", response.data);
-
-      if (response.data.status == 200) {
-        // Update local state to reflect OTP verification
-        onUpdate?.("booking_view_status_otp", "1");
-
-        Swal.fire({
-          title: "Success",
-          text: "OTP verified successfully.",
-          icon: "success",
-          confirmButtonColor: "#3085d6",
-          timer: 2000,
-          timerProgressBar: true,
-        });
-      } else {
-        throw new Error(response.data.message || "OTP verification failed");
-      }
-    } catch (error: any) {
-      console.error("Error verifying OTP:", error);
-      Swal.fire({
-        title: "Error",
-        text:
-          error.response?.data?.message ||
-          error.message ||
-          "Failed to verify OTP. Please try again.",
-        icon: "error",
-        confirmButtonColor: "#d33",
-      });
-    }
-  };
-  const completeBooking = async () => {
-    if (!data?.booking_id) {
-      Swal.fire({
-        title: "Error",
-        text: "Invalid booking ID",
-        icon: "error",
-        confirmButtonColor: "#d33",
-      });
-      return;
-    }
-
-    try {
-      // Ask for confirmation first
-      const result = await Swal.fire({
-        title: "Complete Booking?",
-        text: "Are you sure you want to complete this booking?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes, Complete",
-        cancelButtonText: "Cancel",
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        reverseButtons: true,
-      });
-
-      if (!result.isConfirmed) {
-        return;
-      }
-
-      // Show loading
-      Swal.fire({
-        title: "Completing Booking...",
-        text: "Please wait",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      console.log("Completing booking for booking ID:", data.booking_id);
-      const response = await axios.post(
-        `${baseURL}/ambulance/complete_booking/${data.booking_id}`
-      );
-
-      console.log("Complete booking response:", response.data);
-
-      if (response.data.status == 200) {
-        // Update local state to reflect OTP verification
-        onUpdate?.("booking_status", "4");
-        onUpdate?.("booking_payment_status", "2");
-        onUpdate?.("booking_payment_method", "2");
-
-        Swal.fire({
-          title: "Success",
-          text: "Booking completed successfully.",
-          icon: "success",
-          confirmButtonColor: "#3085d6",
-          timer: 2000,
-          timerProgressBar: true,
-        });
-      } else {
-        throw new Error(response.data.message || "Booking completion failed");
-      }
-    } catch (error: any) {
-      console.error("Error completing booking:", error);
-      Swal.fire({
-        title: "Error",
-        text:
-          error.response?.data?.message ||
-          error.message ||
-          "Failed to complete booking. Please try again.",
-        icon: "error",
-        confirmButtonColor: "#d33",
-      });
-    }
-  };
-
-
-  <Button variant="" className="me-2 mb-2 bg-light" onClick={verifyOTP}>
-    Verify OTP
-  </Button>;
-
   const searchConsumers = async (query: string) => {
     if (!query.trim()) {
       setConsumerSearchResults([]);
@@ -638,35 +415,10 @@ const AmbulanceBookingDetailsForm: React.FC<
     }
 
     setSearchingConsumer(true);
-    try {
-      const response = await axios.get(
-        `${baseURL}/ambulance/get_ambulance_consumer_mobile?search=${encodeURIComponent(
-          query
-        )}`
-      );
-      console.log("Consumer search response:", response.data);
-      setConsumerSearchResults(
-        response.data?.jsonData?.ambulance_consumer_data || []
-      );
-    } catch (error) {
-      console.error("Error searching consumers:", error);
-      setConsumerSearchResults([]);
-    } finally {
-      setSearchingConsumer(false);
-    }
+    const result = await api.searchConsumers(query);
+    setConsumerSearchResults(result.data);
+    setSearchingConsumer(false);
   };
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      if (vehicleSearchQuery) {
-        searchVehicles(vehicleSearchQuery);
-      } else {
-        setVehicleSearchResults([]);
-      }
-    }, 300); // debounce delay (300ms)
-
-    return () => clearTimeout(timer);
-  }, [vehicleSearchQuery]);
 
   const handleSelectConsumer = async (consumer: Consumer) => {
     try {
@@ -689,57 +441,53 @@ const AmbulanceBookingDetailsForm: React.FC<
       });
 
       if (result.isConfirmed) {
-        // Show loading state
         Swal.fire({
           title: "Updating...",
           text: "Please wait while we update the consumer details.",
           allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
+          didOpen: () => Swal.showLoading(),
         });
 
-        // Update consumer details via API
-        await axios.put(
-          `${baseURL}/ambulance/update_ambulance_booking_consumer_details/${data?.booking_id}`,
-          {
-            booking_con_name: consumer.consumer_name,
-            booking_con_mobile: consumer.consumer_mobile_no,
-          }
+        const apiResult = await api.updateConsumerDetails(
+          data?.booking_id,
+          consumer.consumer_name,
+          consumer.consumer_mobile_no
         );
 
-        // Update local state
-        onUpdate?.("booking_con_name", consumer.consumer_name);
-        onUpdate?.("booking_con_mobile", consumer.consumer_mobile_no);
-        onUpdate?.("booking_by_cid", consumer.consumer_id.toString());
+        if (apiResult.success) {
+          onUpdate?.("booking_con_name", consumer.consumer_name);
+          onUpdate?.("booking_con_mobile", consumer.consumer_mobile_no);
+          onUpdate?.("booking_by_cid", consumer.consumer_id.toString());
 
-        // Close modal
-        setShowConsumerSearchModal(false);
-        setConsumerSearchQuery("");
-        setConsumerSearchResults([]);
+          setShowConsumerSearchModal(false);
+          setConsumerSearchQuery("");
+          setConsumerSearchResults([]);
 
-        // Show success message
-        Swal.fire({
-          title: "Updated!",
-          text: "Consumer details have been updated successfully.",
-          icon: "success",
-          confirmButtonColor: "#3085d6",
-          timer: 2000,
-          timerProgressBar: true,
-        });
+          Swal.fire({
+            title: "Updated!",
+            text: "Consumer details have been updated successfully.",
+            icon: "success",
+            confirmButtonColor: "#3085d6",
+            timer: 2000,
+            timerProgressBar: true,
+          });
+        } else {
+          throw new Error(apiResult.message);
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating consumer details:", error);
-
-      // Show error message
       Swal.fire({
         title: "Error!",
-        text: "Failed to update consumer details. Please try again.",
+        text:
+          error.message ||
+          "Failed to update consumer details. Please try again.",
         icon: "error",
         confirmButtonColor: "#d33",
       });
     }
   };
+
   const searchVehicles = async (query: string) => {
     if (!query.trim()) {
       setVehicleSearchResults([]);
@@ -747,23 +495,22 @@ const AmbulanceBookingDetailsForm: React.FC<
     }
 
     setSearchingVehicle(true);
-    try {
-      const response = await axios.get(
-        `${baseURL}/ambulance/get_vehicle_and_assign_data?search=${encodeURIComponent(
-          query
-        )}`
-      );
-
-      setVehicleSearchResults(
-        response.data?.jsonData?.vehicle_and_assign_data || []
-      );
-    } catch (error) {
-      console.error("Error searching vehicles:", error);
-      setVehicleSearchResults([]);
-    } finally {
-      setSearchingVehicle(false);
-    }
+    const result = await api.searchVehicles(query);
+    setVehicleSearchResults(result.data);
+    setSearchingVehicle(false);
   };
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (vehicleSearchQuery) {
+        searchVehicles(vehicleSearchQuery);
+      } else {
+        setVehicleSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [vehicleSearchQuery]);
 
   const handleSelectVehicle = async (vehicle: Vehicle) => {
     try {
@@ -790,7 +537,6 @@ const AmbulanceBookingDetailsForm: React.FC<
 
       if (!result.isConfirmed) return;
 
-      // Show loading
       Swal.fire({
         title: "Assigning...",
         text: "Please wait while we assign the driver and vehicle.",
@@ -798,161 +544,193 @@ const AmbulanceBookingDetailsForm: React.FC<
         didOpen: () => Swal.showLoading(),
       });
 
-      const adminId = 1; // replace with real admin id
+      const adminId = 1; // TODO: Get from auth context
 
-      // 🔥 DIRECT ASSIGN API CALL
-      await axios.post(
-        `${baseURL}/ambulance/assign_driver/${data?.booking_id}`,
-        {
-          driverId: vehicle.assign_id,
-          vehicleId: vehicle.vehicle_id,
-          adminId,
-        }
+      const apiResult = await api.assignDriver(
+        data?.booking_id,
+        vehicle.assign_id,
+        vehicle.vehicle_id,
+        adminId
       );
 
-      // ✅ Update local booking state
-      onUpdate?.("booking_acpt_vehicle_id", vehicle.vehicle_id.toString());
-      onUpdate?.("booking_acpt_driver_id", vehicle.assign_id.toString());
-      onUpdate?.("v_vehicle_name", vehicle.v_vehicle_name);
-      onUpdate?.("vehicle_rc_number", vehicle.vehicle_rc_number);
-      onUpdate?.("driver_name", vehicle.assign_name);
-      onUpdate?.("driver_last_name", vehicle.assign_last_name);
-      onUpdate?.("driver_mobile", vehicle.assign_mobile);
-      onUpdate?.("booking_status", "2"); // Driver Assigned
+      if (apiResult.success) {
+        onUpdate?.("booking_acpt_vehicle_id", vehicle.vehicle_id.toString());
+        onUpdate?.("booking_acpt_driver_id", vehicle.assign_id.toString());
+        onUpdate?.("v_vehicle_name", vehicle.v_vehicle_name);
+        onUpdate?.("vehicle_rc_number", vehicle.vehicle_rc_number);
+        onUpdate?.("driver_name", vehicle.assign_name);
+        onUpdate?.("driver_last_name", vehicle.assign_last_name);
+        onUpdate?.("driver_mobile", vehicle.assign_mobile);
+        onUpdate?.("booking_status", "2");
 
-      // ✅ Cleanup & close modal
-      setShowAssignModal(false);
-      setVehicleSearchResults([]);
-      setVehicleSearchQuery("");
+        setShowAssignModal(false);
+        setVehicleSearchResults([]);
+        setVehicleSearchQuery("");
 
-      Swal.fire({
-        icon: "success",
-        title: "Assigned Successfully",
-        text: "Driver and vehicle have been assigned.",
-        timer: 2000,
-        showConfirmButton: false,
-      });
-    } catch (error) {
+        Swal.fire({
+          icon: "success",
+          title: "Assigned Successfully",
+          text: "Driver and vehicle have been assigned.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } else {
+        throw new Error(apiResult.message);
+      }
+    } catch (error: any) {
       console.error("Assignment failed:", error);
       Swal.fire({
         icon: "error",
         title: "Assignment Failed",
-        text: "Unable to assign vehicle and driver.",
+        text: error.message || "Unable to assign vehicle and driver.",
       });
     }
   };
 
-  // const handleSubmitAssign = async () => {
-  //   if (!selectedVehicle || !selectedDriver) {
-  //     Swal.fire({
-  //       icon: "warning",
-  //       title: "Missing Information",
-  //       text: "Please select both vehicle and driver",
-  //       confirmButtonColor: "#3085d6",
-  //     });
-  //     return;
-  //   }
+  const isBulkBooking = () =>
+    data?.booking_type === 2 || data?.booking_type === "2";
+  const isRentalBooking = () =>
+    data?.booking_type === 1 || data?.booking_type === "1";
 
-  //   try {
-  //     const result = await Swal.fire({
-  //       title: "Confirm Assignment",
-  //       html: `
-  //         <div class="text-start">
-  //           <p><strong>Vehicle:</strong> ${
-  //             selectedVehicleData?.v_vehicle_name || "N/A"
-  //           }</p>
-  //           <p><strong>RC Number:</strong> ${
-  //             selectedVehicleData?.vehicle_rc_number || "N/A"
-  //           }</p>
-  //           <p><strong>${driverData?.assign_type || "Driver"}:</strong> ${
-  //         driverData?.assign_name || "N/A"
-  //       } ${driverData?.assign_last_name || ""}</p>
-  //           <p><strong>Mobile:</strong> ${
-  //             driverData?.assign_mobile || "N/A"
-  //           }</p>
-  //         </div>
-  //       `,
-  //       icon: "question",
-  //       showCancelButton: true,
-  //       confirmButtonText: "Yes, Assign",
-  //       cancelButtonText: "Cancel",
-  //       confirmButtonColor: "#3085d6",
-  //       cancelButtonColor: "#d33",
-  //       reverseButtons: true,
-  //     });
+  const verifyOTP = async () => {
+    if (!data?.booking_id) {
+      Swal.fire({
+        title: "Error",
+        text: "Invalid booking ID",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
 
-  //     if (result.isConfirmed) {
-  //       setSubmitting(true);
+    try {
+      const result = await Swal.fire({
+        title: "Verify OTP?",
+        text: "Are you sure you want to verify the OTP for this booking?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Verify",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        reverseButtons: true,
+      });
 
-  //       // Show loading
-  //       Swal.fire({
-  //         title: "Assigning...",
-  //         text: "Please wait while we assign the driver and vehicle.",
-  //         allowOutsideClick: false,
-  //         didOpen: () => {
-  //           Swal.showLoading();
-  //         },
-  //       });
+      if (!result.isConfirmed) return;
 
-  //       // Get adminId from localStorage or context (adjust as needed)
-  //       const adminId = 1; // TODO: Replace with actual admin ID from your auth context
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Authentication token not found");
 
-  //       // Call the assign driver API
-  //       await axios.post(
-  //         `${baseURL}/ambulance/assign_driver/${data?.booking_id}`,
-  //         {
-  //           driverId: selectedDriver,
-  //           vehicleId: selectedVehicle,
-  //           adminId: adminId,
-  //         }
-  //       );
+      const decodedToken = jwtDecode(token) as any;
+      const adminId = decodedToken?.id;
 
-  //       // Update local state
-  //       if (onUpdate) {
-  //         onUpdate("booking_acpt_vehicle_id", selectedVehicle);
-  //         onUpdate("booking_acpt_driver_id", selectedDriver);
-  //         onUpdate("v_vehicle_name", selectedVehicleData?.v_vehicle_name || "");
-  //         onUpdate(
-  //           "vehicle_rc_number",
-  //           selectedVehicleData?.vehicle_rc_number || ""
-  //         );
-  //         onUpdate("driver_name", driverData?.assign_name || "");
-  //         onUpdate("driver_last_name", driverData?.assign_last_name || "");
-  //         onUpdate("driver_mobile", driverData?.assign_mobile || "");
-  //         onUpdate("booking_status", "2"); // Driver Assigned status
-  //       }
+      if (!adminId) throw new Error("Admin ID not found in token");
 
-  //       // Close modal and reset
-  //       setShowAssignModal(false);
-  //       setSelectedVehicle("");
-  //       setSelectedDriver("");
-  //       setSelectedVehicleData(null);
-  //       setDriverData(null);
-  //       setVehicleSearchResults([]);
-  //       setVehicleSearchQuery("");
+      Swal.fire({
+        title: "Verifying OTP...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
 
-  //       // Show success
-  //       Swal.fire({
-  //         icon: "success",
-  //         title: "Assigned!",
-  //         text: "Driver and vehicle have been assigned successfully.",
-  //         confirmButtonColor: "#3085d6",
-  //         timer: 2000,
-  //         timerProgressBar: true,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error("Error assigning driver:", error);
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Assignment Failed",
-  //       text: "Failed to assign driver and vehicle. Please try again.",
-  //       confirmButtonColor: "#d33",
-  //     });
-  //   } finally {
-  //     setSubmitting(false);
-  //   }
-  // };
+      const apiResult = await api.verifyOTP(data.booking_id, adminId);
+
+      if (apiResult.success && apiResult.data.status == 200) {
+        onUpdate?.("booking_view_status_otp", "1");
+
+        Swal.fire({
+          title: "Success",
+          text: "OTP verified successfully.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } else {
+        throw new Error(apiResult.message || "OTP verification failed");
+      }
+    } catch (error: any) {
+      console.error("Error verifying OTP:", error);
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Failed to verify OTP. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    }
+  };
+
+  const completeBooking = async () => {
+    if (!data?.booking_id) {
+      Swal.fire({
+        title: "Error",
+        text: "Invalid booking ID",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+
+    try {
+      const result = await Swal.fire({
+        title: "Complete Booking?",
+        text: "Are you sure you want to complete this booking?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Complete",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        reverseButtons: true,
+      });
+
+      if (!result.isConfirmed) return;
+
+      Swal.fire({
+        title: "Completing Booking...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      const apiResult = await api.completeBooking(data.booking_id);
+
+      if (apiResult.success && apiResult.data.status == 200) {
+        onUpdate?.("booking_status", "4");
+        onUpdate?.("booking_payment_status", "2");
+        onUpdate?.("booking_payment_method", "2");
+
+        Swal.fire({
+          title: "Success",
+          text: "Booking completed successfully.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      } else {
+        throw new Error(apiResult.message || "Booking completion failed");
+      }
+    } catch (error: any) {
+      console.error("Error completing booking:", error);
+      Swal.fire({
+        title: "Error",
+        text: error.message || "Failed to complete booking. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    }
+  };
+
+  const handleAssignDriver = () => {
+    setShowAssignModal(true);
+  };
+
+  const handleConsumerSearch = () => {
+    setShowConsumerSearchModal(true);
+    setConsumerSearchQuery("");
+    setConsumerSearchResults([]);
+  };
 
   const handleCancelBooking = () => {
     setShowCancelBookingModal(true);
