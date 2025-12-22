@@ -2691,6 +2691,135 @@ export const completeAmbulanceBookingService = async (bookingId: number) => {
     }
 };
 
+// SERVICE TO GENERATE BOOKING INVOICE
+export const generateAmbulanceBookingInvoiceService = async (
+    bookingId: number,
+    totalAmounts: number,
+    advance_amounts: number,
+    extra_km: number = 0,
+    extra_minute: number = 0
+) => {
+    try {
+
+        const [bookingRows]: any = await db.query(
+            `SELECT * FROM booking_view WHERE booking_id = ?`,
+            [bookingId]
+        );
+
+        if (!bookingRows || bookingRows.length === 0) {
+            throw new ApiError(404, "Booking not found");
+        }
+
+        const bookingData = bookingRows[0];
+
+        const bookingcustomerId = bookingData.booking_by_cid;
+        const bookingdriverId = bookingData.booking_acpt_driver_id;
+
+        const bi_base_rate = bookingData.booking_view_base_rate;
+        const bi_base_km = bookingData.booking_view_km_rate;
+        const bi_km_rate = bookingData.booking_view_per_ext_km_rate;
+        const bi_ext_min = bookingData.booking_view_per_ext_min_rate;
+
+        const discount_mrp = totalAmounts * 0.10;
+
+        const discount_prices =
+            discount_mrp > advance_amounts
+                ? discount_mrp - advance_amounts
+                : 0;
+
+        const discount_amount_with_services =
+            totalAmounts - advance_amounts;
+
+        const bi_ext_km_rate =
+            Number(extra_km) * Number(bi_km_rate);
+
+        const bi_ext_min_rate =
+            Number(extra_minute) * Number(bi_ext_min);
+
+        const bi_total_amount_with_sc =
+            totalAmounts + bi_ext_km_rate + bi_ext_min_rate;
+
+        const [invoiceResult]: any = await db.query(
+            `
+            INSERT INTO booking_invoice
+            (
+                bi_booking_id,
+                bi_driver_id,
+                bi_consumer_id,
+                bi_base_rate,
+                bi_km_rate,
+                bi_addons_rate,
+                bi_ext_km,
+                bi_ext_km_rate,
+                bi_ext_min,
+                bi_ext_min_rate,
+                bi_total_amount_without_SC,
+                bi_discount_in_sc,
+                bi_service_charge,
+                bi_total_amount_with_sc,
+                bi_payment_status,
+                bi_cash_pay_amount,
+                bi_online_pay_amount,
+                bi_status,
+                bi_invoice_genrated_time_unix,
+                created_at,
+                updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+            `,
+            [
+                bookingId,
+                bookingdriverId,
+                bookingcustomerId,
+                bi_base_rate,
+                bi_base_km,
+                0,
+                extra_km,
+                bi_ext_km_rate,
+                extra_minute,
+                bi_ext_min_rate,
+                discount_amount_with_services,
+                Number(discount_prices.toFixed(2)),
+                advance_amounts,
+                bi_total_amount_with_sc,
+                1,
+                0,
+                0,
+                2,
+                Math.floor(Date.now() / 1000)
+            ]
+        );
+
+        await db.query(
+            `
+            UPDATE booking_view
+            SET booking_status = 3,
+                booking_payment_status = ''
+            WHERE booking_id = ?
+            `,
+            [bookingId]
+        );
+
+        if (invoiceResult.affectedRows > 0) {
+            return {
+                success: true,
+                message: "Invoice Generate Receive Successfully"
+            };
+        } else {
+            return {
+                error: true,
+                message: "Something went wrong !!"
+            };
+        }
+
+    } catch (error) {
+        throw new ApiError(
+            500,
+            "Generate Ambulance Booking Invoice Service Error"
+        );
+    }
+};
+
 
 // generate invoice code
 
