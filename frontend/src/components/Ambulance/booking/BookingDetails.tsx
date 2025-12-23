@@ -1519,19 +1519,19 @@ const AmbulanceBookingDetailsForm: React.FC<
                 const statusText = statusOption?.label || "Unknown";
                 const statusClass =
                   status === 0 || status === "0"
-                    ? "text-warning"
-                    : status === 1 || status === "1"
-                    ? "text-info"
-                    : status === 2 || status === "2"
-                    ? "text-primary"
-                    : status === 3 || status === "3"
                     ? "text-secondary"
-                    : status === 4 || status === "4"
+                    : status === 1 || status === "1"
+                    ? "text-primary"
+                    : status === 2 || status === "2"
                     ? "text-info"
-                    : status === 5 || status === "5"
+                    : status === 3 || status === "3"
+                    ? "text-warning"
+                    : status === 4 || status === "4"
                     ? "text-success"
-                    : status === 6 || status === "6"
+                    : status === 5 || status === "5"
                     ? "text-danger"
+                    : status === 6 || status === "6"
+                    ? "text-dark"
                     : "text-muted";
                 return <span className={statusClass}>{statusText}</span>;
               })()}
@@ -1945,8 +1945,9 @@ const AmbulanceBookingDetailsForm: React.FC<
 
               {data?.booking_acpt_driver_id &&
               data?.booking_acpt_driver_id !== "0" ? (
-                <div className="mb-2 border-bottom">
+                <>
                   <h6 className="fw-bold mb-0">Driver & Vehicle</h6>
+                  <div className="mb-2 border-bottom d-flex justify-content-between">
                   <p className="mb-0">
                     <strong>Driver:</strong>{" "}
                     {invoiceData.driver_name
@@ -1955,9 +1956,10 @@ const AmbulanceBookingDetailsForm: React.FC<
                   </p>
                   <p className="mb-1">
                     <strong>Vehicle No:</strong>{" "}
-                    {invoiceData.vehicle_rc_number || "N/A"} {invoiceData.v_vehicle_name !== "unknown" && (invoiceData.v_vehicle_name)}
+                    {invoiceData.vehicle_rc_number || "N/A"} {invoiceData.v_vehicle_name !== "unknown" && `(${invoiceData.v_vehicle_name})`}
                   </p>
                 </div>
+                </>
               ) : (
                 <div className="mb-2 border-bottom">
                   <h6 className="fw-bold">Driver & Vehicle</h6>
@@ -1994,9 +1996,9 @@ const AmbulanceBookingDetailsForm: React.FC<
                   </tr>
                   <tr>
                     <td>
-                      <strong>Total</strong>
+                      <strong className="text-dark">Total</strong>
                     </td>
-                    <td className="text-end fw-bold">
+                    <td className="text-end text-dark fw-bold">
                       ₹{invoiceData.bi_total_amount_with_sc}
                     </td>
                   </tr>
