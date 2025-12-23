@@ -542,6 +542,54 @@ export const fetchCityContentService = async (cityId: number) => {
 };
 
 // SERVICE TO EDIT EXISTING CITY CONTENT
+// export const editCityContentService = async (cityId: number, data: cityContentData) => {
+//     try {
+
+//         const updateData: any = {};
+
+//         if (data.city_name) updateData.city_name = data.city_name;
+//         if (data.city_title_sku) updateData.city_title_sku = generateSlug(data.city_title_sku);
+//         if (data.city_title) updateData.city_title = data.city_title;
+//         if (data.city_heading) updateData.city_heading = data.city_heading;
+//         if (data.city_body_desc) updateData.city_body_desc = data.city_body_desc;
+//         if (data.city_why_choose_us) updateData.city_why_choose_us = data.city_why_choose_us;
+//         if (data.why_choose_meta_desc) updateData.why_choose_meta_desc = data.why_choose_meta_desc;
+//         if (data.city_block1_heading) updateData.city_block1_heading = data.city_block1_heading;
+//         if (data.city_block1_body) updateData.city_block1_body = data.city_block1_body;
+//         if (data.city_block2_heading) updateData.city_block2_heading = data.city_block2_heading;
+//         if (data.city_block2_body) updateData.city_block2_body = data.city_block2_body;
+//         if (data.city_block3_heading) updateData.city_block3_heading = data.city_block3_heading;
+//         if (data.city_block3_body) updateData.city_block3_body = data.city_block3_body;
+//         if (data.city_thumbnail) {
+//             const uploadedPath = uploadFileCustom(data.city_thumbnail, "/city_content");
+//             updateData.city_thumbnail = uploadedPath;
+//         }
+//         if (data.city_thumbnail_alt) updateData.city_thumbnail_alt = data.city_thumbnail_alt;
+//         if (data.city_thumbnail_title) updateData.city_thumbnail_title = data.city_thumbnail_title;
+//         if (data.city_meta_title) updateData.city_meta_title = data.city_meta_title;
+//         if (data.city_meta_desc) updateData.city_meta_desc = data.city_meta_desc;
+//         if (data.city_meta_keyword) updateData.city_meta_keyword = data.city_meta_keyword;
+//         if (data.city_force_keyword) updateData.city_force_keyword = data.city_force_keyword;
+//         if (data.city_faq_heading) updateData.city_faq_heading = data.city_faq_heading;
+//         if (data.city_faq_desc) updateData.city_faq_desc = data.city_faq_desc;
+//         if (data.city_emergency_heading) updateData.city_emergency_heading = data.city_emergency_heading;
+//         if (data.city_emergency_desc) updateData.city_emergency_desc = data.city_emergency_desc;
+
+//         const [result]: any = await db.query(
+//             `UPDATE city_content SET ? WHERE city_id = ?`,
+//             [updateData, cityId]
+//         );
+
+//         return {
+//             status: 200,
+//             message: "City content updated successfully",
+//         };
+
+//     } catch (error) {
+//         throw new ApiError(500, "Edit City Content Error On Updating");
+//     }
+// };
+
 export const editCityContentService = async (cityId: number, data: cityContentData) => {
     try {
 
@@ -560,10 +608,7 @@ export const editCityContentService = async (cityId: number, data: cityContentDa
         if (data.city_block2_body) updateData.city_block2_body = data.city_block2_body;
         if (data.city_block3_heading) updateData.city_block3_heading = data.city_block3_heading;
         if (data.city_block3_body) updateData.city_block3_body = data.city_block3_body;
-        if (data.city_thumbnail) {
-            const uploadedPath = uploadFileCustom(data.city_thumbnail, "/city_content");
-            updateData.city_thumbnail = uploadedPath;
-        }
+        if (data.city_thumbnail) updateData.city_thumbnail = null;
         if (data.city_thumbnail_alt) updateData.city_thumbnail_alt = data.city_thumbnail_alt;
         if (data.city_thumbnail_title) updateData.city_thumbnail_title = data.city_thumbnail_title;
         if (data.city_meta_title) updateData.city_meta_title = data.city_meta_title;
@@ -579,6 +624,35 @@ export const editCityContentService = async (cityId: number, data: cityContentDa
             `UPDATE city_content SET ? WHERE city_id = ?`,
             [updateData, cityId]
         );
+
+        const cityIdForImage = cityId;
+
+        if (data.city_thumbnail?.buffer) {
+            console.log("File dataaaaa", data.city_thumbnail.buffer);
+
+            const formData = new FormData();
+            formData.append("city_id", cityIdForImage.toString());
+
+            formData.append(
+                "city_thumbnail",
+                data.city_thumbnail.buffer,
+                {
+                    filename: data.city_thumbnail.originalname,
+                    contentType: data.city_thumbnail.mimetype,
+                }
+            );
+
+            console.log("Form Data:", formData);
+
+            await axios.post(
+                "https://medcab.in/reactApi/ambulance/cityContent/ImageSave",
+                formData,
+                {
+                    headers: formData.getHeaders(),
+                    maxBodyLength: Infinity,
+                }
+            );
+        }
 
         return {
             status: 200,
