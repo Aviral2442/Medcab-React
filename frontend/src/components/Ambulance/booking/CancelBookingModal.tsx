@@ -3,6 +3,7 @@ import { Modal, Button, Form, Spinner, Alert } from "react-bootstrap";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { TbAlertCircle } from "react-icons/tb";
+import { jwtDecode } from "jwt-decode";
 
 const baseURL = (import.meta as any).env?.VITE_PATH ?? "";
 
@@ -14,7 +15,7 @@ interface CancelBookingModalProps {
 }
 
 interface CancelReason {
-  id: number;
+  booking_cancel_reasons_id: number;
   booking_cancel_reasons_text: string;
 }
 
@@ -24,10 +25,15 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
   bookingId,
   onBookingCancelled,
 }) => {
-  const [cancelConsumerReasons, setCancelConsumerReasons] = useState<CancelReason[]>([]);
-  const [cancelDriverReasons, setCancelDriverReasons] = useState<CancelReason[]>([]);
+  const [cancelConsumerReasons, setCancelConsumerReasons] = useState<
+    CancelReason[]
+  >([]);
+  const [cancelDriverReasons, setCancelDriverReasons] = useState<
+    CancelReason[]
+  >([]);
   const [loadingReasons, setLoadingReasons] = useState(false);
   const [selectedReason, setSelectedReason] = useState("");
+  const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
   const [otherReason, setOtherReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,9 +52,11 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
       const response = await axios.get(
         `${baseURL}/ambulance/cancel_booking_reasons_data`
       );
-      
-      const consumerReasons = response.data?.jsonData?.cancel_reasons_consumer || [];
-      const driverReasons = response.data?.jsonData?.cancel_reasons_driver || [];
+
+      const consumerReasons =
+        response.data?.jsonData?.cancel_reasons_consumer || [];
+      const driverReasons =
+        response.data?.jsonData?.cancel_reasons_driver || [];
       console.log("driver reasons", driverReasons);
       console.log("consumer reasons", consumerReasons);
       setCancelConsumerReasons(consumerReasons);
@@ -61,8 +69,9 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
     }
   };
 
-  const handleReasonChange = (reason: string) => {
+  const handleReasonChange = (reason: string, reasonId?: number) => {
     setSelectedReason(reason);
+    setSelectedReasonId(reasonId || null);
     // Clear other reason if user selects a predefined reason
     if (reason !== "other") {
       setOtherReason("");
@@ -90,6 +99,19 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
       });
       return;
     }
+
+    const admin = localStorage.getItem("token");
+    if (!admin) {
+      Swal.fire({
+        icon: "error",
+        title: "Unauthorized",
+        text: "You must be logged in to perform this action.",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+    const adminId = jwtDecode<any>(admin).id;
+    console.log("adminId", adminId);
 
     try {
       const result = await Swal.fire({
@@ -124,11 +146,16 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
         });
 
         // API call to cancel booking
+        const cancelReasonText = selectedReason === "other" ? otherReason : selectedReason;
+        const cancelReasonIdValue = selectedReason === "other" ? 0 : (selectedReasonId || 0);
+        
         await axios.patch(
           `${baseURL}/ambulance/cancel_ambulance_booking/${bookingId}`,
           {
-            cancelReason:
-              selectedReason === "other" ? otherReason : selectedReason,
+            cancelReasonId: cancelReasonIdValue,
+            cancelReason: cancelReasonText,
+            cancelUserType: 1, // 1 for admin
+            adminId: adminId,
           }
         );
 
@@ -150,6 +177,7 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
 
         // Reset form
         setSelectedReason("");
+        setSelectedReasonId(null);
         setOtherReason("");
       }
     } catch (err: any) {
@@ -170,6 +198,7 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
   const handleClose = () => {
     if (!submitting) {
       setSelectedReason("");
+      setSelectedReasonId(null);
       setOtherReason("");
       setError(null);
       onHide();
@@ -208,10 +237,16 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
               <div className="d-flex flex-wrap gap-2">
                 {cancelConsumerReasons.map((reason) => (
                   <Button
-                    key={reason.id}
-                    variant={selectedReason === reason.booking_cancel_reasons_text ? "primary" : "outline-primary"}
+                    key={reason.booking_cancel_reasons_id}
+                    variant={
+                      selectedReason === reason.booking_cancel_reasons_text
+                        ? "primary"
+                        : "outline-primary"
+                    }
                     size="sm"
-                    onClick={() => setSelectedReason(reason.booking_cancel_reasons_text)}
+                    onClick={() =>
+                      handleReasonChange(reason.booking_cancel_reasons_text, reason.booking_cancel_reasons_id)
+                    }
                     className="text-nowrap py-0"
                   >
                     {reason.booking_cancel_reasons_text}
@@ -228,10 +263,16 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
               <div className="d-flex flex-wrap gap-2">
                 {cancelDriverReasons.map((reason) => (
                   <Button
-                    key={reason.id}
-                    variant={selectedReason === reason.booking_cancel_reasons_text ? "primary" : "outline-primary"}
+                    key={reason.booking_cancel_reasons_id}
+                    variant={
+                      selectedReason === reason.booking_cancel_reasons_text
+                        ? "primary"
+                        : "outline-primary"
+                    }
                     size="sm"
-                    onClick={() => setSelectedReason(reason.booking_cancel_reasons_text)}
+                    onClick={() =>
+                      handleReasonChange(reason.booking_cancel_reasons_text, reason.booking_cancel_reasons_id)
+                    }
                     className="text-nowrap py-0"
                   >
                     {reason.booking_cancel_reasons_text}
@@ -276,11 +317,7 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          variant="light"
-          onClick={handleClose}
-          disabled={submitting}
-        >
+        <Button variant="light" onClick={handleClose} disabled={submitting}>
           Close
         </Button>
         <Button

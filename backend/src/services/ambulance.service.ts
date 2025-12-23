@@ -1911,9 +1911,6 @@ export const createAmbulanceBookingService = async (data: AmbulanceBookingData) 
 export const updateAmbulanceBookingScheduleTime = async (bookingId: number, booking_schedule_time: string) => {
     try {
 
-        console.log(bookingId, booking_schedule_time);
-
-
         if (!bookingId) {
             throw new ApiError(400, "Invalid booking ID");
         }
@@ -2219,7 +2216,7 @@ export const cancelAmbulanceBookingService = async (bookingId: number, cancelRea
             [bookingId]
         );
 
-        const assignedDriverId = rows[0].booking_acpt_driver_id;
+        const assignedDriverId = rows[0].booking_acpt_driver_id || 0;
 
         if (assignedDriverId && assignedDriverId > 0) {
             await db.query(
@@ -2293,7 +2290,6 @@ export const verifyOTPAmbulanceBookingService = async (bookingId: number, adminI
 
         const currentBookingStatus = rows[0].booking_status;
 
-        console.log("currentBookingStatus", rows[0]);
         if (currentBookingStatus === "2") {
 
             const arrivalTime = rows[0].booking_view_pickup_time;
@@ -2833,6 +2829,39 @@ export const generateAmbulanceBookingInvoiceService = async (
     }
 };
 
+export const ambulanceBookingInvoiceSerive = async (bookingId: number) => {
+    try {
+        const [rows]: any = await db.query(
+            `SELECT 
+                booking_invoice.*, 
+                consumer.consumer_name,
+                consumer.consumer_mobile_no,
+                driver.driver_name,
+                driver.driver_last_name,
+                driver.driver_mobile,
+                booking_view.booking_acpt_vehicle_id,
+                booking_view.booking_pickup,
+                booking_view.booking_drop,
+                booking_view.booking_schedule_time,
+                booking_view.booking_view_category_name
+            FROM booking_invoice
+            LEFT JOIN booking_view ON booking_view.booking_id = booking_invoice.bi_booking_id
+            LEFT JOIN consumer ON booking_invoice.bi_consumer_id = consumer.consumer_id
+            LEFT JOIN driver ON driver.driver_id = booking_invoice.bi_driver_id
+            WHERE bi_booking_id = ?`,
+            [bookingId]
+        );
+        return {
+            status: 200,
+            message: "Booking invoice data fetched successfully",
+            jsonData: {
+                booking_invoice_data: rows
+            }
+        };
+    } catch (error) {
+        throw new ApiError(500, "Get Booking Invoice Data Error On Fetching");
+    }
+};
 
 // generate invoice code
 

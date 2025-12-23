@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, ambulanceBookingCountService, dashboardAmbulanceBookingService, getAmbulanceConsumerMobileService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService, ambulancePartnerCountService, ambulanceCompleteOngoingCancelReminderBookingCounts, assignDriverService, cancelAmbulanceBookingService, verifyOTPAmbulanceBookingService, cancelReasonService, getAmbulanceVehicleAndAssignDataService, cancelDriverFromAmbulanceBookingService, updateAmbulanceBookingAmountService, completeAmbulanceBookingService, generateAmbulanceBookingInvoiceService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, ambulanceBookingCountService, dashboardAmbulanceBookingService, getAmbulanceConsumerMobileService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService, ambulancePartnerCountService, ambulanceCompleteOngoingCancelReminderBookingCounts, assignDriverService, cancelAmbulanceBookingService, verifyOTPAmbulanceBookingService, cancelReasonService, getAmbulanceVehicleAndAssignDataService, cancelDriverFromAmbulanceBookingService, updateAmbulanceBookingAmountService, completeAmbulanceBookingService, generateAmbulanceBookingInvoiceService, ambulanceBookingInvoiceSerive } from "../services/ambulance.service";
 
 // CONTROLLER TO GET TOTAL AMBULANCE BOOKING COUNT
 export const ambulanceBookingCountController = async (req: Request, res: Response, next: NextFunction) => {
@@ -705,7 +705,7 @@ export const cancelAmbulanceBookingController = async (req: Request, res: Respon
     try {
         const bookingId = Number(req.params.bookingId);
         const { cancelReasonId, cancelReason, cancelUserType, adminId } = req.body;
-
+        console.log(bookingId, cancelReasonId, cancelReason, cancelUserType, adminId);
         const result = await cancelAmbulanceBookingService(bookingId, cancelReasonId, cancelReason, cancelUserType, adminId);
         res.status(result.status).json(result);
     } catch (error) {
@@ -806,6 +806,16 @@ export const generateAmbulanceBookingInvoiceController = async (req: Request, re
 
         return res.status(200).json(result);
 
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const ambulanceBookingInvoiceController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const bookingId = parseInt(req.params.bookingId);
+        const result = await ambulanceBookingInvoiceSerive(bookingId);
+        res.status(200).json(result);
     } catch (error) {
         next(error);
     }

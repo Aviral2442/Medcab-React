@@ -9,7 +9,6 @@ import CancelBookingModal from "./CancelBookingModal";
 import { jwtDecode } from "jwt-decode";
 import BookingDetailsApiData from "./BookingDetailsApiData";
 
-
 interface AmbulanceBookingDetailsFormProps {
   data: any;
   onUpdate?: (field: string, value: string) => void;
@@ -160,7 +159,11 @@ const Field: React.FC<FieldProps> = ({
             className="text-decoration-none border-0 bg-transparent text-secondary p-0 fs-6"
             style={{ marginLeft: "8px" }}
           >
-            (Assign Driver)
+            (
+            {value && value.toString().trim() && value !== "N/A"
+              ? "Update Assign Driver"
+              : "Assign Driver"}
+            )
           </button>
         )}
       </div>
@@ -358,6 +361,9 @@ const AmbulanceBookingDetailsForm: React.FC<
     useState<Vehicle | null>(null);
   const [_driverData, setDriverData] = useState<any>(null);
   const [showCancelBookingModal, setShowCancelBookingModal] = useState(false);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<any>(null);
+  const [loadingInvoice, setLoadingInvoice] = useState(false);
 
   const handleFieldUpdate = async (field: string, value: string) => {
     if (data?.booking_id === undefined) {
@@ -724,6 +730,183 @@ const AmbulanceBookingDetailsForm: React.FC<
     setShowAssignModal(true);
   };
 
+  const handlegenerateInvoice = async () => {
+    if (!data?.booking_id) {
+      Swal.fire({
+        title: "Error",
+        text: "Invalid booking ID",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+    try {
+      const result = await Swal.fire({
+        title: "Generate Invoice?",
+        text: "Are you sure you want to generate invoice for this booking?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Generate",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        reverseButtons: true,
+      });
+      if (!result.isConfirmed) return;
+
+      Swal.fire({
+        title: "Generating Invoice...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      const totalAmounts = Number(data.booking_total_amount || 0);
+      const advance_amounts = Number(data.booking_adv_amount || 0);
+      const extra_km = Number(data?.booking_view_per_ext_km_rate || 0);
+      const extra_hour = Number(data?.booking_view_per_ext_min_rate || 0);
+
+      const apiResult = await api.generateInvoice(
+        data.booking_id,
+        totalAmounts,
+        advance_amounts,
+        extra_km,
+        extra_hour
+      );
+
+      if (apiResult.success) {
+        Swal.fire({
+          title: "Success!",
+          text: "Invoice generated successfully",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+        // Optionally refresh booking data or open invoice
+        if (onUpdate) {
+          onUpdate("booking_status", "3"); // Update to invoice status
+        }
+      } else {
+        Swal.fire({
+          title: "Error!",
+          text: apiResult.message || "Failed to generate invoice",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error in handlegenerateInvoice:", error);
+      Swal.fire({
+        title: "Error!",
+        text: error.message || "Failed to generate invoice. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    }
+  };
+
+  const handleRemoveAssignDriver = async () => {
+    if (!data?.booking_id) {
+      Swal.fire({
+        title: "Error",
+        text: "Invalid booking ID",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+    try {
+      const result = await Swal.fire({
+        title: "Remove Assigned Driver?",
+        text: "Are you sure you want to remove the assigned driver from this booking?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Remove",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        reverseButtons: true,
+      });
+      if (!result.isConfirmed) return;
+
+      Swal.fire({
+        title: "Removing Assigned Driver...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+      const apiResult = await api.cancelAssignDriver(data.booking_id);
+      if (apiResult.success && apiResult.data.status == 200) {
+        onUpdate?.("booking_acpt_vehicle_id", "");
+        onUpdate?.("booking_acpt_driver_id", "");
+        onUpdate?.("v_vehicle_name", "");
+        onUpdate?.("vehicle_rc_number", "");
+        onUpdate?.("driver_name", "");
+        onUpdate?.("driver_last_name", "");
+        onUpdate?.("driver_mobile", "");
+        onUpdate?.("booking_status", "1");
+        Swal.fire({
+          title: "Success",
+          text: "Assigned driver has been removed successfully.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+      }
+    } catch (error: any) {
+      console.error("Error removing assigned driver:", error);
+      Swal.fire({
+        title: "Error",
+        text:
+          error.message ||
+          "Failed to remove assigned driver. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    }
+  };
+
+  const handleInvoiceData = async () => {
+    if (!data?.booking_id) {
+      Swal.fire({
+        title: "Error!",
+        text: "Invalid booking ID",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+    try {
+      setLoadingInvoice(true);
+      const result = await api.fetchInvoiceData(data.booking_id);
+
+      if (result.success && result.data) {
+        console.log("Fetched Invoice Data:", result.data[0]);
+        setInvoiceData(result.data[0]);
+        setShowInvoiceModal(true);
+      } else {
+        Swal.fire({
+          title: "Error!",
+          text: result.message || "Failed to fetch invoice data",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error fetching invoice data:", error);
+      Swal.fire({
+        title: "Error!",
+        text: error.message || "Failed to fetch invoice data",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    } finally {
+      setLoadingInvoice(false);
+    }
+  };
+
   const handleConsumerSearch = () => {
     setShowConsumerSearchModal(true);
     setConsumerSearchQuery("");
@@ -772,7 +955,7 @@ const AmbulanceBookingDetailsForm: React.FC<
           cols: 2,
         },
         {
-          label: "Rating Status (Driver to Consumer)",
+          label: "Rating Status (D-C)",
           name: "booking_view_rating_status",
           type: "select",
           options: ratingStatus,
@@ -780,7 +963,7 @@ const AmbulanceBookingDetailsForm: React.FC<
           cols: 2,
         },
         {
-          label: "Consumer to Driver Rating Status",
+          label: "Rating Status (C-D)",
           name: "booking_view_rating_c_to_d_status",
           type: "select",
           options: ratingCtoDStatus,
@@ -1250,29 +1433,70 @@ const AmbulanceBookingDetailsForm: React.FC<
               variant=""
               className="me-2 mb-2 bg-light"
               onClick={handleCancelBooking}
+              disabled={
+                data?.booking_status === "5" &&
+                data?.booking_status === "0" &&
+                data?.booking_status === "4"
+              }
             >
-              Cancel Booking
+              {data?.booking_status == 5
+                ? "Booking Cancelled"
+                : "Cancel Booking"}
             </Button>
             <Button
               variant=""
               className="me-2 mb-2 bg-light"
               onClick={verifyOTP}
+              disabled={data?.booking_view_status_otp === "0"}
             >
-              Verify OTP
+              {data?.booking_view_status_otp === "0"
+                ? "OTP Verified"
+                : "Verify OTP"}
             </Button>
             <Button
               variant=""
               className="me-2 mb-2 bg-light"
               onClick={completeBooking}
+              disabled={data?.booking_status === "4"}
             >
-              Complete Booking
+              {data?.booking_status === "4"
+                ? "Booking Completed"
+                : "Complete Booking"}
             </Button>
             <Button
               variant=""
               className="me-2 mb-2  bg-light"
               onClick={handleAssignDriver}
             >
-              Assign Driver
+              {data?.booking_acpt_driver_id === "0"
+                ? "Assign Driver"
+                : "Reassign Driver"}
+            </Button>
+            <Button
+              variant=""
+              className="me-2 mb-2  bg-light"
+              onClick={handleRemoveAssignDriver}
+              disabled={data?.booking_acpt_driver_id === "0"}
+            >
+              {data?.booking_acpt_driver_id !== "0"
+                ? "Remove Assigned Driver"
+                : "No Driver Assigned"}
+            </Button>
+            <Button
+              variant=""
+              className="me-2 mb-2  bg-light"
+              onClick={handlegenerateInvoice}
+              // disabled={!data?.booking_id}
+            >
+              Generate Invoice
+            </Button>
+            <Button
+              variant=""
+              className="me-2 mb-2  bg-light"
+              onClick={handleInvoiceData}
+              disabled={loadingInvoice}
+            >
+              {loadingInvoice ? "Loading..." : "View Invoice"}
             </Button>
           </Section>
         </Card.Body>
@@ -1363,7 +1587,7 @@ const AmbulanceBookingDetailsForm: React.FC<
           setDriverData(null);
         }}
         centered
-        size="lg"
+        size="sm"
       >
         <Modal.Header closeButton>
           <Modal.Title>Assign Vehicle & Driver</Modal.Title>
@@ -1452,7 +1676,7 @@ const AmbulanceBookingDetailsForm: React.FC<
         </Modal.Body>
         <Modal.Footer>
           <Button
-            variant="secondary"
+            variant="primary"
             onClick={() => {
               setShowAssignModal(false);
               setVehicleSearchResults([]);
@@ -1460,6 +1684,217 @@ const AmbulanceBookingDetailsForm: React.FC<
             }}
           >
             Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Invoice Modal */}
+      <Modal
+        show={showInvoiceModal}
+        onHide={() => setShowInvoiceModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Booking Invoice</Modal.Title>
+        </Modal.Header>
+        <Modal.Body id="invoice-content">
+          {invoiceData ? (
+            <div className="invoice-pdf">
+              {/* HEADER */}
+              <div className="d-flex justify-content-between align-items-start border-bottom pb-2 mb-2">
+                <div>
+                  <img
+                    src="http://localhost:5173/src/assets/images/medcab.png"
+                    alt="medcab"
+                    height={35}
+                    className=""
+                  />
+                  <p className="mb-0 small">
+                    3/31-D Vibhuti Khand, Gomti Nagar
+                    <br />
+                    Lucknow, Uttar Pradesh, India – 226020
+                    <br />
+                    Phone: 7311134449
+                    <br />
+                    Email: support@hurryupcabs.com
+                    <br />
+                    GST: 09AAFCI5119Q1Z0
+                  </p>
+                </div>
+
+                <div className="text-end">
+                  <h5 className="fw-bold">INVOICE</h5>
+                  <p className="mb-0 small">
+                    <strong>Invoice No:</strong>{" "}
+                    {invoiceData.bi_invoice_no || "N/A"}
+                    <br />
+                    <strong>Bill Date:</strong>{" "}
+                    {new Date(invoiceData.created_at).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* CUSTOMER & BOOKING */}
+              <div className="row mb-2 border-bottom">
+                <div className="col-md-6">
+                  <h6 className="fw-bold">Customer Details</h6>
+                  <p className="mb-0">
+                    <strong>Name:</strong> {invoiceData.consumer_name}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Mobile:</strong> {invoiceData.consumer_mobile_no}
+                  </p>
+                </div>
+
+                <div className="col-md-6 text-end">
+                  <h6 className="fw-bold">Trip Type</h6>
+                  <p className="mb-0">
+                    {invoiceData.booking_view_category_name}
+                  </p>
+                </div>
+              </div>
+
+              {/* TRIP DETAILS */}
+              <div className="mb-2 border-bottom">
+                <h6 className="fw-bold">Trip Details</h6>
+                <p className="mb-0">
+                  <strong>Pickup:</strong> {invoiceData.booking_pickup}
+                </p>
+                <p className="mb-0">
+                  <strong>Drop:</strong> {invoiceData.booking_drop}
+                </p>
+                <p className="mb-1">
+                  <strong>From:</strong> {invoiceData.booking_schedule_time}
+                </p>
+              </div>
+
+              {data?.booking_acpt_driver_id &&
+              data?.booking_acpt_driver_id !== "0" ? (
+                <div className="mb-2 border-bottom">
+                  <h6 className="fw-bold mb-0">Driver & Vehicle</h6>
+                  <p className="mb-1">
+                    <strong>Driver:</strong>{" "}
+                    {invoiceData.driver_name
+                      ? `${invoiceData.driver_name} ${invoiceData.driver_last_name}`
+                      : "N/A"}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Vehicle No:</strong>{" "}
+                    {invoiceData.vehicle_number || "N/A"}
+                  </p>
+                </div>
+              ) : (
+                <div className="mb-2 border-bottom">
+                  <h6 className="fw-bold">Driver & Vehicle</h6>
+                  <p className="mb-1"> No Driver Assigned</p>
+                </div>
+              )}
+
+              {/* CHARGES TABLE */}
+              <table className="table table-bordered mt-3">
+                <thead className="table-light">
+                  <tr>
+                    <th>Description</th>
+                    <th className="text-end">Amount (₹)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Base Fare</td>
+                    <td className="text-end">{invoiceData.bi_base_rate}</td>
+                  </tr>
+                  <tr>
+                    <td>KM Charges</td>
+                    <td className="text-end">{invoiceData.bi_km_rate}</td>
+                  </tr>
+                  <tr>
+                    <td>Addons</td>
+                    <td className="text-end">{invoiceData.bi_addons_rate}</td>
+                  </tr>
+                  <tr>
+                    <td>Service Charge</td>
+                    <td className="text-end">
+                      {invoiceData.bi_service_charge}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Total</strong>
+                    </td>
+                    <td className="text-end fw-bold">
+                      ₹{invoiceData.bi_total_amount_with_sc}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* FOOTER */}
+              <div className="text-center mt-4">
+                <p className="mb-1">
+                  Payment Status:{" "}
+                  <strong>
+                    {invoiceData.bi_payment_status === "1" ? "PAID" : "PENDING"}
+                  </strong>
+                </p>
+                <p className="small mt-3">
+                  Thank you for riding with <strong>Medcab</strong>
+                </p>
+                <p className="fw-bold mt-4">Authorized Signatory</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-center">No invoice data available</p>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowInvoiceModal(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              const printContent = document.getElementById("invoice-content");
+              if (printContent) {
+                const printWindow = window.open("", "", "height=600,width=800");
+                if (printWindow) {
+                  printWindow.document.write(
+                    "<html><head><title>Invoice</title>"
+                  );
+                  printWindow.document.write("<style>");
+                  printWindow.document.write(`
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    h4, h5, h6 { color: #333; }
+                    .text-primary { color: #007bff; }
+                    .fw-bold { color: #28a745; }
+                    hr { margin: 10px 0; }
+                    .row { display: flex; flex-wrap: wrap; }
+                    .col-md-6 { width: 50%; padding: 5px; }
+                    .col-md-12 { width: 100%; padding: 5px; }
+                    .mb-2 { margin-bottom: 10px; }
+                    .mb-3 { margin-bottom: 15px; }
+                    .mb-4 { margin-bottom: 20px; }
+                    .text-center { text-align: center; }
+                    .text-end { text-align: right; }
+                  `);
+                  printWindow.document.write("</style></head><body>");
+                  printWindow.document.write(printContent.innerHTML);
+                  printWindow.document.write("</body></html>");
+                  printWindow.document.close();
+                  printWindow.focus();
+                  setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                  }, 250);
+                }
+              }
+            }}
+          >
+            Print
           </Button>
         </Modal.Footer>
       </Modal>

@@ -20,6 +20,7 @@ const BookingDetails = () => {
       setLoading(true);
       const result = await api.fetchBookingDetails(id!);
       if (result.success) {
+        console.log("Fetched booking details:", result.data);
         setBookingData(result.data);
       }
     } catch (error) {
