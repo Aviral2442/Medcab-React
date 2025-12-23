@@ -16,7 +16,6 @@ router.put("/edit_blog/:id", upload.single("blogs_image"), editBlogController);
 router.patch("/update_blog_status/:id", updateBlogStatusController);
 
 
-
 // ----------------------------------------- AMBULANCE CITY CONTENT ROUTER's ------------------------------------------ //
 
 

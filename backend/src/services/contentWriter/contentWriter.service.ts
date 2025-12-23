@@ -4,6 +4,8 @@ import { buildFilters } from "../../utils/filters";
 import { currentUnixTime } from "../../utils/current_unixtime";
 import { generateSlug } from "../../utils/generate_sku";
 import { uploadFileCustom } from "../../utils/file_uploads";
+import axios from "axios";
+import FormData from "form-data";
 
 interface blogData {
     blogs_image?: Express.Multer.File;
@@ -386,16 +388,64 @@ export const getCityContentService = async (filters?: {
 };
 
 // SERVICE TO ADD NEW CITY CONTENT
-export const addCityContentService = async (data: cityContentData) => {
+// export const addCityContentService = async (data: cityContentData) => {
+
+//     try {
+
+//         let imagePath: string | null = null;
+
+//         if (data.city_thumbnail) {
+//             imagePath = uploadFileCustom(data.city_thumbnail, "/city_content");
+//         }
+
+//         const insertData = {
+//             city_name: data.city_name,
+//             city_title_sku: generateSlug(data.city_title_sku || ""),
+//             city_title: data.city_title,
+//             city_heading: data.city_heading,
+//             city_body_desc: data.city_body_desc,
+//             city_why_choose_us: data.city_why_choose_us,
+//             why_choose_meta_desc: data.why_choose_meta_desc,
+//             city_block1_heading: data.city_block1_heading,
+//             city_block1_body: data.city_block1_body,
+//             city_block2_heading: data.city_block2_heading,
+//             city_block2_body: data.city_block2_body,
+//             city_block3_heading: data.city_block3_heading,
+//             city_block3_body: data.city_block3_body,
+//             city_thumbnail: imagePath,
+//             city_thumbnail_alt: data.city_thumbnail_alt,
+//             city_thumbnail_title: data.city_thumbnail_title,
+//             city_meta_title: data.city_meta_title,
+//             city_meta_desc: data.city_meta_desc,
+//             city_meta_keyword: data.city_meta_keyword,
+//             city_force_keyword: data.city_force_keyword,
+//             city_faq_heading: data.city_faq_heading,
+//             city_faq_desc: data.city_faq_desc,
+//             city_emergency_heading: data.city_emergency_heading,
+//             city_emergency_desc: data.city_emergency_desc,
+//             city_status: 0,
+//             city_timestamp: currentUnixTime(),
+//         };
+
+//         const [result]: any = await db.query(
+//             `INSERT INTO city_content SET ?`,
+//             [insertData]
+//         );
+
+//         return {
+//             status: 200,
+//             message: "City content added successfully",
+//         };
+
+//     } catch (error) {
+//         throw new ApiError(500, "Add City Content Error On Inserting");
+//     }
+
+// };
+
+export const addCityContentService = async (data: any) => {
 
     try {
-
-        let imagePath: string | null = null;
-
-        if (data.city_thumbnail) {
-            imagePath = uploadFileCustom(data.city_thumbnail, "/city_content");
-        }
-
         const insertData = {
             city_name: data.city_name,
             city_title_sku: generateSlug(data.city_title_sku || ""),
@@ -410,7 +460,7 @@ export const addCityContentService = async (data: cityContentData) => {
             city_block2_body: data.city_block2_body,
             city_block3_heading: data.city_block3_heading,
             city_block3_body: data.city_block3_body,
-            city_thumbnail: imagePath,
+            city_thumbnail: null,
             city_thumbnail_alt: data.city_thumbnail_alt,
             city_thumbnail_title: data.city_thumbnail_title,
             city_meta_title: data.city_meta_title,
@@ -430,15 +480,43 @@ export const addCityContentService = async (data: cityContentData) => {
             [insertData]
         );
 
+        const cityId = result.insertId;
+
+        if (data.city_thumbnail?.buffer) {
+            console.log("File dataaaaa", data.city_thumbnail.buffer);
+
+            const formData = new FormData();
+            formData.append("city_id", cityId.toString());
+
+            formData.append(
+                "city_thumbnail",
+                data.city_thumbnail.buffer,
+                {
+                    filename: data.city_thumbnail.originalname,
+                    contentType: data.city_thumbnail.mimetype,
+                }
+            );
+
+            console.log("Form Data:", formData);
+
+            await axios.post(
+                "https://medcab.in/reactApi/ambulance/cityContent/ImageSave",
+                formData,
+                {
+                    headers: formData.getHeaders(),
+                    maxBodyLength: Infinity,
+                }
+            );
+        }
+
         return {
             status: 200,
             message: "City content added successfully",
+            city_id: cityId,
         };
-
     } catch (error) {
-        throw new ApiError(500, "Add City Content Error On Inserting");
+        throw new ApiError(500, "Add City Content Failed");
     }
-
 };
 
 // SERVICE TO FETCH SINGLE CITY CONTENT
