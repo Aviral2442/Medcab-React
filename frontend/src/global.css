@@ -180,3 +180,152 @@
   background-color: #fafaf7;
   cursor: pointer;
 }
+/* Invoice Container */
+.watermark-container {
+  position: relative;
+  background: white;
+  padding: 10px;
+}
+
+.invoice-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  opacity: 0.08;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.invoice-pdf {
+  position: relative;
+  z-index: 1;
+}
+
+.invoice-pdf > *:not(.invoice-watermark) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Print Styles */
+@page {
+  size: A4;
+  margin: 12mm;
+  margin-top: 60px;
+  margin-bottom: 0;
+}
+
+@media print {
+  html,
+  body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Remove browser default header/footer */
+  @page {
+    margin-top: 60px;
+    margin-bottom: 0;
+  }
+
+  /* Hide browser-generated content */
+  body::before,
+  body::after,
+  html::before,
+  html::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Hide modal elements */
+  .modal-header,
+  .modal-footer,
+  .modal-backdrop,
+  button {
+    display: none !important;
+  }
+
+  /* Show only content */
+  .modal-body {
+    display: block !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+
+  /* Watermark positioning for print */
+  .invoice-watermark {
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.08;
+    width: 300px;
+    z-index: -1;
+  }
+
+  /* Ensure colors and borders print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Table styling */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  th,
+  td {
+    border: 1px solid #dee2e6 !important;
+    padding: 8px !important;
+  }
+
+  .table-bordered {
+    border: 1px solid #dee2e6 !important;
+  }
+
+  .table-light {
+    background-color: #f8f9fa !important;
+  }
+
+  /* Prevent page breaks inside content */
+  .invoice-pdf {
+    page-break-inside: avoid;
+  }
+
+  .border-bottom {
+    border-bottom: 1px solid #dee2e6 !important;
+  }
+
+  /* Ensure proper spacing */
+  .mb-0 { margin-bottom: 0 !important; }
+  .mb-1 { margin-bottom: 0.25rem !important; }
+  .mb-2 { margin-bottom: 0.5rem !important; }
+  .pb-2 { padding-bottom: 0.5rem !important; }
+  .mt-3 { margin-top: 1rem !important; }
+  .mt-4 { margin-top: 1.5rem !important; }
+
+  /* Typography */
+  .fw-bold {
+    font-weight: bold !important;
+  }
+
+  .small {
+    font-size: 0.875em !important;
+  }
+
+  .text-end {
+    text-align: right !important;
+  }
+
+  .text-center {
+    text-align: center !important;
+  }
+}

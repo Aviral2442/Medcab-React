@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import CancelBookingModal from "./CancelBookingModal";
 import { jwtDecode } from "jwt-decode";
 import BookingDetailsApiData from "./BookingDetailsApiData";
+import { GoDotFill } from "react-icons/go";
 
 interface AmbulanceBookingDetailsFormProps {
   data: any;
@@ -926,6 +927,168 @@ const AmbulanceBookingDetailsForm: React.FC<
     window.location.reload();
   };
 
+
+
+  const handlePrint = () => {
+    const content = document.getElementById("invoice-content");
+    if (!content) return;
+
+    // Create a new window for printing
+    const printWindow = window.open("", "", "width=800,height=600");
+
+    if (!printWindow) {
+      alert("Please allow popups to print the invoice");
+      return;
+    }
+
+    // Get all stylesheets from the current page
+    const styles = Array.from(document.styleSheets)
+      .map((styleSheet) => {
+        try {
+          return Array.from(styleSheet.cssRules)
+            .map((rule) => rule.cssText)
+            .join("\n");
+        } catch (e) {
+          // Handle CORS issues with external stylesheets
+          return "";
+        }
+      })
+      .join("\n");
+
+    // Write the content to the new window
+    printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Invoice</title>
+        <link 
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+          rel="stylesheet"
+        >
+        <style>
+          ${styles}
+          
+          @page {
+            size: A4;
+            margin: 12mm;
+            margin-top: 0;
+            margin-bottom: 0;
+          }
+
+          body {
+            margin: 0;
+            padding: 20px;
+            background: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          }
+
+          .watermark-container {
+            position: relative;
+            min-height: 100vh;
+          }
+
+          .invoice-watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            opacity: 0.08;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+          }
+
+          .invoice-pdf > *:not(.invoice-watermark) {
+            position: relative;
+            z-index: 1;
+          }
+
+          @media print {
+            body {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+              padding: 0;
+            }
+
+            /* Hide browser print headers/footers */
+            @page {
+              margin-top: 0;
+              margin-bottom: 0;
+            }
+
+            /* Remove default browser header/footer content */
+            body::before,
+            body::after {
+              content: none !important;
+              display: none !important;
+            }
+
+            html::before,
+            html::after {
+              content: none !important;
+              display: none !important;
+            }
+
+            .invoice-watermark {
+              position: fixed;
+              top: 45%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              opacity: 0.08;
+              width: 300px;
+              z-index: -1;
+            }
+
+            /* Ensure table borders print */
+            table {
+              border-collapse: collapse !important;
+            }
+
+            th, td {
+              border: 1px solid #dee2e6 !important;
+            }
+
+            .table-bordered {
+              border: 1px solid #dee2e6 !important;
+            }
+
+            /* Ensure backgrounds print */
+            .table-light {
+              background-color: #f8f9fa !important;
+            }
+
+            /* Page breaks */
+            .invoice-pdf {
+              page-break-inside: avoid;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        ${content.innerHTML}
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+
+    // Wait for images to load before printing
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+    };
+
+    // Fallback if onload doesn't fire
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
+
   const sections: SectionConfig[] = [
     {
       title: "Consumer Information",
@@ -1426,6 +1589,7 @@ const AmbulanceBookingDetailsForm: React.FC<
         );
       })}
 
+      {/* buttons  */}
       <Card className="mb-4">
         <Card.Body>
           <Section title="">
@@ -1618,9 +1782,9 @@ const AmbulanceBookingDetailsForm: React.FC<
 
             {/* Vehicle Search Results */}
             {searchingVehicle ? (
-              <div className="text-center border border-2">
+              <div className="text-center">
                 <Spinner animation="border" variant="primary" />
-                <p className="mt-2 mb-0">Searching...</p>
+                <p className="mb-0">Searching...</p>
               </div>
             ) : vehicleSearchResults.length > 0 ? (
               <div className="">
@@ -1632,22 +1796,26 @@ const AmbulanceBookingDetailsForm: React.FC<
                           className="border-2 border-primary w-100 cursor-pointer"
                           onClick={() => handleSelectVehicle(vehicle)}
                         >
-                          <div className="p-1 px-2 mb-1 hover-shadow rounded-2">
+                          <div className="py-1 px-0 hover-shadow rounded-2">
                             <div className="d-flex justify-content-between align-items-start">
                               <div>
                                 <h5 className="fw-bold mb-0">
-                                  {vehicle.vehicle_rc_number} (
-                                  {vehicle.v_vehicle_name})
+                                  {vehicle.vehicle_rc_number}{" "}
+                                  {vehicle.v_vehicle_name !== "unknown" &&
+                                    `(${vehicle.v_vehicle_name})`}
                                 </h5>
                                 <div className="small text-muted">
                                   <p className="mb-0">
-                                    <strong>{vehicle.assign_type}:</strong>{" "}
-                                    {vehicle.assign_name}{" "}
-                                    {vehicle.assign_last_name}
-                                  </p>
-                                  <p className="mb-0">
-                                    <strong>Mobile:</strong>{" "}
-                                    {vehicle.assign_mobile}
+                                    {vehicle.assign_name ? (
+                                      <>
+                                        <strong>{vehicle.assign_type}:</strong>{" "}
+                                        {vehicle.assign_name}{" "}
+                                        {vehicle.assign_last_name} (
+                                        {vehicle.assign_mobile})
+                                      </>
+                                    ) : (
+                                      <span>No Driver/Partner</span>
+                                    )}
                                   </p>
                                 </div>
                               </div>
@@ -1658,14 +1826,16 @@ const AmbulanceBookingDetailsForm: React.FC<
                                     : "text-danger"
                                 }`}
                               >
-                                {vehicle.vehicle_status === 1
-                                  ? "Active"
-                                  : "Inactive"}
+                                {vehicle.vehicle_status === 1 ? (
+                                  <GoDotFill />
+                                ) : (
+                                  <GoDotFill />
+                                )}
                               </span>
                             </div>
                           </div>
                         </div>
-                        <hr className="mt-0" />
+                        <hr className="m-0 p-0" />
                       </Col>
                     ))}
                   </Row>
@@ -1682,6 +1852,7 @@ const AmbulanceBookingDetailsForm: React.FC<
               setVehicleSearchResults([]);
               setVehicleSearchQuery("");
             }}
+            className="m-0"
           >
             Close
           </Button>
@@ -1700,26 +1871,30 @@ const AmbulanceBookingDetailsForm: React.FC<
         </Modal.Header>
         <Modal.Body id="invoice-content">
           {invoiceData ? (
-            <div className="invoice-pdf">
+            <div className="invoice-pdf watermark-container">
+              <img
+                src="https://madmin.medcab.in/site_img/logo.png"
+                className="invoice-watermark"
+                alt="watermark"
+              />
+
               {/* HEADER */}
               <div className="d-flex justify-content-between align-items-start border-bottom pb-2 mb-2">
                 <div>
                   <img
-                    src="http://localhost:5173/src/assets/images/medcab.png"
+                    src="https://madmin.medcab.in/site_img/logo.png"
                     alt="medcab"
-                    height={35}
+                    height={20}
                     className=""
                   />
                   <p className="mb-0 small">
-                    3/31-D Vibhuti Khand, Gomti Nagar
+                    FairDeal Bhawan, Vibhuti Khand, Gomti Nagar
                     <br />
-                    Lucknow, Uttar Pradesh, India – 226020
+                    Lucknow, Uttar Pradesh, India - 226010
                     <br />
-                    Phone: 7311134449
+                    Phone: +91 7905-715-156
                     <br />
-                    Email: support@hurryupcabs.com
-                    <br />
-                    GST: 09AAFCI5119Q1Z0
+                    Email: info@medcab.in
                   </p>
                 </div>
 
@@ -1738,17 +1913,16 @@ const AmbulanceBookingDetailsForm: React.FC<
               {/* CUSTOMER & BOOKING */}
               <div className="row mb-2 border-bottom">
                 <div className="col-md-6">
-                  <h6 className="fw-bold">Customer Details</h6>
+                  <h6 className="fw-bold mb-0">Customer Details</h6>
                   <p className="mb-0">
-                    <strong>Name:</strong> {invoiceData.consumer_name}
+                    {invoiceData.consumer_name} (
+                    {invoiceData.consumer_mobile_no})
                   </p>
-                  <p className="mb-1">
-                    <strong>Mobile:</strong> {invoiceData.consumer_mobile_no}
-                  </p>
+                  <p className="mb-1">{/* <strong>Mobile:</strong>  */}</p>
                 </div>
 
                 <div className="col-md-6 text-end">
-                  <h6 className="fw-bold">Trip Type</h6>
+                  <h6 className="fw-bold mb-0">Category</h6>
                   <p className="mb-0">
                     {invoiceData.booking_view_category_name}
                   </p>
@@ -1757,7 +1931,7 @@ const AmbulanceBookingDetailsForm: React.FC<
 
               {/* TRIP DETAILS */}
               <div className="mb-2 border-bottom">
-                <h6 className="fw-bold">Trip Details</h6>
+                <h6 className="fw-bold mb-0">Booking Details</h6>
                 <p className="mb-0">
                   <strong>Pickup:</strong> {invoiceData.booking_pickup}
                 </p>
@@ -1765,7 +1939,7 @@ const AmbulanceBookingDetailsForm: React.FC<
                   <strong>Drop:</strong> {invoiceData.booking_drop}
                 </p>
                 <p className="mb-1">
-                  <strong>From:</strong> {invoiceData.booking_schedule_time}
+                  <strong>Schedule:</strong> {invoiceData.booking_schedule_time}
                 </p>
               </div>
 
@@ -1773,15 +1947,15 @@ const AmbulanceBookingDetailsForm: React.FC<
               data?.booking_acpt_driver_id !== "0" ? (
                 <div className="mb-2 border-bottom">
                   <h6 className="fw-bold mb-0">Driver & Vehicle</h6>
-                  <p className="mb-1">
+                  <p className="mb-0">
                     <strong>Driver:</strong>{" "}
                     {invoiceData.driver_name
-                      ? `${invoiceData.driver_name} ${invoiceData.driver_last_name}`
+                      ? `${invoiceData.driver_name} ${invoiceData.driver_last_name} (${invoiceData.driver_mobile}) `
                       : "N/A"}
                   </p>
                   <p className="mb-1">
                     <strong>Vehicle No:</strong>{" "}
-                    {invoiceData.vehicle_number || "N/A"}
+                    {invoiceData.vehicle_rc_number || "N/A"} {invoiceData.v_vehicle_name !== "unknown" && (invoiceData.v_vehicle_name)}
                   </p>
                 </div>
               ) : (
@@ -1830,17 +2004,15 @@ const AmbulanceBookingDetailsForm: React.FC<
               </table>
 
               {/* FOOTER */}
-              <div className="text-center mt-4">
+              <div className="text-center d-flex justify-content-between mt-4">
                 <p className="mb-1">
                   Payment Status:{" "}
                   <strong>
                     {invoiceData.bi_payment_status === "1" ? "PAID" : "PENDING"}
                   </strong>
                 </p>
-                <p className="small mt-3">
-                  Thank you for riding with <strong>Medcab</strong>
-                </p>
-                <p className="fw-bold mt-4">Authorized Signatory</p>
+                <img src="" alt="" />
+                <p className="fw-bold mt-1">Authorized Signatory</p>
               </div>
             </div>
           ) : (
@@ -1849,51 +2021,10 @@ const AmbulanceBookingDetailsForm: React.FC<
         </Modal.Body>
 
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowInvoiceModal(false)}
-          >
+          <Button variant="primary" onClick={() => setShowInvoiceModal(false)}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            onClick={() => {
-              const printContent = document.getElementById("invoice-content");
-              if (printContent) {
-                const printWindow = window.open("", "", "height=600,width=800");
-                if (printWindow) {
-                  printWindow.document.write(
-                    "<html><head><title>Invoice</title>"
-                  );
-                  printWindow.document.write("<style>");
-                  printWindow.document.write(`
-                    body { font-family: Arial, sans-serif; padding: 20px; }
-                    h4, h5, h6 { color: #333; }
-                    .text-primary { color: #007bff; }
-                    .fw-bold { color: #28a745; }
-                    hr { margin: 10px 0; }
-                    .row { display: flex; flex-wrap: wrap; }
-                    .col-md-6 { width: 50%; padding: 5px; }
-                    .col-md-12 { width: 100%; padding: 5px; }
-                    .mb-2 { margin-bottom: 10px; }
-                    .mb-3 { margin-bottom: 15px; }
-                    .mb-4 { margin-bottom: 20px; }
-                    .text-center { text-align: center; }
-                    .text-end { text-align: right; }
-                  `);
-                  printWindow.document.write("</style></head><body>");
-                  printWindow.document.write(printContent.innerHTML);
-                  printWindow.document.write("</body></html>");
-                  printWindow.document.close();
-                  printWindow.focus();
-                  setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                  }, 250);
-                }
-              }
-            }}
-          >
+          <Button variant="primary" onClick={handlePrint}>
             Print
           </Button>
         </Modal.Footer>

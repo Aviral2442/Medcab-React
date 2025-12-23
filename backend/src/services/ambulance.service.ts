@@ -2435,270 +2435,274 @@ export const updateAmbulanceBookingAmountService = async (bookingId: number, new
 
 // SERVICE TO COMPLETE AMBULANCE BOOKING
 export const completeAmbulanceBookingService = async (bookingId: number) => {
-    try {
+  const connection = await db.getConnection();
 
-        const [bookingRows]: any = await db.query(
-            `SELECT * FROM booking_view WHERE booking_id = ?`,
-            [bookingId]
-        );
+  try {
+    await connection.beginTransaction();
 
-        if (!bookingRows || bookingRows.length === 0) {
-            throw new ApiError(404, "Booking not found");
-        }
+    const [bookingRows]: any = await connection.query(
+      `SELECT * FROM booking_view WHERE booking_id = ?`,
+      [bookingId]
+    );
 
-        const bookingData = bookingRows[0];
-
-        const driverId = bookingData.booking_acpt_driver_id;
-        const consumerId = bookingData.booking_by_cid;
-
-        if (driverId === null || driverId === 0) {
-            return { status: 400, message: "Please Choose the driver !!" };
-        }
-
-        if (consumerId === null || consumerId === 0) {
-            return { status: 400, message: "Please Choose the consumer !!" };
-        }
-
-        const [detailsRows]: any = await db.query(
-            `
-            SELECT *
-            FROM booking_invoice
-            LEFT JOIN consumer ON booking_invoice.bi_consumer_id = consumer.consumer_id
-            LEFT JOIN driver ON driver.driver_id = booking_invoice.bi_driver_id
-            LEFT JOIN driver_live_location 
-                ON driver.driver_id = driver_live_location.driver_live_location_d_id
-            WHERE bi_booking_id = ?
-            `,
-            [bookingId]
-        );
-
-        if (!detailsRows || detailsRows.length === 0) {
-            throw new ApiError(404, "Booking invoice not found");
-        }
-
-        const bookingDetails = detailsRows[0];
-
-        const paymentStatus = bookingDetails.bi_payment_status;
-        const totalAmounts = bookingDetails.bi_total_amount_with_sc;
-        const booking_adv_amount = bookingDetails.bi_service_charge;
-        const driverWalletAmount = bookingDetails.driver_wallet_amount;
-        const biConsumerId = bookingDetails.bi_consumer_id;
-        const biDriverId = bookingDetails.bi_driver_id;
-
-        const [paymentRows]: any = await db.query(
-            `
-            SELECT amount 
-            FROM booking_payments
-            WHERE booking_id = ? AND consumer_id = ?
-            `,
-            [bookingId, biConsumerId]
-        );
-
-        const bookingSum =
-            paymentRows.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
-
-        if (bookingSum == booking_adv_amount) {
-
-            await db.query(
-                `UPDATE driver SET driver_on_booking_status = 0 WHERE driver_id = ?`,
-                [biDriverId]
-            );
-
-            await db.query(
-                `
-                UPDATE booking_view
-                SET booking_payment_status = 2,
-                    booking_payment_method = 2,
-                    booking_status = 4
-                WHERE booking_id = ?
-                `,
-                [bookingId]
-            );
-
-            const total_cash = totalAmounts - bookingSum;
-
-            await db.query(
-                `
-                UPDATE booking_invoice
-                SET bi_payment_status = 0,
-                    bi_cash_pay_amount = ?,
-                    bi_online_pay_amount = ?
-                WHERE bi_booking_id = ?
-                `,
-                [total_cash, bookingSum, bookingId]
-            );
-
-            return { status: 200, message: "Booking successfully completed" };
-        }
-
-        if (bookingSum > booking_adv_amount) {
-
-            const paydriverAmounts = bookingSum - booking_adv_amount;
-            const driverlatestWallet = paydriverAmounts + driverWalletAmount;
-            const driver_pay_booking_id = `BOOKING_CHARGE_${bookingId}_${Date.now()}`;
-
-            await db.query(
-                `
-                INSERT INTO driver_transection
-                (
-                    driver_transection_by,
-                    driver_transection_by_type,
-                    driver_transection_by_type_pid,
-                    driver_transection_amount,
-                    driver_transection_pay_id,
-                    driver_transection_type,
-                    driver_transection_wallet_new_amount,
-                    driver_transection_wallet_previous_amount,
-                    driver_transection_note,
-                    driver_transection_time_unix,
-                    driver_transection_order_id,
-                    driver_transection_bank_ref_no,
-                    driver_transection_order_status,
-                    driver_transection_payment_mode,
-                    driver_transection_payment_mobile,
-                    driver_transection_cc_time,
-                    created_at,
-                    updated_at
-                )
-                VALUES (?, 0, 0, ?, ?, 4, ?, ?, ?, ?, 0, '', '', '', '', '', NOW(), NOW())
-                `,
-                [
-                    biDriverId,
-                    paydriverAmounts,
-                    driver_pay_booking_id,
-                    driverlatestWallet,
-                    driverWalletAmount,
-                    `Booking Charge: ${bookingId}`,
-                    Math.floor(Date.now() / 1000)
-                ]
-            );
-
-            await db.query(
-                `
-                UPDATE driver
-                SET driver_wallet_amount = ?,
-                    driver_on_booking_status = 0
-                WHERE driver_id = ?
-                `,
-                [driverlatestWallet, biDriverId]
-            );
-
-            await db.query(
-                `
-                UPDATE booking_view
-                SET booking_payment_status = 1,
-                    booking_payment_method = 2,
-                    booking_status = 4
-                WHERE booking_id = ?
-                `,
-                [bookingId]
-            );
-
-            const total_cash = totalAmounts - bookingSum;
-
-            await db.query(
-                `
-                UPDATE booking_invoice
-                SET bi_payment_status = 0,
-                    bi_cash_pay_amount = ?,
-                    bi_online_pay_amount = ?
-                WHERE bi_booking_id = ?
-                `,
-                [total_cash, bookingSum, bookingId]
-            );
-
-            return { status: 200, message: "Booking successfully completed" };
-        }
-
-        if (bookingSum < booking_adv_amount) {
-
-            const paydriverAmounts = booking_adv_amount - bookingSum;
-            const driverlatestWallet = driverWalletAmount - paydriverAmounts;
-            const driver_pay_booking_id = `BOOKING_CHARGE_${bookingId}_${Date.now()}`;
-
-            await db.query(
-                `
-                INSERT INTO driver_transection
-                (
-                    driver_transection_by,
-                    driver_transection_by_type,
-                    driver_transection_by_type_pid,
-                    driver_transection_amount,
-                    driver_transection_pay_id,
-                    driver_transection_type,
-                    driver_transection_wallet_new_amount,
-                    driver_transection_wallet_previous_amount,
-                    driver_transection_note,
-                    driver_transection_time_unix,
-                    driver_transection_order_id,
-                    driver_transection_bank_ref_no,
-                    driver_transection_order_status,
-                    driver_transection_payment_mode,
-                    driver_transection_payment_mobile,
-                    driver_transection_cc_time,
-                    created_at,
-                    updated_at
-                )
-                VALUES (?, 0, 0, ?, ?, 3, ?, ?, ?, ?, 0, '', '', '', '', '', NOW(), NOW())
-                `,
-                [
-                    biDriverId,
-                    paydriverAmounts,
-                    driver_pay_booking_id,
-                    driverlatestWallet,
-                    driverWalletAmount,
-                    `Booking Charge: ${bookingId}`,
-                    Math.floor(Date.now() / 1000)
-                ]
-            );
-
-            await db.query(
-                `
-                UPDATE driver
-                SET driver_wallet_amount = ?,
-                    driver_on_booking_status = 0
-                WHERE driver_id = ?
-                `,
-                [driverlatestWallet, biDriverId]
-            );
-
-            const pay_type = bookingSum > 1 ? 2 : 3;
-            const booking_payment_method = bookingSum > 1 ? 2 : 1;
-
-            await db.query(
-                `
-                UPDATE booking_view
-                SET booking_payment_status = 2,
-                    booking_payment_type = ?,
-                    booking_payment_method = ?,
-                    booking_status = 4
-                WHERE booking_id = ?
-                `,
-                [pay_type, booking_payment_method, bookingId]
-            );
-
-            const total_cash = totalAmounts - bookingSum;
-
-            await db.query(
-                `
-                UPDATE booking_invoice
-                SET bi_payment_status = 0,
-                    bi_cash_pay_amount = ?,
-                    bi_online_pay_amount = ?
-                WHERE bi_booking_id = ?
-                `,
-                [total_cash, bookingSum, bookingId]
-            );
-
-            return { status: 200, message: "Booking successfully completed" };
-        }
-
-        return { status: 400, message: "Something went wrong please try again!" };
-
-    } catch (error) {
-        throw new ApiError(500, "Complete Ambulance Booking Service Error On Completing");
+    if (!bookingRows.length) {
+      throw new ApiError(404, "Booking not found");
     }
+
+    const bookingData = bookingRows[0];
+    console.log("bookingData:", bookingData);
+    const driverId = Number(bookingData.booking_acpt_driver_id);
+    const consumerId = Number(bookingData.booking_by_cid);
+
+    if (!driverId) {
+      return { status: 400, message: "Please Choose the driver !!" };
+    }
+
+    if (!consumerId) {
+      return { status: 400, message: "Please Choose the consumer !!" };
+    }
+
+    const [detailsRows]: any = await connection.query(
+      `
+      SELECT *
+      FROM booking_invoice
+      LEFT JOIN consumer ON booking_invoice.bi_consumer_id = consumer.consumer_id
+      LEFT JOIN driver ON driver.driver_id = booking_invoice.bi_driver_id
+      LEFT JOIN driver_live_location 
+        ON driver.driver_id = driver_live_location.driver_live_location_d_id
+      WHERE bi_booking_id = ?
+      `,
+      [bookingId]
+    );
+
+    if (!detailsRows.length) {
+      throw new ApiError(404, "Booking invoice not found");
+    }
+
+    const bookingDetails = detailsRows[0];
+
+    const totalAmounts = Number(bookingDetails.bi_total_amount_with_sc);
+    const bookingAdvAmount = Number(bookingDetails.bi_service_charge);
+    const driverWalletAmount = Number(bookingDetails.driver_wallet_amount || 0);
+    const biConsumerId = Number(bookingDetails.bi_consumer_id);
+    const biDriverId = Number(bookingDetails.bi_driver_id);
+
+    /* =======================
+       3. SUM PAYMENTS
+    ======================= */
+    const [paymentRows]: any = await connection.query(
+      `
+      SELECT amount 
+      FROM booking_payments
+      WHERE booking_id = ? AND consumer_id = ?
+      `,
+      [bookingId, biConsumerId]
+    );
+
+    const bookingSum =
+      paymentRows.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
+
+    /* =======================
+       CASE 1: bookingSum == advance
+    ======================= */
+    if (bookingSum === bookingAdvAmount) {
+      await connection.query(
+        `UPDATE driver SET driver_on_booking_status = 0 WHERE driver_id = ?`,
+        [biDriverId]
+      );
+
+      await connection.query(
+        `
+        UPDATE booking_view
+        SET booking_payment_status = 2,
+            booking_payment_method = 2,
+            booking_status = 4
+        WHERE booking_id = ?
+        `,
+        [bookingId]
+      );
+
+      await connection.query(
+        `
+        UPDATE booking_invoice
+        SET bi_payment_status = 0,
+            bi_cash_pay_amount = ?,
+            bi_online_pay_amount = ?
+        WHERE bi_booking_id = ?
+        `,
+        [totalAmounts - bookingSum, bookingSum, bookingId]
+      );
+
+      await connection.commit();
+      return { status: 200, message: "Booking successfully completed" };
+    }
+
+    /* =======================
+       CASE 2: bookingSum > advance
+    ======================= */
+    if (bookingSum > bookingAdvAmount) {
+      const payDriverAmount = bookingSum - bookingAdvAmount;
+      const newWallet = driverWalletAmount + payDriverAmount;
+      const txnId = `BOOKING_CHARGE_${bookingId}_${Date.now()}`;
+
+      await connection.query(
+        `
+        INSERT INTO driver_transection (
+          driver_transection_by,
+          driver_transection_by_type,
+          driver_transection_by_type_pid,
+          driver_transection_amount,
+          driver_transection_pay_id,
+          driver_transection_type,
+          driver_transection_wallet_new_amount,
+          driver_transection_wallet_previous_amount,
+          driver_transection_note,
+          driver_transection_time_unix,
+          driver_transection_order_id,
+          driver_transection_bank_ref_no,
+          driver_transection_order_status,
+          driver_transection_payment_mode,
+          driver_transection_payment_mobile,
+          driver_transection_cc_time,
+          created_at,
+          updated_at
+        )
+        VALUES (?, 0, 0, ?, ?, 4, ?, ?, ?, ?, 0, '', '', '', '', '', NOW(), NOW())
+        `,
+        [
+          biDriverId,
+          payDriverAmount,
+          txnId,
+          newWallet,
+          driverWalletAmount,
+          `Booking Charge: ${bookingId}`,
+          Math.floor(Date.now() / 1000),
+        ]
+      );
+
+      await connection.query(
+        `
+        UPDATE driver
+        SET driver_wallet_amount = ?, driver_on_booking_status = 0
+        WHERE driver_id = ?
+        `,
+        [newWallet, biDriverId]
+      );
+
+      await connection.query(
+        `
+        UPDATE booking_view
+        SET booking_payment_status = 1,
+            booking_payment_method = 2,
+            booking_status = 4
+        WHERE booking_id = ?
+        `,
+        [bookingId]
+      );
+
+      await connection.query(
+        `
+        UPDATE booking_invoice
+        SET bi_payment_status = 0,
+            bi_cash_pay_amount = ?,
+            bi_online_pay_amount = ?
+        WHERE bi_booking_id = ?
+        `,
+        [totalAmounts - bookingSum, bookingSum, bookingId]
+      );
+
+      await connection.commit();
+      return { status: 200, message: "Booking successfully completed" };
+    }
+
+    /* =======================
+       CASE 3: bookingSum < advance
+    ======================= */
+    const payDriverAmount = bookingAdvAmount - bookingSum;
+    const newWallet = driverWalletAmount - payDriverAmount;
+    const txnId = `BOOKING_CHARGE_${bookingId}_${Date.now()}`;
+
+    await connection.query(
+      `
+      INSERT INTO driver_transection (
+        driver_transection_by,
+        driver_transection_by_type,
+        driver_transection_by_type_pid,
+        driver_transection_amount,
+        driver_transection_pay_id,
+        driver_transection_type,
+        driver_transection_wallet_new_amount,
+        driver_transection_wallet_previous_amount,
+        driver_transection_note,
+        driver_transection_time_unix,
+        driver_transection_order_id,
+        driver_transection_bank_ref_no,
+        driver_transection_order_status,
+        driver_transection_payment_mode,
+        driver_transection_payment_mobile,
+        driver_transection_cc_time,
+        created_at,
+        updated_at
+      )
+      VALUES (?, 0, 0, ?, ?, 3, ?, ?, ?, ?, 0, '', '', '', '', '', NOW(), NOW())
+      `,
+      [
+        biDriverId,
+        payDriverAmount,
+        txnId,
+        newWallet,
+        driverWalletAmount,
+        `Booking Charge: ${bookingId}`,
+        Math.floor(Date.now() / 1000),
+      ]
+    );
+
+    await connection.query(
+      `
+      UPDATE driver
+      SET driver_wallet_amount = ?, driver_on_booking_status = 0
+      WHERE driver_id = ?
+      `,
+      [newWallet, biDriverId]
+    );
+
+    const payType = bookingSum > 1 ? 2 : 3;
+    const paymentMethod = bookingSum > 1 ? 2 : 1;
+
+    await connection.query(
+      `
+      UPDATE booking_view
+      SET booking_payment_status = 2,
+          booking_payment_type = ?,
+          booking_payment_method = ?,
+          booking_status = 4
+      WHERE booking_id = ?
+      `,
+      [payType, paymentMethod, bookingId]
+    );
+
+    await connection.query(
+      `
+      UPDATE booking_invoice
+      SET bi_payment_status = 0,
+          bi_cash_pay_amount = ?,
+          bi_online_pay_amount = ?
+      WHERE bi_booking_id = ?
+      `,
+      [totalAmounts - bookingSum, bookingSum, bookingId]
+    );
+
+    await connection.commit();
+    return { status: 200, message: "Booking successfully completed" };
+  } catch (error) {
+    await connection.rollback();
+    console.error(error);
+    throw new ApiError(500, "Complete Ambulance Booking Error");
+  } finally {
+    connection.release();
+  }
 };
+
 
 // SERVICE TO GENERATE BOOKING INVOICE
 export const generateAmbulanceBookingInvoiceService = async (
@@ -2840,6 +2844,8 @@ export const ambulanceBookingInvoiceSerive = async (bookingId: number) => {
                 driver.driver_last_name,
                 driver.driver_mobile,
                 booking_view.booking_acpt_vehicle_id,
+                vehicle.v_vehicle_name,
+                vehicle.vehicle_rc_number,
                 booking_view.booking_pickup,
                 booking_view.booking_drop,
                 booking_view.booking_schedule_time,
@@ -2848,6 +2854,7 @@ export const ambulanceBookingInvoiceSerive = async (bookingId: number) => {
             LEFT JOIN booking_view ON booking_view.booking_id = booking_invoice.bi_booking_id
             LEFT JOIN consumer ON booking_invoice.bi_consumer_id = consumer.consumer_id
             LEFT JOIN driver ON driver.driver_id = booking_invoice.bi_driver_id
+            LEFT JOIN vehicle ON vehicle.vehicle_id = booking_view.booking_acpt_vehicle_id
             WHERE bi_booking_id = ?`,
             [bookingId]
         );
