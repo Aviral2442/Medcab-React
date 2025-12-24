@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, ambulanceBookingCountService, dashboardAmbulanceBookingService, getAmbulanceConsumerMobileService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService, ambulancePartnerCountService, ambulanceCompleteOngoingCancelReminderBookingCounts, assignDriverService, cancelAmbulanceBookingService, verifyOTPAmbulanceBookingService, cancelReasonService, getAmbulanceVehicleAndAssignDataService, cancelDriverFromAmbulanceBookingService, updateAmbulanceBookingAmountService, completeAmbulanceBookingService, generateAmbulanceBookingInvoiceService, ambulanceBookingInvoiceSerive } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, ambulanceBookingCountService, dashboardAmbulanceBookingService, getAmbulanceConsumerMobileService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService, ambulancePartnerCountService, ambulanceCompleteOngoingCancelReminderBookingCounts, assignDriverService, cancelAmbulanceBookingService, verifyOTPAmbulanceBookingService, cancelReasonService, getAmbulanceVehicleAndAssignDataService, cancelDriverFromAmbulanceBookingService, updateAmbulanceBookingAmountService, completeAmbulanceBookingService, generateAmbulanceBookingInvoiceService, ambulanceBookingInvoiceSerive, partnerDashboardCountService } from "../services/ambulance.service";
 
 // CONTROLLER TO GET TOTAL AMBULANCE BOOKING COUNT
 export const ambulanceBookingCountController = async (req: Request, res: Response, next: NextFunction) => {
@@ -97,6 +97,44 @@ export const dashboardAmbulanceDriverTransController = async (req: Request, res:
         const result = await dashboardAmbulanceDriverTransService();
         res.status(result.status).json(result);
 
+    } catch (error) {
+        next(error);
+    }
+};
+
+// COUNT DASHBOARD AMBULANCE BOOKING COUNT CONTROLLER
+export const countDashboardAmbulanceBookingController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            stateId: req.query.stateId as string,
+            cityId: req.query.cityId as string,
+        };
+        const result = await getAmbulanceCategoryListService(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// PARTNER DASHBOARD COUNT CONTROLLER
+export const partnerDashboardCountController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const filters = {
+            date: req.query.date as string,
+            status: req.query.status as string,
+            fromDate: req.query.fromDate as string,
+            toDate: req.query.toDate as string,
+            stateId: req.query.stateId as string,
+            cityId: req.query.cityId as string,
+        };
+        const result = await partnerDashboardCountService(filters);
+        res.status(200).json(result);
     } catch (error) {
         next(error);
     }

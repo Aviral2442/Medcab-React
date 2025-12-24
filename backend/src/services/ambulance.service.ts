@@ -6,6 +6,10 @@ import { generateSlug } from "../utils/generate_sku";
 import { uploadFileCustom } from "../utils/file_uploads";
 import { FieldPacket, RowDataPacket } from 'mysql2';
 
+
+// --------------------------------------------- AMBULANCE DASHBOARD SERVICES -------------------------------------------------- //
+
+
 // SERVICE TO GET TOTAL AMBULANCE BOOKING COUNT
 export const ambulanceBookingCountService = async () => {
     try {
@@ -347,7 +351,264 @@ export const dashboardAmbulanceDriverTransService = async () => {
     } catch (error) {
         throw new ApiError(500, "Dashboard Ambulance Driver Transactions Error On Fetching");
     }
-}
+};
+
+
+
+
+// --------------------------------------------- COUNT DASHBOARD AMBULANCE BOOKING -------------------------------------------------- //
+
+
+// // DASHBOARD AMBULANCE BOOKINGS COUNT SERVICE
+// export const countDashboardAmbulanceBookingService = async (filters: {
+//     date?: string;
+//     fromDate?: string;
+//     toDate?: string;
+//     status?: string;
+//     stateId?: string;
+//     cityId?: string;
+// }) => {
+//     try {
+
+//         const { whereSQL, params } = buildFilters({
+//             ...filters,
+//             dateColumn: "booking_view.created_at_unix",
+//         });
+
+//         let finalWhereSQL = whereSQL;
+
+//         const allBookingMasterQuery = `
+//             SELECT 
+//                 COUNT(booking_id) AS total_booking_count,
+//                 COUNT(CASE WHEN booking_status = 0 THEN 1 END) AS enquiry_booking_count,
+//                 COUNT(CASE WHEN booking_status = 1 THEN 1 END) AS new_booking_count,
+//                 COUNT(CASE WHEN booking_status = 3 THEN 1 END) AS ongoing_booking_count,
+//                 COUNT(CASE WHEN booking_status = 4 THEN 1 END) AS complete_booking_count,
+//                 COUNT(CASE WHEN booking_status = 6 THEN 1 END) AS future_booking_count,
+//             FROM booking_view
+//             ${finalWhereSQL}
+//         `;
+
+//         const regularBookingMasterQuery = `
+//             SELECT 
+//                 COUNT(booking_id) AS total_booking_count,
+//                 COUNT(CASE WHEN booking_status = 0 THEN 1 END) AS enquiry_booking_count,
+//                 COUNT(CASE WHEN booking_status = 1 THEN 1 END) AS new_booking_count,
+//                 COUNT(CASE WHEN booking_status = 3 THEN 1 END) AS ongoing_booking_count,
+//                 COUNT(CASE WHEN booking_status = 4 THEN 1 END) AS complete_booking_count,
+//                 COUNT(CASE WHEN booking_status = 6 THEN 1 END) AS future_booking_count,
+//             FROM booking_view
+//             WHERE booking_type = 0
+//             ${finalWhereSQL}
+//         `;
+
+//         const rentalBookingMasterQuery = `
+//             SELECT 
+//                 COUNT(booking_id) AS total_booking_count,
+//                 COUNT(CASE WHEN booking_status = 0 THEN 1 END) AS enquiry_booking_count,
+//                 COUNT(CASE WHEN booking_status = 1 THEN 1 END) AS new_booking_count,
+//                 COUNT(CASE WHEN booking_status = 3 THEN 1 END) AS ongoing_booking_count,
+//                 COUNT(CASE WHEN booking_status = 4 THEN 1 END) AS complete_booking_count,
+//                 COUNT(CASE WHEN booking_status = 6 THEN 1 END) AS future_booking_count,
+//             FROM booking_view
+//             WHERE booking_type = 1
+//             ${finalWhereSQL}
+//         `;
+
+//         const bulkBookingMasterQuery = `
+//             SELECT 
+//                 COUNT(booking_id) AS total_booking_count,
+//                 COUNT(CASE WHEN booking_status = 0 THEN 1 END) AS enquiry_booking_count,
+//                 COUNT(CASE WHEN booking_status = 1 THEN 1 END) AS new_booking_count,
+//                 COUNT(CASE WHEN booking_status = 3 THEN 1 END) AS ongoing_booking_count,
+//                 COUNT(CASE WHEN booking_status = 4 THEN 1 END) AS complete_booking_count,
+//                 COUNT(CASE WHEN booking_status = 6 THEN 1 END) AS future_booking_count,
+//             FROM booking_view
+//             WHERE booking_type = 2
+//             ${finalWhereSQL}
+//         `;
+
+//         // ------------------------------------ PARTNER QUERY ------------------------------------ //
+
+//         const wherePartnerSQL = buildFilters({
+//             ...filters,
+//             dateColumn: "partner.created_at",
+//         });
+
+//         let finalPartnerWhereSQL = wherePartnerSQL;
+
+//         if(filters.stateId){
+//             const stateCondition = `partner.partner_state_id = ${db.escape(filters.stateId)}`;
+//             if (/where\s+/i.test(finalPartnerWhereSQL)) {
+//                 finalPartnerWhereSQL += ` AND ${stateCondition}`;
+//             } else {
+//                 finalPartnerWhereSQL = `WHERE ${stateCondition}`;
+//             }
+//         }
+
+//         if(filters.cityId){
+//             const cityCondition = `partner.partner_city_id = ${db.escape(filters.cityId)}`;
+//             if (/where\s+/i.test(finalPartnerWhereSQL)) {
+//                 finalPartnerWhereSQL += ` AND ${cityCondition}`;
+//             } else {
+//                 finalPartnerWhereSQL = `WHERE ${cityCondition}`;
+//             }
+//         }
+
+//         const partnerMasterQuery = `
+//             SELECT 
+//                 COUNT(*) AS total_partner_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS new_partner_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS unverified_partner_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS verified_partner_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS blocked_partner_count,
+//             FROM partner
+//             ${finalPartnerWhereSQL}
+//         `;
+
+//         // --------------------------------------------- DRIVER QUERY ------------------------------------ //
+
+//         const driverMasterQuery = `
+//             SELECT 
+//                 COUNT(*) AS total_driver_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS new_driver_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS unverified_driver_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS verified_driver_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS blocked_driver_count,
+//             FROM driver
+//             ${finalWhereSQL}
+//         `;
+
+//         // --------------------------------------------- VEHICLE QUERY ------------------------------------ //
+
+//         const vehicleMasterQuery = `
+//             SELECT 
+//                 COUNT(*) AS total_vehicle_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS new_vehicle_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS unverified_vehicle_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS verified_vehicle_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS blocked_vehicle_count,
+//             FROM vehicle
+//             ${finalWhereSQL}
+//         `;
+
+//         // --------------------------------------------- CONSUMER QUERY ------------------------------------ //
+
+//         const consumerMasterQuery = `
+//             SELECT 
+//                 COUNT(*) AS total_consumer_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS new_consumer_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS verified_consumer_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS app_consumer_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS website_consumer_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS call_consumer_count,
+//             FROM consumer
+//             ${finalWhereSQL}
+//         `;
+
+//         // --------------------------------------------- TRANSACTION QUERY ------------------------------------ //
+
+//         const transactionMasterQuery = `
+//             SELECT 
+//                 COUNT(*) AS total_transaction_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS recharge_transaction_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS neg_wallet_transaction_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS pos_wallet_transaction_count,
+//                 COUNT(CASE WHEN ambulance_faq_status = 0 THEN 1 END) AS widrawl_transaction_count,
+//             FROM transaction
+//             ${finalWhereSQL}
+//         `;
+
+//         return {
+//             status: 200,
+//             message: "Ambulance FAQ list fetched successfully",
+//             pagination: {
+//             },
+//             jsonData: {
+
+//             },
+//         };
+
+//     } catch (error) {
+//         throw new ApiError(500, "Count Dashboard Ambulance Booking Error On Fetching");
+//     }
+// };
+
+
+// PARTNER COUNT DASHBOARD AMBULANCE SERVICE
+export const partnerDashboardCountService = async (filters: {
+    date?: string;
+    fromDate?: string;
+    toDate?: string;
+    status?: string;
+    stateId?: string;
+    cityId?: string;
+}) => {
+    try {
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "partner.created_at",
+        });
+
+        let finalWhereSQL = whereSQL;
+
+        const queryParams: any[] = [...params];
+
+        let joinSQL = "";
+
+        if (filters.cityId) {
+            if (/where\s+/i.test(finalWhereSQL)) {
+                finalWhereSQL += " AND partner.partner_city_id = ?";
+            } else {
+                finalWhereSQL = "WHERE partner.partner_city_id = ?";
+            }
+            queryParams.push(filters.cityId);
+        }
+
+        if (filters.stateId) {
+            joinSQL = `
+                LEFT JOIN city 
+                    ON city.city_id = partner.partner_city_id
+            `;
+
+            if (/where\s+/i.test(finalWhereSQL)) {
+                finalWhereSQL += " AND city.city_state = ?";
+            } else {
+                finalWhereSQL = "WHERE city.city_state = ?";
+            }
+            queryParams.push(filters.stateId);
+        }
+
+        const partnerMasterQuery = `
+            SELECT 
+                COUNT(partner_id) AS total_partner_count,
+                COUNT(CASE WHEN partner_status = 0 THEN 1 END) AS new_partner_count,
+                COUNT(CASE WHEN partner_status = 1 THEN 1 END) AS unverified_partner_count,
+                COUNT(CASE WHEN partner_status = 2 THEN 1 END) AS verified_partner_count,
+                COUNT(CASE WHEN partner_status = 3 THEN 1 END) AS blocked_partner_count
+            FROM partner
+            ${joinSQL}
+            ${finalWhereSQL}
+        `;
+
+        const [rows]: any = await db.query(partnerMasterQuery, queryParams);
+
+        return {
+            status: 200,
+            message: "Ambulance Partner's count fetched successfully",
+            jsonData: {
+                ambulance_partner_counts: rows[0]
+            },
+        };
+
+    } catch (error) {
+        console.log(error);
+        throw new ApiError(500, "Ambulance Partner's Count Error On Fetching");
+    }
+};
+
+
 
 // --------------------------------------------- AMBULANCE CATEGORY SERVICES -------------------------------------------------- //
 
@@ -2341,7 +2602,7 @@ export const verifyOTPAmbulanceBookingService = async (bookingId: number, adminI
 
     } catch (error) {
         console.log(error);
-        
+
         throw new ApiError(500, "Verify OTP Ambulance Booking Service Error On Verifying");
     }
 };
