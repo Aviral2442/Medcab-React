@@ -328,7 +328,7 @@ const ExportDataWithButtons = ({
       render: (data: any) => {
         switch (data) {
           case "0":
-            return '<span class="badge badge-label badge-soft-secondary">Online</span>';
+            return '<span class="badge badge-label badge-soft-info">Online</span>';
           case "1":
             return '<span class="badge badge-label badge-soft-success">Partner Wallet</span>';
           case "2":

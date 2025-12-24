@@ -1,18 +1,48 @@
 import DashboardFilters from "@/components/table/DashboardFilter";
 import { Card, CardBody, CardHeader, CardTitle, Row, Col } from "react-bootstrap";
+import React from "react";
+import axios from "axios";
+
 
 interface CountItem {
   label: string;
-  count: number;
+  count: number | string;
 }
 
 interface BookingCategory {
   title: string;
-  total: number;
+  total: number | string;
   items: CountItem[];
 }
 
+interface PartnerCounts {
+  total_partner_count: number;
+  new_partner_count: number;
+  unverified_partner_count: number;
+  verified_partner_count: number;
+  blocked_partner_count: number;
+}
+
+
 const CountsDashboard = () => {
+const [partnerCounts, setPartnerCounts] = React.useState<PartnerCounts | null>(null);
+
+  const baseURL = (import.meta as any).env.VITE_PATH ?? "";
+
+  const fetchPartnerCountsData = async () => {
+    try{
+      const response = await axios(`${baseURL}/ambulance/partner_count_dashboard_ambulance`);
+      console.log("Partner Counts Data:", response);
+      setPartnerCounts(response.data?.jsonData?.ambulance_partner_counts);
+    } catch (error) {
+      console.error("Error fetching partner counts data:", error);
+    }
+  }
+
+  React.useEffect(() => {
+    fetchPartnerCountsData();
+  }, []);
+
   // Static booking data
   const bookingData: BookingCategory[] = [
     {
@@ -64,15 +94,15 @@ const CountsDashboard = () => {
   // Static partner data
   const partnerData: BookingCategory[] = [
     {
-      title: "Partner",
-      total: 441,
-      items: [
-        { label: "Active", count: 92 },
-        { label: "Under Reg.", count: 347 },
-        { label: "Blocked", count: 0 },
-        { label: "No Working Area", count: 2 },
-      ],
-    },
+        title: "Partner",
+        total: partnerCounts?.total_partner_count || 0,
+        items: [
+          { label: "New", count: partnerCounts?.new_partner_count || 0 },
+          { label: "Unverified", count: partnerCounts?.unverified_partner_count || 0 },
+          { label: "Verified", count: partnerCounts?.verified_partner_count || 0 },
+          { label: "Blocked", count: partnerCounts?.blocked_partner_count || 0 },
+        ],
+      },
     {
       title: "Partner's Vehicle",
       total: 192,
@@ -115,7 +145,7 @@ const CountsDashboard = () => {
             <CardTitle as="h6" className="mb-0 fs-5 text-uppercase fw-semibold">
               {category.title}
             </CardTitle>
-            <span className="badge badge-label">{category.total}</span>
+            <span className="badge badge-label text-dark fw-semibold ">{category.total}</span>
           </div>
         </CardHeader>
         <CardBody className="p-0">
@@ -141,7 +171,6 @@ const CountsDashboard = () => {
     <>
       <Row>
         <Col xs={12} className="mb-3">
-          <h5 className="fs-5">Filters</h5>
           <DashboardFilters
             showDateFilter={true}
             showDateRange={true}
@@ -160,19 +189,13 @@ const CountsDashboard = () => {
 
       </Row>
 
-      <Row className="mb-4">
-        <Col xs={12} className="">
-          <h5 className="fs-5">Booking Statistics</h5>
-        </Col>
+      <Row className="">
         {bookingData.map((category, idx) => (
           <CountCard key={idx} category={category} />
         ))}
       </Row>
 
       <Row className="">
-        <Col xs={12} className="">
-          <h5 className="fs-5">Partner & Driver Statistics</h5>
-        </Col>
         {partnerData.map((category, idx) => (
           <CountCard key={idx} category={category} />
         ))}

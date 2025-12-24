@@ -34,7 +34,6 @@ const DriverTransaction = () => {
   const headers = [
     "ID",
     "Name",
-    "Mobile",
     "Type",
     // "Note",
     // "Prev Amt",
@@ -51,7 +50,7 @@ const DriverTransaction = () => {
       const response = await axios.get(
         `${basePath}/ambulance/dashboard_ambulance_driver_transactions`
       );
-    //   console.log("Driver Transactions Data", response.data);
+      console.log("Driver Transactions Data", response.data);
       const rows = response.data?.jsonData?.dashboard_ambulance_driver_transactions || [];
       setData(rows);
       return rows;
@@ -150,11 +149,8 @@ const DriverTransaction = () => {
                 <tr key={idx}>
                   <td>{row.driver_transection_id}</td>
                   <td>
-                    {row.trans_by_name || " "}
+                    {row.trans_by_name || " "} <br /> {row.trans_by_mobile && `(${row.trans_by_mobile})`}
                     </td>
-                    <td>
-                    {row.trans_by_mobile && `${row.trans_by_mobile}`}
-                  </td>
                   <td>
                     <div>{getTransactionByType(row.driver_transection_by_type)}</div>
                     <small className="text-muted">

@@ -66,7 +66,7 @@ const TableFilters = ({
       style={{ minWidth: 0 }}
     >
       {showDateFilter && (
-        <div style={{ width: "250px", flexShrink: 0 }}>
+        <div style={{ width: "300px", flexShrink: 0 }}>
           <InputPicker
             data={[
               { label: "Today", value: "today" },
@@ -89,7 +89,7 @@ const TableFilters = ({
       {showDateRange && (
         <DateRangePicker
           placeholder={dateRangePlaceholder}
-          style={{ width: 250 }}
+          style={{ width: 300 }}
           value={startDate && endDate ? [startDate, endDate] : null}
           onChange={handleDateRangeChange}
           cleanable
@@ -100,7 +100,7 @@ const TableFilters = ({
       )}
 
       {showStateFilter && (
-        <div style={{ width: "250px", flexShrink: 0 }}>
+        <div style={{ width: "300px", flexShrink: 0 }}>
           <InputPicker
             data={[]}
             placeholder={stateFilterPlaceholder}
@@ -111,7 +111,7 @@ const TableFilters = ({
         </div>
       )}
       {showCityFilter && (
-        <div style={{ width: "250px", flexShrink: 0 }}>
+        <div style={{ width: "300px", flexShrink: 0 }}>
           <InputPicker
             data={cityOptions}
             placeholder={cityFilterPlaceholder}

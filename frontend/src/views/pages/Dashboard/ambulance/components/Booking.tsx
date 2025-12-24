@@ -8,7 +8,7 @@ import {
 } from "react-bootstrap";
 import axios from "axios";
 import { useEffect, useState } from "react";
-// import { formatDate } from "@/components/DateFormat";
+import { formatDate } from "@/components/DateFormat";
 
 const BookingList = () => {
   const basePath = (import.meta as any).env?.VITE_PATH ?? "";
@@ -34,7 +34,7 @@ const BookingList = () => {
     "Pickup",
     // "Drop",
     "Amount",
-    "Status",
+    // "Status",
     "Schedule Time",
     // "Date",
   ];
@@ -77,25 +77,25 @@ const BookingList = () => {
     }
   };
 
-  const handleBookingStatus = (status: string) => {
-    switch (status) {
-        //0 for enquiry, 1 for booking done, 2 for driver assigned,3 for invoice, 4 for complete, 5 for Cancel Booking
-        case "0":
-            return "Enquiry";
-        case "1":
-            return "Confirm Booking";
-        case "2":
-            return "Driver Assign";
-        case "3":
-            return "Invoice";
-        case "4":
-            return "Complete";
-        case "5":
-            return "Cancel";
-        default:
-            return " ";
-    }
-  }
+  // const handleBookingStatus = (status: string) => {
+  //   switch (status) {
+  //       //0 for enquiry, 1 for booking done, 2 for driver assigned,3 for invoice, 4 for complete, 5 for Cancel Booking
+  //       case "0":
+  //           return "Enquiry";
+  //       case "1":
+  //           return "Confirm Booking";
+  //       case "2":
+  //           return "Driver Assign";
+  //       case "3":
+  //           return "Invoice";
+  //       case "4":
+  //           return "Complete";
+  //       case "5":
+  //           return "Cancel";
+  //       default:
+  //           return " ";
+  //   }
+  // }
 
   return (
     <Card>
@@ -127,11 +127,15 @@ const BookingList = () => {
                 </td>
                 <td>{handleBookingType(row.booking_type)} <br /> {row.booking_category} </td>
                 {/* <td></td> */}
-                <td>{row.booking_pickup_city}</td>
+                {row.booking_pickup_city !== "NA" ? (
+                  <td>{row.booking_pickup_city}</td>
+                ) : (
+                  <td></td>
+                )}
                 {/* <td>{row.booking_drop}</td> */}
                 <td>₹{row.booking_total_amount}</td>
-                <td>{handleBookingStatus(row.booking_status)}</td>
-                <td>{row.booking_schedule_time}</td>
+                {/* <td>{handleBookingStatus(row.booking_status)}</td> */}
+                <td>{formatDate(row.booking_schedule_time)}</td>
                 {/* <td>{formatDate(row.created_at)}</td> */}
               </tr>
             ))}

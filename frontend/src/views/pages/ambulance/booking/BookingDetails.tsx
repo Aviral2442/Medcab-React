@@ -13,6 +13,11 @@ const BookingDetails = () => {
 
   const tabs = [
     { eventKey: 1, title: 'Booking Details' },
+    { eventKey: 2, title: 'Nearest Driver/Partner' },
+    { eventKey: 3, title: 'City Wise' },
+    { eventKey: 4, title: 'State Wise' },
+    { eventKey: 5, title: 'Accept History' },
+    { eventKey: 6, title: 'Remark' },
   ];
 
   const fetchBookingDetails = async () => {

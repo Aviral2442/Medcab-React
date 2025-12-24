@@ -30,7 +30,6 @@ const PartnerTransaction = () => {
   const headers = [
     "ID",
     "Partner Name",
-    "Mobile",
     "Type",
     // "Prev Amt",
     "Amount",
@@ -134,9 +133,8 @@ const PartnerTransaction = () => {
                 <tr key={idx}>
                   <td>{row.partner_transection_id}</td>
                   <td>
-                    {row.partner_f_name} {row.partner_l_name}
+                    {row.partner_f_name} {row.partner_l_name} <br /> ({row.partner_mobile})
                   </td>
-                  <td>{row.partner_mobile}</td>
                   <td>
                       {getTransactionType(row.partner_transection_type)}
                   </td>

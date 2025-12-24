@@ -5,6 +5,7 @@ import { currentUnixTime } from "../utils/current_unixtime";
 import { generateSlug } from "../utils/generate_sku";
 import { uploadFileCustom } from "../utils/file_uploads";
 import { FieldPacket, RowDataPacket } from 'mysql2';
+import { query } from 'express-validator/lib/middlewares/validation-chain-builders';
 
 
 // --------------------------------------------- AMBULANCE DASHBOARD SERVICES -------------------------------------------------- //
@@ -127,7 +128,7 @@ export const dashboardAmbulanceBookingService = async () => {
                 booking_view.booking_total_amount
             FROM booking_view
             ORDER BY booking_view.booking_id DESC
-            LIMIT 17 OFFSET 0
+            LIMIT 20 OFFSET 0
             `
         )
 
@@ -160,8 +161,10 @@ export const dashboardAmbulancePartnerService = async () => {
                 partner_city_id,
                 partner_registration_step,
                 created_at,
+                city.city_name,
                 partner_status
             FROM partner
+            LEFT JOIN city ON partner.partner_city_id = city.city_id
             ORDER BY partner_id DESC
             LIMIT 5 OFFSET 0;   
             `
@@ -2696,35 +2699,35 @@ export const updateAmbulanceBookingAmountService = async (bookingId: number, new
 
 // SERVICE TO COMPLETE AMBULANCE BOOKING
 export const completeAmbulanceBookingService = async (bookingId: number) => {
-  const connection = await db.getConnection();
+    const connection = await db.getConnection();
 
-  try {
-    await connection.beginTransaction();
+    try {
+        await connection.beginTransaction();
 
-    const [bookingRows]: any = await connection.query(
-      `SELECT * FROM booking_view WHERE booking_id = ?`,
-      [bookingId]
-    );
+        const [bookingRows]: any = await connection.query(
+            `SELECT * FROM booking_view WHERE booking_id = ?`,
+            [bookingId]
+        );
 
-    if (!bookingRows.length) {
-      throw new ApiError(404, "Booking not found");
-    }
+        if (!bookingRows.length) {
+            throw new ApiError(404, "Booking not found");
+        }
 
-    const bookingData = bookingRows[0];
-    console.log("bookingData:", bookingData);
-    const driverId = Number(bookingData.booking_acpt_driver_id);
-    const consumerId = Number(bookingData.booking_by_cid);
+        const bookingData = bookingRows[0];
+        console.log("bookingData:", bookingData);
+        const driverId = Number(bookingData.booking_acpt_driver_id);
+        const consumerId = Number(bookingData.booking_by_cid);
 
-    if (!driverId) {
-      return { status: 400, message: "Please Choose the driver !!" };
-    }
+        if (!driverId) {
+            return { status: 400, message: "Please Choose the driver !!" };
+        }
 
-    if (!consumerId) {
-      return { status: 400, message: "Please Choose the consumer !!" };
-    }
+        if (!consumerId) {
+            return { status: 400, message: "Please Choose the consumer !!" };
+        }
 
-    const [detailsRows]: any = await connection.query(
-      `
+        const [detailsRows]: any = await connection.query(
+            `
       SELECT *
       FROM booking_invoice
       LEFT JOIN consumer ON booking_invoice.bi_consumer_id = consumer.consumer_id
@@ -2733,81 +2736,81 @@ export const completeAmbulanceBookingService = async (bookingId: number) => {
         ON driver.driver_id = driver_live_location.driver_live_location_d_id
       WHERE bi_booking_id = ?
       `,
-      [bookingId]
-    );
+            [bookingId]
+        );
 
-    if (!detailsRows.length) {
-      throw new ApiError(404, "Booking invoice not found");
-    }
+        if (!detailsRows.length) {
+            throw new ApiError(404, "Booking invoice not found");
+        }
 
-    const bookingDetails = detailsRows[0];
+        const bookingDetails = detailsRows[0];
 
-    const totalAmounts = Number(bookingDetails.bi_total_amount_with_sc);
-    const bookingAdvAmount = Number(bookingDetails.bi_service_charge);
-    const driverWalletAmount = Number(bookingDetails.driver_wallet_amount || 0);
-    const biConsumerId = Number(bookingDetails.bi_consumer_id);
-    const biDriverId = Number(bookingDetails.bi_driver_id);
+        const totalAmounts = Number(bookingDetails.bi_total_amount_with_sc);
+        const bookingAdvAmount = Number(bookingDetails.bi_service_charge);
+        const driverWalletAmount = Number(bookingDetails.driver_wallet_amount || 0);
+        const biConsumerId = Number(bookingDetails.bi_consumer_id);
+        const biDriverId = Number(bookingDetails.bi_driver_id);
 
-    /* =======================
-       3. SUM PAYMENTS
-    ======================= */
-    const [paymentRows]: any = await connection.query(
-      `
+        /* =======================
+           3. SUM PAYMENTS
+        ======================= */
+        const [paymentRows]: any = await connection.query(
+            `
       SELECT amount 
       FROM booking_payments
       WHERE booking_id = ? AND consumer_id = ?
       `,
-      [bookingId, biConsumerId]
-    );
+            [bookingId, biConsumerId]
+        );
 
-    const bookingSum =
-      paymentRows.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
+        const bookingSum =
+            paymentRows.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
 
-    /* =======================
-       CASE 1: bookingSum == advance
-    ======================= */
-    if (bookingSum === bookingAdvAmount) {
-      await connection.query(
-        `UPDATE driver SET driver_on_booking_status = 0 WHERE driver_id = ?`,
-        [biDriverId]
-      );
+        /* =======================
+           CASE 1: bookingSum == advance
+        ======================= */
+        if (bookingSum === bookingAdvAmount) {
+            await connection.query(
+                `UPDATE driver SET driver_on_booking_status = 0 WHERE driver_id = ?`,
+                [biDriverId]
+            );
 
-      await connection.query(
-        `
+            await connection.query(
+                `
         UPDATE booking_view
         SET booking_payment_status = 2,
             booking_payment_method = 2,
             booking_status = 4
         WHERE booking_id = ?
         `,
-        [bookingId]
-      );
+                [bookingId]
+            );
 
-      await connection.query(
-        `
+            await connection.query(
+                `
         UPDATE booking_invoice
         SET bi_payment_status = 0,
             bi_cash_pay_amount = ?,
             bi_online_pay_amount = ?
         WHERE bi_booking_id = ?
         `,
-        [totalAmounts - bookingSum, bookingSum, bookingId]
-      );
+                [totalAmounts - bookingSum, bookingSum, bookingId]
+            );
 
-      await connection.commit();
-      return { status: 200, message: "Booking successfully completed" };
-    }
+            await connection.commit();
+            return { status: 200, message: "Booking successfully completed" };
+        }
 
-    /* =======================
-       CASE 2: bookingSum > advance
-    ======================= */
-    if (bookingSum > bookingAdvAmount) {
-      const payDriverAmount = bookingSum - bookingAdvAmount;
-      const newWallet = driverWalletAmount + payDriverAmount;
-      const txnId = `BOOKING_CHARGE_${bookingId}_${Date.now()}`;
+        /* =======================
+           CASE 2: bookingSum > advance
+        ======================= */
+        if (bookingSum > bookingAdvAmount) {
+            const payDriverAmount = bookingSum - bookingAdvAmount;
+            const newWallet = driverWalletAmount + payDriverAmount;
+            const txnId = `BOOKING_CHARGE_${bookingId}_${Date.now()}`;
 
-      await connection.query(
-        `
+            await connection.query(
+                `
         INSERT INTO driver_transection (
           driver_transection_by,
           driver_transection_by_type,
@@ -2830,61 +2833,61 @@ export const completeAmbulanceBookingService = async (bookingId: number) => {
         )
         VALUES (?, 0, 0, ?, ?, 4, ?, ?, ?, ?, 0, '', '', '', '', '', NOW(), NOW())
         `,
-        [
-          biDriverId,
-          payDriverAmount,
-          txnId,
-          newWallet,
-          driverWalletAmount,
-          `Booking Charge: ${bookingId}`,
-          Math.floor(Date.now() / 1000),
-        ]
-      );
+                [
+                    biDriverId,
+                    payDriverAmount,
+                    txnId,
+                    newWallet,
+                    driverWalletAmount,
+                    `Booking Charge: ${bookingId}`,
+                    Math.floor(Date.now() / 1000),
+                ]
+            );
 
-      await connection.query(
-        `
+            await connection.query(
+                `
         UPDATE driver
         SET driver_wallet_amount = ?, driver_on_booking_status = 0
         WHERE driver_id = ?
         `,
-        [newWallet, biDriverId]
-      );
+                [newWallet, biDriverId]
+            );
 
-      await connection.query(
-        `
+            await connection.query(
+                `
         UPDATE booking_view
         SET booking_payment_status = 1,
             booking_payment_method = 2,
             booking_status = 4
         WHERE booking_id = ?
         `,
-        [bookingId]
-      );
+                [bookingId]
+            );
 
-      await connection.query(
-        `
+            await connection.query(
+                `
         UPDATE booking_invoice
         SET bi_payment_status = 0,
             bi_cash_pay_amount = ?,
             bi_online_pay_amount = ?
         WHERE bi_booking_id = ?
         `,
-        [totalAmounts - bookingSum, bookingSum, bookingId]
-      );
+                [totalAmounts - bookingSum, bookingSum, bookingId]
+            );
 
-      await connection.commit();
-      return { status: 200, message: "Booking successfully completed" };
-    }
+            await connection.commit();
+            return { status: 200, message: "Booking successfully completed" };
+        }
 
-    /* =======================
-       CASE 3: bookingSum < advance
-    ======================= */
-    const payDriverAmount = bookingAdvAmount - bookingSum;
-    const newWallet = driverWalletAmount - payDriverAmount;
-    const txnId = `BOOKING_CHARGE_${bookingId}_${Date.now()}`;
+        /* =======================
+           CASE 3: bookingSum < advance
+        ======================= */
+        const payDriverAmount = bookingAdvAmount - bookingSum;
+        const newWallet = driverWalletAmount - payDriverAmount;
+        const txnId = `BOOKING_CHARGE_${bookingId}_${Date.now()}`;
 
-    await connection.query(
-      `
+        await connection.query(
+            `
       INSERT INTO driver_transection (
         driver_transection_by,
         driver_transection_by_type,
@@ -2907,31 +2910,31 @@ export const completeAmbulanceBookingService = async (bookingId: number) => {
       )
       VALUES (?, 0, 0, ?, ?, 3, ?, ?, ?, ?, 0, '', '', '', '', '', NOW(), NOW())
       `,
-      [
-        biDriverId,
-        payDriverAmount,
-        txnId,
-        newWallet,
-        driverWalletAmount,
-        `Booking Charge: ${bookingId}`,
-        Math.floor(Date.now() / 1000),
-      ]
-    );
+            [
+                biDriverId,
+                payDriverAmount,
+                txnId,
+                newWallet,
+                driverWalletAmount,
+                `Booking Charge: ${bookingId}`,
+                Math.floor(Date.now() / 1000),
+            ]
+        );
 
-    await connection.query(
-      `
+        await connection.query(
+            `
       UPDATE driver
       SET driver_wallet_amount = ?, driver_on_booking_status = 0
       WHERE driver_id = ?
       `,
-      [newWallet, biDriverId]
-    );
+            [newWallet, biDriverId]
+        );
 
-    const payType = bookingSum > 1 ? 2 : 3;
-    const paymentMethod = bookingSum > 1 ? 2 : 1;
+        const payType = bookingSum > 1 ? 2 : 3;
+        const paymentMethod = bookingSum > 1 ? 2 : 1;
 
-    await connection.query(
-      `
+        await connection.query(
+            `
       UPDATE booking_view
       SET booking_payment_status = 2,
           booking_payment_type = ?,
@@ -2939,29 +2942,29 @@ export const completeAmbulanceBookingService = async (bookingId: number) => {
           booking_status = 4
       WHERE booking_id = ?
       `,
-      [payType, paymentMethod, bookingId]
-    );
+            [payType, paymentMethod, bookingId]
+        );
 
-    await connection.query(
-      `
+        await connection.query(
+            `
       UPDATE booking_invoice
       SET bi_payment_status = 0,
           bi_cash_pay_amount = ?,
           bi_online_pay_amount = ?
       WHERE bi_booking_id = ?
       `,
-      [totalAmounts - bookingSum, bookingSum, bookingId]
-    );
+            [totalAmounts - bookingSum, bookingSum, bookingId]
+        );
 
-    await connection.commit();
-    return { status: 200, message: "Booking successfully completed" };
-  } catch (error) {
-    await connection.rollback();
-    console.error(error);
-    throw new ApiError(500, "Complete Ambulance Booking Error");
-  } finally {
-    connection.release();
-  }
+        await connection.commit();
+        return { status: 200, message: "Booking successfully completed" };
+    } catch (error) {
+        await connection.rollback();
+        console.error(error);
+        throw new ApiError(500, "Complete Ambulance Booking Error");
+    } finally {
+        connection.release();
+    }
 };
 
 
@@ -3130,6 +3133,114 @@ export const ambulanceBookingInvoiceSerive = async (bookingId: number) => {
         throw new ApiError(500, "Get Booking Invoice Data Error On Fetching");
     }
 };
+
+//update with pagination
+export const ambulanceBookingRemarkListService = async (bookingID: number, filters: {
+    page?: number;
+    limit?: number;
+}) => {
+    try {
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        if (!bookingID) {
+            throw new ApiError(400, "Invalid booking ID");
+        }
+
+        const [rows]: any = await db.query(
+            `SELECT 
+                remark_id,
+                remark_type,
+                remark_text,
+                remark_add_unix_time,
+                admin.admin_name AS remark_added_by_admin_name
+            FROM remark_data
+            LEFT JOIN admin ON remark_data.remark_type = admin.id
+            WHERE remark_data.remark_booking_id = ?
+            ORDER BY remark_data.remark_id DESC
+            LIMIT ? OFFSET ?`,
+            [bookingID, limit, offset]
+        );
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM remark_data WHERE remark_data.remark_booking_id = ?`,
+            [bookingID]
+        );
+
+        const total = countRows[0]?.total || 0;
+
+
+        return {
+            status: 200,
+            message: "Ambulance booking remarks fetched successfully",
+            pagination : {
+                total: total,
+                page: page,
+                limit: limit,
+                totalPages: Math.ceil(total / limit)
+            },
+            jsonData: {
+                ambulance_booking_remarks: rows
+            }
+        };
+    } catch (error) {
+        throw new ApiError(500, "Get Ambulance Booking Remarks Error On Fetching");
+    }
+}
+
+export const ambulanceBookingStateWiseListService = async (bookingID: number, filters: {
+    page?: number;
+    limit?: number;
+}) => {
+    try {
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const [bookingstate]: any = await db.query(
+            `SELECT booking_pickup_city FROM booking_view WHERE booking_id = ?`,
+            [bookingID]
+        );
+        if (bookingstate[0].booking_pickup_city === 'NA' || !bookingstate) {
+            throw new ApiError(404, "Booking city not found");
+        }
+        const [bookingStateId]: any = await db.query(
+            `SELECT city_state FROM city WHERE city_name = ?`,
+            [bookingstate[0].booking_pickup_city]
+        );
+        
+        const stateId = bookingStateId[0]?.city_state;
+
+        const [rows]: any = await db.query(
+            `SELECT city_id, city_name FROM city WHERE city.city_state = ?`,
+            [stateId]
+        );
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total FROM city WHERE city_state = ?`,
+            [stateId]
+        );
+        const total = countRows[0]?.total || 0;
+
+
+        return {
+            status: 200,
+            message: "State fetched successfully",
+            pagination : {
+                total: total,
+                page: page,
+                limit: limit,
+                totalPages: Math.ceil(total / limit)
+            },
+            jsonData: {
+                states: rows
+            }
+        };
+    } catch (error) {
+        throw new ApiError(500, "Get States Error On Fetching");
+    }
+}
 
 // generate invoice code
 

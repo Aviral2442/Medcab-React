@@ -143,18 +143,19 @@ const Vehicle = () => {
                   <td>{row.vehicle_id}</td>
                     <td>{getTransactionByType(row.vehicle_added_type)}</td>
                   <td>
-                    {row.v_vehicle_name}
-                    {/* <br />
-                    <small className="text-muted">
-                      ID: {row.v_vehicle_name_id}
-                    </small> */}
+                    {row.v_vehicle_name !== "unknown" ? row.v_vehicle_name : ""}
                   </td>
-                  <td>{
-                    //also handle null values
+                  <td>
+                    {row.driver_name == null ? (
                     getTransactionByType(row.vehicle_added_type) === <FaUser title="Driver" />
-                      ? `${row.driver_name} (${row.driver_mobile})` || " "
-                      : `${row.partner_f_name} ${row.partner_l_name} (${row.partner_mobile})` || " "
-                    }</td>
+                      ? <>
+                        {row.driver_name} <br /> ({row.driver_mobile})
+                      </>
+                      : <>
+                        {row.partner_f_name} {row.partner_l_name} <br /> ({row.partner_mobile})
+                      </>
+                    ) : " "}
+                    </td>
                   {/* <td>{row.ambulance_category_vehicle_name}</td> */}
                   {/* <td>
                     <small className="text-muted">
