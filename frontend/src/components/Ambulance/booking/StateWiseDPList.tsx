@@ -75,7 +75,7 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
 
   const headers = [
     "S.No.",
-    // "City ID"","
+    "State",
     "By",
     "Name",
     "Mobile",
@@ -92,7 +92,7 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
       render: (_data: any, _type: any, _row: any, meta: any) => meta.row + 1,
     },
     {
-      title: "Name",
+      title: "State",
       data: "state_name",
       render: (data: any) => (data ? data : "N/A"),
     },
