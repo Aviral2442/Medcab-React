@@ -102,8 +102,8 @@ const ExportDataWithButtons = ({
   const { endpoint, headers } = tableConfig[tabKey];
 
   const statusFilterOptions = [
-    { label: "Active", value: "1" },
-    { label: "Inactive", value: "0" },
+    { label: "Active", value: "active" },
+    { label: "Inactive", value: "inactive" },
   ];
 
   const fetchData = async () => {
@@ -196,9 +196,9 @@ const ExportDataWithButtons = ({
       title: "Status",
       data: "blogs_status",
       render: (data: number) => {
-        if (data == 1) {
+        if (data == 0) {
           return `<span class="badge badge-label badge-soft-success">Active</span>`;
-        } else if (data == 0) {
+        } else if (data == 1) {
           return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
         }
       }
@@ -219,14 +219,14 @@ const ExportDataWithButtons = ({
                 onClick={() => {
                     toggleStatus(rowData.blogs_id, rowData.blogs_status);
                 }}
-                title={rowData.blogs_status === 1 ? "Click to deactivate" : "Click to activate"}
-                style={{ backgroundColor: rowData.blogs_status === 1 ? "#d9534f" : "#3a833a" }}
+                title={rowData.blogs_status == 1 ? "Click to activate" : "Click to deactivate"}
+                style={{ backgroundColor: rowData.blogs_status == 1 ? "#3a833a" : "#d9534f" }}
             >           
 
-                {rowData.blogs_status === 1 ? (
-                    <FaRegTimesCircle className="me-1" />
+                {rowData.blogs_status == 1 ? (
+                  <FaRegCheckCircle className="me-1" />
                 ) : (
-                    <FaRegCheckCircle className="me-1" />
+                  <FaRegTimesCircle className="me-1" />
                 )}
             </button>
             <button

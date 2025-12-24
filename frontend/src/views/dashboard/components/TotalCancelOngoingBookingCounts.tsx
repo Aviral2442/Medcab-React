@@ -48,7 +48,7 @@ const ResponseAccuracy = () => {
       bookingData.total_bookings - 
       bookingData.cancelled_bookings - 
       bookingData.ongoing_bookings;
-      console.log("Completed Bookings:", completedBookings);
+      // console.log("Completed Bookings:", completedBookings);
 
     return {
       data: {
