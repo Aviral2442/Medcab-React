@@ -46,7 +46,7 @@ const BookingList = () => {
       const response = await axios.get(
         `${basePath}/ambulance/dashboard_ambulance_bookings`
       );
-      console.log("Bookings Data", response.data);
+      // console.log("Bookings Data", response.data);
       const rows = response.data?.jsonData?.dashboard_ambulance_bookings || [];
       setData(rows);
       // console.log("Booking Trans", rows);

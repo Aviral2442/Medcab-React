@@ -1,3 +1,4 @@
+import DashboardFilters from "@/components/table/DashboardFilter";
 import { Card, CardBody, CardHeader, CardTitle, Row, Col } from "react-bootstrap";
 
 interface CountItem {
@@ -139,6 +140,27 @@ const CountsDashboard = () => {
   return (
     <>
       <Row>
+        <Col xs={12} className="mb-3">
+          <h5 className="fs-5">Filters</h5>
+          <DashboardFilters
+            showDateFilter={true}
+            showDateRange={true}
+            showCityFilter={true}
+            showStateFilter={true}
+            onDateFilterChange={() => {}}
+            onDateRangeChange={() => {}}
+            onCityFilterChange={() => {}}
+            onStateFilterChange={() => {}}
+            dateRange={[null, null]}
+            dateFilter={null}
+            cityOptions={[]}
+            stateOptions={[]}
+          />
+        </Col>
+
+      </Row>
+
+      <Row className="mb-4">
         <Col xs={12} className="">
           <h5 className="fs-5">Booking Statistics</h5>
         </Col>

@@ -18,7 +18,7 @@ import { useTableFilters } from "@/hooks/useTableFilters";
 import _pdfFonts from "pdfmake/build/vfs_fonts";
 import _pdfMake from "pdfmake/build/pdfmake";
 import { FaRegTimesCircle, FaRegCheckCircle } from "react-icons/fa";
-
+import { formatDate } from "@/components/DateFormat";
 
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
@@ -281,8 +281,9 @@ const ExportDataWithButtons = ({
       let dataArray: any[] = [];
 
       // console.log("Current Section ID:", currentSectionId);
+      console.log("Tab Key:", tabKey);
+      console.log("Current Section ID:", currentSectionId);
       
-      // Fix: Use currentSectionId directly instead of sectionMap[currentSectionId]
       if (currentSectionId === 1) {
         if (tabKey === 1) {
           dataArray = res.data?.jsonData?.city_content_list || [];
@@ -342,16 +343,6 @@ const ExportDataWithButtons = ({
     dateRange,
   ]);
 
-  const formatDate = (timestamp: number) => {
-    if (!timestamp) return "N/A";
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   const cityColumns = [
     {
       title: "S.No.",
@@ -364,40 +355,40 @@ const ExportDataWithButtons = ({
     },
     {
       title: "ID",
-      data: currentSectionId === 4 ? "city_pathology_id" : "city_id",
+      data: currentSectionId == 4 ? "city_pathology_id" : "city_id",
       render: (data: any) => {
         return data || "N/A";
       },
     },
     {
       title: "City Name",
-      data: currentSectionId === 4 ? "city_pathology_name" : "city_name",
+      data: currentSectionId == 4 ? "city_pathology_name" : "city_name",
       render: (data: string) => {
         return data || "N/A";
       },
     },
     {
       title: "City Title",
-      data: currentSectionId === 4 ? "city_pathology_title" : "city_title",
+      data: currentSectionId == 4 ? "city_pathology_title" : "city_title",
       render: (data: string) => {
         return data || "N/A";
       },
     },
     {
       title: "Date",
-      data: currentSectionId === 4 ? "city_pathology_timestamp" : "city_timestamp",
+      data: currentSectionId == 4 ? "city_pathology_timestamp" : "city_timestamp",
       render: (data: any) => {
         return formatDate(data);
       },
     },
     {
       title: "Status",
-      data: currentSectionId === 4 ? "city_pathology_status" : "city_status",
+      data: currentSectionId == 4 ? "city_pathology_status" : "city_status",
       render: (data: any) => {
         const status = typeof data === "string" ? parseInt(data) : data;
-        if (status === 0 || status === "0") {
+        if (status == 0 || status === "0") {
           return `<span class="badge badge-label badge-soft-success">Active</span>`;
-        } else if (status === 1 || status === "1") {
+        } else if (status == 1 || status === "1") {
           return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
         }
       },
@@ -413,8 +404,8 @@ const ExportDataWithButtons = ({
         const root = createRoot(td);
         
         // Get the correct ID field based on section
-        const cityId = currentSectionId === 4 ? rowData.city_pathology_id : rowData.city_id;
-        const cityStatus = currentSectionId === 4 ? rowData.city_pathology_status : rowData.city_status;
+        const cityId = currentSectionId == 4 ? rowData.city_pathology_id : rowData.city_id;
+        const cityStatus = currentSectionId == 4 ? rowData.city_pathology_status : rowData.city_status;
         
         root.render(
           <div className="d-flex flex-row gap-1">
@@ -424,16 +415,16 @@ const ExportDataWithButtons = ({
                 toggleStatus(cityId, cityStatus);
               }}
               title={
-                cityStatus === 0
+                cityStatus == 0
                   ? "Click to deactivate"
                   : "Click to activate"
               }
               style={{
                 backgroundColor:
-                  cityStatus === 0 ? "#d9534f" : "#3a833a",
+                  cityStatus == 0 ? "#d9534f" : "#3a833a",
               }}
             >
-              {cityStatus === 0 ? (
+              {cityStatus == 0 ? (
                 <FaRegTimesCircle className="me-1" />
               ) : (
                 <FaRegCheckCircle className="me-1" />
@@ -465,7 +456,7 @@ const ExportDataWithButtons = ({
     },
     {
       title: "ID",
-      data: currentSectionId === 4 ? "city_pathology_faq_id" : "city_faq_id",
+      data: currentSectionId == 4 ? "city_pathology_faq_id" : "city_faq_id",
       render: (data: any) => {
         return data || "N/A";
       },
@@ -477,27 +468,27 @@ const ExportDataWithButtons = ({
     },
     {
       title: "Question",
-      data: currentSectionId === 4 ? "city_pathology_faq_que" : "city_faq_que",
+      data: currentSectionId == 4 ? "city_pathology_faq_que" : "city_faq_que",
       render: (data: string) => {
         return data || "N/A";
       },
     },
     {
       title: "Answer",
-      data: currentSectionId === 4 ? "city_pathology_faq_ans" : "city_faq_ans",
+      data: currentSectionId == 4 ? "city_pathology_faq_ans" : "city_faq_ans",
       render: (data: string) => {
         return data || "N/A";
       },
     },
     {
       title: "Status",
-      data: currentSectionId === 4 ? "city_pathology_faq_status" : "city_faq_status",
+      data: currentSectionId == 4 ? "city_pathology_faq_status" : "city_faq_status",
       defaultContent: "0",
       render: (data: any) => {
         const status = typeof data === "string" ? parseInt(data) : data;
-        if (status === 0 || status === "0") {
+        if (status == 0 || status === "0") {
           return `<span class="badge badge-label badge-soft-success">Active</span>`;
-        } else if (status === 1 || status === "1") {
+        } else if (status == 1 || status === "1") {
           return `<span class="badge badge-label badge-soft-danger">Inactive</span>`;
         }
       },
@@ -513,8 +504,8 @@ const ExportDataWithButtons = ({
         const root = createRoot(td);
         
         // Get the correct ID and status fields based on section
-        const faqId = currentSectionId === 4 ? rowData.city_pathology_faq_id : rowData.city_faq_id;
-        const faqStatus = currentSectionId === 4 ? rowData.city_pathology_faq_status : rowData.city_faq_status;
+        const faqId = currentSectionId == 4 ? rowData.city_pathology_faq_id : rowData.city_faq_id;
+        const faqStatus = currentSectionId == 4 ? rowData.city_pathology_faq_status : rowData.city_faq_status;
         const status =
           typeof faqStatus === "string"
             ? parseInt(faqStatus)
@@ -527,12 +518,12 @@ const ExportDataWithButtons = ({
               onClick={() => {
                 toggleFAQStatus(faqId, faqStatus);
               }}
-              title={status === 0 ? "Click to deactivate" : "Click to activate"}
+              title={status == 0 ? "Click to deactivate" : "Click to activate"}
               style={{
-                backgroundColor: status === 0 ? "#d9534f" : "#3a833a",
+                backgroundColor: status == 0 ? "#d9534f" : "#3a833a",
               }}
             >
-              {status === 0 ? (
+              {status == 0 ? (
                 <FaRegTimesCircle className="me-1" />
               ) : (
                 <FaRegCheckCircle className="me-1" />
@@ -589,7 +580,7 @@ const ExportDataWithButtons = ({
       <ComponentCard
         title={
           <div className="w-100">
-            {getSectionName()} - {tabKey === 1 ? "City" : "City FAQ"}
+            {getSectionName()} - {tabKey == 1 ? "City" : "City FAQ"}
           </div>
         }
         className="mb-2"

@@ -57,11 +57,11 @@ export const bookingColumns = [
     },
     {
         data: 'booking_id',
-        defaultContent: '-'  // Make sure this is a string
+        defaultContent: ''  
     },
     {
         data: 'booking_type',
-        defaultContent: '-',  // Change from '' or 0 to '-' or '0'
+        defaultContent: '',  
         render: (data: any) => {
             const typeMap: Record<number, string> = { 0: "Regular", 1: "Rental", 2: "Bulk" };
             return typeMap[data] || data;
@@ -69,7 +69,7 @@ export const bookingColumns = [
     },
     {
         data: 'booking_con_name',
-        defaultContent: '-',
+        defaultContent: '',
         render: (_data: any, _type: any, row: any) => {
             const name = row['booking_con_name'] || '-';
             const mobile = row['booking_con_mobile'] || '-';
@@ -78,28 +78,28 @@ export const bookingColumns = [
     },
     {
         data: 'booking_view_category_name',
-        defaultContent: '-',
+        defaultContent: '',
     },
     {
         data: 'booking_pickup',
-        defaultContent: '-',
+        defaultContent: '',
     },
     {
         data: 'booking_drop',
-        defaultContent: '-',
+        defaultContent: '',
     },
     {
         data: 'booking_schedule_time',
-        defaultContent: '-',
+        defaultContent: '',
         render: (data: any) => formatDate(data),
     },
     {
         data: 'booking_total_amount',
-        defaultContent: '-',  // Change from 0 to '-' or '0'
+        defaultContent: '',  // Change from 0 to '-' or '0'
     },
     {
         data: 'created_at',
-        defaultContent: '-',
+        defaultContent: '',
         render: (data: any) => formatDate(data),
     },
     // { data: 'remark_text',
@@ -107,7 +107,7 @@ export const bookingColumns = [
     //  },
     {
         data: 'booking_status',
-        defaultContent: '0',  // Changed from 0 to '0'
+        defaultContent: '',
         render: (data: number) => {
             const [variant, text] = statusMap[data] || ["secondary", "Unknown"];
             return `<span class="badge badge-label badge-soft-${variant}">${text}</span>`;

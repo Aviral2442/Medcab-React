@@ -155,7 +155,7 @@ const BookingDetailsApiData = () => {
   const completeBooking = async (bookingId: string) => {
     try {
       const response = await axios.post(
-        `${baseURL}/ambulance/complete_booking/${bookingId}`
+        `${baseURL}/ambulance/complete_ambulance_booking/${bookingId}`
       );
       return { success: true, data: response.data };
     } catch (error: any) {
