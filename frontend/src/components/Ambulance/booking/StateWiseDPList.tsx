@@ -8,26 +8,30 @@ import "datatables.net-responsive";
 import jszip from "jszip";
 import pdfmake from "pdfmake";
 import "pdfmake/build/vfs_fonts";
-import { formatDate } from "@/components/DateFormat";
 import { Spinner } from "react-bootstrap";
 import TablePagination from "@/components/table/TablePagination";
-import '@/global.css'
+import "@/global.css";
 
 // Register plugins
 DataTable.use(DT);
 DT.Buttons.jszip(jszip);
 DT.Buttons.pdfMake(pdfmake);
 
-interface RemarkListProps {
+interface CityWiseDPListProps {
   data: any[] | null;
   loading?: boolean;
   error?: string | null;
   currentPage?: number;
-  pagination?: { page: number; limit: number; total: number; totalPages: number } | null;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  } | null;
   onPageChange?: (pageIndex: number) => void;
 }
 
-const RemarkList: React.FC<RemarkListProps> = ({
+const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
   data,
   loading = false,
   error = null,
@@ -38,7 +42,6 @@ const RemarkList: React.FC<RemarkListProps> = ({
   const tableRef = useRef<any>(null);
 
   useEffect(() => {
-    // Cleanup function to properly destroy DataTable
     return () => {
       if (tableRef.current) {
         try {
@@ -72,10 +75,12 @@ const RemarkList: React.FC<RemarkListProps> = ({
 
   const headers = [
     "S.No.",
-    "ID",
-    "Added By",
-    "Remark",
-    "Date",
+    // "City ID"","
+    "By",
+    "Name",
+    "Mobile",
+    "Vehicle",
+    "Vehicle RC",
   ];
 
   const columns = [
@@ -87,27 +92,51 @@ const RemarkList: React.FC<RemarkListProps> = ({
       render: (_data: any, _type: any, _row: any, meta: any) => meta.row + 1,
     },
     {
-      title: "ID",
-      data: "remark_id",
+      title: "Name",
+      data: "state_name",
       render: (data: any) => (data ? data : "N/A"),
     },
     {
-      title: "Added By",
-      data: "remark_added_by_admin_name",
-      render: (data: any) => (data ? data : "Unknown"),
-    },
-    {
-      title: "Remark",
-      data: "remark_text",
+      title: "By",
+      data: "vehicle_added_type",
       render: (data: any) => {
-        if (!data) return "-";
-        return `<div style="white-space: pre-wrap; word-break: break-word; max-width: 400px;">${data}</div>`;
+        switch (data) {
+          case "0":
+            return "Driver";
+          case "1":
+            return "Partner";
+        }
       },
     },
     {
-      title: "Date",
-      data: "remark_add_unix_time",
-      render: (data: any) => (data ? formatDate(data) : "-"),
+      title: "Name",
+      data: null,
+      render: (_data: any, _type: any, row: any) => {
+        const firstName = row.name || "";
+        const lastName = row.last_name || "";
+        return firstName || lastName
+          ? `${firstName} ${lastName}`.trim()
+          : "N/A";
+      },
+    },
+    {
+      title: "Mobile",
+      data: "mobile",
+    },
+    {
+      title: "Vehicle",
+      data: "v_vehicle_name",
+      render: (data: any) => {
+        if (data === "unknown") return "";
+        else return data;
+      },
+    },
+    {
+      title: "Vehicle RC",
+      data: "vehicle_rc_number",
+      render: (data: any) => {
+        return data;
+      },
     },
   ];
 
@@ -115,28 +144,30 @@ const RemarkList: React.FC<RemarkListProps> = ({
 
   if (error) {
     return (
-      <ComponentCard title="Ambulance Booking Remarks">
+      <ComponentCard title="City Wise Driver/Partner List">
         <div className="text-center p-4 text-danger">{error}</div>
       </ComponentCard>
     );
   }
 
   return (
-    <ComponentCard title="Remarks" className="mb-2">
+    <ComponentCard title="State Wise Driver/Partner List" className="mb-2">
       {loading ? (
         <div className="text-center p-4">
           <Spinner animation="border" variant="primary" />
-          <p className="mt-2">Loading remarks...</p>
+          <p className="mt-2">Loading state wise data...</p>
         </div>
       ) : tableData.length === 0 ? (
         <div className="text-center p-4">
-          <p className="text-muted">No remarks found for this booking.</p>
+          <p className="text-muted">
+            No city wise data found for this booking.
+          </p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <DataTable
             ref={tableRef}
-            key={`remark-table-${currentPage}`}
+            key={`citywise-table-${currentPage}`}
             data={tableData}
             columns={columns}
             options={{
@@ -146,7 +177,7 @@ const RemarkList: React.FC<RemarkListProps> = ({
               searching: true,
               info: false,
               ordering: true,
-              order: [[0, 'desc']],
+              order: [[1, "asc"]],
               layout: {
                 topStart: "buttons",
               },
@@ -204,12 +235,20 @@ const RemarkList: React.FC<RemarkListProps> = ({
                   <TablePagination
                     start={pageIndexLocal + 1}
                     showInfo={true}
-                    previousPage={() => onPageChange && onPageChange(Math.max(0, pageIndexLocal - 1))}
+                    previousPage={() =>
+                      onPageChange &&
+                      onPageChange(Math.max(0, pageIndexLocal - 1))
+                    }
                     canPreviousPage={pageIndexLocal > 0}
                     pageCount={pagination.totalPages}
                     pageIndex={pageIndexLocal}
                     setPageIndex={(p) => onPageChange && onPageChange(p)}
-                    nextPage={() => onPageChange && onPageChange(Math.min(pagination.totalPages - 1, pageIndexLocal + 1))}
+                    nextPage={() =>
+                      onPageChange &&
+                      onPageChange(
+                        Math.min(pagination.totalPages - 1, pageIndexLocal + 1)
+                      )
+                    }
                     canNextPage={pageIndexLocal < pagination.totalPages - 1}
                   />
                 );
@@ -222,4 +261,4 @@ const RemarkList: React.FC<RemarkListProps> = ({
   );
 };
 
-export default RemarkList;
+export default CityWiseDPList;

@@ -3,11 +3,20 @@ import { Container, Spinner, Nav } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import AmbulanceBookingDetails from '@/components/Ambulance/booking/BookingDetails';
 import BookingDetailsApiData from '@/components/Ambulance/booking/BookingDetailsApiData';
+import RemarkList from '@/components/Ambulance/booking/RemarkList';
+import StateWiseDPList from '@/components/Ambulance/booking/StateWiseDPList';
 
 const BookingDetails = () => {
   const api = BookingDetailsApiData();
   const { id } = useParams();
   const [bookingData, setBookingData] = React.useState<any>(null);
+
+  const [remarkData, setRemarkData] = React.useState<any>(null);
+  const [remarkPagination, setRemarkPagination] = React.useState<any>(null);
+
+  const [stateWiseDPData, setStateWiseDPData] = React.useState<any>(null);
+  const [stateWiseDPPagination, setStateWiseDPPagination] = React.useState<any>(null);
+
   const [loading, setLoading] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState(1);
 
@@ -35,9 +44,43 @@ const BookingDetails = () => {
     }
   };
 
+  const fetchRemarkDetails = async () => {
+    try {
+      setLoading(true);
+      const result = await api.fetchRemarkDetails(id!);
+      if (result.success) {
+        console.log("Fetched remark details:", result.data);
+        setRemarkData(result.data);
+        setRemarkPagination(result.pagination);
+      }
+    } catch (error) {
+      console.error("Error fetching remark details:", error);
+    }
+  };
+
+  const fetchStateWiseDPDetails = async () => {
+    try {
+      setLoading(true);
+      const result = await api.fetchStateWiseDPDetails(id!);
+      if (result.success) {
+        console.log("Fetched state-wise DP details:", result);
+        setStateWiseDPData(result.data);
+        setStateWiseDPPagination(result.pagination);
+      }
+    } catch (error) {
+      console.error("Error fetching state-wise DP details:", error);
+    }
+  };
+
   React.useEffect(() => {
     if (activeTab === 1 && !bookingData) {
       fetchBookingDetails();
+    }
+    if (activeTab === 6) {
+      fetchRemarkDetails();
+    }
+    if (activeTab === 4) {
+      fetchStateWiseDPDetails();
     }
   }, [activeTab, id]);
 
@@ -81,6 +124,28 @@ const BookingDetails = () => {
             <p className="text-muted">Accept/Reject History - Coming Soon</p>
           </div>
         );
+        case 4:
+          return stateWiseDPData ? (
+            <StateWiseDPList
+              data={stateWiseDPData}
+              pagination={stateWiseDPPagination}
+            />
+          ) : (
+            <div className="text-center p-5">
+              <p className="text-muted">No state-wise DP data found</p>
+            </div>
+          );
+        case 6:
+          return remarkData ? (
+            <RemarkList
+              data={remarkData}
+              pagination={remarkPagination}
+            />
+          ) : (
+            <div className="text-center p-5">
+              <p className="text-muted">No remark data found</p>
+            </div>
+          )
       default:
         return null;
     }

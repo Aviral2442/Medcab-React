@@ -264,6 +264,42 @@ const BookingDetailsApiData = () => {
     }
   };
 
+  const fetchRemarkDetails = async (bookingId: string) => {
+    try {
+      const response = await axios.get(`${baseURL}/ambulance/ambulance_booking_remark_list/${bookingId}`);
+      return {
+        success: true,
+        data: response.data?.jsonData?.ambulance_booking_remarks,
+        pagination : response.data?.pagination
+      };
+    }
+    catch (error: any) {
+      console.error("Error fetching remark details:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch remark details",
+      };
+    }
+  };
+
+  const fetchStateWiseDPDetails = async (bookingId: string) => {
+    try {
+      const response = await axios.get(`${baseURL}/ambulance/ambulance_booking_state_wise_list/${bookingId}`);
+      return {
+        success: true,
+        data: response.data?.jsonData?.state_wise,
+        pagination: response.data?.pagination
+      };
+    } catch (error: any) {
+      console.error("Error fetching state-wise DP details:", error);
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to fetch state-wise DP details",
+      };
+    }
+  }
+
   return {
     updatePaymentDetails,
     updateScheduleTime,
@@ -277,7 +313,9 @@ const BookingDetailsApiData = () => {
     cancelAssignDriver,
     cancelBooking,
     generateInvoice,
-    fetchInvoiceData
+    fetchInvoiceData,
+    fetchRemarkDetails,
+    fetchStateWiseDPDetails
   };
 };
 

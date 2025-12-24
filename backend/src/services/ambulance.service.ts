@@ -3174,7 +3174,7 @@ export const ambulanceBookingRemarkListService = async (bookingID: number, filte
         return {
             status: 200,
             message: "Ambulance booking remarks fetched successfully",
-            pagination : {
+            pagination: {
                 total: total,
                 page: page,
                 limit: limit,
@@ -3189,58 +3189,103 @@ export const ambulanceBookingRemarkListService = async (bookingID: number, filte
     }
 }
 
-export const ambulanceBookingStateWiseListService = async (bookingID: number, filters: {
-    page?: number;
-    limit?: number;
-}) => {
-    try {
-        const page = filters?.page && filters.page > 0 ? filters.page : 1;
-        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
-        const offset = (page - 1) * limit;
+export const ambulanceBookingStateWiseListService = async (
+  bookingID: number,
+  filters: { page?: number; limit?: number }
+) => {
+  try {
+    const page = filters?.page && filters.page > 0 ? filters.page : 1;
+    const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+    const offset = (page - 1) * limit;
 
-        const [bookingstate]: any = await db.query(
-            `SELECT booking_pickup_city FROM booking_view WHERE booking_id = ?`,
-            [bookingID]
-        );
-        if (bookingstate[0].booking_pickup_city === 'NA' || !bookingstate) {
-            throw new ApiError(404, "Booking city not found");
-        }
-        const [bookingStateId]: any = await db.query(
-            `SELECT city_state FROM city WHERE city_name = ?`,
-            [bookingstate[0].booking_pickup_city]
-        );
-        
-        const stateId = bookingStateId[0]?.city_state;
+    /* 1️⃣ Get state_id using booking city */
+    const [stateRows]: any = await db.query(
+      `SELECT c.city_state
+       FROM booking_view b
+       JOIN city c ON booking_pickup_city != 'NA' AND c.city_name = b.booking_pickup_city
+       WHERE b.booking_id = ?
+       LIMIT 1`,
+      [bookingID]
+    );
 
-        const [rows]: any = await db.query(
-            `SELECT city_id, city_name FROM city WHERE city.city_state = ?`,
-            [stateId]
-        );
-
-        const [countRows]: any = await db.query(
-            `SELECT COUNT(*) as total FROM city WHERE city_state = ?`,
-            [stateId]
-        );
-        const total = countRows[0]?.total || 0;
-
-
-        return {
-            status: 200,
-            message: "State fetched successfully",
-            pagination : {
-                total: total,
-                page: page,
-                limit: limit,
-                totalPages: Math.ceil(total / limit)
-            },
-            jsonData: {
-                states: rows
-            }
-        };
-    } catch (error) {
-        throw new ApiError(500, "Get States Error On Fetching");
+    if (!stateRows.length || !stateRows[0].city_state) {
+      return {
+        status: 404,
+        message: "State not found for the given booking ID",
+        jsonData: {}
+      }
     }
-}
+
+    const stateId = stateRows[0].city_state;
+
+    const [rows]: any = await db.query(
+      `SELECT 
+          c.city_id,
+          c.city_name,
+          state.state_name,
+          vd.vehicle_id,
+          vd.v_vehicle_name,
+          vd.vehicle_rc_number,
+          vd.vehicle_added_type,
+          d.driver_id as assign_id,
+          d.driver_name as name,
+          d.driver_last_name as last_name,
+          d.driver_mobile as mobile,
+          p.partner_id as assign_id,
+          p.partner_f_name as name,
+          p.partner_l_name as last_name,
+          p.partner_mobile as mobile
+       FROM city c
+       LEFT JOIN driver d 
+         ON c.city_id = d.driver_city_id
+
+       LEFT JOIN partner p 
+         ON c.city_id = p.partner_city_id
+
+       LEFT JOIN state ON c.city_state = state.state_id
+
+       LEFT JOIN vehicle vd 
+         ON vd.vehicle_added_by = d.driver_id 
+        AND vd.vehicle_added_type = 0
+
+       LEFT JOIN vehicle vp 
+         ON vp.vehicle_added_by = p.partner_id 
+        AND vp.vehicle_added_type = 1
+
+       WHERE c.city_state = ?
+       LIMIT ? OFFSET ?`,
+      [stateId, limit, offset]
+    );
+
+    /* 3️⃣ Correct count */
+    const [countRows]: any = await db.query(
+      `SELECT COUNT(DISTINCT c.city_id) AS total
+       FROM city c
+       WHERE c.city_state = ?`,
+      [stateId]
+    );
+
+    const total = countRows[0]?.total || 0;
+
+    return {
+      status: 200,
+      message: "State-wise data fetched successfully",
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      },
+      jsonData: {
+        state_wise: rows
+      }
+    };
+  } catch (error) {
+    console.error(error);
+    throw new ApiError(500, "Get State Wise Data Error");
+  }
+};
+
 
 // generate invoice code
 
