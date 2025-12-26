@@ -611,6 +611,77 @@ export const partnerDashboardCountService = async (filters: {
     }
 };
 
+// PARTNER COUNT DASHBOARD AMBULANCE SERVICE
+export const driverDashboardCountService = async (filters: {
+    date?: string;
+    fromDate?: string;
+    toDate?: string;
+    status?: string;
+    stateId?: string;
+    cityId?: string;
+}) => {
+    try {
+
+        const { whereSQL, params } = buildFilters({
+            ...filters,
+            dateColumn: "driver.created_at",
+        });
+
+        let finalWhereSQL = whereSQL;
+
+        const queryParams: any[] = [...params];
+
+        let joinSQL = "";
+
+        if (filters.cityId) {
+            if (/where\s+/i.test(finalWhereSQL)) {
+                finalWhereSQL += " AND driver.driver_city_id = ?";
+            } else {
+                finalWhereSQL = "WHERE driver.driver_city_id = ?";
+            }
+            queryParams.push(filters.cityId);
+        }
+
+        if (filters.stateId) {
+            joinSQL = `
+                LEFT JOIN city 
+                    ON city.city_id = driver.driver_city_id
+            `;
+
+            if (/where\s+/i.test(finalWhereSQL)) {
+                finalWhereSQL += " AND city.city_state = ?";
+            } else {
+                finalWhereSQL = "WHERE city.city_state = ?";
+            }
+            queryParams.push(filters.stateId);
+        }
+
+        const driverMasterQuery = `
+            SELECT 
+                COUNT(driver_id) AS total_partner_count,
+                COUNT(CASE WHEN driver_status = 0 THEN 1 END) AS new_driver_count,
+                COUNT(CASE WHEN driver_status = 2 THEN 1 END) AS unverified_driver_count,
+                COUNT(CASE WHEN driver_status = 1 THEN 1 END) AS verified_driver_count,
+                COUNT(CASE WHEN driver_status = 4 THEN 1 END) AS verification_applied_driver_count
+            FROM driver
+            ${joinSQL}
+            ${finalWhereSQL}
+        `;
+
+        const [rows]: any = await db.query(driverMasterQuery, queryParams);
+        return {
+            status: 200,
+            message: "Ambulance Driver's count fetched successfully",
+            jsonData: {
+                ambulance_driver_counts: rows[0]
+            },
+        };
+
+    } catch (error) {
+        throw new ApiError(500, "Ambulance Driver's Count Error On Fetching");
+    }
+};
+
 
 
 // --------------------------------------------- AMBULANCE CATEGORY SERVICES -------------------------------------------------- //
@@ -3097,6 +3168,7 @@ export const generateAmbulanceBookingInvoiceService = async (
     }
 };
 
+// SERVICE TO GET AMBULANCE BOOKING INVOICE DATA
 export const ambulanceBookingInvoiceSerive = async (bookingId: number) => {
     try {
         const [rows]: any = await db.query(
@@ -3134,7 +3206,7 @@ export const ambulanceBookingInvoiceSerive = async (bookingId: number) => {
     }
 };
 
-//update with pagination
+// SERVICE TO GET AMBULANCE BOOKING REMARK LIST
 export const ambulanceBookingRemarkListService = async (bookingID: number, filters: {
     page?: number;
     limit?: number;
@@ -3189,103 +3261,103 @@ export const ambulanceBookingRemarkListService = async (bookingID: number, filte
     }
 }
 
+// SERVICE TO GET AMBULANCE BOOKING STATE WISE LIST
 export const ambulanceBookingStateWiseListService = async (
-  bookingID: number,
-  filters: { page?: number; limit?: number }
+    bookingID: number,
+    filters: { page?: number; limit?: number }
 ) => {
-  try {
-    const page = filters?.page && filters.page > 0 ? filters.page : 1;
-    const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
-    const offset = (page - 1) * limit;
+    try {
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
 
-    /* 1️⃣ Get state_id using booking city */
-    const [stateRows]: any = await db.query(
-      `SELECT c.city_state
-       FROM booking_view b
-       JOIN city c ON booking_pickup_city != 'NA' AND c.city_name = b.booking_pickup_city
-       WHERE b.booking_id = ?
-       LIMIT 1`,
-      [bookingID]
-    );
+        const [stateRows]: any = await db.query(
+            `SELECT c.city_state
+            FROM booking_view b
+            JOIN city c ON booking_pickup_city != 'NA' AND c.city_name = b.booking_pickup_city
+            WHERE b.booking_id = ?
+            LIMIT 1`,
+            [bookingID]
+        );
 
-    if (!stateRows.length || !stateRows[0].city_state) {
-      return {
-        status: 404,
-        message: "State not found for the given booking ID",
-        jsonData: {}
-      }
+        if (!stateRows.length || !stateRows[0].city_state) {
+            return {
+                status: 404,
+                message: "State not found for the given booking ID",
+                jsonData: {}
+            }
+        }
+
+        const stateId = stateRows[0].city_state;
+
+        const [rows]: any = await db.query(
+            `SELECT 
+                c.city_id,
+                c.city_name,
+                state.state_name,
+                vd.vehicle_id,
+                vd.v_vehicle_name,
+                vd.vehicle_rc_number,
+                vd.vehicle_added_type,
+                d.driver_id as assign_id,
+                d.driver_name as name,
+                d.driver_last_name as last_name,
+                d.driver_mobile as mobile,
+                p.partner_id as assign_id,
+                p.partner_f_name as name,
+                p.partner_l_name as last_name,
+                p.partner_mobile as mobile
+            FROM city c
+            LEFT JOIN driver d 
+                ON c.city_id = d.driver_city_id
+
+            LEFT JOIN partner p 
+                ON c.city_id = p.partner_city_id
+
+            LEFT JOIN state ON c.city_state = state.state_id
+
+            LEFT JOIN vehicle vd 
+                ON vd.vehicle_added_by = d.driver_id 
+                AND vd.vehicle_added_type = 0
+
+            LEFT JOIN vehicle vp 
+                ON vp.vehicle_added_by = p.partner_id 
+                AND vp.vehicle_added_type = 1
+
+            WHERE c.city_state = ?
+            LIMIT ? OFFSET ?`,
+            [stateId, limit, offset]
+        );
+
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(DISTINCT c.city_id) AS total
+            FROM city c
+            WHERE c.city_state = ?`,
+            [stateId]
+        );
+
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "State-wise data fetched successfully",
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            },
+            jsonData: {
+                state_wise: rows
+            }
+        };
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, "Get State Wise Data Error");
     }
-
-    const stateId = stateRows[0].city_state;
-
-    const [rows]: any = await db.query(
-      `SELECT 
-          c.city_id,
-          c.city_name,
-          state.state_name,
-          vd.vehicle_id,
-          vd.v_vehicle_name,
-          vd.vehicle_rc_number,
-          vd.vehicle_added_type,
-          d.driver_id as assign_id,
-          d.driver_name as name,
-          d.driver_last_name as last_name,
-          d.driver_mobile as mobile,
-          p.partner_id as assign_id,
-          p.partner_f_name as name,
-          p.partner_l_name as last_name,
-          p.partner_mobile as mobile
-       FROM city c
-       LEFT JOIN driver d 
-         ON c.city_id = d.driver_city_id
-
-       LEFT JOIN partner p 
-         ON c.city_id = p.partner_city_id
-
-       LEFT JOIN state ON c.city_state = state.state_id
-
-       LEFT JOIN vehicle vd 
-         ON vd.vehicle_added_by = d.driver_id 
-        AND vd.vehicle_added_type = 0
-
-       LEFT JOIN vehicle vp 
-         ON vp.vehicle_added_by = p.partner_id 
-        AND vp.vehicle_added_type = 1
-
-       WHERE c.city_state = ?
-       LIMIT ? OFFSET ?`,
-      [stateId, limit, offset]
-    );
-
-    /* 3️⃣ Correct count */
-    const [countRows]: any = await db.query(
-      `SELECT COUNT(DISTINCT c.city_id) AS total
-       FROM city c
-       WHERE c.city_state = ?`,
-      [stateId]
-    );
-
-    const total = countRows[0]?.total || 0;
-
-    return {
-      status: 200,
-      message: "State-wise data fetched successfully",
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      },
-      jsonData: {
-        state_wise: rows
-      }
-    };
-  } catch (error) {
-    console.error(error);
-    throw new ApiError(500, "Get State Wise Data Error");
-  }
 };
 
+// SERVICE TO GET AMBULANCE BOOKING CITY WISE LIST
 export const ambulanceBookingCityWiseListService = async (bookingID: number, filters: {
     page?: number;
     limit?: number;
@@ -3301,7 +3373,7 @@ export const ambulanceBookingCityWiseListService = async (bookingID: number, fil
              JOIN city c ON booking_pickup_city != 'NA' AND c.city_name = b.booking_pickup_city
              WHERE b.booking_id = ?
              LIMIT 1`,
-             [bookingID]
+            [bookingID]
         );
 
         if (!cityRows.length || !cityRows[0].city_id) {
@@ -3351,7 +3423,7 @@ export const ambulanceBookingCityWiseListService = async (bookingID: number, fil
             `SELECT COUNT(DISTINCT c.city_id) AS total
              FROM city c
              WHERE c.city_id = ?`,
-             [cityId]
+            [cityId]
         );
         const total = countRows[0]?.total || 0;
 
@@ -3375,247 +3447,3 @@ export const ambulanceBookingCityWiseListService = async (bookingID: number, fil
         throw new ApiError(500, "Get City Wise Data Error");
     }
 };
-
-
-// generate invoice code
-
-// $totalAmounts = $request -> input('totalAmounts');
-// $advance_amounts = $request -> input('advance_amounts');
-// $extra_km = $request -> input('extra_km') ?? 0;
-// $extra_minute = $request -> input('extra_hour') ?? 0;
-
-// $bookingData = DB:: table('booking_view') -> where('booking_id', $bookingId) -> first();
-
-// $bookingcustomerId = $bookingData -> booking_by_cid;
-// $bookingdriverId = $bookingData -> booking_acpt_driver_id;
-// $bi_base_rate = $bookingData -> booking_view_base_rate;
-// $bi_base_km = $bookingData -> booking_view_km_rate;
-// $bi_km_rate = $bookingData -> booking_view_per_ext_km_rate;
-// $bi_ext_min = $bookingData -> booking_view_per_ext_min_rate;
-
-
-
-// $discount_mrp = $totalAmounts * 0.10;
-
-// $discount_prices = ($discount_mrp > $advance_amounts) ? ($discount_mrp - $advance_amounts) : 0;
-// $discount_amount_with_services = $totalAmounts - $advance_amounts;
-
-// $bi_ext_km_rate = floatval($extra_km) * floatval($bi_km_rate);
-// $bi_ext_min_rate = floatval($extra_minute) * floatval($bi_ext_min);
-
-// $bi_total_amount_with_sc = $totalAmounts + $bi_ext_km_rate + $bi_ext_min_rate;
-
-// $invoice_data = DB:: table('booking_invoice') -> insert([
-//     'bi_booking_id' => $bookingId,
-//     'bi_driver_id' => $bookingdriverId,
-//     'bi_consumer_id' => $bookingcustomerId,
-//     'bi_base_rate' => $bi_base_rate,
-//     'bi_km_rate' => $bi_base_km,
-//     'bi_addons_rate' => 0,
-//     'bi_ext_km' => $extra_km,
-//     'bi_ext_km_rate' => $bi_ext_km_rate,
-//     'bi_ext_min' => $extra_minute,
-//     'bi_ext_min_rate' => $bi_ext_min_rate,
-//     'bi_total_amount_without_SC' => $discount_amount_with_services,
-//     'bi_discount_in_sc' => round($discount_prices, 2),
-//     'bi_service_charge' => $advance_amounts,
-//     'bi_total_amount_with_sc' => $bi_total_amount_with_sc,
-//     'bi_payment_status' => '1',
-//     'bi_cash_pay_amount' => 0,
-//     'bi_online_pay_amount' => 0,
-//     'bi_status' => '2',
-//     'bi_invoice_genrated_time_unix' => Carbon:: now() -> timestamp,
-//     'created_at' => now(),
-//     'updated_at' => now()
-// ]);
-
-
-// $updateStatus = DB:: table('booking_view') -> where('booking_id', $bookingId) -> update(['booking_status' => '3', 'booking_payment_status' => '']);
-
-// if ($invoice_data) {
-//     return response() -> json(['success' => true, 'message' => 'Invoice Generate Receive Successfully']);
-// } else {
-//     return response() -> json(['error' => true, 'message' => 'Something went Wroung !!']);
-// }
-
-
-
-// complete booking
-
-
-// $bookingData = DB:: table('booking_view') -> where('booking_id', '=', $bookingId)
-//     -> first();
-
-// $driverId = $bookingData -> booking_acpt_driver_id;
-// $consumerId = $bookingData -> booking_by_cid;
-
-// if ($driverId === 'null' || $driverId == '0') {
-//     return redirect() -> back() ->with ('error', 'Please Choose the driver !!');
-// } elseif($consumerId === 'null' || $consumerId == '0') {
-//     return redirect() -> back() ->with ('error', 'Please Choose the consumer !!');
-// } else {
-//     $bookingDetails = DB:: table('booking_invoice')
-//         -> leftjoin('consumer', 'booking_invoice.bi_consumer_id', '=', 'consumer.consumer_id')
-//         -> leftjoin('driver', 'driver.driver_id', '=', 'booking_invoice.bi_driver_id')
-//         -> leftjoin('driver_live_location', 'driver.driver_id', '=', 'driver_live_location.driver_live_location_d_id')
-//         -> where('bi_booking_id', '=', $bookingId)
-//         -> first();
-
-//     $paymentStatus = $bookingDetails -> bi_payment_status;
-//     $totalAmounts = $bookingDetails -> bi_total_amount_with_sc;
-//     $booking_adv_amount = $bookingDetails -> bi_service_charge;
-//     $consumerId = $bookingDetails -> bi_consumer_id;
-//     $driverId = $bookingDetails -> bi_driver_id;
-//     $driverWalletAmount = $bookingDetails -> driver_wallet_amount;
-
-//     $bookingPayments = DB:: table('booking_payments')
-//         -> where('booking_id', $bookingId)
-//         -> where('consumer_id', $consumerId)
-//         -> get();
-
-//     $bookingSum = $bookingPayments -> sum('amount') ?? '0';  the sum the total consumer pay amounts
-
-//     if ($bookingSum == $booking_adv_amount) {
-
-//         $releaseDriver = DB:: table('driver')
-//             -> where('driver_id', $driverId)
-//             -> update([
-//                 'driver_on_booking_status' => '0'
-//             ]);                                            realese the drivewr in bookings
-
-//         $updateBooking = DB:: table('booking_view')
-//             -> where('booking_id', $bookingId)
-//             -> update([
-//                 'booking_payment_status' => '2',
-//                 'booking_payment_method' => '2',
-//                 'booking_status' => '4'
-//             ]);
-
-//         $total_cash = $totalAmounts - $bookingSum;
-//         $updateBooking = DB:: table('booking_invoice')
-//             -> where('bi_booking_id', $bookingId)
-//             -> update([
-//                 'bi_payment_status' => '0',
-//                 'bi_cash_pay_amount' => $total_cash,
-//                 'bi_online_pay_amount' => $bookingSum
-//             ]);
-
-//         return redirect() -> back() ->with ('success', 'Booking successfully completed');
-//     } elseif($bookingSum > $booking_adv_amount) {
-//         $paydriverAmounts = $bookingSum - $booking_adv_amount;
-//         $driver_pay_booking_id = 'BOOKING_CHARGE_'.$bookingId. '_'.time();
-
-//         $driverlatestWallet = $paydriverAmounts + $driverWalletAmount;
-//         $driverTransactionInsert = DB:: table('driver_transection')
-//             -> insert([
-//                 'driver_transection_by' => $driverId,
-//                 'driver_transection_by_type' => '0',
-//                 'driver_transection_by_type_pid' => '0',
-//                 'driver_transection_amount' => $paydriverAmounts,
-//                 'driver_transection_pay_id' => $driver_pay_booking_id,
-//                 'driver_transection_type' => '4',
-//                 'driver_transection_wallet_new_amount' => $driverlatestWallet,
-//                 'driver_transection_wallet_previous_amount' => $driverWalletAmount,
-//                 'driver_transection_note' => 'Booking Charge: '.$bookingId,
-//                 'driver_transection_time_unix' => Carbon:: now() -> timestamp,
-//                 'driver_transection_order_id' => '0',
-//                 'driver_transection_bank_ref_no' => '',
-//                 'driver_transection_order_status' => '',
-//                 'driver_transection_payment_mode' => '',
-//                 'driver_transection_payment_mobile' => '',
-//                 'driver_transection_cc_time' => '',
-//                 'updated_at' => Carbon:: now(),
-//                 'created_at' => Carbon:: now()
-//             ]);
-
-//         $updatedriverWallet = DB:: table('driver')
-//             -> where('driver_id', $driverId)
-//             -> update([
-//                 'driver_wallet_amount' => $driverlatestWallet,
-//                 'driver_on_booking_status' => '0'
-//             ]);
-
-//         $updateBooking = DB:: table('booking_view')
-//             -> where('booking_id', $bookingId)
-//             -> update([
-//                 'booking_payment_status' => '1',
-//                 'booking_payment_method' => '2',
-//                 'booking_status' => '4'
-//             ]);
-
-//         $total_cash = $totalAmounts - $bookingSum;
-//         $updateBooking = DB:: table('booking_invoice')
-//             -> where('bi_booking_id', $bookingId)
-//             -> update([
-//                 'bi_payment_status' => '0',
-//                 'bi_cash_pay_amount' => $total_cash,
-//                 'bi_online_pay_amount' => $bookingSum
-//             ]);
-
-//         return redirect() -> back() ->with ('success', 'Booking successfully completed');
-//     } elseif($bookingSum < $booking_adv_amount) {  cash collect
-
-//         $paydriverAmounts = $booking_adv_amount - $bookingSum;
-//         $driverlatestWallet = $driverWalletAmount - $paydriverAmounts;
-
-//         $driver_pay_booking_id = 'BOOKING_CHARGE_'.$bookingId. '_'.time();
-
-//         $driverTransactionInsert = DB:: table('driver_transection')
-//             -> insert([
-//                 'driver_transection_by' => $driverId,
-//                 'driver_transection_by_type' => '0',
-//                 'driver_transection_by_type_pid' => '0',
-//                 'driver_transection_amount' => $paydriverAmounts,
-//                 'driver_transection_pay_id' => $driver_pay_booking_id,
-//                 'driver_transection_type' => '3',
-//                 'driver_transection_wallet_new_amount' => $driverlatestWallet,
-//                 'driver_transection_wallet_previous_amount' => $driverWalletAmount,
-//                 'driver_transection_note' => 'Booking Charge: '.$bookingId,
-//                 'driver_transection_time_unix' => Carbon:: now() -> timestamp,
-//                 'driver_transection_order_id' => '0',
-//                 'driver_transection_bank_ref_no' => '',
-//                 'driver_transection_order_status' => '',
-//                 'driver_transection_payment_mode' => '',
-//                 'driver_transection_payment_mobile' => '',
-//                 'driver_transection_cc_time' => '',
-//                 'updated_at' => Carbon:: now(),
-//                 'created_at' => Carbon:: now()
-//             ]);
-
-//         $updatedriverWallet = DB:: table('driver')
-//             -> where('driver_id', $driverId)
-//             -> update([
-//                 'driver_wallet_amount' => $driverlatestWallet,
-//                 'driver_on_booking_status' => '0'
-//             ]);
-
-//         if ($bookingSum > 1) {
-//             $pay_type = '2';
-//             $booking_payment_method = '2';
-//         } else {
-//             $pay_type = '3';
-//             $booking_payment_method = '1';
-//         }
-//         $updateBooking = DB:: table('booking_view')
-//             -> where('booking_id', $bookingId)
-//             -> update([
-//                 'booking_payment_status' => '2',
-//                 'booking_payment_type' => $pay_type,
-//                 'booking_payment_method' => $booking_payment_method,
-//                 'booking_status' => '4'
-//             ]);
-
-//         $total_cash = $totalAmounts - $bookingSum;
-//         $updateBooking = DB:: table('booking_invoice')
-//             -> where('bi_booking_id', $bookingId)
-//             -> update([
-//                 'bi_payment_status' => '0',
-//                 'bi_cash_pay_amount' => $total_cash,
-//                 'bi_online_pay_amount' => $bookingSum
-//             ]);
-//         return redirect() -> back() ->with ('success', 'Booking successfully completed');
-//     } else {
-//         return redirect() -> back() ->with ('error', 'Somthing went wrong please try again!');
-//     }
-// }
-
