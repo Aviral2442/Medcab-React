@@ -352,6 +352,41 @@ const BookingDetailsApiData = () => {
     }
   };
 
+  const fetchBookingAcceptHistory = async (bookingId: string) => {
+    try {
+      const response = await axios.get(`${baseURL}/ambulance/ambulance_booking_accept_history/${bookingId}`);
+      return {
+        success: true,
+        data: response.data?.jsonData?.ambulance_booking_accept_history,
+        pagination: response.data?.pagination
+      };
+    } catch (error: any) {
+      console.error("Error fetching booking accept history:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch booking accept history",
+      };
+    }
+  };
+
+  const fetchBookingRejectHistory = async (bookingId: string) => {
+    try {
+      const response = await axios.get(`${baseURL}/ambulance/ambulance_booking_reject_history/${bookingId}`);
+      return {
+        success: true,
+        data: response.data?.jsonData?.ambulance_booking_reject_history,
+        pagination: response.data?.pagination
+      };
+    }
+    catch (error: any) {
+      console.error("Error fetching booking reject history:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch booking reject history",
+      };
+    }
+  };
+
   return {
     updatePaymentDetails,
     updateScheduleTime,
@@ -370,7 +405,9 @@ const BookingDetailsApiData = () => {
     fetchStateWiseDPDetails,
     fetchCityWiseDPDetails,
     fetchMapData,
-    fetchNearestDriverAndVehicleData
+    fetchNearestDriverAndVehicleData,
+    fetchBookingAcceptHistory,
+    fetchBookingRejectHistory
   };
 };
 

@@ -3561,42 +3561,17 @@ export const ambulanceBookingMapViewDataService = async (bookingID: number) => {
         const [rows]: any = await db.query(
             `
             SELECT
-                bv.booking_id,
-                bv.booking_pick_lat,
-                bv.booking_pick_long,
-                bv.booking_drop_lat,
-                bv.booking_drop_long,
-                bv.booking_polyline,
-                bv.booking_acpt_driver_id,
-                bv.booking_acpt_vehicle_id,
-
-                dr.driver_name,
-                dr.driver_last_name,
-                dr.driver_mobile,
-
-                vh.v_vehicle_name,
-                vh.vehicle_rc_number,
-
-                bv.booking_schedule_time,
-                bv.booking_pickup,
-                bv.booking_drop,
-
-                dll.driver_live_location_lat,
-                dll.driver_live_location_long
-
-            FROM booking_view AS bv
-
-            LEFT JOIN driver AS dr
-                ON bv.booking_acpt_driver_id = dr.driver_id
-
-            LEFT JOIN driver_live_location AS dll
-                ON bv.booking_acpt_driver_id = dll.driver_live_location_d_id
-
-            LEFT JOIN vehicle AS vh
-                ON bv.booking_acpt_vehicle_id = vh.vehicle_id
-
-            WHERE bv.booking_id = ?
-            LIMIT 1
+                driver_live_location.driver_live_location_lat,
+                driver_live_location.driver_live_location_long,
+                booking_view.booking_pickup,
+                booking_view.booking_drop,
+                booking_view.booking_acpt_driver_id,
+                driver.driver_name,
+                driver.driver_mobile
+            FROM booking_view
+            LEFT JOIN driver_live_location ON booking_view.booking_acpt_driver_id = driver_live_location.driver_live_location_d_id
+            LEFT JOIN driver ON booking_view.booking_acpt_driver_id = driver.driver_id
+            WHERE booking_view.booking_id = ?
             `,
             [bookingID]
         );

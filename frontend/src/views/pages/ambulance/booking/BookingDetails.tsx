@@ -28,6 +28,12 @@ const BookingDetails = () => {
   const [nearestDriverAndVehicleData, setNearestDriverAndVehicleData] = React.useState<any>(null);
   const [nearestDriverAndVehiclePagination, setNearestDriverAndVehiclePagination] = React.useState<any>(null);
 
+  const [acceptHistoryData, setAcceptHistoryData] = React.useState<any>(null);
+  const [acceptHistoryPagination, setAcceptHistoryPagination] = React.useState<any>(null);
+
+  const [rejectHistoryData, setRejectHistoryData] = React.useState<any>(null);
+  const [rejectHistoryPagination, setRejectHistoryPagination] = React.useState<any>(null);
+
   const [mapData, setMapData] = React.useState<any>(null);
 
   const [loading, setLoading] = React.useState(true);
@@ -114,6 +120,34 @@ const BookingDetails = () => {
     }
   };
 
+  const fetchAcceptHistory = async () => {
+    try {
+      setLoading(true);
+      const result = await api.fetchBookingAcceptHistory(id!);
+      if (result.success) {
+        console.log("Fetched accept history data:", result.data);
+        setAcceptHistoryData(result.data);
+        setAcceptHistoryPagination(result.pagination);
+      } 
+    } catch (error) {
+      console.error("Error fetching accept history data:", error);
+    }
+  };
+
+  const fetchRejectHistory = async () => {
+    try {
+      setLoading(true);
+      const result = await api.fetchBookingRejectHistory(id!);
+      if (result.success) {
+        console.log("Fetched reject history data:", result.data);
+        setRejectHistoryData(result.data);
+        setRejectHistoryPagination(result.pagination);
+      }
+     } catch (error) {
+      console.error("Error fetching reject history data:", error);
+    }
+  };
+
   const fetchNearestDriverAndVehicleData = async () => {
     try {
       setLoading(true);
@@ -135,17 +169,23 @@ const BookingDetails = () => {
     if (activeTab === 2) {
       fetchNearestDriverAndVehicleData();
     }
+    if (activeTab === 3) {
+      fetchCityWiseDPDetails();
+    }
+    if (activeTab === 4) {
+      fetchStateWiseDPDetails();
+    }
+    if (activeTab === 5) {
+      fetchAcceptHistory();
+    }
+    if (activeTab === 6) {
+      fetchRejectHistory();
+    }
     if (activeTab === 7) {
       fetchRemarkDetails();
     }
     if (activeTab === 8) {
       fetchMapData();
-    }
-    if (activeTab === 4) {
-      fetchStateWiseDPDetails();
-    }
-    if (activeTab === 3) {
-      fetchCityWiseDPDetails();
     }
   }, [activeTab, id]);
 
