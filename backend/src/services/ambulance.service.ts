@@ -3038,7 +3038,6 @@ export const completeAmbulanceBookingService = async (bookingId: number) => {
     }
 };
 
-
 // SERVICE TO GENERATE BOOKING INVOICE
 export const generateAmbulanceBookingInvoiceService = async (
     bookingId: number,
