@@ -7,7 +7,7 @@ import {
   Table,
 } from "react-bootstrap";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { formatDate } from "@/components/DateFormat";
 
 const PartnerTransaction = () => {
@@ -35,7 +35,7 @@ const PartnerTransaction = () => {
     "Amount",
     // "New Amt",
     // "Note",
-    // "Status",
+    "Status",
     "Date",
   ];
 
@@ -73,18 +73,18 @@ const PartnerTransaction = () => {
     }
   };
 
-  // const getTransactionStatus = (status: string): JSX.Element => {
-  //   switch (status) {
-  //     case "0":
-  //       return <span className="badge bg-secondary">Default</span>;
-  //     case "1":
-  //       return <span className="badge bg-warning">Pending Withdrawal</span>;
-  //     case "2":
-  //       return <span className="badge bg-success">Refunded</span>;
-  //     default:
-  //       return <span className="badge bg-secondary">N/A</span>;
-  //   }
-  // };
+  const getTransactionStatus = (status: string): JSX.Element => {
+    switch (status) {
+      case "0":
+        return <span className="badge badge-label badge-soft-secondary">Default</span>;
+      case "1":
+        return <span className="badge badge-label badge-soft-warning">Pending Withdrawal</span>;
+      case "2":
+        return <span className="badge badge-label badge-soft-success">Refunded</span>;
+      default:
+        return <span className="badge badge-label badge-soft-secondary">N/A</span>;
+    }
+  };
 
   const formatValue = (value: number | string | null | undefined): string => {
     if (value === null || value === undefined) return "0.00";
@@ -147,7 +147,7 @@ const PartnerTransaction = () => {
                   </td>
                   {/* <td>₹{formatValue(row.partner_transection_wallet_new_amount)}</td> */}
                   {/* <td>{row.partner_transection_note || "-"}</td> */}
-                  {/* <td>{getTransactionStatus(row.partner_transection_status)}</td> */}
+                  <td>{getTransactionStatus(row.partner_transection_status)}</td>
                   <td>{formatDate(row.created_at)}</td>
                 </tr>
               ))

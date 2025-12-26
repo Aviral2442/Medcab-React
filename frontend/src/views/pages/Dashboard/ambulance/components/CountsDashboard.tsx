@@ -23,16 +23,28 @@ interface PartnerCounts {
   blocked_partner_count: number;
 }
 
+interface DriverCounts {
+  total_driver_count: number;
+  new_driver_count: number;
+  unverified_driver_count: number;
+  verified_driver_count: number;
+  verification_applied_driver_count: number;
+}
+
 
 const CountsDashboard = () => {
 const [partnerCounts, setPartnerCounts] = React.useState<PartnerCounts | null>(null);
+const [driverCounts, setDriverCounts] = React.useState<DriverCounts | null>(null);
 
   const baseURL = (import.meta as any).env.VITE_PATH ?? "";
 
   const fetchPartnerCountsData = async () => {
     try{
       const response = await axios(`${baseURL}/ambulance/partner_count_dashboard_ambulance`);
+      const resDriver = await axios(`${baseURL}/ambulance/driver_count_dashboard_ambulance`);
       console.log("Partner Counts Data:", response);
+      console.log("Driver Counts Data:", resDriver);
+      setDriverCounts(resDriver.data?.jsonData?.ambulance_driver_counts);
       setPartnerCounts(response.data?.jsonData?.ambulance_partner_counts);
     } catch (error) {
       console.error("Error fetching partner counts data:", error);
@@ -104,13 +116,13 @@ const [partnerCounts, setPartnerCounts] = React.useState<PartnerCounts | null>(n
         ],
       },
     {
-      title: "Partner's Vehicle",
-      total: 192,
+      title: "Driver",
+      total: driverCounts?.total_driver_count || 0,
       items: [
-        { label: "New", count: 0 },
-        { label: "Active", count: 184 },
-        { label: "Reject", count: 2 },
-        { label: "Unverified", count: 3 },
+        { label: "New", count: driverCounts?.new_driver_count || 0 },
+        { label: "Unverified", count: driverCounts?.unverified_driver_count || 0 },
+        { label: "Verified", count: driverCounts?.verified_driver_count || 0 },
+        { label: "Verification Applied", count: driverCounts?.verification_applied_driver_count || 0 },
         // { label: "Subscription", count: 3 },
       ],
     },

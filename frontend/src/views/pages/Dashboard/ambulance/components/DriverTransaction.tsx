@@ -7,7 +7,7 @@ import {
   Table,
 } from "react-bootstrap";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { formatDate } from "@/components/DateFormat";
 
 const DriverTransaction = () => {
@@ -39,7 +39,7 @@ const DriverTransaction = () => {
     // "Prev Amt",
     "Amount",
     // "New Amt",
-    // "Status",
+    "Status",
     "Date",
   ];
 
@@ -102,18 +102,18 @@ const DriverTransaction = () => {
     }
   };
 
-  // const getTransactionStatus = (status: string): JSX.Element => {
-  //   switch (status) {
-  //     case "0":
-  //       return <span className="badge bg-success">Success</span>;
-  //     case "1":
-  //       return <span className="badge bg-warning">Pending</span>;
-  //     case "2":
-  //       return <span className="badge bg-danger">Refunded</span>;
-  //     default:
-  //       return <span className="badge bg-secondary">N/A</span>;
-  //   }
-  // };
+  const getTransactionStatus = (status: string): JSX.Element => {
+    switch (status) {
+      case "0":
+        return <span className="badge badge-label badge-soft-success">Success</span>;
+      case "1":
+        return <span className="badge badge-label badge-soft-warning">Pending</span>;
+      case "2":
+        return <span className="badge badge-label badge-soft-danger">Refunded</span>;
+      default:
+        return <span className="badge badge-label badge-soft-secondary">N/A</span>;
+    }
+  };
 
   const formatValue = (value: number | string | null | undefined): string => {
     if (value === null || value === undefined) return "0.00";
@@ -174,7 +174,7 @@ const DriverTransaction = () => {
                     )}
                   </td>
                   {/* <td>₹{formatValue(row.driver_transection_wallet_new_amount)}</td> */}
-                  {/* <td>{getTransactionStatus(row.driver_transection_status)}</td> */}
+                  <td>{getTransactionStatus(row.driver_transection_status)}</td>
                   <td>{formatDate(row.created_at)}</td>
                 </tr>
               ))

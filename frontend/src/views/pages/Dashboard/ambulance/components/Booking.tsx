@@ -34,7 +34,7 @@ const BookingList = () => {
     "Pickup",
     // "Drop",
     "Amount",
-    // "Status",
+    "Status",
     "Schedule Time",
     // "Date",
   ];
@@ -77,25 +77,25 @@ const BookingList = () => {
     }
   };
 
-  // const handleBookingStatus = (status: string) => {
-  //   switch (status) {
-  //       //0 for enquiry, 1 for booking done, 2 for driver assigned,3 for invoice, 4 for complete, 5 for Cancel Booking
-  //       case "0":
-  //           return "Enquiry";
-  //       case "1":
-  //           return "Confirm Booking";
-  //       case "2":
-  //           return "Driver Assign";
-  //       case "3":
-  //           return "Invoice";
-  //       case "4":
-  //           return "Complete";
-  //       case "5":
-  //           return "Cancel";
-  //       default:
-  //           return " ";
-  //   }
-  // }
+    const handleBookingStatus = (status: number) => {
+    const statusMap: Record<number, { label: string; class: string }> = {
+      "0": { label: "Enquiry", class: "info" },
+      "1": { label: "Confirm Booking", class: "success" },
+      "2": { label: "Driver Assign", class: "warning" },
+      "3": { label: "Invoice", class: "danger" },
+      "4": { label: "Complete", class: "primary" },
+      "5": { label: "Cancel", class: "secondary" },
+    };
+    const statusInfo = statusMap[status] || {
+      label: "Unknown",
+      class: "secondary",
+    };
+    return (
+      <span className={`badge badge-label badge-soft-${statusInfo.class}`}>
+        {statusInfo.label}
+      </span>
+    );
+  };
 
   return (
     <Card>
@@ -134,7 +134,7 @@ const BookingList = () => {
                 )}
                 {/* <td>{row.booking_drop}</td> */}
                 <td>₹{row.booking_total_amount}</td>
-                {/* <td>{handleBookingStatus(row.booking_status)}</td> */}
+                <td>{handleBookingStatus(row.booking_status)}</td>
                 <td>{formatDate(row.booking_schedule_time)}</td>
                 {/* <td>{formatDate(row.created_at)}</td> */}
               </tr>
