@@ -3264,7 +3264,7 @@ export const ambulanceBookingRemarkListService = async (bookingID: number, filte
 // SERVICE TO GET AMBULANCE BOOKING STATE WISE LIST
 export const ambulanceBookingStateWiseListService = async (
     bookingID: number,
-    filters: { page?: number; limit?: number }
+    filters?: { page?: number; limit?: number }
 ) => {
     try {
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
