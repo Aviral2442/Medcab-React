@@ -658,7 +658,7 @@ export const driverDashboardCountService = async (filters: {
 
         const driverMasterQuery = `
             SELECT 
-                COUNT(driver_id) AS total_partner_count,
+                COUNT(driver_id) AS total_driver_count,
                 COUNT(CASE WHEN driver_status = 0 THEN 1 END) AS new_driver_count,
                 COUNT(CASE WHEN driver_status = 2 THEN 1 END) AS unverified_driver_count,
                 COUNT(CASE WHEN driver_status = 1 THEN 1 END) AS verified_driver_count,
@@ -3299,14 +3299,19 @@ export const ambulanceBookingStateWiseListService = async (
                 vd.v_vehicle_name,
                 vd.vehicle_rc_number,
                 vd.vehicle_added_type,
+                vd.vehicle_added_by,
+                acv.ambulance_category_vehicle_name,
                 d.driver_id as assign_id,
                 d.driver_name as name,
                 d.driver_last_name as last_name,
                 d.driver_mobile as mobile,
+                d.driver_wallet_amount as wallet_amount,
+                d.driver_duty_status,
                 p.partner_id as assign_id,
                 p.partner_f_name as name,
                 p.partner_l_name as last_name,
-                p.partner_mobile as mobile
+                p.partner_mobile as mobile,
+                p.partner_wallet as wallet_amount
             FROM city c
             LEFT JOIN driver d 
                 ON c.city_id = d.driver_city_id
@@ -3323,6 +3328,9 @@ export const ambulanceBookingStateWiseListService = async (
             LEFT JOIN vehicle vp 
                 ON vp.vehicle_added_by = p.partner_id 
                 AND vp.vehicle_added_type = 1
+
+            LEFT JOIN ambulance_category_vehicle acv
+                ON vd.vehicle_category_type = acv.ambulance_category_vehicle_cat_type
 
             WHERE c.city_state = ?
             LIMIT ? OFFSET ?`,
