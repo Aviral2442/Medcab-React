@@ -40,6 +40,7 @@ const Vehicle = () => {
     "By",
     "Vehicle Name",
     "Added",
+    "Mobile",
     // "Category",
     // "Service ID",
     // "Verify Type",
@@ -149,10 +150,21 @@ const Vehicle = () => {
                     {row.driver_name == null ? (
                     getTransactionByType(row.vehicle_added_type) === <FaUser title="Driver" />
                       ? <>
-                        {row.driver_name} <br /> ({row.driver_mobile})
+                        {row.driver_name}
                       </>
                       : <>
-                        {row.partner_f_name} {row.partner_l_name} <br /> ({row.partner_mobile})
+                        {row.partner_f_name} {row.partner_l_name}
+                      </>
+                    ) : " "}
+                    </td>
+                    <td>
+                      {row.driver_name == null ? (
+                      getTransactionByType(row.vehicle_added_type) === <FaUser title="Driver" />
+                      ? <>
+                        {row.driver_mobile}
+                      </>
+                      : <>
+                        {row.partner_mobile}
                       </>
                     ) : " "}
                     </td>

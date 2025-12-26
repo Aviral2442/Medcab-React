@@ -34,6 +34,7 @@ const DriverTransaction = () => {
   const headers = [
     "ID",
     "Name",
+    "Mobile",
     "Type",
     // "Note",
     // "Prev Amt",
@@ -149,7 +150,10 @@ const DriverTransaction = () => {
                 <tr key={idx}>
                   <td>{row.driver_transection_id}</td>
                   <td>
-                    {row.trans_by_name || " "} <br /> {row.trans_by_mobile && `(${row.trans_by_mobile})`}
+                    {row.trans_by_name || " "}
+                    </td>
+                    <td>
+                      {row.trans_by_mobile && `${row.trans_by_mobile}`}
                     </td>
                   <td>
                     <div>{getTransactionByType(row.driver_transection_by_type)}</div>

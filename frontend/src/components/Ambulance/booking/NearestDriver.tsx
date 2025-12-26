@@ -135,7 +135,7 @@ const NearestDriver: React.FC<NearestDriverProps> = ({
     },
     {
         title: "Distance (km)",
-        data: "distance",
+        data: "distance_km",
         render: (data: any) => {
           return data ? data.toFixed(2) : " ";
         },

@@ -121,14 +121,14 @@ export const dashboardAmbulanceBookingService = async () => {
                 booking_view.booking_type,
                 booking_view.booking_con_name,
                 booking_view.booking_con_mobile,
-                booking_view.booking_category,
+                booking_view.booking_view_category_name,
                 booking_view.booking_schedule_time,
                 booking_view.booking_pickup_city,
                 booking_view.booking_status,
                 booking_view.booking_total_amount
             FROM booking_view
             ORDER BY booking_view.booking_id DESC
-            LIMIT 20 OFFSET 0
+            LIMIT 22 OFFSET 0
             `
         )
 
@@ -3480,7 +3480,8 @@ export const ambulanceBookingNearestDriverAndVehicleDataService = async (booking
         const pickup = { lat: bookingRows[0].booking_pick_lat, lon: bookingRows[0].booking_pick_long }
 
         const [rows]: any = await db.query(
-            `SELECT
+            `
+            SELECT
                 dr.driver_id,
                 dr.driver_name,
                 dr.driver_last_name,
@@ -3489,20 +3490,40 @@ export const ambulanceBookingNearestDriverAndVehicleDataService = async (booking
                 d.driver_live_location_long,
                 vd.vehicle_id,
                 vd.v_vehicle_name,
-                vd.vehicle_rc_number
-            FROM driver_live_location d
-            LEFT JOIN vehicle vd ON d.driver_live_location_d_id = vd.vehicle_added_by AND vd.vehicle_added_type = 0
-            LEFT JOIN driver dr ON dr.driver_id = d.driver_live_location_d_id
-            LIMIT ? OFFSET ?`,
-            [limit, offset]
-            );
-            // console.log("rows:", rows);
+                vd.vehicle_rc_number,
 
-        rows.forEach((row: any) => {
-            const driverPos = {lat: row.driver_live_location_lat, lon: row.driver_live_location_long};
-            const distance = haversine(pickup, driverPos);
-            row.distance = distance/1000; // distance in kilometers
-        });
+                CASE
+                    WHEN d.driver_live_location_lat IS NOT NULL
+                    AND d.driver_live_location_long IS NOT NULL
+                    THEN (
+                    6371 * 2 * ASIN(
+                        SQRT(
+                        POWER(SIN(RADIANS(? - d.driver_live_location_lat) / 2), 2) +
+                        COS(RADIANS(d.driver_live_location_lat)) *
+                        COS(RADIANS(?)) *
+                        POWER(SIN(RADIANS(? - d.driver_live_location_long) / 2), 2)
+                        )
+                    )
+                    )
+                    ELSE NULL
+                END AS distance_km
+
+            FROM driver_live_location d
+            LEFT JOIN vehicle vd
+                ON d.driver_live_location_d_id = vd.vehicle_added_by
+            AND vd.vehicle_added_type = 0
+            LEFT JOIN driver dr
+                ON dr.driver_id = d.driver_live_location_d_id
+
+            HAVING distance_km <= 80
+
+            ORDER BY distance_km ASC
+            LIMIT ? OFFSET ?
+            `,
+            [pickup.lat, pickup.lat, pickup.lon, limit, offset]
+        );
+
+
 
         // Sort by distance
         rows.sort((a: any, b: any) => a.distance - b.distance);
@@ -3538,29 +3559,48 @@ export const ambulanceBookingNearestDriverAndVehicleDataService = async (booking
 export const ambulanceBookingMapViewDataService = async (bookingID: number) => {
     try {
         const [rows]: any = await db.query(
-            `SELECT 
-                booking_id,
-                booking_pick_lat,
-                booking_pick_long,
-                booking_drop_lat,
-                booking_drop_long,
-                booking_polyline,
-                booking_acpt_driver_id,
-                booking_acpt_vehicle_id,
-                driver.driver_name,
-                driver.driver_last_name,
-                driver.driver_mobile,
-                vehicle.v_vehicle_name,
-                vehicle.vehicle_rc_number,
-                booking_schedule_time,
-                booking_pickup,
-                booking_drop
-            FROM booking_view
-            LEFT JOIN driver ON booking_acpt_driver_id = driver.driver_id
-            LEFT JOIN vehicle ON booking_acpt_vehicle_id = vehicle.vehicle_id
-            WHERE booking_id = ?`,
+            `
+            SELECT
+                bv.booking_id,
+                bv.booking_pick_lat,
+                bv.booking_pick_long,
+                bv.booking_drop_lat,
+                bv.booking_drop_long,
+                bv.booking_polyline,
+                bv.booking_acpt_driver_id,
+                bv.booking_acpt_vehicle_id,
+
+                dr.driver_name,
+                dr.driver_last_name,
+                dr.driver_mobile,
+
+                vh.v_vehicle_name,
+                vh.vehicle_rc_number,
+
+                bv.booking_schedule_time,
+                bv.booking_pickup,
+                bv.booking_drop,
+
+                dll.driver_live_location_lat,
+                dll.driver_live_location_long
+
+            FROM booking_view AS bv
+
+            LEFT JOIN driver AS dr
+                ON bv.booking_acpt_driver_id = dr.driver_id
+
+            LEFT JOIN driver_live_location AS dll
+                ON bv.booking_acpt_driver_id = dll.driver_live_location_d_id
+
+            LEFT JOIN vehicle AS vh
+                ON bv.booking_acpt_vehicle_id = vh.vehicle_id
+
+            WHERE bv.booking_id = ?
+            LIMIT 1
+            `,
             [bookingID]
         );
+
 
         if (!rows.length) {
             return {
@@ -3627,7 +3667,58 @@ export const ambulanceBookingDriverAcceptHistoryService = async (bookingId: numb
                 ambulance_booking_driver_accept_history: rows
             }
         };
-            
+
+
+    } catch (error) {
+        throw new ApiError(500, "Get Ambulance Booking Driver Accept History Error On Fetching");
+    }
+};
+
+// SERVICE TO GET AMBULANCE BOOKING DRIVER REJECT HISTORY
+export const ambulanceBookingDriverRejectHistoryService = async (bookingId: number, filters?: {
+    page?: number;
+    limit?: number;
+}) => {
+    try {
+
+        const page = filters?.page && filters.page > 0 ? filters.page : 1;
+        const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
+        const offset = (page - 1) * limit;
+
+        const [rows]: any = await db.query(
+            `SELECT *
+            FROM booking_a_c_history
+            WHERE bah_user_type = 0
+            AND bah_status = 2
+            AND bah_booking_id = ?
+            ORDER BY bah_id DESC
+            LIMIT ? OFFSET ?`,
+            [bookingId, limit, offset]
+        );
+        const [countRows]: any = await db.query(
+            `SELECT COUNT(*) as total
+            FROM booking_a_c_history
+            WHERE bah_user_type = 0
+            AND bah_status = 2
+            AND bah_booking_id = ?`,
+            [bookingId]
+        );
+        const total = countRows[0]?.total || 0;
+
+        return {
+            status: 200,
+            message: "Ambulance booking driver accept history fetched successfully",
+            pagination: {
+                total: total,
+                page: page,
+                limit: limit,
+                totalPages: Math.ceil(total / limit)
+            },
+            jsonData: {
+                ambulance_booking_driver_accept_history: rows
+            }
+        };
+
 
     } catch (error) {
         throw new ApiError(500, "Get Ambulance Booking Driver Accept History Error On Fetching");

@@ -130,6 +130,8 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
             return "Driver";
           case "1":
             return "Partner";
+            default:
+            return " ";
         }
       },
     },

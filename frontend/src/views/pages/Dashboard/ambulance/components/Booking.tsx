@@ -18,7 +18,7 @@ const BookingList = () => {
     booking_con_name: string;
     booking_con_mobile: string;
     booking_type: string;
-    booking_category: string;
+    booking_view_category_name: string;
     booking_schedule_time: string;
     booking_pickup_city: string;
     booking_drop: string;
@@ -127,7 +127,7 @@ const BookingList = () => {
                   {row.booking_con_name} 
                 </td>
                 <td>{row.booking_con_mobile}</td>
-                <td>{handleBookingType(row.booking_type)} <br /> {row.booking_category} </td>
+                <td>{handleBookingType(row.booking_type)} <br /> {row.booking_view_category_name} </td>
                 {/* <td></td> */}
                 {row.booking_pickup_city !== "NA" ? (
                   <td>{row.booking_pickup_city}</td>
