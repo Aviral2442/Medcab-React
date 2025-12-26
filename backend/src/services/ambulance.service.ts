@@ -5,7 +5,6 @@ import { currentUnixTime } from "../utils/current_unixtime";
 import { generateSlug } from "../utils/generate_sku";
 import { uploadFileCustom } from "../utils/file_uploads";
 import { FieldPacket, RowDataPacket } from 'mysql2';
-import { query } from 'express-validator/lib/middlewares/validation-chain-builders';
 
 
 // --------------------------------------------- AMBULANCE DASHBOARD SERVICES -------------------------------------------------- //
