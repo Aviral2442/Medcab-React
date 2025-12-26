@@ -77,8 +77,8 @@ const BookingList = () => {
     }
   };
 
-    const handleBookingStatus = (status: number) => {
-    const statusMap: Record<number, { label: string; class: string }> = {
+    const handleBookingStatus = (status: string) => {
+    const statusMap: Record<string, { label: string; class: string }> = {
       "0": { label: "Enquiry", class: "info" },
       "1": { label: "Confirm Booking", class: "success" },
       "2": { label: "Driver Assign", class: "warning" },

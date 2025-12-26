@@ -50,7 +50,7 @@ const DriverTransaction = () => {
       const response = await axios.get(
         `${basePath}/ambulance/dashboard_ambulance_driver_transactions`
       );
-      console.log("Driver Transactions Data", response.data);
+      // console.log("Driver Transactions Data", response.data);
       const rows = response.data?.jsonData?.dashboard_ambulance_driver_transactions || [];
       setData(rows);
       return rows;

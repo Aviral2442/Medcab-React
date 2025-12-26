@@ -6,9 +6,9 @@ import Partner from "./components/Partner";
 import Vehicle from "./components/Vehicle";
 import DriverTransaction from "./components/DriverTransaction";
 import PartnerTransaction from "./components/PartnerTransaction";
-import TotalBookingCount from "@/views/dashboard/components/TotalBookingCount";
-import TotalActiveOtherStatusVendor from "@/views/dashboard/components/TotalActiveOtherStatusVendorCounts";
-import TotalCancelOngoingBooking from "@/views/dashboard/components/TotalCancelOngoingBookingCounts";
+import TotalBookingCount from "@/views/pages/Dashboard/ambulance/components/BookingCounts";
+import TotalPartnerCounts from "@/views/pages/Dashboard/ambulance/components/PartnerCounts";
+import BookingStatistic from "@/views/pages/Dashboard/ambulance/components/BookingStatistic";
 import GetConsumerCounts from "@/views/dashboard/components/GetConsumerCounts";
 import RequestStatistics from "@/views/dashboard/components/RequestStatistics";
 import CountsDashboard from "./components/CountsDashboard";
@@ -47,11 +47,11 @@ const Page = () => {
             </Col>
 
             <Col>
-              <TotalActiveOtherStatusVendor />
+              <TotalPartnerCounts />
             </Col>
 
             <Col>
-              <TotalCancelOngoingBooking />
+              <BookingStatistic />
             </Col>
 
             <Col>
