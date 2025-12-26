@@ -3576,7 +3576,6 @@ export const ambulanceBookingMapViewDataService = async (bookingID: number) => {
             [bookingID]
         );
 
-
         if (!rows.length) {
             return {
                 status: 404,
