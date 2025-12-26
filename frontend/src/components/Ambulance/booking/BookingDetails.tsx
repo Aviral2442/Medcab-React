@@ -10,6 +10,7 @@ import { jwtDecode } from "jwt-decode";
 import BookingDetailsApiData from "./BookingDetailsApiData";
 import { GoDotFill } from "react-icons/go";
 import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
+import { FaWhatsapp } from "react-icons/fa";
 
 interface AmbulanceBookingDetailsFormProps {
   data: any;
@@ -1102,6 +1103,81 @@ const AmbulanceBookingDetailsForm: React.FC<
     }, 500);
   };
 
+  const handleWhatsAppShare = () => {
+    if (!data) {
+      Swal.fire({
+        title: "Error",
+        text: "Booking data not available",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+
+    // Get consumer mobile number
+    const consumerMobile = data.consumer_mobile_no || data.booking_con_mobile;
+    
+    if (!consumerMobile) {
+      Swal.fire({
+        title: "Error",
+        text: "Consumer mobile number not found",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+
+    // Prepare booking details message
+    const message = `
+*Medcab Booking Details*
+
+*Booking ID:* ${data.booking_id || "N/A"}
+*Schedule Date:* ${formatDate(data.booking_schedule_time)}
+
+*Consumer Details:*
+Name: ${data.consumer_name || data.booking_con_name || "N/A"}
+Mobile: ${consumerMobile}
+
+*Pickup Location:* ${data.booking_pickup || "N/A"}
+*Drop Location:* ${data.booking_drop || "N/A"}
+
+${data.booking_acpt_driver_id && data.booking_acpt_driver_id !== "0" ? `
+*Driver Details:*
+Name: ${data.driver_name || ""} ${data.driver_last_name || ""}
+Mobile: ${data.driver_mobile || "N/A"}
+
+*Vehicle Details:*
+Vehicle: ${data.v_vehicle_name || "N/A"}
+RC Number: ${data.vehicle_rc_number || "N/A"}
+` : "*Driver:* Not yet assigned"}
+
+*Amount:* ₹${data.booking_total_amount || "0"}
+*Status:* ${bookingStatusOptions.find(opt => opt.value.toString() === data.booking_status?.toString())?.label || "Unknown"}
+
+Thank you for choosing Medcab!
+  `.trim();
+
+    // Format mobile number (remove any spaces, dashes, etc.)
+    const formattedMobile = consumerMobile.replace(/\D/g, "");
+    
+    // Check if mobile number is valid (10 digits for India)
+    if (formattedMobile.length !== 10) {
+      Swal.fire({
+        title: "Invalid Mobile Number",
+        text: "Please ensure the consumer mobile number is valid",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+
+    // Create WhatsApp URL with Indian country code
+    const whatsappUrl = `https://wa.me/91${formattedMobile}?text=${encodeURIComponent(message)}`;
+
+    // Open WhatsApp in new tab
+    window.open(whatsappUrl, "_blank");
+  };
+
   const sections: SectionConfig[] = [
     {
       title: "Consumer Information",
@@ -1695,6 +1771,13 @@ const AmbulanceBookingDetailsForm: React.FC<
               onClick={() => handleRemark(data)}
             >
               Add Remark
+            </Button>
+            <Button
+              variant=""
+              className="me-2 mb-2  bg-light"
+              onClick={handleWhatsAppShare}
+            >
+              <FaWhatsapp className="me-2" /> WhatsApp
             </Button>
           </Section>
         </Card.Body>

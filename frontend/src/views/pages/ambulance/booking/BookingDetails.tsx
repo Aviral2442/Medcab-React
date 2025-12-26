@@ -8,6 +8,8 @@ import StateWiseDPList from "@/components/Ambulance/booking/StateWiseDPList";
 import CityWiseDPList from "@/components/Ambulance/booking/CityWiseDPList";
 import Map from "@/components/Ambulance/booking/Map";
 import NearestDriver from "@/components/Ambulance/booking/NearestDriver";
+import AcceptHistory from "@/components/Ambulance/booking/AcceptHistory";
+import RejectHistory from "@/components/Ambulance/booking/RejectHistory";
 
 const BookingDetails = () => {
   const api = BookingDetailsApiData();
@@ -246,6 +248,22 @@ const BookingDetails = () => {
         ) : (
           <div className="text-center p-5">
             <p className="text-muted">No state-wise DP data found</p>
+          </div>
+        );
+      case 5:
+        return acceptHistoryData ? (
+          <AcceptHistory data={acceptHistoryData} pagination={acceptHistoryPagination} />
+        ) : (
+          <div className="text-center p-5">
+            <p className="text-muted">No accept history data found</p>
+          </div>
+        );
+      case 6:
+        return rejectHistoryData ? (
+          <RejectHistory data={rejectHistoryData} pagination={rejectHistoryPagination} />
+        ) : (
+          <div className="text-center p-5">
+            <p className="text-muted">No reject history data found</p>
           </div>
         );
       case 7:
