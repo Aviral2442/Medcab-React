@@ -30,6 +30,7 @@ const BookingList = () => {
   const headers = [
     "ID",
     "Consumer",
+    "Mobile",
     "Type & Ctg",
     "Pickup",
     // "Drop",
@@ -123,8 +124,9 @@ const BookingList = () => {
               <tr key={idx}>
                 <td>{row.booking_id}</td>
                 <td>
-                  {row.booking_con_name} <br /> ({row.booking_con_mobile})
+                  {row.booking_con_name} 
                 </td>
+                <td>{row.booking_con_mobile}</td>
                 <td>{handleBookingType(row.booking_type)} <br /> {row.booking_category} </td>
                 {/* <td></td> */}
                 {row.booking_pickup_city !== "NA" ? (

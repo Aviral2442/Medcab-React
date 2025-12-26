@@ -181,7 +181,7 @@ const PromptsUsage = () => {
           </div>
         </div>
 
-        <div className="mb-3" style={{ height: "60px" }}>
+        <div className="mb-2" style={{ height: "60px" }}>
           <CustomChartJS
             key={JSON.stringify(bookings)}
             type="bar"
@@ -191,7 +191,7 @@ const PromptsUsage = () => {
           />
         </div>
 
-        <div className="d-flex justify-content-between">
+        <div className="d-flex justify-content-between my-0">
           <div>
             <span className="text-muted">Today</span>
             <div className="fw-semibold">

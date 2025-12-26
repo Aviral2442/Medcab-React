@@ -298,7 +298,59 @@ const BookingDetailsApiData = () => {
           error.response?.data?.message || "Failed to fetch state-wise DP details",
       };
     }
-  }
+  };
+
+  const fetchCityWiseDPDetails = async (bookingId: string) => {
+    try {
+      const response = await axios.get(`${baseURL}/ambulance/ambulance_booking_city_wise_list/${bookingId}`);
+      return {
+        success: true,
+        data: response.data?.jsonData?.city_wise,
+        pagination: response.data?.pagination
+      };
+    }
+    catch (error: any) {
+      console.error("Error fetching city-wise DP details:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch city-wise DP details",
+      };
+    }
+  };
+
+  const fetchMapData = async (bookingId: string) => {
+    try {
+      const response = await axios.get(`${baseURL}/ambulance/ambulance_booking_map_data/${bookingId}`);
+      return {
+        success: true,
+        data: response.data?.jsonData?.booking_map_view_data,
+      };
+    } catch (error: any) {
+      console.error("Error fetching map data:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch map data",
+      };
+    }
+  };
+
+  const fetchNearestDriverAndVehicleData = async (bookingId: string) => {
+    try {
+      const response = await axios.get(`${baseURL}/ambulance/ambulance_booking_nearest_driver_and_vehicle_data/${bookingId}`);
+      return {
+        success: true,
+        data: response.data?.jsonData?.nearest_drivers_and_vehicles,
+        pagination: response.data?.pagination
+      };
+    }
+    catch (error: any) {
+      console.error("Error fetching nearest driver and vehicle data:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch nearest driver and vehicle data",
+      };
+    }
+  };
 
   return {
     updatePaymentDetails,
@@ -315,7 +367,10 @@ const BookingDetailsApiData = () => {
     generateInvoice,
     fetchInvoiceData,
     fetchRemarkDetails,
-    fetchStateWiseDPDetails
+    fetchStateWiseDPDetails,
+    fetchCityWiseDPDetails,
+    fetchMapData,
+    fetchNearestDriverAndVehicleData
   };
 };
 

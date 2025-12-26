@@ -9,6 +9,7 @@ import CancelBookingModal from "./CancelBookingModal";
 import { jwtDecode } from "jwt-decode";
 import BookingDetailsApiData from "./BookingDetailsApiData";
 import { GoDotFill } from "react-icons/go";
+import AddRemark, { REMARK_CATEGORY_TYPES } from "@/components/AddRemark";
 
 interface AmbulanceBookingDetailsFormProps {
   data: any;
@@ -365,6 +366,9 @@ const AmbulanceBookingDetailsForm: React.FC<
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [invoiceData, setInvoiceData] = useState<any>(null);
   const [loadingInvoice, setLoadingInvoice] = useState(false);
+  const [bookingId, setBookingId] = useState<number | null>(null);
+  const [isRemarkOpen, setIsRemarkOpen] = useState(false);
+
 
   const handleFieldUpdate = async (field: string, value: string) => {
     if (data?.booking_id === undefined) {
@@ -926,8 +930,17 @@ const AmbulanceBookingDetailsForm: React.FC<
     // You may want to reload the entire page or fetch fresh data
     window.location.reload();
   };
+  
+  const handleRemark = (rowData: any) => {
+    const id = rowData?.booking_id ?? rowData?.id;
+    setBookingId(id);
+    setIsRemarkOpen(true);
+  };
 
-
+  const handleRemarkSuccess = () => {
+    // fetchData();
+    setIsRemarkOpen(false);
+  };
 
   const handlePrint = () => {
     const content = document.getElementById("invoice-content");
@@ -1108,6 +1121,20 @@ const AmbulanceBookingDetailsForm: React.FC<
           editable: true,
           cols: 2,
           showConsumerSearch: true,
+        },
+        {
+          label: "Consumer Name",
+          name: "consumer_name",
+          editable: true,
+          cols: 2,
+          showViewIcon: true,
+        },
+        {
+          label: "Consumer Mobile",
+          name: "consumer_mobile_no",
+          type: "tel",
+          editable: true,
+          cols: 2,
         },
         { label: "OTP", name: "booking_view_otp", editable: false, cols: 2 },
         {
@@ -1662,6 +1689,13 @@ const AmbulanceBookingDetailsForm: React.FC<
             >
               {loadingInvoice ? "Loading..." : "View Invoice"}
             </Button>
+            <Button
+              variant=""
+              className="me-2 mb-2  bg-light"
+              onClick={() => handleRemark(data)}
+            >
+              Add Remark
+            </Button>
           </Section>
         </Card.Body>
       </Card>
@@ -2037,6 +2071,14 @@ const AmbulanceBookingDetailsForm: React.FC<
         onHide={() => setShowCancelBookingModal(false)}
         bookingId={data?.booking_id || ""}
         onBookingCancelled={handleBookingCancelled}
+      />
+
+      <AddRemark
+        isOpen={isRemarkOpen}
+        onClose={() => setIsRemarkOpen(false)}
+        remarkCategoryType={REMARK_CATEGORY_TYPES.AMBULANCE_BOOKING}
+        primaryKeyId={bookingId}
+        onSuccess={handleRemarkSuccess}
       />
     </div>
   );

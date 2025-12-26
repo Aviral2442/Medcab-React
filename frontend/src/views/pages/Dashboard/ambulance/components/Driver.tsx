@@ -33,7 +33,8 @@ const DriverList = () => {
   const headers = [
     "ID",
     "By",
-    "Driver",
+    "Name",
+    "Mobile",
     // "Wallet",
     // "Duty Status",
     "Status",
@@ -128,9 +129,9 @@ const DriverList = () => {
                 <td>{row.driver_id}</td>
                 <td>{getTransactionByType(row.driver_created_by)}</td>
                 <td>
-                  {row.driver_name} {row.driver_last_name} <br /> (
-                  {row.driver_mobile})
+                  {row.driver_name} {row.driver_last_name}
                 </td>
+                 <td>{row.driver_mobile}</td>
                 {/* <td>₹{row.driver_wallet_amount || 0}</td> */}
                 {/* <td>{handleDutyStatus(row.driver_duty_status)}</td> */}
                 <td>{handleDriverStatus(row.driver_status)}</td>

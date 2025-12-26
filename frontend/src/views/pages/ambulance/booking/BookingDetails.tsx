@@ -1,10 +1,13 @@
-import React from 'react';
-import { Container, Spinner, Nav } from 'react-bootstrap';
-import { useParams } from 'react-router-dom';
-import AmbulanceBookingDetails from '@/components/Ambulance/booking/BookingDetails';
-import BookingDetailsApiData from '@/components/Ambulance/booking/BookingDetailsApiData';
-import RemarkList from '@/components/Ambulance/booking/RemarkList';
-import StateWiseDPList from '@/components/Ambulance/booking/StateWiseDPList';
+import React from "react";
+import { Container, Spinner, Nav } from "react-bootstrap";
+import { useParams } from "react-router-dom";
+import AmbulanceBookingDetails from "@/components/Ambulance/booking/BookingDetails";
+import BookingDetailsApiData from "@/components/Ambulance/booking/BookingDetailsApiData";
+import RemarkList from "@/components/Ambulance/booking/RemarkList";
+import StateWiseDPList from "@/components/Ambulance/booking/StateWiseDPList";
+import CityWiseDPList from "@/components/Ambulance/booking/CityWiseDPList";
+import Map from "@/components/Ambulance/booking/Map";
+import NearestDriver from "@/components/Ambulance/booking/NearestDriver";
 
 const BookingDetails = () => {
   const api = BookingDetailsApiData();
@@ -15,18 +18,30 @@ const BookingDetails = () => {
   const [remarkPagination, setRemarkPagination] = React.useState<any>(null);
 
   const [stateWiseDPData, setStateWiseDPData] = React.useState<any>(null);
-  const [stateWiseDPPagination, setStateWiseDPPagination] = React.useState<any>(null);
+  const [stateWiseDPPagination, setStateWiseDPPagination] =
+    React.useState<any>(null);
+
+  const [cityWiseDPData, setCityWiseDPData] = React.useState<any>(null);
+  const [cityWiseDPPagination, setCityWiseDPPagination] =
+    React.useState<any>(null);
+
+  const [nearestDriverAndVehicleData, setNearestDriverAndVehicleData] = React.useState<any>(null);
+  const [nearestDriverAndVehiclePagination, setNearestDriverAndVehiclePagination] = React.useState<any>(null);
+
+  const [mapData, setMapData] = React.useState<any>(null);
 
   const [loading, setLoading] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState(1);
 
   const tabs = [
-    { eventKey: 1, title: 'Booking Details' },
-    { eventKey: 2, title: 'Nearest Driver/Partner' },
-    { eventKey: 3, title: 'City Wise' },
-    { eventKey: 4, title: 'State Wise' },
-    { eventKey: 5, title: 'Accept History' },
-    { eventKey: 6, title: 'Remark' },
+    { eventKey: 1, title: "Booking Details" },
+    { eventKey: 2, title: "Nearest Driver/Partner" },
+    { eventKey: 3, title: "City Wise" },
+    { eventKey: 4, title: "State Wise" },
+    { eventKey: 5, title: "Accept History" },
+    { eventKey: 6, title: "Reject History" },
+    { eventKey: 7, title: "Remark" },
+    { eventKey: 8, title: "Map" },
   ];
 
   const fetchBookingDetails = async () => {
@@ -72,27 +87,77 @@ const BookingDetails = () => {
     }
   };
 
+  const fetchCityWiseDPDetails = async () => {
+    try {
+      setLoading(true);
+      const result = await api.fetchCityWiseDPDetails(id!);
+      if (result.success) {
+        console.log("Fetched city-wise DP details:", result);
+        setCityWiseDPData(result.data);
+        setCityWiseDPPagination(result.pagination);
+      }
+    } catch (error) {
+      console.error("Error fetching city-wise DP details:", error);
+    }
+  };
+
+  const fetchMapData = async () => {
+    try {
+      setLoading(true);
+      const result = await api.fetchMapData(id!);
+      if (result.success) {
+        // console.log("Fetched map data:", result.data[0]);
+        setMapData(result.data[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching map data:", error);
+    }
+  };
+
+  const fetchNearestDriverAndVehicleData = async () => {
+    try {
+      setLoading(true);
+      const result = await api.fetchNearestDriverAndVehicleData(id!);
+      if (result.success) {
+        console.log("Fetched nearest driver and vehicle data:", result.data);
+        setNearestDriverAndVehicleData(result.data);
+        setNearestDriverAndVehiclePagination(result.pagination);
+      }
+    } catch (error) {
+      console.error("Error fetching nearest driver and vehicle data:", error);
+    }
+  };
+
   React.useEffect(() => {
     if (activeTab === 1 && !bookingData) {
       fetchBookingDetails();
     }
-    if (activeTab === 6) {
+    if (activeTab === 2) {
+      fetchNearestDriverAndVehicleData();
+    }
+    if (activeTab === 7) {
       fetchRemarkDetails();
+    }
+    if (activeTab === 8) {
+      fetchMapData();
     }
     if (activeTab === 4) {
       fetchStateWiseDPDetails();
+    }
+    if (activeTab === 3) {
+      fetchCityWiseDPDetails();
     }
   }, [activeTab, id]);
 
   const handleFieldUpdate = async (field: string, value: string) => {
     setBookingData((prev: any) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const renderTabContent = (tabKey: number) => {
-    switch(tabKey) {
+    switch (tabKey) {
       case 1:
         return bookingData ? (
           <AmbulanceBookingDetails
@@ -100,52 +165,65 @@ const BookingDetails = () => {
             onUpdate={handleFieldUpdate}
             editable={true}
           />
+        ) : loading ? (
+          <div className="text-center p-5">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-3">Loading booking details...</p>
+          </div>
         ) : (
-          loading ? (
-            <div className="text-center p-5">
-              <Spinner animation="border" variant="primary" />
-              <p className="mt-3">Loading booking details...</p>
-            </div>
-          ) : (
-            <div className="text-center p-5">
-              <p className="text-muted">No booking data found</p>
-            </div>
-          )
+          <div className="text-center p-5">
+            <p className="text-muted">No booking data found</p>
+          </div>
         );
       case 2:
-        return (
-          <div className='text-center p-5'>
-            <p className="text-muted">Transaction List - Coming Soon</p>
+        return nearestDriverAndVehicleData ? (
+          <NearestDriver
+            data={nearestDriverAndVehicleData}
+            pagination={nearestDriverAndVehiclePagination}
+          />
+        ) : (
+          <div className="text-center p-5">
+            <p className="text-muted">No nearest driver and vehicle data found</p>
           </div>
         );
       case 3:
-        return (
-          <div className='text-center p-5'>
-            <p className="text-muted">Accept/Reject History - Coming Soon</p>
+        return cityWiseDPData ? (
+          <CityWiseDPList
+            data={cityWiseDPData}
+            pagination={cityWiseDPPagination}
+          />
+        ) : (
+          <div className="text-center p-5">
+            <p className="text-muted">No city-wise DP data found</p>
           </div>
         );
-        case 4:
-          return stateWiseDPData ? (
-            <StateWiseDPList
-              data={stateWiseDPData}
-              pagination={stateWiseDPPagination}
-            />
-          ) : (
-            <div className="text-center p-5">
-              <p className="text-muted">No state-wise DP data found</p>
-            </div>
-          );
-        case 6:
-          return remarkData ? (
-            <RemarkList
-              data={remarkData}
-              pagination={remarkPagination}
-            />
-          ) : (
-            <div className="text-center p-5">
-              <p className="text-muted">No remark data found</p>
-            </div>
-          )
+      case 4:
+        return stateWiseDPData ? (
+          <StateWiseDPList
+            data={stateWiseDPData}
+            pagination={stateWiseDPPagination}
+          />
+        ) : (
+          <div className="text-center p-5">
+            <p className="text-muted">No state-wise DP data found</p>
+          </div>
+        );
+      case 7:
+        return remarkData ? (
+          <RemarkList data={remarkData} pagination={remarkPagination} />
+        ) : (
+          <div className="text-center p-5">
+            <p className="text-muted">No remark data found</p>
+          </div>
+        );
+      case 8:
+        return mapData ? (
+          <Map data={mapData} />
+        ) : (
+          <div className="text-center p-5">
+            <p className="text-muted">No map data found</p>
+          </div>
+        );
       default:
         return null;
     }
@@ -161,21 +239,19 @@ const BookingDetails = () => {
       ) : (
         <div className="m-3 ms-0">
           <Nav variant="tabs" className="mb-3">
-            {tabs.map(tab => (
+            {tabs.map((tab) => (
               <Nav.Item key={tab.eventKey}>
                 <Nav.Link
                   active={activeTab === tab.eventKey}
                   onClick={() => setActiveTab(tab.eventKey)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                 >
                   {tab.title}
                 </Nav.Link>
               </Nav.Item>
             ))}
           </Nav>
-          <div className="tab-content">
-            {renderTabContent(activeTab)}
-          </div>
+          <div className="tab-content">{renderTabContent(activeTab)}</div>
         </div>
       )}
     </Container>

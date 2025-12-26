@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, ambulanceBookingCountService, dashboardAmbulanceBookingService, getAmbulanceConsumerMobileService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService, ambulancePartnerCountService, ambulanceCompleteOngoingCancelReminderBookingCounts, assignDriverService, cancelAmbulanceBookingService, verifyOTPAmbulanceBookingService, cancelReasonService, getAmbulanceVehicleAndAssignDataService, cancelDriverFromAmbulanceBookingService, updateAmbulanceBookingAmountService, completeAmbulanceBookingService, generateAmbulanceBookingInvoiceService, ambulanceBookingInvoiceSerive, partnerDashboardCountService, ambulanceBookingRemarkListService, ambulanceBookingStateWiseListService, ambulanceBookingCityWiseListService, driverDashboardCountService } from "../services/ambulance.service";
+import { addAmbulanceCategoryService, addAmbulanceFacilitiesRateService, addAmbulanceFacilitiesService, addAmbulanceFaqService, ambulanceBookingDetailService, ambulanceBookingCountService, dashboardAmbulanceBookingService, getAmbulanceConsumerMobileService, dashboardAmbulanceDriverService, dashboardAmbulanceDriverTransService, dashboardAmbulancePartnerService, dashboardAmbulancePartnerTransService, dashboardAmbulanceVehicleService, editAmbulanceCategoryService, editAmbulanceFacilitiesRateService, editAmbulanceFacilitiesService, editAmbulanceFaqService, getAmbulanceBookingListService, getAmbulanceCategoryListService, getAmbulanceCategoryService, getAmbulanceFacilitiesListService, getAmbulanceFacilitiesRateListService, getAmbulanceFacilitiesRateService, getAmbulanceFacilitiesService, getAmbulanceFaqListService, getAmbulanceFaqService, getBulkAmbulanceBookingListService, getRegularAmbulanceBookingListService, getRentalAmbulanceBookingListService, updateAmbulanceBookingConsumerDetails, updateAmbulanceBookingScheduleTime, updateAmbulanceCategoryStatusService, updateAmbulanceFacilitiesRateStatusService, updateAmbulanceFacilitiesStatusService, updateAmbulanceFaqStatusService, ambulancePartnerCountService, ambulanceCompleteOngoingCancelReminderBookingCounts, assignDriverService, cancelAmbulanceBookingService, verifyOTPAmbulanceBookingService, cancelReasonService, getAmbulanceVehicleAndAssignDataService, cancelDriverFromAmbulanceBookingService, updateAmbulanceBookingAmountService, completeAmbulanceBookingService, generateAmbulanceBookingInvoiceService, ambulanceBookingInvoiceSerive, partnerDashboardCountService, ambulanceBookingRemarkListService, ambulanceBookingStateWiseListService, ambulanceBookingCityWiseListService, driverDashboardCountService, ambulanceBookingMapViewDataService, ambulanceBookingNearestDriverAndVehicleDataService } from "../services/ambulance.service";
 
 // CONTROLLER TO GET TOTAL AMBULANCE BOOKING COUNT
 export const ambulanceBookingCountController = async (req: Request, res: Response, next: NextFunction) => {
@@ -881,12 +881,12 @@ export const ambulanceBookingInvoiceController = async (req: Request, res: Respo
 // CONTROLLER FOR AMBULANCE BOOKING REMARK LIST
 export const ambulanceBookingRemarkListController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const filters =  {
-            page: req.query.page ? parseInt(req.query.page as string, 10) : undefined,
-            limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
+        const filters = {
+            page: req.query.page ? parseInt(req.query.page as string) : undefined,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
         }
         const bookingId = parseInt(req.params.bookingId);
-        const result = await ambulanceBookingRemarkListService(bookingId , filters);
+        const result = await ambulanceBookingRemarkListService(bookingId, filters);
         res.status(200).json(result);
     } catch (error) {
         next(error);
@@ -897,13 +897,13 @@ export const ambulanceBookingRemarkListController = async (req: Request, res: Re
 export const ambulanceBookingStateWiseListController = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-            const filters =  {
-                page: req.query.page ? parseInt(req.query.page as string, 10) : undefined,
-                limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
-            }
-            const bookingId = parseInt(req.params.bookingId);
-            const result = await ambulanceBookingStateWiseListService(bookingId , filters);
-            res.status(200).json(result);
+        const filters = {
+            page: req.query.page ? parseInt(req.query.page as string) : undefined,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+        }
+        const bookingId = parseInt(req.params.bookingId);
+        const result = await ambulanceBookingStateWiseListService(bookingId, filters);
+        res.status(200).json(result);
     } catch (error) {
         next(error);
     }
@@ -913,13 +913,39 @@ export const ambulanceBookingStateWiseListController = async (req: Request, res:
 export const ambulanceBookingCityWiseListController = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
-            const filters =  {
-                page: req.query.page ? parseInt(req.query.page as string, 10) : undefined,
-                limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
-            }
-            const bookingId = parseInt(req.params.bookingId);
-            const result = await ambulanceBookingCityWiseListService(bookingId , filters);
-            res.status(200).json(result);
+        const filters = {
+            page: req.query.page ? parseInt(req.query.page as string) : undefined,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+        }
+        const bookingId = parseInt(req.params.bookingId);
+        const result = await ambulanceBookingCityWiseListService(bookingId, filters);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO GET AMBULANCE BOOKING NEAREST DRIVER AND VEHICLE DATA
+export const ambulanceBookingNearestDriverAndVehicleDataController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const filters = {
+            page: req.query.page ? parseInt(req.query.page as string) : undefined,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+        }
+        const bookingId = parseInt(req.params.bookingId);
+        const result = await ambulanceBookingNearestDriverAndVehicleDataService(bookingId, filters);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO GET AMBULANCE BOOKING MAP DATA 
+export const ambulanceBookingMapDataController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const bookingId = parseInt(req.params.bookingId);
+        const result = await ambulanceBookingMapViewDataService(bookingId);
+        res.status(200).json(result);
     } catch (error) {
         next(error);
     }

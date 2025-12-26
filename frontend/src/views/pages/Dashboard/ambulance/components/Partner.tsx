@@ -31,7 +31,7 @@ const Partner = () => {
   const headers = [
     "ID",
     "Name",
-    // "Mobile",
+    "Mobile",
     // "Wallet",
     "City",
     // "Reg Step",
@@ -102,9 +102,8 @@ const Partner = () => {
                   <td>{row.partner_id}</td>
                   <td>
                     {row.partner_f_name} {row.partner_l_name} <br />
-                    ({row.partner_mobile})
                   </td>
-                  {/* <td>{row.partner_mobile}</td> */}
+                  <td>{row.partner_mobile}</td>
                   {/* <td className="text-success fw-semibold">
                     ₹{formatValue(row.partner_wallet)}
                   </td> */}

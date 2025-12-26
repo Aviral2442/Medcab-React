@@ -88,14 +88,14 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
 
   const headers = [
     "S.No.",
-    "City",
+    // "City",
     "Vehicle",
     "Vehicle RC",
     "By",
     "Name",
     "Mobile",
-    "Wallet",
-    "Duty Status",
+    // "Wallet",
+    // "Duty Status",
   ];
 
   const columns = [
@@ -105,11 +105,6 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
       orderable: false,
       searchable: false,
       render: (_data: any, _type: any, _row: any, meta: any) => meta.row + 1,
-    },
-    {
-      title: "City",
-      data: "city_name",
-      render: (data: any) => (data ? data : "N/A"),
     },
     {
       title: "Vehicle",
@@ -153,20 +148,6 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
       title: "Mobile",
       data: "mobile",
     },
-    {
-      title: "Wallet Amount",
-      data: "wallet_amount",
-      render: (data: any) => {
-        return data ? data : "0";
-      },
-    },
-    {
-      title: "Duty Status",
-      data: "driver_duty_status",
-      render: (data: any) => {
-        return data ? data : "N/A";
-      },
-    }
   ];
 
   const tableData = data ? (Array.isArray(data) ? data : [data]) : [];
@@ -280,20 +261,3 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
 };
 
 export default CityWiseDPList;
-
-
-        // "city_id": 706,
-        // "city_name": "Delhi",
-        // "state_name": "Delhi",
-        // "vehicle_id": 620,
-        // "v_vehicle_name": "Bike",
-        // "vehicle_rc_number": "UP85BT9460",
-        // "vehicle_added_type": "0",
-        // "vehicle_added_by": "773",
-        // "ambulance_category_vehicle_name": "Bike",
-        // "assign_id": 77,
-        // "name": "Amit",
-        // "last_name": "Aggarwal",
-        // "mobile": "9315467210",
-        // "wallet_amount": "0",
-        // "driver_duty_status": "OFF"

@@ -17,7 +17,7 @@ DataTable.use(DT);
 DT.Buttons.jszip(jszip);
 DT.Buttons.pdfMake(pdfmake);
 
-interface CityWiseDPListProps {
+interface NearestDriverProps {
   data: any[] | null;
   loading?: boolean;
   error?: string | null;
@@ -31,7 +31,7 @@ interface CityWiseDPListProps {
   onPageChange?: (pageIndex: number) => void;
 }
 
-const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
+const NearestDriver: React.FC<NearestDriverProps> = ({
   data,
   loading = false,
   error = null,
@@ -88,14 +88,11 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
 
   const headers = [
     "S.No.",
-    "City",
     "Vehicle",
     "Vehicle RC",
-    "By",
     "Name",
     "Mobile",
-    "Wallet",
-    "Duty Status",
+    "Distance (km)",
   ];
 
   const columns = [
@@ -105,11 +102,6 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
       orderable: false,
       searchable: false,
       render: (_data: any, _type: any, _row: any, meta: any) => meta.row + 1,
-    },
-    {
-      title: "City",
-      data: "city_name",
-      render: (data: any) => (data ? data : "N/A"),
     },
     {
       title: "Vehicle",
@@ -127,45 +119,26 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
       },
     },
     {
-      title: "By",
-      data: "vehicle_added_type",
-      render: (data: string) => {
-        switch (data) {
-          case "0":
-            return "Driver";
-          case "1":
-            return "Partner";
-        }
-      },
-    },
-    {
       title: "Name",
       data: null,
       render: (_data: any, _type: any, row: any) => {
-        const firstName = row.name || "";
-        const lastName = row.last_name || "";
+        const firstName = row.driver_name || "";
+        const lastName = row.driver_last_name || "";
         return firstName || lastName
           ? `${firstName} ${lastName}`.trim()
-          : "N/A";
+          : " ";
       },
     },
     {
       title: "Mobile",
-      data: "mobile",
+      data: "driver_mobile",
     },
     {
-      title: "Wallet Amount",
-      data: "wallet_amount",
-      render: (data: any) => {
-        return data ? data : "0";
-      },
-    },
-    {
-      title: "Duty Status",
-      data: "driver_duty_status",
-      render: (data: any) => {
-        return data ? data : "N/A";
-      },
+        title: "Distance (km)",
+        data: "distance",
+        render: (data: any) => {
+          return data ? data.toFixed(2) : " ";
+        },
     }
   ];
 
@@ -279,21 +252,4 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
   );
 };
 
-export default CityWiseDPList;
-
-
-        // "city_id": 706,
-        // "city_name": "Delhi",
-        // "state_name": "Delhi",
-        // "vehicle_id": 620,
-        // "v_vehicle_name": "Bike",
-        // "vehicle_rc_number": "UP85BT9460",
-        // "vehicle_added_type": "0",
-        // "vehicle_added_by": "773",
-        // "ambulance_category_vehicle_name": "Bike",
-        // "assign_id": 77,
-        // "name": "Amit",
-        // "last_name": "Aggarwal",
-        // "mobile": "9315467210",
-        // "wallet_amount": "0",
-        // "driver_duty_status": "OFF"
+export default NearestDriver;
