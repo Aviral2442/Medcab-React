@@ -3205,7 +3205,7 @@ export const ambulanceBookingInvoiceSerive = async (bookingId: number) => {
 };
 
 // SERVICE TO GET AMBULANCE BOOKING REMARK LIST
-export const ambulanceBookingRemarkListService = async (bookingID: number, filters: {
+export const ambulanceBookingRemarkListService = async (bookingID: number, filters?: {
     page?: number;
     limit?: number;
 }) => {
@@ -3260,10 +3260,10 @@ export const ambulanceBookingRemarkListService = async (bookingID: number, filte
 }
 
 // SERVICE TO GET AMBULANCE BOOKING STATE WISE LIST
-export const ambulanceBookingStateWiseListService = async (
-    bookingID: number,
-    filters?: { page?: number; limit?: number }
-) => {
+export const ambulanceBookingStateWiseListService = async (bookingID: number, filters?: { 
+    page?: number;
+    limit?: number 
+}) => {
     try {
         const page = filters?.page && filters.page > 0 ? filters.page : 1;
         const limit = filters?.limit && filters.limit > 0 ? filters.limit : 10;
@@ -3336,9 +3336,7 @@ export const ambulanceBookingStateWiseListService = async (
         );
 
         const [countRows]: any = await db.query(
-            `SELECT COUNT(DISTINCT c.city_id) AS total
-            FROM city c
-            WHERE c.city_state = ?`,
+            `SELECT COUNT(*) AS total FROM city WHERE city.city_state = ?`,
             [stateId]
         );
 
