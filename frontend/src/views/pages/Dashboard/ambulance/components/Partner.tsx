@@ -7,7 +7,7 @@ import {
   Table,
 } from "react-bootstrap";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { formatDate } from "@/components/DateFormat";
 
 const Partner = () => {
@@ -35,7 +35,7 @@ const Partner = () => {
     // "Wallet",
     "City",
     // "Reg Step",
-    // "Status",
+    "Status",
     "Date",
   ];
 
@@ -60,18 +60,18 @@ const Partner = () => {
     fetchPartners();
   }, []);
 
-  // const getPartnerStatus = (status: number): JSX.Element => {
-  //   switch (status) {
-  //     case 0:
-  //       return <span className="badge badge-label badge-soft-info">New</span>;
-  //     case 1:
-  //       return <span className="badge badge-label badge-soft-success">Active</span>;
-  //     case 2:
-  //       return <span className="badge badge-label badge-soft-warning">Inactive</span>;
-  //     default:
-  //       return <span className="badge bg-secondary">Unknown</span>;
-  //   }
-  // };
+  const getPartnerStatus = (status: number): JSX.Element => {
+    switch (status) {
+      case 0:
+        return <span className="badge badge-label badge-soft-info">New</span>;
+      case 1:
+        return <span className="badge badge-label badge-soft-success">Active</span>;
+      case 2:
+        return <span className="badge badge-label badge-soft-warning">Inactive</span>;
+      default:
+        return <span className="badge bg-secondary">Unknown</span>;
+    }
+  };
 
 
   return (
@@ -110,7 +110,7 @@ const Partner = () => {
                   </td> */}
                   <td>{row.city_name || "N/A"}</td>
                   {/* <td>{row.partner_registration_step}</td> */}
-                  {/* <td>{getPartnerStatus(row.partner_status)}</td> */}
+                  <td>{getPartnerStatus(row.partner_status)}</td>
                   <td>{formatDate(row.created_at)}</td>
                 </tr>
               ))

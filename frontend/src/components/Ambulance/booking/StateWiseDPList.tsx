@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ComponentCard from "@/components/ComponentCard";
 import DT from "datatables.net-bs5";
 import DataTable from "datatables.net-react";
@@ -40,6 +40,7 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
   onPageChange,
 }) => {
   const tableRef = useRef<any>(null);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     return () => {
@@ -73,9 +74,21 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
     }
   }, [data]);
 
+  useEffect(() => {
+    if (pagination) {
+      setTotalPages(pagination.totalPages || 0);
+    }
+  }, [pagination]);
+
+  const handlePageChange = (newPage: number) => {
+    if (onPageChange) {
+      onPageChange(newPage);
+    }
+  };
+
   const headers = [
     "S.No.",
-    "State",
+    "City",
     "By",
     "Name",
     "Mobile",
@@ -92,8 +105,8 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
       render: (_data: any, _type: any, _row: any, meta: any) => meta.row + 1,
     },
     {
-      title: "State",
-      data: "state_name",
+      title: "City",
+      data: "city_name",
       render: (data: any) => (data ? data : "N/A"),
     },
     {
@@ -229,30 +242,21 @@ const CityWiseDPList: React.FC<CityWiseDPListProps> = ({
 
           {pagination && pagination.totalPages > 0 && (
             <div className="mt-3">
-              {(() => {
-                const pageIndexLocal = (pagination.page || 1) - 1;
-                return (
-                  <TablePagination
-                    start={pageIndexLocal + 1}
-                    showInfo={true}
-                    previousPage={() =>
-                      onPageChange &&
-                      onPageChange(Math.max(0, pageIndexLocal - 1))
-                    }
-                    canPreviousPage={pageIndexLocal > 0}
-                    pageCount={pagination.totalPages}
-                    pageIndex={pageIndexLocal}
-                    setPageIndex={(p) => onPageChange && onPageChange(p)}
-                    nextPage={() =>
-                      onPageChange &&
-                      onPageChange(
-                        Math.min(pagination.totalPages - 1, pageIndexLocal + 1)
-                      )
-                    }
-                    canNextPage={pageIndexLocal < pagination.totalPages - 1}
-                  />
-                );
-              })()}
+              <TablePagination
+                start={currentPage + 1}
+                showInfo={true}
+                previousPage={() =>
+                  handlePageChange(Math.max(0, currentPage - 1))
+                }
+                canPreviousPage={currentPage > 0}
+                pageCount={totalPages}
+                pageIndex={currentPage}
+                setPageIndex={handlePageChange}
+                nextPage={() =>
+                  handlePageChange(Math.min(totalPages - 1, currentPage + 1))
+                }
+                canNextPage={currentPage < totalPages - 1}
+              />
             </div>
           )}
         </div>

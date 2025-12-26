@@ -36,7 +36,7 @@ const DriverList = () => {
     "Driver",
     // "Wallet",
     // "Duty Status",
-    // "Status",
+    "Status",
     "Date",
   ];
 
@@ -82,24 +82,24 @@ const DriverList = () => {
   //   );
   // };
 
-  // const handleDriverStatus = (status: number) => {
-  //   const statusMap: Record<number, { label: string; class: string }> = {
-  //     0: { label: "New", class: "info" },
-  //     1: { label: "Active", class: "success" },
-  //     2: { label: "Inactive", class: "warning" },
-  //     3: { label: "Deleted", class: "danger" },
-  //     4: { label: "Verification", class: "primary" },
-  //   };
-  //   const statusInfo = statusMap[status] || {
-  //     label: "Unknown",
-  //     class: "secondary",
-  //   };
-  //   return (
-  //     <span className={`badge badge-label badge-soft-${statusInfo.class}`}>
-  //       {statusInfo.label}
-  //     </span>
-  //   );
-  // };
+  const handleDriverStatus = (status: number) => {
+    const statusMap: Record<number, { label: string; class: string }> = {
+      0: { label: "New", class: "info" },
+      1: { label: "Active", class: "success" },
+      2: { label: "Inactive", class: "warning" },
+      3: { label: "Deleted", class: "danger" },
+      4: { label: "Verification", class: "primary" },
+    };
+    const statusInfo = statusMap[status] || {
+      label: "Unknown",
+      class: "secondary",
+    };
+    return (
+      <span className={`badge badge-label badge-soft-${statusInfo.class}`}>
+        {statusInfo.label}
+      </span>
+    );
+  };
 
   return (
     <Card>
@@ -133,7 +133,7 @@ const DriverList = () => {
                 </td>
                 {/* <td>₹{row.driver_wallet_amount || 0}</td> */}
                 {/* <td>{handleDutyStatus(row.driver_duty_status)}</td> */}
-                {/* <td>{handleDriverStatus(row.driver_status)}</td> */}
+                <td>{handleDriverStatus(row.driver_status)}</td>
                 <td>{formatDate(row.created_at)}</td>
               </tr>
             ))}
