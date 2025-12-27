@@ -3567,7 +3567,13 @@ export const ambulanceBookingMapViewDataService = async (bookingID: number) => {
                 booking_view.booking_drop,
                 booking_view.booking_acpt_driver_id,
                 driver.driver_name,
-                driver.driver_mobile
+                driver.driver_mobile,
+                booking_pick_lat,
+                booking_pick_long,
+                booking_drop_lat,
+                booking_drop_long,
+                booking_polyline,
+                booking_status
             FROM booking_view
             LEFT JOIN driver_live_location ON booking_view.booking_acpt_driver_id = driver_live_location.driver_live_location_d_id
             LEFT JOIN driver ON booking_view.booking_acpt_driver_id = driver.driver_id
