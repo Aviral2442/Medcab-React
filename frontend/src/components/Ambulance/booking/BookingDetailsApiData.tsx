@@ -441,7 +441,7 @@ const BookingDetailsApiData = () => {
         schedule_time: scheduletime,
         auth_key: authKey
       });
-      return { success: true, data: response.data
+      return { success: true, data: response.data?.jsonData
       };
     } catch (error: any) {
       console.error("Error fetching category list:", error);
