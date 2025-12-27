@@ -3712,7 +3712,7 @@ export const ambulanceBookingDriverRejectHistoryService = async (bookingId: numb
                 totalPages: Math.ceil(total / limit)
             },
             jsonData: {
-                ambulance_booking_driver_accept_history: rows
+                ambulance_booking_driver_reject_history: rows
             }
         };
 
