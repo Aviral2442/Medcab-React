@@ -2280,7 +2280,7 @@ export const updateAmbulanceBookingConsumerDetails = async (bookingId: number, b
         );
 
         return {
-            status: 200,
+            status: 200,    
             message: "Ambulance booking consumer details updated successfully",
         };
 

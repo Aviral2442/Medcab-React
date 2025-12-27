@@ -79,7 +79,7 @@ const Field: React.FC<FieldProps> = ({
   onAssignDriver,
   showConsumerSearch = false,
   onConsumerSearch,
-  showCategoryChange = false, 
+  showCategoryChange = false,
   onCategoryChange,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -153,14 +153,14 @@ const Field: React.FC<FieldProps> = ({
       setIsEditing(true);
     }
   };
-  
+
   const handleCategoryChange = () => {
     if (onCategoryChange) {
       onCategoryChange();
     } else {
       setIsEditing(true);
     }
-  }
+  };
 
   React.useEffect(() => {
     setEditValue(value?.toString() || "");
@@ -402,9 +402,8 @@ const AmbulanceBookingDetailsForm: React.FC<
   const [loadingInvoice, setLoadingInvoice] = useState(false);
   const [bookingId, setBookingId] = useState<number | null>(null);
   const [isRemarkOpen, setIsRemarkOpen] = useState(false);
-  const [newConsumerName, setNewConsumerName] = useState("");
+  const [consumerName, setNewConsumerName] = useState("");
   const [showCategoryListModal, setShowCategoryListModal] = useState(false);
-
 
   const handleFieldUpdate = async (field: string, value: string) => {
     if (data?.booking_id === undefined) {
@@ -505,17 +504,17 @@ const AmbulanceBookingDetailsForm: React.FC<
           didOpen: () => Swal.showLoading(),
         });
 
+        // Pass bookingId when updating existing consumer
         const apiResult = await api.createNewConsumer(
+          data.booking_id,
           consumer.consumer_name,
-          consumer.consumer_mobile_no
+          Number(consumer.consumer_mobile_no)
         );
 
         if (apiResult.success) {
           console.log("Consumer details updated successfully.");
-          // Update booking_con_name and booking_con_mobile (not consumer_name and consumer_mobile_no)
           onUpdate?.("consumer_name", consumer.consumer_name);
           onUpdate?.("consumer_mobile_no", consumer.consumer_mobile_no);
-
 
           setShowConsumerSearchModal(false);
           setConsumerSearchQuery("");
@@ -577,7 +576,6 @@ const AmbulanceBookingDetailsForm: React.FC<
       } else {
         setVehicleSearchResults([]);
       }
-      
     }, 300);
 
     return () => clearTimeout(timer);
@@ -978,75 +976,75 @@ const AmbulanceBookingDetailsForm: React.FC<
     }
   };
 
-  const handleCreateNewConsumer = async () => {
-    if (!newConsumerName.trim()) {
+const handleCreateNewConsumer = async () => {
+  if (!consumerName.trim()) {
+    Swal.fire({
+      title: "Error",
+      text: "Please enter consumer name",
+      icon: "error",
+      confirmButtonColor: "#d33",
+    });
+    return;
+  }
+
+  if (consumerSearchQuery.length !== 10) {
+    Swal.fire({
+      title: "Error",
+      text: "Please enter a valid 10-digit mobile number",
+      icon: "error",
+      confirmButtonColor: "#d33",
+    });
+    return;
+  }
+
+  try {
+    Swal.fire({
+      title: "Creating Consumer...",
+      text: "Please wait",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    // Don't pass bookingId when creating brand new consumer
+    const apiResult = await api.createNewConsumer(
+      data?.booking_id,
+      consumerName,
+      Number(consumerSearchQuery)
+    );
+
+    if (apiResult.success) {
       Swal.fire({
-        title: "Error",
-        text: "Please enter consumer name",
-        icon: "error",
-        confirmButtonColor: "#d33",
+        title: "Success!",
+        text: "Consumer created successfully",
+        icon: "success",
+        confirmButtonColor: "#3085d6",
+        timer: 2000,
+        timerProgressBar: true,
       });
-      return;
+      console.log("Consumer z data", data?.booking_id, consumerName, consumerSearchQuery);
+      // Update the booking with new consumer details
+      onUpdate?.("consumer_name", consumerName);
+      onUpdate?.("consumer_mobile_no", consumerSearchQuery);
+
+      // Close modal and reset
+      setShowConsumerSearchModal(false);
+      setConsumerSearchQuery("");
+      setNewConsumerName("");
+      setConsumerSearchResults([]);
+    } else {
+      throw new Error(apiResult.message);
     }
+  } catch (error: any) {
+    console.error("Error creating consumer:", error);
+    Swal.fire({
+      title: "Error!",
+      text: error.message || "Failed to create consumer. Please try again.",
+      icon: "error",
+      confirmButtonColor: "#d33",
+    });
+  }
+};
 
-    if (consumerSearchQuery.length !== 10) {
-      Swal.fire({
-        title: "Error",
-        text: "Please enter a valid 10-digit mobile number",
-        icon: "error",
-        confirmButtonColor: "#d33",
-      });
-      return;
-    }
-
-    try {
-      Swal.fire({
-        title: "Creating Consumer...",
-        text: "Please wait",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-      });
-
-      console.log("Creating consumer with name:", newConsumerName);
-      console.log("Creating consumer with mobile:", consumerSearchQuery);
-      const apiResult = await api.createNewConsumer(
-        newConsumerName,
-        consumerSearchQuery
-      );
-      console.log("Create Consumer API Result:", apiResult);
-
-      if (apiResult.success) {
-        Swal.fire({
-          title: "Success!",
-          text: "Consumer created successfully",
-          icon: "success",
-          confirmButtonColor: "#3085d6",
-          timer: 2000,
-          timerProgressBar: true,
-        });
-
-        // Update the booking with new consumer details
-        onUpdate?.("consumer_name", newConsumerName);
-        onUpdate?.("consumer_mobile_no", consumerSearchQuery);
-
-        // Close modal and reset
-        setShowConsumerSearchModal(false);
-        setConsumerSearchQuery("");
-        setNewConsumerName("");
-        setConsumerSearchResults([]);
-      } else {
-        throw new Error(apiResult.message);
-      }
-    } catch (error: any) {
-      console.error("Error creating consumer:", error);
-      Swal.fire({
-        title: "Error!",
-        text: error.message || "Failed to create consumer. Please try again.",
-        icon: "error",
-        confirmButtonColor: "#d33",
-      });
-    }
-  };
 
   const handleConsumerSearch = () => {
     setShowConsumerSearchModal(true);
@@ -1067,7 +1065,7 @@ const AmbulanceBookingDetailsForm: React.FC<
     // You may want to reload the entire page or fetch fresh data
     window.location.reload();
   };
-  
+
   const handleRemark = (rowData: any) => {
     const id = rowData?.booking_id ?? rowData?.id;
     setBookingId(id);
@@ -1252,7 +1250,7 @@ const AmbulanceBookingDetailsForm: React.FC<
 
     // Get consumer mobile number
     const consumerMobile = data.consumer_mobile_no || data.booking_con_mobile;
-    
+
     if (!consumerMobile) {
       Swal.fire({
         title: "Error",
@@ -1277,7 +1275,9 @@ Mobile: ${consumerMobile}
 *Pickup Location:* ${data.booking_pickup || "N/A"}
 *Drop Location:* ${data.booking_drop || "N/A"}
 
-${data.booking_acpt_driver_id && data.booking_acpt_driver_id !== "0" ? `
+${
+  data.booking_acpt_driver_id && data.booking_acpt_driver_id !== "0"
+    ? `
 *Driver Details:*
 Name: ${data.driver_name || ""} ${data.driver_last_name || ""}
 Mobile: ${data.driver_mobile || "N/A"}
@@ -1285,17 +1285,23 @@ Mobile: ${data.driver_mobile || "N/A"}
 *Vehicle Details:*
 Vehicle: ${data.v_vehicle_name || "N/A"}
 RC Number: ${data.vehicle_rc_number || "N/A"}
-` : "*Driver:* Not yet assigned"}
+`
+    : "*Driver:* Not yet assigned"
+}
 
 *Amount:* ₹${data.booking_total_amount || "0"}
-*Status:* ${bookingStatusOptions.find(opt => opt.value.toString() === data.booking_status?.toString())?.label || "Unknown"}
+*Status:* ${
+      bookingStatusOptions.find(
+        (opt) => opt.value.toString() === data.booking_status?.toString()
+      )?.label || "Unknown"
+    }
 
 Thank you for choosing Medcab!
   `.trim();
 
     // Format mobile number (remove any spaces, dashes, etc.)
     const formattedMobile = consumerMobile.replace(/\D/g, "");
-    
+
     // Check if mobile number is valid (10 digits for India)
     if (formattedMobile.length !== 10) {
       Swal.fire({
@@ -1308,7 +1314,9 @@ Thank you for choosing Medcab!
     }
 
     // Create WhatsApp URL with Indian country code
-    const whatsappUrl = `https://wa.me/91${formattedMobile}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/91${formattedMobile}?text=${encodeURIComponent(
+      message
+    )}`;
 
     // Open WhatsApp in new tab
     window.open(whatsappUrl, "_blank");
@@ -1945,7 +1953,7 @@ Thank you for choosing Medcab!
         </Modal.Header>
         <Modal.Body>
           <Form.Control
-            type="text"
+            type="number"
             placeholder="Search by mobile number..."
             value={consumerSearchQuery}
             onChange={(e) => setConsumerSearchQuery(e.target.value)}
@@ -1980,32 +1988,29 @@ Thank you for choosing Medcab!
                 </div>
               ))}
             </div>
-         ) : consumerSearchQuery && !searchingConsumer ? (
+          ) : consumerSearchQuery && !searchingConsumer ? (
             <>
               {consumerSearchQuery.length == 10 && (
                 <div className="mt-3">
-                <Form.Group>
-                  <Form.Label className="fw-semibold">
-                    Create New Consumer
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter consumer name"
-                    className="mb-2"
-                    value={newConsumerName}
-                    onChange={(e) => setNewConsumerName(e.target.value)}
-                  />
-                  <div className="d-flex justify-content-end">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={handleCreateNewConsumer}
-                    >
-                      Create Consumer
-                    </Button>
-                  </div>
-                </Form.Group>
-              </div>
+                  <Form.Group>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter consumer name"
+                      className="mb-2"
+                      value={consumerName}
+                      onChange={(e) => setNewConsumerName(e.target.value)}
+                    />
+                    <div className="d-flex justify-content-end">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={handleCreateNewConsumer}
+                      >
+                        Create Consumer
+                      </Button>
+                    </div>
+                  </Form.Group>
+                </div>
               )}
             </>
           ) : (

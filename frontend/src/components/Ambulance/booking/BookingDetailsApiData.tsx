@@ -99,18 +99,19 @@ const BookingDetailsApiData = () => {
   };
 
   const createNewConsumer = async (
+    bookingId: string,
     consumerName: string,
-    consumerMobile: string
+    consumerMobile: number
   ) => {
     try {
       const response = await axios.post(
-        `${baseURL}/consumer/create_new_consumer`,
+        `${baseURL}/consumer/create_new_consumer/${bookingId}`,
         {
           consumer_name: consumerName,
           consumer_mobile_no: consumerMobile,
         }
       );
-      return { success: true, message: response.data?.message };
+      return { success: true, message: response.data?.message, data: response.data };
     } catch (error: any) {
       console.error("Error creating new consumer:", error);
       return {
