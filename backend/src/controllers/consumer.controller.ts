@@ -27,7 +27,12 @@ export const createConsumerController = async (req: Request, res: Response, next
     try {
         const bookingId = parseInt(req.params.bookingId);
         const {consumer_name, consumer_mobile_no} = req.body;
+<<<<<<< HEAD
         const result = await createConsumerService(consumer_name, consumer_mobile_no, bookingId);
+=======
+        console.log("Received data to create consumer:", consumer_name, consumer_mobile_no);
+        const result = await createConsumerService(consumer_name, consumer_mobile_no);
+>>>>>>> c55708fd553dbb632fc69784dcb7381a11db571e
         res.status(200).json(result);
 
     } catch (error) {

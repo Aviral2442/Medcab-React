@@ -59,6 +59,8 @@ interface FieldProps {
   onAssignDriver?: () => void;
   showConsumerSearch?: boolean;
   onConsumerSearch?: () => void;
+  showCategoryChange?: boolean;
+  onCategoryChange?: () => void;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -75,6 +77,8 @@ const Field: React.FC<FieldProps> = ({
   onAssignDriver,
   showConsumerSearch = false,
   onConsumerSearch,
+  showCategoryChange = false, 
+  onCategoryChange,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value?.toString() || "");
@@ -121,7 +125,7 @@ const Field: React.FC<FieldProps> = ({
 
         return formatDate(date.toISOString());
       } catch {
-        return "N/A";
+        return " ";
       }
     }
 
@@ -147,6 +151,14 @@ const Field: React.FC<FieldProps> = ({
       setIsEditing(true);
     }
   };
+  
+  const handleCategoryChange = () => {
+    if (onCategoryChange) {
+      onCategoryChange();
+    } else {
+      setIsEditing(true);
+    }
+  }
 
   React.useEffect(() => {
     setEditValue(value?.toString() || "");
@@ -176,6 +188,15 @@ const Field: React.FC<FieldProps> = ({
             style={{ marginLeft: "8px" }}
           >
             (Change)
+          </button>
+        )}
+        {showCategoryChange && onCategoryChange && (
+          <button
+            onClick={handleCategoryChange}
+            className="text-decoration-none border-0 bg-transparent text-secondary p-0 fs-6"
+            style={{ marginLeft: "8px" }}
+          >
+            (Change Category)
           </button>
         )}
       </div>
@@ -378,6 +399,7 @@ const AmbulanceBookingDetailsForm: React.FC<
   const [loadingInvoice, setLoadingInvoice] = useState(false);
   const [bookingId, setBookingId] = useState<number | null>(null);
   const [isRemarkOpen, setIsRemarkOpen] = useState(false);
+  const [newConsumerName, setNewConsumerName] = useState("");
 
 
   const handleFieldUpdate = async (field: string, value: string) => {
@@ -389,6 +411,18 @@ const AmbulanceBookingDetailsForm: React.FC<
     // Handle schedule time update
     if (field === "booking_schedule_time") {
       const result = await api.updateScheduleTime(data.booking_id, value);
+      if (!result.success) {
+        alert(result.message);
+        return;
+      }
+    }
+
+    if (field === "booking_con_name" || field === "booking_con_mobile") {
+      const result = await api.updateConsumerDetails(
+        data.booking_id,
+        field === "booking_con_name" ? value : data.booking_con_name,
+        field === "booking_con_mobile" ? value : data.booking_con_mobile
+      );
       if (!result.success) {
         alert(result.message);
         return;
@@ -467,16 +501,17 @@ const AmbulanceBookingDetailsForm: React.FC<
           didOpen: () => Swal.showLoading(),
         });
 
-        const apiResult = await api.updateConsumerDetails(
-          data?.booking_id,
+        const apiResult = await api.createNewConsumer(
           consumer.consumer_name,
           consumer.consumer_mobile_no
         );
 
         if (apiResult.success) {
-          onUpdate?.("booking_con_name", consumer.consumer_name);
-          onUpdate?.("booking_con_mobile", consumer.consumer_mobile_no);
-          onUpdate?.("booking_by_cid", consumer.consumer_id.toString());
+          console.log("Consumer details updated successfully.");
+          // Update booking_con_name and booking_con_mobile (not consumer_name and consumer_mobile_no)
+          onUpdate?.("consumer_name", consumer.consumer_name);
+          onUpdate?.("consumer_mobile_no", consumer.consumer_mobile_no);
+
 
           setShowConsumerSearchModal(false);
           setConsumerSearchQuery("");
@@ -935,10 +970,81 @@ const AmbulanceBookingDetailsForm: React.FC<
     }
   };
 
+  const handleCreateNewConsumer = async () => {
+    if (!newConsumerName.trim()) {
+      Swal.fire({
+        title: "Error",
+        text: "Please enter consumer name",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+
+    if (consumerSearchQuery.length !== 10) {
+      Swal.fire({
+        title: "Error",
+        text: "Please enter a valid 10-digit mobile number",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+
+    try {
+      Swal.fire({
+        title: "Creating Consumer...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      console.log("Creating consumer with name:", newConsumerName);
+      console.log("Creating consumer with mobile:", consumerSearchQuery);
+      const apiResult = await api.createNewConsumer(
+        newConsumerName,
+        consumerSearchQuery
+      );
+      console.log("Create Consumer API Result:", apiResult);
+
+      if (apiResult.success) {
+        Swal.fire({
+          title: "Success!",
+          text: "Consumer created successfully",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+
+        // Update the booking with new consumer details
+        onUpdate?.("consumer_name", newConsumerName);
+        onUpdate?.("consumer_mobile_no", consumerSearchQuery);
+
+        // Close modal and reset
+        setShowConsumerSearchModal(false);
+        setConsumerSearchQuery("");
+        setNewConsumerName("");
+        setConsumerSearchResults([]);
+      } else {
+        throw new Error(apiResult.message);
+      }
+    } catch (error: any) {
+      console.error("Error creating consumer:", error);
+      Swal.fire({
+        title: "Error!",
+        text: error.message || "Failed to create consumer. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+      });
+    }
+  };
+
   const handleConsumerSearch = () => {
     setShowConsumerSearchModal(true);
     setConsumerSearchQuery("");
     setConsumerSearchResults([]);
+    setNewConsumerName("");
   };
 
   const handleCancelBooking = () => {
@@ -1704,6 +1810,8 @@ Thank you for choosing Medcab!
                             ? handleConsumerSearch
                             : undefined
                         }
+                        showCategoryChange={f.name === "booking_view_category_name"}
+                        onCategoryChange={handleConsumerSearch}
                       />
                     </Col>
                   ))}
@@ -1848,13 +1956,6 @@ Thank you for choosing Medcab!
                       className="flex-grow-1 mb-0"
                       title={consumer.consumer_name}
                     />
-                    {/* <Form.Control
-                      readOnly
-                      plaintext
-                      value={consumer.consumer_mobile_no || ""}
-                      className="ms-3 mb-0"
-                      title={consumer.consumer_mobile_no}
-                      /> */}
                   </div>
                 </div>
               ))}
@@ -1871,21 +1972,18 @@ Thank you for choosing Medcab!
                     type="text"
                     placeholder="Enter consumer name"
                     className="mb-2"
+                    value={newConsumerName}
+                    onChange={(e) => setNewConsumerName(e.target.value)}
                   />
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => {
-                      // Handle create new consumer
-                      Swal.fire({
-                        title: "Feature Coming Soon",
-                        text: "Consumer creation will be available in the next update",
-                        icon: "info",
-                      });
-                    }}
-                  >
-                    Create & Assign Consumer
-                  </Button>
+                  <div className="d-flex justify-content-end">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleCreateNewConsumer}
+                    >
+                      Create Consumer
+                    </Button>
+                  </div>
                 </Form.Group>
               </div>
               )}

@@ -2088,7 +2088,8 @@ export const ambulanceBookingDetailService = async (bookingId: number) => {
             vehicle.v_vehicle_name,
             vehicle.vehicle_rc_number,
             consumer.consumer_name,
-            consumer.consumer_mobile_no
+            consumer.consumer_mobile_no,
+            consumer.consumer_auth_key
             FROM booking_view
             LEFT JOIN driver ON booking_view.booking_acpt_driver_id > 0 AND booking_view.booking_acpt_driver_id = driver.driver_id
             LEFT JOIN vehicle ON booking_view.booking_acpt_vehicle_id > 0 AND booking_view.booking_acpt_vehicle_id = vehicle.vehicle_id

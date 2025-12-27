@@ -98,6 +98,29 @@ const BookingDetailsApiData = () => {
     }
   };
 
+  const createNewConsumer = async (
+    consumerName: string,
+    consumerMobile: string
+  ) => {
+    try {
+      const response = await axios.post(
+        `${baseURL}/consumer/create_new_consumer`,
+        {
+          consumer_name: consumerName,
+          consumer_mobile_no: consumerMobile,
+        }
+      );
+      return { success: true, message: response.data?.message };
+    } catch (error: any) {
+      console.error("Error creating new consumer:", error);
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to create new consumer",
+      };
+    }
+  };
+
   const searchVehicles = async (query: string) => {
     try {
       const response = await axios.get(
@@ -387,6 +410,48 @@ const BookingDetailsApiData = () => {
     }
   };
 
+  const fetchCategoryList = async (
+    consumerID: string,
+    type: string,
+    pickupaddress: string,
+    dropaddress: string,
+    picklat: string,
+    picklong: string,
+    droplat: string,
+    droplong: string,
+    distance: string,
+    duration: string,
+    poliline: string,
+    scheduletime: string,
+    authKey: string
+  ) => {
+    try {
+      const response = await axios.post("https://appdata.medcab.in/api/app_data/consumer_app/booking/get_category_price_list",{
+        consumer_id: consumerID,
+        type: type,
+        pickup_address: pickupaddress,
+        drop_address: dropaddress,
+        pick_lat: picklat,
+        pick_long: picklong,
+        drop_lat: droplat,
+        drop_long: droplong,
+        distance: distance,
+        duration: duration,
+        poliline: poliline,
+        schedule_time: scheduletime,
+        auth_key: authKey
+      });
+      return { success: true, data: response.data
+      };
+    } catch (error: any) {
+      console.error("Error fetching category list:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to fetch category list",
+      };
+    }
+  }
+
   return {
     updatePaymentDetails,
     updateScheduleTime,
@@ -407,7 +472,9 @@ const BookingDetailsApiData = () => {
     fetchMapData,
     fetchNearestDriverAndVehicleData,
     fetchBookingAcceptHistory,
-    fetchBookingRejectHistory
+    fetchBookingRejectHistory,
+    createNewConsumer,
+    fetchCategoryList
   };
 };
 
