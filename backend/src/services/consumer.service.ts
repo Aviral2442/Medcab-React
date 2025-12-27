@@ -122,32 +122,43 @@ export const getConsumerList = async (filters?: {
 };
 
 // CREATE CONSUMER SERVICE
-export const createConsumerService = async (consumer_name: string, consumer_mobile_no: number) => {
+export const createConsumerService = async (consumer_name: string, consumer_mobile_no: number, bookingId: number) => {
     try {
-        const [existingConsumer]: any = await db.query(
-            `SELECT consumer_mobile_no FROM consumer WHERE consumer_mobile_no = ?`,
+
+        const [rows]: any = await db.query(
+            `SELECT consumer_id FROM consumer WHERE consumer_mobile_no = ?`,
             [consumer_mobile_no]
         );
 
-        if (existingConsumer && existingConsumer.length > 0) {
-            return {
-                result: 409,
-                message: "Consumer with this mobile number already exists",
-            }
+        let consumerId: number;
+
+        if (rows.length > 0) {
+
+            consumerId = rows[0].consumer_id;
+
+        } else {
+
+            const [result]: any = await db.query(
+                `INSERT INTO consumer (consumer_name, consumer_mobile_no) VALUES (?, ?)`,
+                [consumer_name, consumer_mobile_no]
+            );
+
+            consumerId = result.insertId;
         }
 
-        const insertNewConsumer = `
-            INSERT INTO consumer (consumer_name, consumer_mobile_no) VALUES (?, ?)
-        `;
-        await db.query(insertNewConsumer, [consumer_name, consumer_mobile_no]);
+        await db.query(
+            `UPDATE booking_view SET booking_by_cid = ? WHERE booking_id = ?`,
+            [consumerId, bookingId]
+        );
 
         return {
             status: 200,
-            message: "Consumer created successfully",
+            message: rows.length > 0
+                ? "Consumer already exists. Linked to booking successfully"
+                : "Consumer created and linked to booking successfully",
         };
 
     } catch (error) {
-        console.error("❌ Error in createConsumerService:", error);
         throw new ApiError(500, "Failed to create consumer");
     }
 };

@@ -3261,7 +3261,7 @@ export const ambulanceBookingRemarkListService = async (bookingID: number, filte
     } catch (error) {
         throw new ApiError(500, "Get Ambulance Booking Remarks Error On Fetching");
     }
-}
+};
 
 // SERVICE TO GET AMBULANCE BOOKING STATE WISE LIST
 export const ambulanceBookingStateWiseListService = async (bookingID: number, filters?: {
