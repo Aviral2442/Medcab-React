@@ -3645,7 +3645,7 @@ export const ambulanceBookingDriverAcceptHistoryService = async (bookingId: numb
             FROM booking_a_c_history
             WHERE bah_user_type = 0
             AND bah_status = 0
-            AND bah_booking_id = ?`,
+            AND booking_a_c_history.booking_accept_history_id = ?`,
             [bookingId]
         );
         const total = countRows[0]?.total || 0;
@@ -3688,7 +3688,7 @@ export const ambulanceBookingDriverRejectHistoryService = async (bookingId: numb
             WHERE bah_user_type = 0
             AND bah_status = 2
             AND bah_booking_id = ?
-            ORDER BY bah_id DESC
+            ORDER BY booking_a_c_history.booking_accept_history_id DESC
             LIMIT ? OFFSET ?`,
             [bookingId, limit, offset]
         );
@@ -3716,8 +3716,8 @@ export const ambulanceBookingDriverRejectHistoryService = async (bookingId: numb
             }
         };
 
-
     } catch (error) {
+        console.log(error);
         throw new ApiError(500, "Get Ambulance Booking Driver Accept History Error On Fetching");
     }
 };
