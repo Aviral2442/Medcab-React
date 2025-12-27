@@ -27,6 +27,7 @@ export const createConsumerController = async (req: Request, res: Response, next
     try {
 
         const {consumer_name, consumer_mobile_no} = req.body;
+        console.log("Received data to create consumer:", consumer_name, consumer_mobile_no);
         const result = await createConsumerService(consumer_name, consumer_mobile_no);
         res.status(200).json(result);
 
