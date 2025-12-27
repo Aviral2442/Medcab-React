@@ -357,7 +357,7 @@ const BookingDetailsApiData = () => {
       const response = await axios.get(`${baseURL}/ambulance/ambulance_booking_accept_history/${bookingId}`);
       return {
         success: true,
-        data: response.data?.jsonData?.ambulance_booking_accept_history,
+        data: response.data?.jsonData?.ambulance_booking_driver_accept_history,
         pagination: response.data?.pagination
       };
     } catch (error: any) {
@@ -374,7 +374,7 @@ const BookingDetailsApiData = () => {
       const response = await axios.get(`${baseURL}/ambulance/ambulance_booking_reject_history/${bookingId}`);
       return {
         success: true,
-        data: response.data?.jsonData?.ambulance_booking_reject_history,
+        data: response.data?.jsonData?.ambulance_booking_driver_reject_history,
         pagination: response.data?.pagination
       };
     }

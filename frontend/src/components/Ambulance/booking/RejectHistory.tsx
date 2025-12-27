@@ -17,7 +17,7 @@ DataTable.use(DT);
 DT.Buttons.jszip(jszip);
 DT.Buttons.pdfMake(pdfmake);
 
-interface NearestDriverProps {
+interface RejectHistoryProps {
   data: any[] | null;
   loading?: boolean;
   error?: string | null;
@@ -31,7 +31,7 @@ interface NearestDriverProps {
   onPageChange?: (pageIndex: number) => void;
 }
 
-const NearestDriver: React.FC<NearestDriverProps> = ({
+const RejectHistory: React.FC<RejectHistoryProps> = ({
   data,
   loading = false,
   error = null,
@@ -88,11 +88,10 @@ const NearestDriver: React.FC<NearestDriverProps> = ({
 
   const headers = [
     "S.No.",
-    "Vehicle",
-    "Vehicle RC",
     "Name",
     "Mobile",
-    "Distance (km)",
+    "Vehicle",
+    "Vehicle RC",
   ];
 
   const columns = [
@@ -102,21 +101,6 @@ const NearestDriver: React.FC<NearestDriverProps> = ({
       orderable: false,
       searchable: false,
       render: (_data: any, _type: any, _row: any, meta: any) => meta.row + 1,
-    },
-    {
-      title: "Vehicle",
-      data: "v_vehicle_name",
-      render: (data: any) => {
-        if (data === "unknown") return "";
-        else return data;
-      },
-    },
-    {
-      title: "Vehicle RC",
-      data: "vehicle_rc_number",
-      render: (data: any) => {
-        return data;
-      },
     },
     {
       title: "Name",
@@ -134,26 +118,35 @@ const NearestDriver: React.FC<NearestDriverProps> = ({
       data: "driver_mobile",
     },
     {
-        title: "Distance (km)",
-        data: "distance_km",
-        render: (data: any) => {
-          return data ? data.toFixed(2) : " ";
-        },
-    }
+      title: "Vehicle",
+      data: "v_vehicle_name",
+      render: (data: any) => {
+        if (data === "unknown") return "";
+        else return data;
+      },
+    },
+    {
+      title: "Vehicle RC",
+      data: "vehicle_rc_number",
+      render: (data: any) => {
+        return data;
+      },
+    },
   ];
 
-  const tableData = data ? (Array.isArray(data) ? data : [data]) : [];
+  const tableData = data ? (Array.isArray(data) ? data[0] : [data]) : [];
+  console.log("Rendering Reject History with data:", tableData);
 
   if (error) {
     return (
-      <ComponentCard title="City Wise Driver/Partner List">
+      <ComponentCard title="Reject History List">
         <div className="text-center p-4 text-danger">{error}</div>
       </ComponentCard>
     );
   }
 
   return (
-    <ComponentCard title="State Wise Driver/Partner List" className="mb-2">
+    <ComponentCard title="Reject History List" className="mb-2">
       {loading ? (
         <div className="text-center p-4">
           <Spinner animation="border" variant="primary" />
@@ -252,4 +245,4 @@ const NearestDriver: React.FC<NearestDriverProps> = ({
   );
 };
 
-export default NearestDriver;
+export default RejectHistory;

@@ -3619,9 +3619,12 @@ export const ambulanceBookingDriverAcceptHistoryService = async (bookingId: numb
                 booking_a_c_history.*,
                 driver.driver_name,
                 driver.driver_last_name,
-                driver.driver_mobile
+                driver.driver_mobile,
+                vehicle.v_vehicle_name,
+                vehicle.vehicle_rc_number
             FROM booking_a_c_history
             LEFT JOIN driver ON booking_a_c_history.bah_driver_id = driver.driver_id
+            LEFT JOIN vehicle ON booking_a_c_history.bah_vehicle_id = vehicle.vehicle_id
             WHERE bah_user_type = 0
             AND bah_status = 0
             AND bah_booking_id = ?
@@ -3683,8 +3686,16 @@ export const ambulanceBookingDriverRejectHistoryService = async (bookingId: numb
         const offset = (page - 1) * limit;
 
         const [rows]: any = await db.query(
-            `SELECT *
+            `SELECT
+                booking_a_c_history.*,
+                driver.driver_name,
+                driver.driver_last_name,
+                driver.driver_mobile,
+                vehicle.v_vehicle_name,
+                vehicle.vehicle_rc_number
             FROM booking_a_c_history
+            LEFT JOIN driver ON booking_a_c_history.bah_driver_id = driver.driver_id
+            LEFT JOIN vehicle ON booking_a_c_history.bah_vehicle_id = vehicle.vehicle_id
             WHERE bah_user_type = 0
             AND bah_status = 2
             AND bah_booking_id = ?

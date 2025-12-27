@@ -86,7 +86,7 @@ const BookingDetails = () => {
       setLoading(true);
       const result = await api.fetchStateWiseDPDetails(id!);
       if (result.success) {
-        console.log("Fetched state-wise DP details:", result);
+        console.log("Fetched state-wise DP details:", result.data);
         setStateWiseDPData(result.data);
         setStateWiseDPPagination(result.pagination);
       }
@@ -127,7 +127,7 @@ const BookingDetails = () => {
       setLoading(true);
       const result = await api.fetchBookingAcceptHistory(id!);
       if (result.success) {
-        console.log("Fetched accept history data:", result.data);
+        console.log("Fetched accept history data:", result.data[0]);
         setAcceptHistoryData(result.data);
         setAcceptHistoryPagination(result.pagination);
       } 

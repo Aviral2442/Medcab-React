@@ -169,6 +169,15 @@ const Field: React.FC<FieldProps> = ({
             )
           </button>
         )}
+        {showConsumerSearch && onConsumerSearch && (
+          <button
+            onClick={onConsumerSearch}
+            className="text-decoration-none border-0 bg-transparent text-secondary p-0 fs-6"
+            style={{ marginLeft: "8px" }}
+          >
+            (Change)
+          </button>
+        )}
       </div>
       <div className="d-flex align-items-center gap-2">
         {isEditing ? (
@@ -512,11 +521,24 @@ const AmbulanceBookingDetailsForm: React.FC<
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
+      if (consumerSearchQuery) {
+        searchConsumers(consumerSearchQuery);
+      } else {
+        setConsumerSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [consumerSearchQuery]);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
       if (vehicleSearchQuery) {
         searchVehicles(vehicleSearchQuery);
       } else {
         setVehicleSearchResults([]);
       }
+      
     }, 300);
 
     return () => clearTimeout(timer);
@@ -1184,30 +1206,30 @@ Thank you for choosing Medcab!
       fields: [
         {
           label: "Consumer Name",
-          name: "booking_con_name",
-          editable: true,
-          cols: 2,
-          showViewIcon: true,
-          showConsumerSearch: true,
-        },
-        {
-          label: "Consumer Mobile",
-          name: "booking_con_mobile",
-          type: "tel",
-          editable: true,
-          cols: 2,
-          showConsumerSearch: true,
-        },
-        {
-          label: "Consumer Name",
           name: "consumer_name",
-          editable: true,
+          editable: false,
           cols: 2,
           showViewIcon: true,
+          showConsumerSearch: true,
         },
         {
           label: "Consumer Mobile",
           name: "consumer_mobile_no",
+          type: "tel",
+          editable: false,
+          cols: 2,
+          // showConsumerSearch: true,
+        },
+        {
+          label: "Patient Name",
+          name: "booking_con_name",
+          editable: true,
+          cols: 2,
+          showViewIcon: true,
+        },
+        {
+          label: "Patient Mobile",
+          name: "booking_con_mobile",
           type: "tel",
           editable: true,
           cols: 2,
@@ -1794,21 +1816,13 @@ Thank you for choosing Medcab!
           <Modal.Title>Search Consumer</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form
-            onSubmit={(e) => {
-              e.preventDefault();
-              searchConsumers(consumerSearchQuery);
-            }}
-          >
-            <div className="d-flex gap-2 mb-3">
-              <Form.Control
-                type="text"
-                placeholder="Search by mobile number..."
-                value={consumerSearchQuery}
-                onChange={(e) => setConsumerSearchQuery(e.target.value)}
-              />
-            </div>
-          </Form>
+          <Form.Control
+            type="text"
+            placeholder="Search by mobile number..."
+            value={consumerSearchQuery}
+            onChange={(e) => setConsumerSearchQuery(e.target.value)}
+            className="mb-3"
+          />
 
           {searchingConsumer ? (
             <div className="text-center py-4">
@@ -1834,21 +1848,48 @@ Thank you for choosing Medcab!
                       className="flex-grow-1 mb-0"
                       title={consumer.consumer_name}
                     />
-                    <Form.Control
+                    {/* <Form.Control
                       readOnly
                       plaintext
                       value={consumer.consumer_mobile_no || ""}
                       className="ms-3 mb-0"
                       title={consumer.consumer_mobile_no}
-                    />
+                      /> */}
                   </div>
                 </div>
               ))}
             </div>
-          ) : consumerSearchQuery && !searchingConsumer ? (
-            <div className="text-center text-muted py-4">
-              No consumers found. Try a different search term.
-            </div>
+         ) : consumerSearchQuery && !searchingConsumer ? (
+            <>
+              {consumerSearchQuery.length == 10 && (
+                <div className="mt-3">
+                <Form.Group>
+                  <Form.Label className="fw-semibold">
+                    Create New Consumer
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter consumer name"
+                    className="mb-2"
+                  />
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => {
+                      // Handle create new consumer
+                      Swal.fire({
+                        title: "Feature Coming Soon",
+                        text: "Consumer creation will be available in the next update",
+                        icon: "info",
+                      });
+                    }}
+                  >
+                    Create & Assign Consumer
+                  </Button>
+                </Form.Group>
+              </div>
+              )}
+            </>
           ) : (
             <div className="text-center text-muted py-4">
               Enter mobile number to search for consumers.
