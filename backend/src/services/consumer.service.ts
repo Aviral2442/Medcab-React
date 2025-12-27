@@ -121,6 +121,37 @@ export const getConsumerList = async (filters?: {
     }
 };
 
+// CREATE CONSUMER SERVICE
+export const createConsumerService = async (consumer_name: string, consumer_mobile_no: number) => {
+    try {
+        const [existingConsumer]: any = await db.query(
+            `SELECT consumer_mobile_no FROM consumer WHERE consumer_mobile_no = ?`,
+            [consumer_mobile_no]
+        );
+
+        if (existingConsumer && existingConsumer.length > 0) {
+            return {
+                result: 409,
+                message: "Consumer with this mobile number already exists",
+            }
+        }
+
+        const insertNewConsumer = `
+            INSERT INTO consumer (consumer_name, consumer_mobile_no) VALUES (?, ?)
+        `;
+        await db.query(insertNewConsumer, [consumer_name, consumer_mobile_no]);
+
+        return {
+            status: 200,
+            message: "Consumer created successfully",
+        };
+
+    } catch (error) {
+        console.error("❌ Error in createConsumerService:", error);
+        throw new ApiError(500, "Failed to create consumer");
+    }
+};
+
 // GET CONSUMER DETAIL SERVICE
 export const consumerDetailService = async (
     consumerId: number

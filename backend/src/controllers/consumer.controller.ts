@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { consumerDetailService, getConsumerList, getConsumerTransactionList, getConsumerManpowerOrdersList, getConsumerAmbulanceBookingsList, getConsumerLabBookingsList } from '../services/consumer.service';
+import { consumerDetailService, getConsumerList, getConsumerTransactionList, getConsumerManpowerOrdersList, getConsumerAmbulanceBookingsList, getConsumerLabBookingsList, createConsumerService } from '../services/consumer.service';
 import { parse } from 'path';
 
 // CONTROLLER TO GET CONSUMER LIST WITH FILTERS AND PAGINATION
@@ -15,6 +15,19 @@ export const consumerListController = async (req: Request, res: Response, next: 
         };
 
         const result = await getConsumerList(filters);
+        res.status(200).json(result);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+// CONTROLLER TO CREATE NEW CONSUMER
+export const createConsumerController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const {consumer_name, consumer_mobile_no} = req.body;
+        const result = await createConsumerService(consumer_name, consumer_mobile_no);
         res.status(200).json(result);
 
     } catch (error) {
