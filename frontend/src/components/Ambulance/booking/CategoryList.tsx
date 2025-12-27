@@ -40,7 +40,6 @@ const CategoryListModal: React.FC<CategoryListModalProps> = ({
 
   const fetchCategories = async () => {
     if (!data) return;
-
     setLoading(true);
     try {
       const result = await api.fetchCategoryList(
