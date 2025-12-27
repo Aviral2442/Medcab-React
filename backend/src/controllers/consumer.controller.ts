@@ -25,9 +25,9 @@ export const consumerListController = async (req: Request, res: Response, next: 
 // CONTROLLER TO CREATE NEW CONSUMER
 export const createConsumerController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-
+        const bookingId = parseInt(req.params.bookingId);
         const {consumer_name, consumer_mobile_no} = req.body;
-        const result = await createConsumerService(consumer_name, consumer_mobile_no);
+        const result = await createConsumerService(consumer_name, consumer_mobile_no, bookingId);
         res.status(200).json(result);
 
     } catch (error) {

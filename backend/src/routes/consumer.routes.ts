@@ -4,7 +4,7 @@ import { consumerDetailController, consumerListController, consumerTransactionLi
 const router = Router();
 
 router.get("/get_consumers_list", consumerListController);
-router.post("/create_new_consumer", createConsumerController);
+router.post("/create_new_consumer/:bookingId", createConsumerController);
 router.post("/consumer_detail/:id", consumerDetailController);
 router.post("/consumer_transaction_list/:id", consumerTransactionList);
 router.post("/consumer_manpower_orders_list/:id", consumerManpowerOrdersList);
