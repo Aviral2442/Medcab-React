@@ -3615,8 +3615,13 @@ export const ambulanceBookingDriverAcceptHistoryService = async (bookingId: numb
         const offset = (page - 1) * limit;
 
         const [rows]: any = await db.query(
-            `SELECT *
+            `SELECT 
+                booking_a_c_history.*,
+                driver.driver_name,
+                driver.driver_last_name,
+                driver.driver_mobile
             FROM booking_a_c_history
+            LEFT JOIN driver ON booking_a_c_history.bah_driver_id = driver.driver_id
             WHERE bah_user_type = 0
             AND bah_status = 0
             AND bah_booking_id = ?
@@ -3624,6 +3629,17 @@ export const ambulanceBookingDriverAcceptHistoryService = async (bookingId: numb
             LIMIT ? OFFSET ?`,
             [bookingId, limit, offset]
         );
+
+        if (!rows || rows.length === 0) {
+            return {
+                status: 404,
+                message: "No driver accept history found for the given booking ID",
+                jsonData: {
+                    ambulance_booking_driver_accept_history: []
+                }
+            };
+        }
+
         const [countRows]: any = await db.query(
             `SELECT COUNT(*) as total
             FROM booking_a_c_history
